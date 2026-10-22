@@ -23,8 +23,10 @@ def lire(nom):
 def titre_en_valeur(titre, mot):
     t = e(titre)
     m = e(mot)
-    if m and m in t:
-        return t.replace(m, f"<em>{m}</em>", 1)
+    if m:
+        i = t.lower().find(m.lower())
+        if i >= 0:
+            return t[:i] + "<em>" + t[i:i + len(m)] + "</em>" + t[i + len(m):]
     return t
 
 
