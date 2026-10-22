@@ -304,13 +304,29 @@
     .call-mobile.show { transform: none; }
     footer { padding-bottom: 100px; }
   }
+
+  /* --- Noël --- */
+  .garland { position: fixed; top: 0; left: 0; right: 0; height: 26px; z-index: 40; pointer-events: none; display: flex; justify-content: space-around; background: radial-gradient(ellipse 30px 14px at 30px -4px, transparent 12px, #2e6b3f 13px, #2e6b3f 15px, transparent 16px) repeat-x; background-size: 60px 26px; }
+  .garland i { width: 10px; height: 15px; margin-top: 7px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; animation: blink 1.6s ease-in-out infinite; }
+  .garland i:nth-child(4n+1) { background: #e53935; color: #e53935; }
+  .garland i:nth-child(4n+2) { background: #ffca28; color: #ffca28; animation-delay: -.4s; }
+  .garland i:nth-child(4n+3) { background: #43a047; color: #43a047; animation-delay: -.8s; }
+  .garland i:nth-child(4n) { background: #42a5f5; color: #42a5f5; animation-delay: -1.2s; }
+  @keyframes blink { 0%,100% { opacity: 1; box-shadow: 0 0 10px 2px currentColor; } 50% { opacity: .35; box-shadow: none; } }
+  header.top { top: 22px; }
+  .snow { position: fixed; inset: 0; pointer-events: none; z-index: 35; overflow: hidden; }
+  .snow b { position: absolute; top: -12px; background: #fff; border-radius: 50%; box-shadow: 0 0 3px rgba(120,150,170,.6); animation: fall linear infinite; }
+  @keyframes fall { to { transform: translate(var(--dx), 105vh); } }
+  @media (max-width: 700px) { .garland i:nth-child(2n) { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .snow { display: none; } .garland i { animation: none; } }
 </style>
 </head>
 <body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="maple" viewBox="0 0 100 100"><path d="M50 2 57 20 68 14 65 34 82 26 78 40 96 42 82 54 88 60 66 64 70 76 54 68 52 98 48 98 46 68 30 76 34 64 12 60 18 54 4 42 22 40 18 26 35 34 32 14 43 20Z"/></symbol>
-  <symbol id="leaf2" viewBox="0 0 100 100"><path d="M50 4C78 22 92 52 52 96 50 98 48 98 46 96 8 52 22 22 50 4Z"/><path d="M50 12V94" stroke="rgba(0,0,0,.18)" stroke-width="2" fill="none"/></symbol>
+  <symbol id="maple" viewBox="0 0 100 100"><g stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none"><path d="M50 6V94M12 28 88 72M12 72 88 28"/><path d="M38 12 50 24 62 12M38 88 50 76 62 88M10 42 26 36 20 20M90 58 74 64 80 80M10 58 26 64 20 80M90 42 74 36 80 20"/></g></symbol>
+  <symbol id="leaf2" viewBox="0 0 100 100"><path d="M50 4 62 36 96 38 70 59 79 94 50 74 21 94 30 59 4 38 38 36Z"/></symbol>
+  <symbol id="bauble" viewBox="0 0 100 100"><rect x="42" y="6" width="16" height="12" rx="3" fill="#c98a3a"/><circle cx="50" cy="58" r="38"/><path d="M22 50q28 14 56 0" stroke="rgba(255,255,255,.55)" stroke-width="5" fill="none"/><circle cx="36" cy="44" r="7" fill="rgba(255,255,255,.45)"/></symbol>
   <symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></g></symbol>
@@ -333,19 +349,19 @@
 
 <section class="hero" id="hero">
   <div class="leaves" aria-hidden="true">
-    <svg class="leaf" style="--r:-20deg;left:-30px;top:90px;width:150px;fill:#c0392b"><use href="#maple"/></svg>
-    <svg class="leaf" style="--r:25deg;left:90px;top:40px;width:80px;fill:#e08a2c;animation-delay:-2s"><use href="#maple"/></svg>
-    <svg class="leaf" style="--r:-50deg;left:20px;top:260px;width:70px;fill:#d9a23f;animation-delay:-4s"><use href="#leaf2"/></svg>
-    <svg class="leaf" style="--r:15deg;right:-40px;top:120px;width:170px;fill:#d9762b;animation-delay:-1s"><use href="#maple"/></svg>
-    <svg class="leaf" style="--r:-30deg;right:110px;top:70px;width:70px;fill:#b7372a;animation-delay:-3s"><use href="#leaf2"/></svg>
-    <svg class="leaf" style="--r:40deg;right:30px;bottom:110px;width:90px;fill:#c98a3a;animation-delay:-5s"><use href="#maple"/></svg>
-    <svg class="leaf" style="--r:-10deg;left:8%;bottom:90px;width:110px;fill:#a83226;animation-delay:-2.5s"><use href="#maple"/></svg>
-    <svg class="leaf" style="--r:60deg;left:22%;bottom:40px;width:50px;fill:#e3a33a;animation-delay:-6s"><use href="#leaf2"/></svg>
+    <svg class="leaf" style="--r:-20deg;left:-30px;top:90px;width:150px;color:#9fc3d9"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:25deg;left:90px;top:40px;width:80px;fill:#c98a3a;animation-delay:-2s"><use href="#leaf2"/></svg>
+    <svg class="leaf" style="--r:-15deg;left:20px;top:260px;width:70px;fill:#b7372a;animation-delay:-4s"><use href="#bauble"/></svg>
+    <svg class="leaf" style="--r:15deg;right:-40px;top:120px;width:170px;color:#b9d4e4;animation-delay:-1s"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:-10deg;right:110px;top:70px;width:70px;fill:#2e6b3f;animation-delay:-3s"><use href="#bauble"/></svg>
+    <svg class="leaf" style="--r:30deg;right:30px;bottom:110px;width:90px;fill:#e7b66a;animation-delay:-5s"><use href="#leaf2"/></svg>
+    <svg class="leaf" style="--r:-10deg;left:8%;bottom:90px;width:110px;fill:#a83226;animation-delay:-2.5s"><use href="#bauble"/></svg>
+    <svg class="leaf" style="--r:60deg;left:22%;bottom:40px;width:50px;color:#9fc3d9;animation-delay:-6s"><use href="#maple"/></svg>
   </div>
   <div class="wrap">
     <div>
       <span class="status" id="status"><i></i><span>Restaurant · Beinheim</span></span>
-      <div><div class="logo-xl"><b>Le</b><span>76</span><em class="note">Saveurs d'automne</em></div></div>
+      <div><div class="logo-xl"><b>Le</b><span>76</span><em class="note">Joyeux Noël !</em></div></div>
       <p class="tagline">Bar · Restaurant · Bonheur simple</p>
       <p class="lead">Une cuisine de saison et généreuse, nos plats signatures, des tartes flambées le soir et des soirées qui font du bien. <strong>Une nouvelle ambiance, une nouvelle carte. Toujours le même plaisir.</strong></p>
       <div class="hero-actions">
@@ -356,7 +372,7 @@
     <!-- Photo facultative : dépose images/salle.jpg (format portrait) et elle s'affichera ici toute seule -->
     <div class="hero-photo" id="heroPhoto">
       <img src="images/hero.jpg" alt="La salle du 76, mur en pierre et décor d'automne" fetchpriority="high" onerror="document.getElementById('heroPhoto').remove();document.getElementById('hero').classList.add('no-photo')">
-      <span class="note">Bienvenue au 76 !</span>
+      <span class="note">🎄 Joyeux Noël au 76 !</span>
     </div>
   </div>
 </section>
@@ -566,6 +582,11 @@
   var k = firstFriday(d0.getFullYear(), d0.getMonth());
   if (k < d0) k = firstFriday(d0.getFullYear(), d0.getMonth() + 1);
   document.getElementById("karaoke").textContent = k.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+</script>
+<div class="garland" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="snow" id="snow" aria-hidden="true"></div>
+<script>
+(function(){var el=document.getElementById("snow");if(!el)return;var n=window.innerWidth<700?30:60;for(var i=0;i<n;i++){var f=document.createElement("b");var sz=2+Math.random()*5;f.style.width=f.style.height=sz+"px";f.style.left=Math.random()*100+"%";f.style.opacity=.5+Math.random()*.5;f.style.setProperty("--dx",(Math.random()*80-40)+"px");f.style.animationDuration=(7+Math.random()*9)+"s";f.style.animationDelay=(-Math.random()*16)+"s";el.appendChild(f);}})();
 </script>
 </body>
 </html>
