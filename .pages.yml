@@ -1,0 +1,190 @@
+# Espace d'édition du site du 76 (Pages CMS : https://app.pagescms.org)
+# Chaque enregistrement met le site à jour automatiquement en 1 à 2 minutes.
+
+content:
+  - name: soirees
+    label: Soirées
+    type: file
+    path: contenu/soirees.json
+    format: json
+    fields:
+      - name: petit_titre
+        label: Petit titre au-dessus
+        type: string
+      - name: titre
+        label: Titre de la rubrique
+        type: string
+      - name: mot_en_valeur
+        label: Mot du titre écrit en couleur
+        description: Doit être écrit exactement comme dans le titre.
+        type: string
+      - name: intro
+        label: Texte d'introduction
+        type: text
+      - name: soirees
+        label: Les soirées
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.titre}"
+        fields:
+          - name: quand
+            label: Quand ? (ex. « Samedi 15 novembre » ou « Chaque 1er vendredi du mois »)
+            type: string
+          - name: titre
+            label: Nom de la soirée
+            type: string
+          - name: description
+            label: Description
+            type: text
+          - name: info
+            label: Petite info en bas (ex. « 🎟️ Menu 35 € · sur réservation »)
+            type: string
+          - name: lien_telephone
+            label: Rendre l'info en bas cliquable pour appeler le restaurant
+            type: boolean
+          - name: date_karaoke_auto
+            label: Ajouter automatiquement la date du prochain 1er vendredi du mois
+            type: boolean
+          - name: symbole
+            label: Grand symbole décoratif en fond (ex. ✦ ♪ 🎃) — facultatif
+            type: string
+
+  - name: carte
+    label: La carte
+    type: file
+    path: contenu/carte.json
+    format: json
+    fields:
+      - name: petit_titre
+        label: Petit titre au-dessus
+        type: string
+      - name: titre
+        label: Titre de la carte (ex. « La carte d'hiver »)
+        type: string
+      - name: mot_en_valeur
+        label: Mot du titre écrit en couleur
+        description: Doit être écrit exactement comme dans le titre.
+        type: string
+      - name: intro
+        label: Phrase d'introduction
+        type: text
+      - name: intro_allemand
+        label: Phrase d'introduction en allemand
+        type: text
+      - name: mention_bas
+        label: Mention en bas de la carte (prix nets, allergènes…)
+        type: text
+      - name: onglets
+        label: Onglets de la carte
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.nom}"
+        fields:
+          - name: nom
+            label: Nom de l'onglet (bouton)
+            type: string
+          - name: titre
+            label: Titre dans la fiche
+            type: string
+          - name: titre_allemand
+            label: Titre en allemand
+            type: string
+          - name: presentation
+            label: Petite phrase de présentation (facultatif)
+            type: string
+          - name: note_manuscrite
+            label: Note manuscrite en coin (facultatif)
+            type: string
+          - name: deux_colonnes
+            label: Afficher les plats sur deux colonnes (pour les boissons)
+            type: boolean
+          - name: rubriques
+            label: Rubriques et plats
+            type: object
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{fields.titre}"
+            fields:
+              - name: titre
+                label: Titre de la rubrique (laisser vide si une seule liste)
+                type: string
+              - name: etoile
+                label: Mettre une étoile devant le titre
+                type: boolean
+              - name: plats
+                label: Plats
+                type: object
+                list:
+                  collapsible:
+                    collapsed: true
+                    summary: "{fields.nom} — {fields.prix}"
+                fields:
+                  - name: nom
+                    label: Nom du plat
+                    type: string
+                  - name: prix
+                    label: Prix (ex. « 12 € » — laisser vide si pas de prix)
+                    type: string
+                  - name: allemand
+                    label: Nom en allemand
+                    type: string
+                  - name: description
+                    label: Description
+                    type: string
+                  - name: signature
+                    label: Badge « Signature »
+                    type: boolean
+          - name: encadre
+            label: Encadré (ex. menu enfants) — laisser le titre vide pour ne rien afficher
+            type: object
+            fields:
+              - name: emoji
+                label: Emoji
+                type: string
+              - name: titre
+                label: Titre
+                type: string
+              - name: texte
+                label: Texte
+                type: string
+              - name: prix
+                label: Prix
+                type: string
+          - name: remarque
+            label: Petite remarque en bas de l'onglet (facultatif)
+            type: string
+          - name: bandeau
+            label: Bandeau rouge (ex. « Seulement le soir ») — facultatif
+            type: string
+          - name: bandeau_allemand
+            label: Bandeau rouge en allemand
+            type: string
+          - name: glaces
+            label: Bloc des glaces — laisser le titre vide pour ne rien afficher
+            type: object
+            fields:
+              - name: titre
+                label: Titre
+                type: string
+              - name: cremes
+                label: Parfums des crèmes glacées
+                type: text
+              - name: sorbets
+                label: Parfums des sorbets
+                type: text
+              - name: tarifs
+                label: Tarifs
+                type: object
+                list: true
+                fields:
+                  - name: libelle
+                    label: Libellé (ex. « 2 boules »)
+                    type: string
+                  - name: prix
+                    label: Prix
+                    type: string

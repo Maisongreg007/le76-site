@@ -1,0 +1,793 @@
+{
+  "petit_titre": "Cuisine · Partage · Convivialité",
+  "titre": "La carte d'automne",
+  "mot_en_valeur": "carte",
+  "intro": "Des produits de saison, des assiettes gourmandes.",
+  "intro_allemand": "Saisonale Produkte, genussvolle Gerichte.",
+  "mention_bas": "Prix nets, service compris · Liste des allergènes disponible sur demande · Alle Preise inkl. Service",
+  "onglets": [
+    {
+      "nom": "Entrées & signatures",
+      "note_manuscrite": "Toujours nos incontournables !",
+      "titre": "Nos entrées & plats signatures",
+      "titre_allemand": "Vorspeisen · Signaturgerichte",
+      "presentation": "",
+      "deux_colonnes": false,
+      "rubriques": [
+        {
+          "titre": "Entrées",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Velouté de potimarron",
+              "prix": "8 €",
+              "allemand": "Kürbiscremesuppe",
+              "description": "Crème de châtaigne, noisettes torréfiées",
+              "signature": false
+            },
+            {
+              "nom": "Œuf parfait du 76",
+              "prix": "9 €",
+              "allemand": "Das perfekte Ei vom 76",
+              "description": "Champignons & crème de parmesan",
+              "signature": false
+            },
+            {
+              "nom": "Salade de chèvre chaud",
+              "prix": "11 € / 17 €",
+              "allemand": "Salat mit warmem Ziegenkäse",
+              "description": "Miel, noix, pommes & jambon cru · petite ou grande assiette",
+              "signature": false
+            },
+            {
+              "nom": "Saumon fumé",
+              "prix": "12 € / 18 €",
+              "allemand": "Geräucherter Lachs",
+              "description": "Crème citronnée & blinis · petite ou grande assiette",
+              "signature": false
+            }
+          ]
+        },
+        {
+          "titre": "Plats signatures · nos incontournables",
+          "etoile": true,
+          "plats": [
+            {
+              "nom": "Cordon bleu de veau à la crème",
+              "prix": "22 €",
+              "allemand": "Kalbs-Cordon-Bleu mit Rahmsauce",
+              "description": "Frites & salade",
+              "signature": true
+            },
+            {
+              "nom": "Onglet de bœuf à l'échalote",
+              "prix": "22 €",
+              "allemand": "Rinderhüftsteak mit Schalotten",
+              "description": "Frites & salade",
+              "signature": true
+            },
+            {
+              "nom": "Onglet de bœuf à l'échalote flambé au cognac",
+              "prix": "25 €",
+              "allemand": "Rinderhüftsteak mit Schalotten, mit Cognac flambiert",
+              "description": "Frites & salade",
+              "signature": true
+            },
+            {
+              "nom": "Burger du 76 · Métamorphose Automne",
+              "prix": "21 €",
+              "allemand": "Burger vom 76 – Herbstliche Verwandlung",
+              "description": "Pain rustique, steak haché 150 g, cheddar, champignons persillés, poitrine fumée croustillante, oignons confits au vin rouge & sauce maison. Frites",
+              "signature": true
+            }
+          ]
+        }
+      ],
+      "encadre": {
+        "emoji": "",
+        "titre": "",
+        "texte": "",
+        "prix": ""
+      },
+      "remarque": "",
+      "bandeau": "",
+      "bandeau_allemand": "",
+      "glaces": {
+        "titre": "",
+        "cremes": "",
+        "sorbets": "",
+        "tarifs": []
+      }
+    },
+    {
+      "nom": "Carte d'automne",
+      "note_manuscrite": "Saison de bons moments",
+      "titre": "La carte d'automne",
+      "titre_allemand": "Unsere Herbstkarte",
+      "presentation": "Des produits de saison, des assiettes gourmandes.",
+      "deux_colonnes": false,
+      "rubriques": [
+        {
+          "titre": "",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Magret de canard à l'orange",
+              "prix": "24 €",
+              "allemand": "Entenbrust mit Orange",
+              "description": "Purée de patates douces, endives braisées & noisettes torréfiées",
+              "signature": false
+            },
+            {
+              "nom": "Entrecôte de veau aux girolles",
+              "prix": "27 €",
+              "allemand": "Kalbsentrecôte mit Pfifferlingen",
+              "description": "Girolles persillées, jus de veau & pommes de terre grenailles rôties",
+              "signature": false
+            },
+            {
+              "nom": "Bœuf façon bourguignon",
+              "prix": "23 €",
+              "allemand": "Rindfleisch nach Burgunder Art",
+              "description": "Bœuf mijoté au vin rouge, lardons, champignons & petits oignons, pommes de terre grenailles rôties",
+              "signature": false
+            },
+            {
+              "nom": "Suprême de poulet rôti",
+              "prix": "21 €",
+              "allemand": "Gebratenes Hähnchensuprême",
+              "description": "Sauce moutarde à l'ancienne & miel, endives braisées, pommes de terre grenailles rôties",
+              "signature": false
+            },
+            {
+              "nom": "Filet de poisson selon arrivage",
+              "prix": "22 €",
+              "allemand": "Fischfilet je nach Ankunft",
+              "description": "Beurre blanc, fondue de poireaux & pommes de terre grenailles rôties",
+              "signature": false
+            }
+          ]
+        }
+      ],
+      "encadre": {
+        "emoji": "🧸",
+        "titre": "Menu enfants · Kindermenü",
+        "texte": "Nuggets frites + glace HARIBO push up",
+        "prix": "13,50 €"
+      },
+      "remarque": "Supplément portion de frites, sauce ou tout autre supplément : + 4 €",
+      "bandeau": "",
+      "bandeau_allemand": "",
+      "glaces": {
+        "titre": "",
+        "cremes": "",
+        "sorbets": "",
+        "tarifs": []
+      }
+    },
+    {
+      "nom": "Tartes flambées",
+      "note_manuscrite": "Une tarte pour chaque envie !",
+      "titre": "Tartes flambées",
+      "titre_allemand": "Flammkuchen",
+      "presentation": "Tradition, gourmandise et esprit alsacien.",
+      "deux_colonnes": false,
+      "rubriques": [
+        {
+          "titre": "",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Traditionnelle",
+              "prix": "9,90 €",
+              "allemand": "Klassisch",
+              "description": "Crème, fromage blanc, lardons & oignons",
+              "signature": false
+            },
+            {
+              "nom": "Gratinée",
+              "prix": "10,90 €",
+              "allemand": "Überbacken",
+              "description": "Crème, fromage blanc, lardons, oignons & emmental",
+              "signature": false
+            },
+            {
+              "nom": "Forestière",
+              "prix": "10,90 €",
+              "allemand": "Waldpilz",
+              "description": "Crème, fromage blanc, lardons, oignons & champignons",
+              "signature": false
+            },
+            {
+              "nom": "Ail & persil",
+              "prix": "10,90 €",
+              "allemand": "Knoblauch & Petersilie",
+              "description": "Crème, fromage blanc, lardons, oignons, ail & persil",
+              "signature": false
+            },
+            {
+              "nom": "Forestière gratinée",
+              "prix": "12,20 €",
+              "allemand": "Waldpilz überbacken",
+              "description": "Crème, fromage blanc, lardons, oignons, champignons & emmental",
+              "signature": false
+            },
+            {
+              "nom": "Munster",
+              "prix": "13,90 €",
+              "allemand": "Munsterkäse",
+              "description": "Crème, fromage blanc, lardons, oignons & munster",
+              "signature": false
+            },
+            {
+              "nom": "Tarte flambée de saison",
+              "prix": "",
+              "allemand": "Saisonaler Flammkuchen",
+              "description": "Une création renouvelée au fil des saisons · demandez-nous !",
+              "signature": false
+            }
+          ]
+        }
+      ],
+      "encadre": {
+        "emoji": "",
+        "titre": "",
+        "texte": "",
+        "prix": ""
+      },
+      "remarque": "",
+      "bandeau": "Seulement le soir",
+      "bandeau_allemand": "Nur abends",
+      "glaces": {
+        "titre": "",
+        "cremes": "",
+        "sorbets": "",
+        "tarifs": []
+      }
+    },
+    {
+      "nom": "Desserts",
+      "note_manuscrite": "Un goût d'automne",
+      "titre": "Nos desserts",
+      "titre_allemand": "Unsere Herbstdesserts",
+      "presentation": "Un goût d'automne.",
+      "deux_colonnes": false,
+      "rubriques": [
+        {
+          "titre": "",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Café ou chocolat liégeois",
+              "prix": "8 €",
+              "allemand": "Eiskaffee oder Eisschokolade",
+              "description": "2 boules café, 1 expresso et chantilly · ou 2 boules chocolat noir, 1 chocolat chaud et chantilly",
+              "signature": false
+            },
+            {
+              "nom": "Émotion café",
+              "prix": "5,50 €",
+              "allemand": "Kaffee-Emotion",
+              "description": "1 boule café, 1 expresso et chantilly",
+              "signature": false
+            },
+            {
+              "nom": "Framboises chaudes",
+              "prix": "8 €",
+              "allemand": "Warme Himbeeren",
+              "description": "2 boules vanille, framboises chaudes et chantilly",
+              "signature": false
+            },
+            {
+              "nom": "Dame blanche",
+              "prix": "9 €",
+              "allemand": "Dame Blanche",
+              "description": "3 boules vanille, sauce chocolat et chantilly",
+              "signature": false
+            },
+            {
+              "nom": "Café gourmand",
+              "prix": "8,50 €",
+              "allemand": "Kaffee-Genuss",
+              "description": "1 expresso accompagné de ses mini-desserts",
+              "signature": false
+            },
+            {
+              "nom": "Moelleux du moment",
+              "prix": "9 €",
+              "allemand": "Kuchen des Tages mit einer Kugel Vanilleeis",
+              "description": "Et sa boule de glace vanille",
+              "signature": false
+            },
+            {
+              "nom": "Coupe l'Incroyable",
+              "prix": "8 €",
+              "allemand": "",
+              "description": "1 boule pistache et 1 boule framboise, nappage pistache et framboises",
+              "signature": false
+            },
+            {
+              "nom": "Tiramisu aux pommes caramélisées",
+              "prix": "8 €",
+              "allemand": "Tiramisu mit karamellisierten Äpfeln",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Crumble aux poires caramélisées",
+              "prix": "8 €",
+              "allemand": "Crumble mit karamellisierten Birnen und Haselnüssen",
+              "description": "Et ses noisettes, avec sa boule de glace noisette",
+              "signature": false
+            },
+            {
+              "nom": "Crème brûlée à la vanille",
+              "prix": "7 €",
+              "allemand": "Vanille-Crème-brûlée mit einer Kugel Vanilleeis",
+              "description": "Et sa boule de glace vanille",
+              "signature": false
+            },
+            {
+              "nom": "Crème brûlée flambée au Grand Marnier",
+              "prix": "9 €",
+              "allemand": "Vanille-Crème-brûlée mit Grand Marnier flambiert",
+              "description": "À la vanille, et sa boule de glace vanille",
+              "signature": false
+            },
+            {
+              "nom": "Coupe Calvados",
+              "prix": "8,50 €",
+              "allemand": "",
+              "description": "2 boules pomme arrosées au calvados",
+              "signature": false
+            },
+            {
+              "nom": "Brioche perdue",
+              "prix": "9,50 €",
+              "allemand": "Armer Ritter mit Spekulatiuscreme",
+              "description": "Sa crème de spéculoos et sa boule de glace vanille",
+              "signature": false
+            }
+          ]
+        }
+      ],
+      "encadre": {
+        "emoji": "",
+        "titre": "",
+        "texte": "",
+        "prix": ""
+      },
+      "remarque": "",
+      "bandeau": "",
+      "bandeau_allemand": "",
+      "glaces": {
+        "titre": "Nos parfums de glaces · Unsere Eissorten",
+        "cremes": "vanille, café, chocolat noir, pistache, noisette, rhum-raisin et stracciatella",
+        "sorbets": "citron jaune, framboise et pomme",
+        "tarifs": [
+          {
+            "prix": "2,50 €",
+            "libelle": "1 boule"
+          },
+          {
+            "prix": "5 €",
+            "libelle": "2 boules"
+          },
+          {
+            "prix": "7,50 €",
+            "libelle": "3 boules"
+          },
+          {
+            "prix": "+ 1 €",
+            "libelle": "Sauce ou chantilly"
+          }
+        ]
+      }
+    },
+    {
+      "nom": "Le bar",
+      "note_manuscrite": "À chaque saison ses saveurs !",
+      "titre": "Le bar",
+      "titre_allemand": "Getränke · Cocktails",
+      "presentation": "Des produits de saison, des émotions toute l'année.",
+      "deux_colonnes": true,
+      "rubriques": [
+        {
+          "titre": "Cocktails",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Gin Tonic",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Gin Hendrick's, Schweppes tonic, rondelles de citron jaune",
+              "signature": false
+            },
+            {
+              "nom": "Hugo Spritz",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Liqueur de sureau, limonade, crémant, citron jaune",
+              "signature": false
+            },
+            {
+              "nom": "Apérol Spritz",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Apérol, crémant, limonade, rondelles d'orange",
+              "signature": false
+            },
+            {
+              "nom": "Apple Spritz",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Jus de pomme, crémant, Cointreau, bâton de cannelle",
+              "signature": false
+            },
+            {
+              "nom": "Tequila Sunrise",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Tequila, jus d'orange, sirop de grenadine",
+              "signature": false
+            },
+            {
+              "nom": "Pom' d'Or",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Gin, cidre de pomme, jus de citron, sirop d'érable",
+              "signature": false
+            },
+            {
+              "nom": "Rubis d'automne",
+              "prix": "10,50 €",
+              "allemand": "",
+              "description": "Rhum brun, jus d'orange, jus de cranberry, jus de citron jaune",
+              "signature": false
+            },
+            {
+              "nom": "Rubis pétillant · sans alcool",
+              "prix": "8,50 €",
+              "allemand": "",
+              "description": "Jus d'orange, cranberry, citron, sirop de gingembre",
+              "signature": false
+            },
+            {
+              "nom": "Pomme Caramel Fizz · sans alcool",
+              "prix": "8,50 €",
+              "allemand": "",
+              "description": "Jus de pomme, sirop de caramel, jus de citron, eau pétillante",
+              "signature": false
+            }
+          ]
+        },
+        {
+          "titre": "Apéritifs & bières",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Bière Licorne",
+              "prix": "3,50 € / 7 €",
+              "allemand": "",
+              "description": "25 cl · 50 cl",
+              "signature": false
+            },
+            {
+              "nom": "Monaco, Panaché ou Tango Radler",
+              "prix": "3,50 € / 7 €",
+              "allemand": "",
+              "description": "25 cl · 50 cl",
+              "signature": false
+            },
+            {
+              "nom": "Picon ou Cynar",
+              "prix": "4,30 € / 8,60 €",
+              "allemand": "",
+              "description": "25 cl · 50 cl",
+              "signature": false
+            },
+            {
+              "nom": "Bière Weizen Hefe Hell",
+              "prix": "5,50 €",
+              "allemand": "",
+              "description": "50 cl",
+              "signature": false
+            },
+            {
+              "nom": "Bière sans alcool",
+              "prix": "4 €",
+              "allemand": "",
+              "description": "33 cl",
+              "signature": false
+            },
+            {
+              "nom": "Bière du moment",
+              "prix": "",
+              "allemand": "",
+              "description": "À demander au serveur",
+              "signature": false
+            },
+            {
+              "nom": "Coupe de Crémant nature ou rosé",
+              "prix": "7,50 €",
+              "allemand": "",
+              "description": "12,5 cl",
+              "signature": false
+            },
+            {
+              "nom": "Kir Royal au Crémant",
+              "prix": "8,50 €",
+              "allemand": "",
+              "description": "Cassis, pêche, pamplemousse, violette ou mûre · 12,5 cl",
+              "signature": false
+            },
+            {
+              "nom": "Kir au vin blanc",
+              "prix": "4,50 €",
+              "allemand": "",
+              "description": "Cassis, pêche, pamplemousse, violette ou mûre · 12,5 cl",
+              "signature": false
+            },
+            {
+              "nom": "Ricard, Ricard tomate ou Perroquet",
+              "prix": "4,30 €",
+              "allemand": "",
+              "description": "3 cl",
+              "signature": false
+            },
+            {
+              "nom": "Porto, Suze ou Campari",
+              "prix": "4,50 €",
+              "allemand": "",
+              "description": "3 cl",
+              "signature": false
+            },
+            {
+              "nom": "Martini rouge ou blanc",
+              "prix": "4,50 €",
+              "allemand": "",
+              "description": "3 cl",
+              "signature": false
+            },
+            {
+              "nom": "J&B, Jameson, Tequila, Gin Hendrick's ou Vodka",
+              "prix": "7,10 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            }
+          ]
+        },
+        {
+          "titre": "Softs",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Carola bleue, verte ou rouge",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "50 cl",
+              "signature": false
+            },
+            {
+              "nom": "Jus de fruits",
+              "prix": "4 €",
+              "allemand": "",
+              "description": "Ananas, orange, pomme ou tomate · 20 cl",
+              "signature": false
+            },
+            {
+              "nom": "Sirop à l'eau",
+              "prix": "3 €",
+              "allemand": "",
+              "description": "Grenadine, fraise, citron, violette, menthe ou pêche · 25 cl",
+              "signature": false
+            },
+            {
+              "nom": "Limonade",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "33 cl",
+              "signature": false
+            },
+            {
+              "nom": "Diabolo",
+              "prix": "3,70 €",
+              "allemand": "",
+              "description": "Grenadine, fraise, citron, violette, menthe ou pêche · 33 cl",
+              "signature": false
+            },
+            {
+              "nom": "Pepsi ou Pepsi Max",
+              "prix": "3,90 €",
+              "allemand": "",
+              "description": "33 cl",
+              "signature": false
+            },
+            {
+              "nom": "Coca-Cola Cherry",
+              "prix": "4,20 €",
+              "allemand": "",
+              "description": "33 cl",
+              "signature": false
+            },
+            {
+              "nom": "Orangina",
+              "prix": "4,40 €",
+              "allemand": "",
+              "description": "35 cl",
+              "signature": false
+            },
+            {
+              "nom": "Thé glacé",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "25 cl",
+              "signature": false
+            },
+            {
+              "nom": "Schweppes tonic ou agrume",
+              "prix": "4,40 €",
+              "allemand": "",
+              "description": "25 cl",
+              "signature": false
+            },
+            {
+              "nom": "Perrier",
+              "prix": "4,40 €",
+              "allemand": "",
+              "description": "33 cl",
+              "signature": false
+            },
+            {
+              "nom": "Apfelschorle",
+              "prix": "4 €",
+              "allemand": "",
+              "description": "33 cl",
+              "signature": false
+            }
+          ]
+        },
+        {
+          "titre": "Boissons chaudes",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Expresso",
+              "prix": "2,50 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Double expresso",
+              "prix": "4,90 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Déca",
+              "prix": "3,10 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Café rallongé",
+              "prix": "2,90 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Chocolat chaud",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Cappuccino",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Thé noir",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Thé vert menthe",
+              "prix": "3,10 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            },
+            {
+              "nom": "Infusion",
+              "prix": "3,10 €",
+              "allemand": "",
+              "description": "Verveine ou verveine menthe",
+              "signature": false
+            },
+            {
+              "nom": "Irish café",
+              "prix": "9,50 €",
+              "allemand": "",
+              "description": "",
+              "signature": false
+            }
+          ]
+        },
+        {
+          "titre": "Digestifs",
+          "etoile": false,
+          "plats": [
+            {
+              "nom": "Cognac, Calvados, Bailey's, Get 27",
+              "prix": "7,20 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            },
+            {
+              "nom": "Golden Eight, Grand Marnier",
+              "prix": "7,20 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            },
+            {
+              "nom": "Framboise, Mirabelle, Poire Williams",
+              "prix": "7,20 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            },
+            {
+              "nom": "Marc de Gewurztraminer",
+              "prix": "7,20 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            },
+            {
+              "nom": "Rhum Negrita",
+              "prix": "3,50 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            },
+            {
+              "nom": "Rhum arrangé du moment",
+              "prix": "5 €",
+              "allemand": "",
+              "description": "4 cl",
+              "signature": false
+            }
+          ]
+        }
+      ],
+      "encadre": {
+        "emoji": "",
+        "titre": "",
+        "texte": "",
+        "prix": ""
+      },
+      "remarque": "",
+      "bandeau": "",
+      "bandeau_allemand": "",
+      "glaces": {
+        "titre": "",
+        "cremes": "",
+        "sorbets": "",
+        "tarifs": []
+      }
+    }
+  ]
+}

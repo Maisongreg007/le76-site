@@ -1,0 +1,26 @@
+{
+  "petit_titre": "Bonne table · Bons moments",
+  "titre": "Les soirées du 76",
+  "mot_en_valeur": "soirées",
+  "intro": "Pour connaître le thème des prochaines soirées, appelez-nous ou demandez au restaurant. Et pensez à réserver, les places partent vite !",
+  "soirees": [
+    {
+      "quand": "Régulièrement le samedi soir",
+      "titre": "Soirées à thème",
+      "description": "Un thème, un menu spécial, une ambiance : de quoi passer un samedi soir qui sort de l'ordinaire.",
+      "info": "📞 Le programme au 03 88 86 31 87",
+      "lien_telephone": true,
+      "date_karaoke_auto": false,
+      "symbole": "✦"
+    },
+    {
+      "quand": "Chaque 1er vendredi du mois",
+      "titre": "Soirée karaoké",
+      "description": "On dîne, on trinque et on chante ! Ambiance garantie, même pour les timides.",
+      "info": "🎤 Prochaine :",
+      "lien_telephone": false,
+      "date_karaoke_auto": true,
+      "symbole": "♪"
+    }
+  ]
+}

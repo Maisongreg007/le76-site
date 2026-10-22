@@ -1,0 +1,47 @@
+# Quand la carte ou les soirées sont modifiées (contenu/*.json),
+# reconstruit index.html et le publie. Hostinger met ensuite le site à jour.
+name: Mettre à jour la carte et les soirées
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "contenu/**"
+      - "outils/construire.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: construire
+  cancel-in-progress: false
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier les fichiers de contenu
+        run: python -c "import json; [json.load(open(f, encoding='utf-8')) for f in ('contenu/carte.json', 'contenu/soirees.json')]"
+
+      - name: Reconstruire index.html
+        run: python outils/construire.py
+
+      - name: Publier
+        run: |
+          if git diff --quiet index.html; then
+            echo "Rien à publier"
+            exit 0
+          fi
+          git config user.name "Le 76 (mise à jour auto)"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Mise à jour automatique de la carte / des soirées"
+          git pull --rebase origin main
+          git push origin main
