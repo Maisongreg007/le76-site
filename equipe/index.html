@@ -41,7 +41,7 @@
   .top h1 { font: 600 1rem/1.2 var(--sans); flex: 1; text-align: right; color: #e9d8c0; }
   .datenav { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
   .datenav button.nav { width: 42px; height: 42px; flex: none; border-radius: 12px; border: 0; background: rgba(255,255,255,.1); color: #fff; font-size: 1.3rem; }
-  .datebox { flex: 1; position: relative; height: 42px; border-radius: 12px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; font-weight: 600; text-transform: capitalize; overflow: hidden; }
+  .datebox { flex: 1; position: relative; height: 42px; border-radius: 12px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; font-weight: 600; overflow: hidden; }
   .datebox input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; }
   .datebox small { font-weight: 500; color: var(--gold); margin-left: 6px; text-transform: none; }
   .today-btn { height: 42px; padding: 0 12px; border-radius: 12px; border: 0; background: var(--gold); color: var(--ink); font-weight: 600; }
@@ -97,7 +97,7 @@
 
   /* Demandes */
   .dem { background: var(--paper); border: 1px solid var(--line); border-left: 5px solid var(--orange); border-radius: 14px; padding: 13px 14px; margin-bottom: 12px; }
-  .dem .quand { font: 700 1.08rem/1.2 var(--serif); color: var(--brown); text-transform: capitalize; }
+  .dem .quand { font: 700 1.08rem/1.2 var(--serif); color: var(--brown); }
   .dem .qui { margin-top: 4px; }
   .dem .qui b { font-size: 1.05rem; }
   .dem .meta { font-size: .86rem; color: var(--muted); margin-top: 3px; }
@@ -110,7 +110,7 @@
   .search { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; margin-bottom: 14px; }
   .day-row { display: grid; grid-template-columns: 84px 1fr 1fr; gap: 8px; align-items: stretch; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 8px; margin-bottom: 7px; cursor: pointer; width: 100%; text-align: left; }
   .day-row.closed { opacity: .55; }
-  .day-row .d { font-weight: 600; font-size: .92rem; line-height: 1.2; text-transform: capitalize; padding: 4px 2px; }
+  .day-row .d { font-weight: 600; font-size: .92rem; line-height: 1.2; padding: 4px 2px; }
   .day-row .d small { display: block; color: var(--muted); font-weight: 400; }
   .mini { border-radius: 9px; background: var(--sand); padding: 5px 8px; font-size: .85rem; line-height: 1.25; }
   .mini b { font-size: .98rem; }
@@ -218,8 +218,8 @@ const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date
 const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 const today = () => iso(new Date());
 const addDays = (d, n) => { const x = parse(d); x.setDate(x.getDate() + n); return iso(x); };
-const dateLong = d => { const x = parse(d), j = x.getDate(); return `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; };
-const dateCourt = d => { const x = parse(d); return `${JOURS_C[x.getDay()]} ${x.getDate()} ${MOIS_C[x.getMonth()]}`; };
+const dateLong = d => { const x = parse(d), j = x.getDate(); const t = `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
+const dateCourt = d => { const x = parse(d); const t = `${JOURS_C[x.getDay()]} ${x.getDate()} ${MOIS_C[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
 const hFr = h => h.replace(':', 'h');
 const telHref = t => 'tel:' + String(t).replace(/[^\d+]/g, '');
 const pers = n => `${n} pers.`;
@@ -457,7 +457,7 @@ function ficheResa(r) {
   const actif = r.statut === 'confirmee' || r.statut === 'attente';
   sheet(`<h2>${esc(r.nom)} · ${r.couverts} pers.</h2>
     <div class="det">
-      ${ligne('Quand', `<span style="text-transform:capitalize;width:auto;color:inherit;font-size:inherit">${dateLong(r.date)}</span> à ${hFr(r.heure)}`)}
+      ${ligne('Quand', `${dateLong(r.date)} à ${hFr(r.heure)}`)}
       ${ligne('Statut', STATUTS[r.statut] + (r.traite_par ? ` <small style="color:var(--muted)">· ${esc(r.traite_par)}</small>` : ''))}
       ${ligne('Téléphone', r.telephone ? `<a href="${telHref(r.telephone)}">${esc(r.telephone)}</a>` : '')}
       ${ligne('E-mail', r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : '')}
@@ -738,7 +738,7 @@ async function ecranSoirees() {
     <div class="tip">Ces soirées viennent du programme du site (la liste « prochaines dates »). Une soirée avec un prix est en « menu imposé » automatiquement : le client doit cocher qu'il l'a bien noté.</div>
     ${liste.length ? liste.map((s, i) => s.fermeture
       ? `<div class="group"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small>${dateCourt(s.date)}${s.date_fin !== s.date ? ' → ' + dateCourt(s.date_fin) : ''} · résa en ligne fermée automatiquement</small></div></div></div>`
-      : `<div class="group" data-i="${i}"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small style="text-transform:capitalize">${dateLong(s.date)}${s.heure ? ' · ' + esc(s.heure) : ''}</small>${s.details ? `<small>${esc(s.details)}</small>` : ''}<small>${s.etat.occupe} / ${s.etat.capacite} couverts</small></div></div>
+      : `<div class="group" data-i="${i}"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small>${dateLong(s.date)}${s.heure ? ' · ' + esc(s.heure) : ''}</small>${s.details ? `<small>${esc(s.details)}</small>` : ''}<small>${s.etat.occupe} / ${s.etat.capacite} couverts</small></div></div>
         <div class="row"><div class="grow">Menu imposé</div>${sw('', s.etat.menu_impose, 'data-k="menu"')}</div>
         <div class="row"><div class="grow">Réservation en ligne</div>${sw('', !s.etat.ferme_en_ligne, 'data-k="en_ligne"')}</div></div>`).join('') : '<p>Aucune soirée au programme.</p>'}
     <button class="btn ghost block" data-fermer>Fermer</button>`, el => {

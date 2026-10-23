@@ -152,7 +152,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const hFr = h => h.replace(':', 'h');
   const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date(y, m - 1, j); };
-  const dateFr = d => { const x = parse(d), j = x.getDate(); return `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; };
+  const dateFr = d => { const x = parse(d), j = x.getDate(); const t = `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
   const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 
   let data, parJour = {};
@@ -251,7 +251,7 @@
       </div>
       <div class="step ${st.date ? '' : 'off'}" id="etape-heure">
         <h2><span class="num">3</span>À quelle heure ?</h2>
-        ${st.date ? `<p class="hint" style="margin:-6px 0 14px;text-transform:capitalize">${dateFr(st.date)}</p>` + vueCreneaux() : '<p class="hint">Choisissez d\'abord un jour.</p>'}
+        ${st.date ? `<p class="hint" style="margin:-6px 0 14px">${dateFr(st.date)}</p>` + vueCreneaux() : '<p class="hint">Choisissez d\'abord un jour.</p>'}
       </div>
       <div class="step ${pret ? '' : 'off'}" id="etape-coord">
         <h2><span class="num">4</span>Vos coordonnées</h2>
@@ -259,7 +259,7 @@
       </div>
       ${pret ? `<div class="step">
         ${erreur ? `<div class="err" role="alert">${esc(erreur)}</div>` : ''}
-        <div class="recap"><b style="text-transform:capitalize">${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
+        <div class="recap"><b>${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
         <button class="btn" type="submit" ${st.envoi ? 'disabled' : ''}>${st.envoi ? 'Envoi…' : 'Envoyer ma demande'}</button>
         <p class="small">Ce n'est pas encore une réservation : nous vous envoyons la confirmation par e-mail très vite.</p>
       </div>` : ''}
@@ -330,7 +330,7 @@
     }
     app.innerHTML = `<div class="card"><div class="done"><div class="ok">✓</div><h2>Demande envoyée !</h2>
       <p>Merci ${esc(form.nom.trim())}. Un e-mail de réception vient de partir à <b>${esc(form.email.trim())}</b>, et nous vous confirmons la réservation très vite.</p>
-      <div class="recap"><b style="text-transform:capitalize">${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
+      <div class="recap"><b>${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
       <p>Pas d'e-mail ? Regardez dans les indésirables, ou appelez-nous au ${tel()}.</p>
       <p style="margin-top:22px"><a class="btn ghost" href="/">Retour au site</a></p></div></div>`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -347,7 +347,7 @@
     const r = await api({ action: 'annulation', jeton });
     if (!r.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>Lien introuvable</h2><p>${esc(r.erreur)}</p><p style="margin-top:20px"><a class="btn ghost" href="/reserver/">Faire une réservation</a></p></div></div>`; return; }
     const x = r.reservation;
-    const recap = `<div class="recap"><b style="text-transform:capitalize">${dateFr(x.date)} à ${hFr(x.heure)}</b><br>${x.couverts} personne${x.couverts > 1 ? 's' : ''} · au nom de ${esc(x.nom)}</div>`;
+    const recap = `<div class="recap"><b>${dateFr(x.date)} à ${hFr(x.heure)}</b><br>${x.couverts} personne${x.couverts > 1 ? 's' : ''} · au nom de ${esc(x.nom)}</div>`;
     if (!r.annulable) {
       const pourquoi = x.statut === 'annulee' ? 'Cette réservation est déjà annulée.' : x.statut === 'refusee' ? 'Cette demande n\'avait pas pu être acceptée.' : 'Cette réservation est passée.';
       app.innerHTML = `<div class="card"><div class="done"><h2>${pourquoi}</h2>${recap}<a class="btn ghost" href="/reserver/">Faire une nouvelle réservation</a></div></div>`;
