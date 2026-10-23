@@ -86,7 +86,9 @@ function demande(array $q): never
     $date = (string) ($q['date'] ?? '');
     $heure = (string) ($q['heure'] ?? '');
     $couverts = (int) ($q['couverts'] ?? 0);
-    $nom = nettoyer_texte($q['nom'] ?? '', 80);
+    $prenom = nettoyer_texte($q['prenom'] ?? '', 40);
+    $nom_famille = nettoyer_texte($q['nom'] ?? '', 40);
+    $nom = trim("$prenom $nom_famille");
     $tel = nettoyer_texte($q['telephone'] ?? '', 25);
     $email = mb_strtolower(nettoyer_texte($q['email'] ?? '', 120));
     $remarque = nettoyer_texte($q['remarque'] ?? '', 500);
@@ -97,11 +99,17 @@ function demande(array $q): never
     if ($couverts < 1) {
         erreur('Indiquez le nombre de personnes.');
     }
-    if (mb_strlen($nom) < 2) {
+    if (mb_strlen($prenom) < 2) {
+        erreur('Indiquez votre prénom.');
+    }
+    if (mb_strlen($nom_famille) < 2) {
         erreur('Indiquez votre nom.');
     }
-    if (!telephone_valide($tel)) {
-        erreur('Le numéro de téléphone ne semble pas correct.');
+    if (!mobile_valide($tel)) {
+        erreur('Indiquez un numéro de téléphone mobile valide.');
+    }
+    if (empty($q['accord'])) {
+        erreur("Merci de cocher la case d'accord pour l'utilisation de vos coordonnées.");
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         erreur("L'adresse e-mail ne semble pas correcte.");

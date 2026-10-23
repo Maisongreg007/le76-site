@@ -529,6 +529,15 @@ function telephone_valide(string $t): bool
     return preg_match('/^\+?[0-9 .\-\/()]{8,25}$/', $t) === 1 && strlen(preg_replace('/\D/', '', $t)) >= 9;
 }
 
+/** Mobile français (06/07), allemand (015/016/017) ou tout numéro international avec indicatif. */
+function mobile_valide(string $t): bool
+{
+    $d = preg_replace('/[\s.\-\/()]/', '', $t) ?? '';
+    return preg_match('/^(?:\+33|0033|0)[67]\d{8}$/', $d) === 1
+        || preg_match('/^(?:\+49|0049|0)1[5-7]\d{8,9}$/', $d) === 1
+        || preg_match('/^\+(?!33|49)\d{8,15}$/', $d) === 1;
+}
+
 function date_fr(string $date, bool $avec_annee = false): string
 {
     static $jours = ['', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
