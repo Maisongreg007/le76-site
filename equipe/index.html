@@ -721,7 +721,7 @@ function changerMdp() {
 /* Réglages généraux */
 async function ecranReglages() {
   const x = await api('reglages'); if (!x.ok) return toast(x.erreur, true);
-  const r = x.reglages;
+  const r = x.reglages, sm = x.smtp;
   const NJ = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 7: 'Dim' };
   const opts = (n, v) => Array.from({ length: n }, (_, i) => i + 1).map(i => `<option value="${String(i).padStart(2, '0')}" ${+v === i ? 'selected' : ''}>${i}</option>`).join('');
   const saisonHtml = (s = { nom: 'Été', debut: '06-01', fin: '09-15', midi: 250, soir: 250 }) => `<div class="saison" style="border-top:1px solid var(--line);padding:10px 14px">
@@ -766,6 +766,15 @@ async function ecranReglages() {
       <div class="row" style="display:block"><label class="field" style="margin:0">Petit mot ajouté aux confirmations <small>(facultatif)</small><textarea name="mot_client" placeholder="Ex. : Parking gratuit derrière le restaurant.">${esc(r.mot_client)}</textarea></label></div>
       <div class="row"><button type="button" class="btn ghost small" id="mailtest">Envoyer un e-mail de test</button></div>
     </div>
+
+    <div class="group"><h3>Anti-spam : envoyer par la messagerie Hostinger</h3>
+      <div class="row" style="border:0;padding-top:0"><div class="grow"><small>Les e-mails partent de la vraie boîte @le76.fr au lieu du serveur du site : ils arrivent beaucoup moins dans les spams.</small></div></div>
+      <div class="row"><div class="grow"><b>Utiliser la messagerie</b></div>${sw('smtp_actif', sm.actif)}</div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Boîte mail <small>(la vraie boîte, pas un alias)</small><input name="smtp_utilisateur" value="${esc(sm.utilisateur)}" placeholder="le76@le76.fr" autocapitalize="none" autocomplete="off"></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Mot de passe de cette boîte <small>${sm.mdp_enregistre ? '(déjà enregistré : laisse vide pour le garder)' : '(celui de la boîte chez Hostinger)'}</small><input name="smtp_mdp" type="password" autocomplete="new-password" placeholder="${sm.mdp_enregistre ? '••••••••' : ''}"></label></div>
+      <div class="row"><div class="grow">Serveur</div><input name="smtp_hote" value="${esc(sm.hote)}" style="width:170px"><select name="smtp_port"><option ${sm.port === 465 ? 'selected' : ''}>465</option><option ${sm.port === 587 ? 'selected' : ''}>587</option></select></div>
+      ${sm.derniere_erreur ? `<div class="row"><div class="grow" style="color:var(--rust-dark);font-size:.88rem">Dernier problème : ${esc(sm.derniere_erreur)}</div></div>` : ''}
+    </div>
     <div class="actions" style="position:sticky;bottom:0;background:var(--cream);padding:10px 0"><button class="btn ghost" data-fermer>Fermer</button><button class="btn" id="ok">Enregistrer</button></div>`, (el, fermer) => {
     const v = n => el.querySelector(`[name=${n}]`);
     el.querySelector('#addSaison').onclick = () => el.querySelector('#saisons').insertAdjacentHTML('beforeend', saisonHtml());
@@ -781,9 +790,15 @@ async function ecranReglages() {
       max_par_creneau: +v('max_par_creneau').value, jours_avance: +v('jours_avance').value,
       alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value,
     });
-    const sauver = async () => { const x = await api('reglages_ecrire', { reglages: collecter() }); if (!x.ok) toast(x.erreur, true); return x.ok; };
+    const sauver = async () => {
+      const x = await api('reglages_ecrire', { reglages: collecter() }); if (!x.ok) { toast(x.erreur, true); return false; }
+      const y = await api('smtp_ecrire', { smtp: { actif: v('smtp_actif').checked, utilisateur: v('smtp_utilisateur').value.trim(), mdp: v('smtp_mdp').value, hote: v('smtp_hote').value.trim(), port: +v('smtp_port').value } });
+      if (!y.ok) { toast(y.erreur, true); return false; }
+      v('smtp_mdp').value = '';
+      return true;
+    };
     el.querySelector('#ok').onclick = async () => { if (await sauver()) { fermer(); toast('Réglages enregistrés'); } };
-    el.querySelector('#mailtest').onclick = async () => { if (!(await sauver())) return; const x = await api('mail_test'); x.ok ? toast('E-mail de test envoyé : regarde ta boîte (et les spams)') : toast(x.erreur, true); };
+    el.querySelector('#mailtest').onclick = async () => { if (!(await sauver())) return; const x = await api('mail_test'); x.ok ? toast(x.via === 'smtp' ? 'E-mail de test envoyé par la messagerie Hostinger : regarde ta boîte' : 'E-mail de test envoyé : regarde ta boîte (et les spams)') : toast(x.erreur, true); };
   });
 }
 

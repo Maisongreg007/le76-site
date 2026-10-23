@@ -16,11 +16,13 @@ function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?st
     }
     $exp = $r['expediteur'];
     $limite = 'b' . jeton(8);
+    $domaine = substr(strrchr($exp, '@') ?: '@le76.fr', 1);
     $entetes = [
+        'Date: ' . date('r'),
+        'Message-ID: <' . jeton(12) . '@' . $domaine . '>',
         'From: ' . mb_encode_mimeheader($r['nom'], 'UTF-8') . " <$exp>",
         'MIME-Version: 1.0',
         "Content-Type: multipart/alternative; boundary=\"$limite\"",
-        'X-Mailer: Le76-Reservations',
     ];
     $rep = $repondre_a ?: ($r['alertes_email'][0] ?? null);
     if ($rep && filter_var($rep, FILTER_VALIDATE_EMAIL)) {
@@ -33,10 +35,14 @@ function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?st
         . "--$limite--\r\n";
     $sujet_enc = mb_encode_mimeheader($sujet, 'UTF-8', 'B', "\r\n");
 
+    $smtp = smtp_config();
     // Pour les tests : les e-mails sont écrits dans un fichier au lieu d'être envoyés.
     if ($journal = getenv('RESA_MAIL_LOG')) {
         file_put_contents($journal, json_encode(['a' => $a, 'sujet' => $sujet, 'texte' => $texte, 'repondre_a' => $rep], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND);
         $ok = true;
+    } elseif ($smtp['pret']) {
+        // Envoi par la messagerie Hostinger (authentifié : beaucoup moins de spam)
+        $ok = smtp_envoyer($smtp, $exp, $a, "To: <$a>\r\nSubject: $sujet_enc\r\n" . implode("\r\n", $entetes) . "\r\n\r\n" . $corps);
     } else {
         $ok = @mail($a, $sujet_enc, $corps, implode("\r\n", $entetes), '-f' . $exp);
     }
@@ -46,6 +52,139 @@ function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?st
         db()->exec('DELETE FROM journal_mails WHERE id NOT IN (SELECT id FROM journal_mails ORDER BY id DESC LIMIT 300)');
     } catch (Throwable $e) {
     }
+    return $ok;
+}
+
+/* ------------------------------------------------------------------ */
+/* Envoi SMTP (messagerie Hostinger), réglé depuis l'appli             */
+/* Le mot de passe est rangé dans le dossier des données, jamais dans  */
+/* le dépôt ni renvoyé à l'appli.                                      */
+/* ------------------------------------------------------------------ */
+
+function smtp_config(): array
+{
+    static $c = null;
+    if ($c !== null) {
+        return $c;
+    }
+    $f = dossier_donnees() . '/smtp.json';
+    $c = is_file($f) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
+    $c += ['actif' => false, 'hote' => 'smtp.hostinger.com', 'port' => 465, 'utilisateur' => '', 'mdp' => '', 'derniere_erreur' => ''];
+    $c['pret'] = $c['actif'] && $c['utilisateur'] !== '' && $c['mdp'] !== '';
+    return $c;
+}
+
+function smtp_enregistrer(array $n): array
+{
+    $c = smtp_config();
+    unset($c['pret']);
+    if (array_key_exists('actif', $n)) {
+        $c['actif'] = (bool) $n['actif'];
+    }
+    if (!empty($n['hote']) && preg_match('/^[a-z0-9.-]+$/i', (string) $n['hote'])) {
+        $c['hote'] = (string) $n['hote'];
+    }
+    if (!empty($n['port']) && in_array((int) $n['port'], [465, 587], true)) {
+        $c['port'] = (int) $n['port'];
+    }
+    if (isset($n['utilisateur']) && ($n['utilisateur'] === '' || filter_var($n['utilisateur'], FILTER_VALIDATE_EMAIL))) {
+        $c['utilisateur'] = (string) $n['utilisateur'];
+    }
+    if (isset($n['mdp']) && $n['mdp'] !== '') {
+        $c['mdp'] = (string) $n['mdp'];
+    }
+    $f = dossier_donnees() . '/smtp.json';
+    file_put_contents($f, json_encode($c));
+    @chmod($f, 0600);
+    return smtp_public(true);
+}
+
+function smtp_public(bool $recharger = false): array
+{
+    if ($recharger) {
+        // vider le cache statique
+        $f = dossier_donnees() . '/smtp.json';
+        $c = is_file($f) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
+        $c += ['actif' => false, 'hote' => 'smtp.hostinger.com', 'port' => 465, 'utilisateur' => '', 'mdp' => '', 'derniere_erreur' => ''];
+    } else {
+        $c = smtp_config();
+    }
+    return ['actif' => (bool) $c['actif'], 'hote' => $c['hote'], 'port' => (int) $c['port'], 'utilisateur' => $c['utilisateur'], 'mdp_enregistre' => $c['mdp'] !== '', 'derniere_erreur' => $c['derniere_erreur'] ?? ''];
+}
+
+function smtp_noter_erreur(string $e): void
+{
+    $f = dossier_donnees() . '/smtp.json';
+    $c = is_file($f) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
+    $c['derniere_erreur'] = $e === '' ? '' : date('d/m H:i') . ' : ' . $e;
+    file_put_contents($f, json_encode($c));
+}
+
+function smtp_envoyer(array $c, string $de, string $a, string $message): bool
+{
+    $erreur = '';
+    $ok = (function () use ($c, $de, $a, $message, &$erreur): bool {
+        $hote = ((int) $c['port'] === 465 ? 'ssl://' : 'tcp://') . $c['hote'] . ':' . (int) $c['port'];
+        $s = @stream_socket_client($hote, $no, $msg, 12, STREAM_CLIENT_CONNECT, stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]));
+        if (!$s) {
+            $erreur = "connexion impossible ($msg)";
+            return false;
+        }
+        stream_set_timeout($s, 15);
+        $lire = function () use ($s): string {
+            $r = '';
+            while (($l = fgets($s, 1024)) !== false) {
+                $r .= $l;
+                if (strlen($l) < 4 || $l[3] === ' ') {
+                    break;
+                }
+            }
+            return $r;
+        };
+        $dire = function (string $cmd, array $codes) use ($s, $lire, &$erreur): bool {
+            if ($cmd !== '') {
+                fwrite($s, $cmd . "\r\n");
+            }
+            $r = $lire();
+            if (!in_array((int) substr($r, 0, 3), $codes, true)) {
+                $erreur = trim(preg_replace('/AUTH PLAIN .*/', 'AUTH PLAIN ***', $cmd) . ' → ' . $r);
+                return false;
+            }
+            return true;
+        };
+        $hello = 'EHLO ' . (gethostname() ?: 'le76.fr');
+        if (!$dire('', [220]) || !$dire($hello, [250])) {
+            return false;
+        }
+        if ((int) $c['port'] === 587) {
+            if (!$dire('STARTTLS', [220]) || !stream_socket_enable_crypto($s, true, STREAM_CRYPTO_METHOD_TLS_CLIENT) || !$dire($hello, [250])) {
+                $erreur = $erreur ?: 'STARTTLS impossible';
+                return false;
+            }
+        }
+        if (!$dire('AUTH PLAIN ' . base64_encode("\0{$c['utilisateur']}\0{$c['mdp']}"), [235])) {
+            $erreur = 'identifiant ou mot de passe de la boîte refusé';
+            return false;
+        }
+        // Expéditeur : l'adresse d'envoi (alias) si le serveur l'accepte, sinon la boîte elle-même
+        if (!$dire("MAIL FROM:<$de>", [250])) {
+            $dire('RSET', [250]);
+            if (!$dire("MAIL FROM:<{$c['utilisateur']}>", [250])) {
+                return false;
+            }
+        }
+        if (!$dire("RCPT TO:<$a>", [250, 251]) || !$dire('DATA', [354])) {
+            return false;
+        }
+        $message = preg_replace('/^\./m', '..', str_replace(["\r\n", "\n"], ["\n", "\r\n"], $message));
+        if (!$dire($message . "\r\n.", [250])) {
+            return false;
+        }
+        fwrite($s, "QUIT\r\n");
+        fclose($s);
+        return true;
+    })();
+    smtp_noter_erreur($ok ? '' : $erreur);
     return $ok;
 }
 

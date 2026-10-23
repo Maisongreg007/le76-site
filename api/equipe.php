@@ -73,7 +73,9 @@ try {
 
     switch ($action) {
         case 'reglages':
-            repondre(['ok' => true, 'reglages' => reglages(), 'soirees' => soirees_a_venir()]);
+            repondre(['ok' => true, 'reglages' => reglages(), 'soirees' => soirees_a_venir(), 'smtp' => smtp_public()]);
+        case 'smtp_ecrire':
+            repondre(['ok' => true, 'smtp' => smtp_enregistrer(is_array($q['smtp'] ?? null) ? $q['smtp'] : [])]);
         case 'reglages_ecrire':
             repondre(['ok' => true, 'reglages' => reglages_enregistrer(is_array($q['reglages'] ?? null) ? $q['reglages'] : [])]);
         case 'mail_test':
@@ -637,7 +639,9 @@ function mail_test(): never
     foreach ($r['alertes_email'] as $a) {
         $ok = envoyer_mail($a, 'Test des réservations du 76', $html, $txt) && $ok;
     }
-    $ok ? repondre(['ok' => true]) : erreur("L'hébergement a refusé l'envoi de l'e-mail.");
+    $smtp = smtp_public(true);
+    $ok ? repondre(['ok' => true, 'via' => $smtp['actif'] ? 'smtp' : 'site'])
+        : erreur($smtp['actif'] ? "La messagerie a refusé l'envoi : " . ($smtp['derniere_erreur'] ?: 'raison inconnue') : "L'hébergement a refusé l'envoi de l'e-mail.");
 }
 
 function export_csv(): never
