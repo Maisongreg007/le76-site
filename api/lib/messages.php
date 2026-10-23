@@ -491,6 +491,10 @@ function push_tous(string $titre, string $corps, string $url, string $tag = '', 
     if (getenv('RESA_PUSH_LOG')) {
         file_put_contents(getenv('RESA_PUSH_LOG'), json_encode([$titre, $corps, $url], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND);
     }
+    // Pastille rouge sur l'icône de l'appli : nombre de demandes en attente
+    $st0 = db()->prepare("SELECT COUNT(*) FROM reservations WHERE statut = 'attente' AND date >= ?");
+    $st0->execute([date('Y-m-d')]);
+    $pastille = (int) $st0->fetchColumn();
     $sql = 'SELECT p.* FROM push p JOIN utilisateurs u ON u.id = p.utilisateur_id WHERE u.actif = 1';
     $params = [];
     if ($seulement_utilisateur) {
@@ -501,7 +505,7 @@ function push_tous(string $titre, string $corps, string $url, string $tag = '', 
     $st->execute($params);
     $envoyes = 0;
     foreach ($st->fetchAll() as $abo) {
-        $code = push_envoyer($abo, ['titre' => $titre, 'corps' => $corps, 'url' => $url, 'tag' => $tag]);
+        $code = push_envoyer($abo, ['titre' => $titre, 'corps' => $corps, 'url' => $url, 'tag' => $tag, 'pastille' => $pastille]);
         if ($code === 404 || $code === 410) {
             db()->prepare('DELETE FROM push WHERE endpoint = ?')->execute([$abo['endpoint']]);
         } elseif ($code >= 200 && $code < 300) {
