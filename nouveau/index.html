@@ -101,7 +101,7 @@
 
   /* Haut de page : le numéro de la maison, et la salle */
   .hero { min-height: 100vh; padding: 120px 0 0; display: flex; flex-direction: column; overflow: hidden; }
-  .colombage { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--chene); pointer-events: none; }
+  .colombage { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--chene); opacity: .7; pointer-events: none; }
   .hero .wrap { position: relative; display: grid; grid-template-columns: 1.15fr .85fr; gap: 64px; align-items: center; flex: 1; width: 100%; }
   .numero { font: 300 clamp(9rem, 24vw, 19rem)/.78 var(--display); letter-spacing: -.06em; color: var(--noyer); margin: 0 0 0 -.06em; font-variation-settings: "SOFT" 100, "opsz" 144; }
   .numero small { display: block; font: italic 400 clamp(1.6rem, 3vw, 2.3rem)/1 var(--display); letter-spacing: 0; color: var(--miel); margin: 0 0 14px .12em; }
@@ -110,7 +110,8 @@
   .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
   .hero-photo { position: relative; align-self: stretch; display: flex; align-items: center; }
   .hero-photo img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 3px; position: relative; z-index: 1; }
-  .hero-photo::before { content: ""; position: absolute; left: -22px; right: 22px; top: calc(50% - 50% + 22px); height: 100%; border: 1.5px solid var(--chene-fonce); border-radius: 3px; }
+  .hero-photo > div { position: relative; width: 100%; }
+  .hero-photo > div::before { content: ""; position: absolute; inset: 22px -22px -22px 22px; border: 1.5px solid var(--chene-fonce); border-radius: 3px; }
   .bande { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--chene); margin-top: 70px; background: rgba(251,248,242,.7); }
   .bande > div { padding: 24px 28px; }
   .bande > div + div { border-left: 1px solid var(--chene); }
@@ -123,7 +124,7 @@
     .hero { min-height: 0; padding-top: 104px; }
     .hero .wrap { grid-template-columns: 1fr; gap: 48px; }
     .hero-photo { max-width: 440px; }
-    .hero-photo::before { left: -14px; right: 14px; top: 14px; }
+    .hero-photo > div::before { inset: 14px -14px -14px 14px; }
     .bande { grid-template-columns: 1fr; margin-top: 56px; }
     .bande > div + div { border-left: 0; border-top: 1px solid var(--chene); }
   }
@@ -301,7 +302,7 @@
       </div>
     </div>
     <div class="hero-photo">
-      <img src="/images/accueil-table.jpg" alt="Une table dressée dans la salle à colombages du 76" fetchpriority="high">
+      <div><img src="/images/accueil-table.jpg" alt="Une table dressée dans la salle à colombages du 76" fetchpriority="high"></div>
     </div>
   </div>
   <div class="wrap" style="display:block;flex:none">
@@ -503,7 +504,7 @@
     if (li.getAttribute("data-fin") < iso) { li.remove(); return; }
     var w = li.querySelector(".ag-when"); if (!w) return;
     var m = w.textContent.match(/^(\S+)\s+(\d+)(?:er)?\s+(\S+)(.*)$/); // « samedi 31 octobre · 20h »
-    if (m) w.innerHTML = "<b>" + m[2] + "</b>" + m[1] + " " + m[3] + (m[4] ? "<br>" + m[4].replace(/^\s*·\s*/, "") : "");
+    if (m) w.innerHTML = "<b>" + m[2] + "</b>" + m[3] + "<br>" + m[1] + (m[4] ? ", " + m[4].replace(/^\s*·\s*/, "") : "");
   });
   var ag = document.querySelector(".agenda");
   if (ag && !ag.children.length) { ag.remove(); var at = document.querySelector(".ag-title"); if (at) at.remove(); }
