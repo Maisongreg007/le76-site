@@ -157,7 +157,7 @@ function reglages_defaut(): array
         'delai_heures' => 2,
         'max_en_ligne' => 12,
         'max_par_creneau' => 0,
-        'jours_avance' => 90,
+        'jours_avance' => 365,
         'alertes_email' => [],
         'expediteur' => 'reservation@le76.fr',
         'nom' => 'Le 76',
