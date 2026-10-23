@@ -12,6 +12,8 @@ self.addEventListener('push', e => {
       badge: '/equipe/icone-badge.png',
       tag: d.tag || 'resa',
       renotify: true,
+      requireInteraction: true,
+      vibrate: [200, 100, 200, 100, 200],
       data: { url: d.url || '/equipe/#demandes' },
     });
     const fenetres = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });

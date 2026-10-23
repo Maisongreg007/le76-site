@@ -38,6 +38,8 @@ try {
     $moi = utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
 
     switch ($action) {
+        case 'evenements':
+            evenements($q);
         case 'jour':
             jour($q);
         case 'demandes':
@@ -361,6 +363,25 @@ function jour(array $q): never
         $services[$s]['creneaux'] = creneaux($services[$s]['debut'], $services[$s]['fin'], (int) reglages()['pas']);
     }
     repondre(['ok' => true, 'date' => $date, 'services' => $services, 'reservations' => $resas, 'demandes' => nb_demandes()]);
+}
+
+/** Réservations arrivées du site et annulations des clients depuis un moment donné (alertes à l'écran). */
+function evenements(array $q): never
+{
+    $depuis = (string) ($q['depuis'] ?? '');
+    $maintenant = maintenant();
+    if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $depuis)) {
+        repondre(['ok' => true, 'maintenant' => $maintenant, 'evenements' => []]);
+    }
+    $st = db()->prepare("SELECT * FROM reservations WHERE (source = 'site' AND cree_le > ?)
+        OR (statut = 'annulee' AND traite_par = 'Client (lien e-mail)' AND modifie_le > ?) ORDER BY id LIMIT 30");
+    $st->execute([$depuis, $depuis]);
+    $o = [];
+    foreach ($st->fetchAll() as $r) {
+        $annul = $r['statut'] === 'annulee' && $r['traite_par'] === 'Client (lien e-mail)' && $r['modifie_le'] > $depuis;
+        $o[] = ['type' => $annul ? 'annulee' : 'nouvelle', 'reservation' => resa_equipe($r)];
+    }
+    repondre(['ok' => true, 'maintenant' => $maintenant, 'evenements' => $o]);
 }
 
 function demandes(): never
