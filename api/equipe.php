@@ -86,6 +86,8 @@ try {
             equipe_ajouter($q);
         case 'equipe_modifier':
             equipe_modifier($q, $moi);
+        case 'equipe_supprimer':
+            equipe_supprimer($q, $moi);
         case 'export':
             export_csv();
     }
@@ -291,6 +293,19 @@ function equipe_ajouter(array $q): never
     } catch (PDOException $e) {
         erreur('Cet identifiant existe déjà.');
     }
+    repondre(['ok' => true, 'equipe' => liste_equipe()]);
+}
+
+function equipe_supprimer(array $q, array $moi): never
+{
+    $id = (int) ($q['id'] ?? 0);
+    if ($id === (int) $moi['id']) {
+        erreur('Tu ne peux pas supprimer ton propre compte.');
+    }
+    foreach (['sessions', 'push', 'reinit_mdp'] as $t) {
+        db()->prepare("DELETE FROM $t WHERE utilisateur_id = ?")->execute([$id]);
+    }
+    db()->prepare('DELETE FROM utilisateurs WHERE id = ?')->execute([$id]);
     repondre(['ok' => true, 'equipe' => liste_equipe()]);
 }
 

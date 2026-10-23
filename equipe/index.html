@@ -829,24 +829,53 @@ async function ecranEquipe() {
       <label class="checkline"><input type="checkbox" name="admin">Responsable (accès aux réglages et à l'équipe)</label>
       <button class="btn block" id="add">Ajouter</button></div></div>
     <button class="btn ghost block" data-fermer>Fermer</button>`, el => {
-    const dessiner = eq => el.querySelector('#eq').innerHTML = `<div class="group">${eq.map(u => `<div class="row" data-u="${u.id}" style="${u.actif ? '' : 'opacity:.5'}"><div class="grow"><b>${esc(u.nom)}</b>${u.admin ? ' <span class="tag web">resp.</span>' : ''}<small>${esc(u.identifiant)} · ${u.telephones ? u.telephones + ' téléphone(s) notifié(s)' : 'pas de notification'}${u.actif ? '' : ' · désactivé'}</small></div>
-      ${u.id === S.moi.id ? '<small style="color:var(--muted)">toi</small>' : `<button class="btn ghost small" data-act="mdp">Mot de passe</button><button class="btn ghost small" data-act="actif">${u.actif ? 'Retirer' : 'Rétablir'}</button>`}</div>`).join('')}</div>`;
-    dessiner(x.equipe);
-    let eq = x.equipe;
-    el.querySelector('#eq').onclick = async e => {
-      const b = e.target.closest('[data-act]'); if (!b) return;
-      const u = eq.find(u => u.id === +b.closest('[data-u]').dataset.u);
-      let y;
-      if (b.dataset.act === 'mdp') { const m = prompt(`Nouveau mot de passe pour ${u.nom} (6 caractères minimum)`); if (!m) return; y = await api('equipe_modifier', { id: u.id, mdp: m }); }
-      else { if (u.actif && !confirm(`Retirer l'accès de ${u.nom} ? Elle/il sera déconnecté(e) tout de suite.`)) return; y = await api('equipe_modifier', { id: u.id, actif: !u.actif }); }
-      if (!y.ok) return toast(y.erreur, true);
-      eq = y.equipe; dessiner(eq); toast('Enregistré');
-    };
+    let eq = x.equipe, ouvert = null, confirmeSuppr = false;
+    const dessiner = () => el.querySelector('#eq').innerHTML = `<div class="group">${eq.map(u => {
+      const moi = u.id === S.moi.id;
+      const tete = `<div class="row" data-u="${u.id}" style="${u.actif ? '' : 'opacity:.55'}"><div class="grow"><b>${esc(u.nom)}</b>${u.admin ? ' <span class="tag web">resp.</span>' : ''}${u.actif ? '' : ' <span class="tag" style="background:#f8dcd6;color:var(--rust-dark)">désactivé</span>'}<small>${esc(u.identifiant)} · ${u.telephones ? u.telephones + ' appareil(s) notifié(s)' : 'pas de notification'}</small></div>
+        ${moi ? '<small style="color:var(--muted)">toi</small>' : `<button class="btn ghost small" data-act="gerer">${ouvert === u.id ? 'Fermer' : 'Gérer ›'}</button>`}</div>`;
+      if (moi || ouvert !== u.id) return tete;
+      return tete + `<div style="padding:4px 14px 14px;background:var(--sand)">
+        <label class="field" style="margin-top:10px">Nouveau mot de passe <small>(6 caractères minimum)</small>
+          <div style="display:flex;gap:8px;margin-top:5px"><input data-mdp style="margin:0" autocomplete="off"><button class="btn small" data-act="mdp">Changer</button></div></label>
+        <div class="row" style="padding:8px 0;border:0;background:transparent"><div class="grow">Responsable<small>Accès aux réglages et à l'équipe</small></div>${sw('', u.admin, 'data-act="admin"')}</div>
+        <div class="actions" style="margin-top:6px">
+          <button class="btn ghost small" data-act="actif">${u.actif ? 'Désactiver' : 'Réactiver'}</button>
+          <button class="btn small" data-act="suppr" style="background:${confirmeSuppr ? 'var(--rust-dark)' : 'var(--rust)'}">${confirmeSuppr ? 'Confirmer : supprimer' : 'Supprimer'}</button>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin:8px 0 0">« Désactiver » coupe l'accès mais garde le compte. « Supprimer » l'efface (les réservations déjà notées restent).</p>
+      </div>`;
+    }).join('')}</div>`;
+    dessiner();
+    const maj = (y, msg) => { if (!y.ok) return toast(y.erreur, true); eq = y.equipe; confirmeSuppr = false; dessiner(); toast(msg); };
+    el.querySelector('#eq').addEventListener('click', async e => {
+      const b = e.target.closest('[data-act]'); if (!b || b.dataset.act === 'admin') return;
+      const u = eq.find(u => u.id === +b.closest('[data-u]')?.dataset.u) || eq.find(u => u.id === ouvert);
+      if (!u) return;
+      const a = b.dataset.act;
+      if (a === 'gerer') { ouvert = ouvert === u.id ? null : u.id; confirmeSuppr = false; return dessiner(); }
+      if (a === 'mdp') {
+        const m = el.querySelector('[data-mdp]').value;
+        if (m.length < 6) return toast('6 caractères minimum.', true);
+        return maj(await api('equipe_modifier', { id: u.id, mdp: m }), `Mot de passe de ${u.nom} changé`);
+      }
+      if (a === 'actif') return maj(await api('equipe_modifier', { id: u.id, actif: !u.actif }), u.actif ? `${u.nom} désactivé(e)` : `${u.nom} réactivé(e)`);
+      if (a === 'suppr') {
+        if (!confirmeSuppr) { confirmeSuppr = true; return dessiner(); }
+        ouvert = null;
+        return maj(await api('equipe_supprimer', { id: u.id }), `${u.nom} supprimé(e)`);
+      }
+    });
+    el.querySelector('#eq').addEventListener('change', async e => {
+      if (e.target.dataset.act !== 'admin') return;
+      const u = eq.find(u => u.id === ouvert);
+      maj(await api('equipe_modifier', { id: u.id, admin: e.target.checked }), e.target.checked ? `${u.nom} est responsable` : `${u.nom} n'est plus responsable`);
+    });
     el.querySelector('#add').onclick = async () => {
       const g = n => el.querySelector(`[name=${n}]`);
       const y = await api('equipe_ajouter', { nom: g('nom').value, identifiant: g('identifiant').value.trim(), mdp: g('mdp').value, admin: g('admin').checked });
       if (!y.ok) return toast(y.erreur, true);
-      eq = y.equipe; dessiner(eq);
+      eq = y.equipe; dessiner();
       toast(`${g('nom').value} ajouté(e) : identifiant « ${g('identifiant').value.trim()} »`);
       ['nom', 'identifiant', 'mdp'].forEach(n => g(n).value = ''); g('admin').checked = false;
     };
