@@ -93,6 +93,21 @@
   .more { width: 100%; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 10px; color: var(--muted); font-size: .85rem; }
   .empty { padding: 14px; color: var(--muted); font-size: .92rem; border-top: 1px solid var(--line); }
 
+  .semaine { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 4px; }
+  .sj { border: 1.5px solid var(--line); background: var(--paper); border-radius: 12px; padding: 6px 2px 7px; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; }
+  .sj .sn { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .sj .sd { font: 700 1.15rem/1.1 var(--serif); }
+  .sj .ss { display: flex; gap: 3px; margin-top: 3px; }
+  .sj.auj .sd { color: var(--rust); }
+  .sj.on { border-color: var(--rust); box-shadow: 0 0 0 2px rgba(183,55,42,.18); background: #fff; }
+  .sv { min-width: 22px; padding: 1px 3px; border-radius: 6px; font-size: .72rem; font-weight: 600; background: #f1e8db; color: #a8998a; text-align: center; }
+  .sv.x { background: transparent; color: #cdbfb0; }
+  .sv.pris { background: var(--green-bg); color: var(--green); }
+  .sv.attente { background: var(--amber-bg); color: var(--amber); }
+  .sv.presque { background: #fde3c8; color: #a2500f; }
+  .sv.complet { background: #f8dcd6; color: var(--rust-dark); }
+  .sem-leg { text-align: right; font-size: .7rem; color: var(--muted); margin: 0 2px 10px; }
+  @media (max-width: 380px) { .sv { min-width: 18px; font-size: .66rem; } }
   .fab { position: fixed; right: 16px; bottom: calc(86px + var(--bot)); z-index: 25; width: 60px; height: 60px; border-radius: 50%; border: 0; background: var(--rust); color: #fff; font-size: 2rem; line-height: 1; box-shadow: 0 10px 24px rgba(183,55,42,.4); }
 
   /* Demandes */
@@ -411,11 +426,12 @@ async function vueCarnet(silencieux) {
   enTete('Carnet', true);
   const main = document.getElementById('main');
   if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
-  const d = await api('jour', { date: S.date });
+  const x = parse(S.date); const lundi = addDays(S.date, -((x.getDay() + 6) % 7));
+  const [d, sem] = await Promise.all([api('jour', { date: S.date }), api('avenir', { debut: lundi, jours: 7 })]);
   if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
   if (S.vue !== 'carnet' || d.date !== S.date) return;
   S.jour = d; majBadge(d.demandes);
-  let h = '';
+  let h = sem.ok ? semaine(sem.jours) : '';
   for (const s of ['midi', 'soir']) {
     const e = d.services[s];
     const resas = d.reservations.filter(r => r.service === s);
@@ -452,6 +468,7 @@ async function vueCarnet(silencieux) {
   main2.innerHTML = h;
   main2.onclick = async ev => {
     const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.jour) return aller('carnet', b.dataset.jour);
     if (b.dataset.id) return ficheResa(S.jour.reservations.find(r => r.id === +b.dataset.id));
     if (b.dataset.annul) { S.voirAnnulees[b.dataset.annul] = !S.voirAnnulees[b.dataset.annul]; return vueCarnet(true); }
     if (b.dataset.reglage) return reglageService(b.dataset.reglage);
@@ -462,6 +479,22 @@ async function vueCarnet(silencieux) {
     }
   };
 }
+/* Bande de la semaine en cours (lundi → dimanche) en haut du carnet */
+function semaine(jours) {
+  const cel = v => {
+    if (!v.ouvert && !v.occupe) return '<span class="sv x">–</span>';
+    const t = v.capacite ? v.occupe / v.capacite : 0;
+    const c = v.occupe >= v.capacite && v.capacite ? 'complet' : v.attente.resas ? 'attente' : t >= .85 ? 'presque' : v.occupe ? 'pris' : '';
+    return `<span class="sv ${c}">${v.occupe}</span>`;
+  };
+  return `<div class="semaine">${jours.map(j => {
+    const x = parse(j.date);
+    return `<button class="sj${j.date === S.date ? ' on' : ''}${j.date === today() ? ' auj' : ''}" data-jour="${j.date}">
+      <span class="sn">${JOURS_C[x.getDay()].replace('.', '')}</span><span class="sd">${x.getDate()}</span>
+      <span class="ss">${cel(j.services.midi)}${cel(j.services.soir)}</span></button>`;
+  }).join('')}</div><div class="sem-leg">Couverts midi · soir</div>`;
+}
+
 function ligneResa(r) {
   const infos = [r.telephone, r.remarque ? `« ${r.remarque} »` : '', r.note_interne ? `📝 ${r.note_interne}` : ''].filter(Boolean).join(' · ');
   return `<button class="resa ${r.statut}${r.arrive ? ' arrive' : ''}" data-id="${r.id}">
