@@ -190,7 +190,7 @@
       const jour = parJour[d], e = etatJour(jour);
       const soiree = jour && jour.services.soir.soiree;
       const titre = e === 'dispo' ? '' : e === 'complet' ? 'Complet en ligne' : 'Fermé';
-      cases += `<button type="button" class="day ${e}${st.date === d ? ' sel' : ''}" data-d="${d}" ${e === 'dispo' ? '' : 'disabled'} title="${titre}${soiree ? ' · ' + esc(soiree.titre) : ''}" aria-label="${dateFr(d)}${titre ? ', ' + titre : ''}">${j}${soiree ? '<span class="star">✦</span>' : ''}</button>`;
+      cases += `<button type="button" class="day ${e}${st.date === d ? ' sel' : ''}" data-d="${d}" ${e === 'dispo' || (jour && Object.values(jour.services).some(v => v.commence)) ? '' : 'disabled'} title="${titre}${soiree ? ' · ' + esc(soiree.titre) : ''}" aria-label="${dateFr(d)}${titre ? ', ' + titre : ''}">${j}${soiree ? '<span class="star">✦</span>' : ''}</button>`;
     }
     const prevOk = m > new Date(premier.getFullYear(), premier.getMonth(), 1);
     const nextOk = new Date(m.getFullYear(), m.getMonth() + 1, 1) <= dernier;
@@ -210,7 +210,8 @@
       h += `<div class="service"><h3>${s === 'midi' ? 'Midi' : 'Soir'}</h3>`;
       if (v.soiree) h += `<div class="soiree"><div class="k">Soirée au programme</div><h4>${esc(v.soiree.titre)}</h4>${v.soiree.details ? `<p>${esc(v.soiree.details)}</p>` : ''}${v.soiree.heure ? `<p>À partir de ${esc(v.soiree.heure)}</p>` : ''}</div>`;
       if (v.note) h += `<div class="info" style="margin-bottom:10px">${esc(v.note)}</div>`;
-      if (!v.en_ligne) h += `<div class="info">Pour ce service, la réservation se fait par téléphone : ${tel()}</div>`;
+      if (v.commence) h += `<div class="info">Le service ${s === 'midi' ? 'du midi' : 'du soir'} a déjà commencé : on ne prend plus de réservation en ligne pour ${s === 'midi' ? 'ce midi' : 'ce soir'}. Appelez-nous, on vous dira s'il reste une table : ${tel()}</div>`;
+      else if (!v.en_ligne) h += `<div class="info">Pour ce service, la réservation se fait par téléphone : ${tel()}</div>`;
       else if (!v.creneaux.some(c => c.max >= st.n)) h += `<div class="info">Plus de place en ligne pour ${st.n} personne${st.n > 1 ? 's' : ''}. Appelez-nous, on trouvera peut-être une solution : ${tel()}</div>`;
       else h += `<div class="slots">${v.creneaux.map(c => `<button type="button" class="slot${st.heure === c.h ? ' sel' : ''}" data-h="${c.h}" ${c.max >= st.n ? '' : 'disabled'}>${hFr(c.h)}</button>`).join('')}</div>`;
       h += '</div>';
@@ -253,6 +254,7 @@
       </div>
       <div class="step">
         <h2><span class="num">2</span>Quel jour ?</h2>
+        ${data.fermer_pendant_service ? `<p class="hint" style="margin:-4px 0 14px">Pour le jour même, réservez en ligne avant ${hFr(data.midi_debut)} pour le midi et avant ${hFr(data.soir_debut)} pour le soir. Après, appelez-nous.</p>` : ''}
         ${vueCalendrier()}
       </div>
       <div class="step ${st.date ? '' : 'off'}" id="etape-heure">

@@ -45,8 +45,10 @@ function calendrier(): never
             $e = etat_service($d, $s, $exc, $occ);
             $cr = creneaux_en_ligne($e, $occ);
             $max = $cr ? max(array_column($cr, 'max')) : 0;
+            $commence = $r['fermer_pendant_service'] && $e['ouvert'] && $e['en_ligne'] && $d === date('Y-m-d') && date('H:i') >= $e['debut'];
             $services[$s] = [
                 'ouvert' => $e['ouvert'],
+                'commence' => $commence,
                 'en_ligne' => $e['en_ligne'],
                 'raison' => $e['ouvert'] ? ($e['en_ligne'] ? '' : 'Réservation par téléphone uniquement') : $e['raison'],
                 'max' => $max,
@@ -63,6 +65,9 @@ function calendrier(): never
         'aujourdhui' => $debut,
         'resa_en_ligne' => (bool) $r['resa_en_ligne'],
         'max_en_ligne' => (int) $r['max_en_ligne'],
+        'fermer_pendant_service' => (bool) $r['fermer_pendant_service'],
+        'midi_debut' => $r['midi_debut'],
+        'soir_debut' => $r['soir_debut'],
         'telephone' => $r['telephone'],
         'delai' => $r['delai_mode'] === 'veille' ? 'veille' : (int) $r['delai_heures'],
         'jours' => $jours,
