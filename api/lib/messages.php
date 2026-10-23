@@ -178,13 +178,14 @@ function mail_client(array $resa, string $type, string $message = ''): bool
 function alerter_equipe(array $resa, string $type): void
 {
     $r = reglages();
-    $quand = date_fr($resa['date']) . ' ' . heure_fr($resa['heure']);
+    $quand = ucfirst(date_fr($resa['date'])) . ' à ' . heure_fr($resa['heure']);
+    $qui = "{$resa['nom']} · {$resa['couverts']} pers.";
     if ($type === 'nouvelle') {
-        $titre = "Nouvelle demande : {$resa['couverts']} pers. · $quand";
-        $corps = "{$resa['nom']} · {$resa['telephone']}" . ($resa['remarque'] ? " · « {$resa['remarque']} »" : '');
+        $titre = "🔔 Nouvelle réservation : $qui";
+        $corps = "$quand · à valider dans l'appli" . ($resa['remarque'] ? "\n« {$resa['remarque']} »" : '');
     } else { // annulée par le client
-        $titre = "Annulation : {$resa['couverts']} pers. · $quand";
-        $corps = "{$resa['nom']} a annulé sa réservation.";
+        $titre = "❌ Réservation annulée : $qui";
+        $corps = "$quand · annulée par le client, les places sont libérées";
     }
     $lien = rtrim($r['site'], '/') . '/equipe/' . ($type === 'nouvelle' ? '#demandes' : '#jour=' . $resa['date']);
 

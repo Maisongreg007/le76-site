@@ -318,7 +318,15 @@ function coque() {
   document.getElementById('fab').onclick = () => formulaireResa(null, S.vue === 'carnet' ? S.date : today());
 }
 function majBadge(n) {
-  if (n !== undefined) S.demandes = n;
+  if (n !== undefined) {
+    if (S.demandesConnues !== undefined && n > S.demandesConnues) {
+      const nb = n - S.demandesConnues;
+      toast(`🔔 ${nb} nouvelle${nb > 1 ? 's' : ''} réservation${nb > 1 ? 's' : ''} à valider`);
+      try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch {}
+    }
+    S.demandesConnues = n;
+    S.demandes = n;
+  }
   const b = document.getElementById('badge'); if (!b) return;
   b.hidden = !S.demandes; b.textContent = S.demandes;
   if ('setAppBadge' in navigator) { try { S.demandes ? navigator.setAppBadge(S.demandes) : navigator.clearAppBadge(); } catch {} }
