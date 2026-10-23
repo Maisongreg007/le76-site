@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le 76 · Restaurant à Beinheim · Cuisine de saison & tartes flambées</title>
+<meta name="description" content="Le 76, restaurant au 76 rue Principale à Beinheim. Cuisine de saison, plats signatures, tartes flambées le soir, soirées à thème et karaoké. Réservation en ligne ou par téléphone.">
+<link rel="canonical" href="https://le76.fr/">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Le 76 · Restaurant à Beinheim">
+<meta property="og:description" content="Cuisine de saison, tartes flambées le soir, soirées à thème et karaoké. 76 rue Principale, Beinheim.">
+<meta property="og:url" content="https://le76.fr/">
+<meta property="og:type" content="restaurant">
+<meta property="og:image" content="https://le76.fr/images/partage.jpg">
+<meta name="theme-color" content="#fbf5ec">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232b1d16'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='32' font-weight='700' fill='%23d4953f' text-anchor='middle'%3E76%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Jost:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Le 76",
+  "url": "https://le76.fr/",
+  "telephone": "+33388863187",
+  "servesCuisine": ["Française", "Alsacienne", "Tartes flambées"],
+  "priceRange": "€€",
+  "hasMenu": "https://le76.fr/#carte",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "76 rue Principale",
+    "addressLocality": "Beinheim",
+    "postalCode": "67930",
+    "addressCountry": "FR"
+  },
+  "openingHoursSpecification": [
+    {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Tuesday","Wednesday","Thursday","Friday","Sunday"], "opens": "12:00", "closes": "14:00"},
+    {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Thursday","Friday","Saturday","Sunday"], "opens": "19:00", "closes": "22:00"}
+  ]
+}
+</script>
+
+<style>
+  :root {
+    --cream: #fbf5ec;
+    --paper: #fffbf5;
+    --sand: #f3e7d6;
+    --ink: #2b1d16;
+    --brown: #4a2c1d;
+    --muted: #7a6a5c;
+    --rust: #b7372a;
+    --rust-dark: #8e2a20;
+    --orange: #d9762b;
+    --gold: #c98a3a;
+    --gold-light: #e7b66a;
+    --line: #e8d9c3;
+    --serif: "Playfair Display", Georgia, serif;
+    --sans: "Jost", system-ui, sans-serif;
+    --script: "Caveat", cursive;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 400 17px/1.6 var(--sans); overflow-x: hidden; }
+  img { max-width: 100%; display: block; }
+  a { color: var(--rust); }
+  h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.12; margin: 0; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 88px 0; position: relative; }
+  .kicker { font: 600 .78rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; display: block; }
+  .title { font-size: clamp(2.2rem, 5vw, 3.4rem); color: var(--brown); }
+  .title em { font-style: normal; color: var(--rust); }
+  .note { font: 700 1.6rem/1.1 var(--script); color: var(--rust); }
+  .lead { color: var(--muted); max-width: 36em; font-size: 1.08rem; margin: 14px 0 0; }
+  .center { text-align: center; }
+  .center .lead { margin-left: auto; margin-right: auto; }
+  .divider { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px auto 0; color: var(--orange); }
+  .divider::before, .divider::after { content: ""; width: 70px; height: 1px; background: var(--gold); opacity: .6; }
+  .divider svg { width: 18px; height: 18px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 10px; background: var(--rust); color: #fff; padding: 14px 26px; border-radius: 999px; text-decoration: none; font-weight: 600; letter-spacing: .02em; transition: transform .15s, background .15s; border: 2px solid var(--rust); }
+  .btn:hover { background: var(--rust-dark); border-color: var(--rust-dark); transform: translateY(-1px); }
+  .btn.ghost { background: transparent; color: var(--brown); border-color: var(--brown); }
+  .btn.ghost:hover { background: var(--brown); color: #fff; }
+  .btn svg { width: 18px; height: 18px; }
+
+  /* ---------- En-tête ---------- */
+  header.top { position: fixed; inset: 0 0 auto; z-index: 30; transition: background .25s, box-shadow .25s; }
+  header.top.scrolled { background: rgba(251, 245, 236, .96); backdrop-filter: blur(8px); box-shadow: 0 1px 0 var(--line); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .brand { text-decoration: none; display: flex; align-items: baseline; gap: 2px; color: var(--ink); }
+  .brand b { font: 800 1.6rem/1 var(--serif); }
+  .brand span { font: 700 2rem/1 var(--script); color: var(--gold); }
+  nav.links { display: flex; align-items: center; gap: 26px; }
+  nav.links a { color: var(--brown); text-decoration: none; font-weight: 500; font-size: .95rem; }
+  nav.links a:hover { color: var(--rust); }
+  nav.links .btn { padding: 9px 18px; color: #fff; font-size: .9rem; }
+  @media (max-width: 860px) { nav.links a:not(.btn) { display: none; } }
+
+  /* ---------- Haut de page ---------- */
+  .hero { min-height: 100vh; display: flex; align-items: center; padding: 110px 0 70px; background:
+      radial-gradient(ellipse at 15% 10%, rgba(217,118,43,.10), transparent 55%),
+      radial-gradient(ellipse at 90% 90%, rgba(183,55,42,.08), transparent 50%), var(--cream); overflow: hidden; }
+  .hero .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: 1.1fr .9fr; gap: 56px; align-items: center; width: 100%; }
+  .hero.no-photo .wrap { grid-template-columns: 1fr; text-align: center; }
+  .hero.no-photo .hero-actions, .hero.no-photo .status { justify-content: center; }
+  .hero.no-photo .lead { margin-left: auto; margin-right: auto; }
+  .status { display: inline-flex; align-items: center; gap: 8px; padding: 7px 16px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-size: .9rem; font-weight: 500; color: var(--brown); }
+  .status i { width: 9px; height: 9px; border-radius: 50%; background: #3d9a5b; box-shadow: 0 0 0 4px rgba(61,154,91,.18); }
+  .status.closed i { background: var(--rust); box-shadow: 0 0 0 4px rgba(183,55,42,.15); }
+  .logo-xl { margin: 26px 0 6px; display: inline-flex; align-items: flex-end; gap: 6px; position: relative; }
+  .logo-xl b { font: 800 clamp(4.5rem, 13vw, 8.5rem)/.85 var(--serif); color: var(--ink); letter-spacing: -.02em; }
+  .logo-xl span { font: 700 clamp(6rem, 18vw, 11.5rem)/.7 var(--script); color: var(--gold); transform: rotate(-4deg); }
+  .logo-xl .note { position: absolute; right: -10px; top: -26px; transform: rotate(-8deg); font-size: clamp(1.4rem, 3vw, 2rem); white-space: nowrap; }
+  .tagline { font: 500 .82rem/1 var(--sans); letter-spacing: .38em; text-transform: uppercase; color: var(--brown); margin: 22px 0 0; }
+  .hero .lead { font-size: 1.15rem; margin-top: 22px; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .hero-photo { position: relative; }
+  .hero-photo img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 200px 200px 18px 18px; box-shadow: 0 30px 60px rgba(74,44,29,.22); }
+  .hero-photo .note { position: absolute; left: -30px; bottom: 30px; background: var(--paper); padding: 10px 18px; border-radius: 12px; box-shadow: 0 10px 30px rgba(74,44,29,.15); transform: rotate(-5deg); }
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+    .hero .hero-actions, .hero .status { justify-content: center; }
+    .hero .lead { margin-left: auto; margin-right: auto; }
+    .hero-photo { max-width: 360px; margin: 0 auto; }
+    .hero-photo .note { left: -6px; }
+  }
+
+  /* Feuilles décoratives */
+  .leaves { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .leaves svg { position: absolute; }
+  .leaf { animation: sway 7s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+  @keyframes sway { from { transform: rotate(var(--r, 0deg)); } to { transform: rotate(calc(var(--r, 0deg) + 8deg)); } }
+  @media (prefers-reduced-motion: reduce) { .leaf { animation: none; } }
+  @media (max-width: 860px) {
+    .hero .leaves svg { transform: scale(.55); opacity: .75; }
+    .hero .leaves svg:nth-child(n+3):not(:nth-child(4)) { display: none; }
+    .hero .leaves svg:nth-child(1) { top: 20px !important; left: -60px !important; }
+    .hero .leaves svg:nth-child(4) { top: 10px !important; right: -70px !important; }
+    .tagline { letter-spacing: .22em; font-size: .74rem; }
+    .hero .lead { font-size: 1.05rem; }
+  }
+
+  /* ---------- Bandeau infos ---------- */
+  .infobar { margin-top: -40px; position: relative; z-index: 5; padding: 0; }
+  .infobar .grid { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--paper); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 20px 50px rgba(74,44,29,.10); }
+  .infobar .cell { padding: 26px 28px; display: flex; gap: 16px; align-items: flex-start; }
+  .infobar .cell + .cell { border-left: 1px solid var(--line); }
+  .infobar .ico { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--sand); color: var(--rust); display: grid; place-items: center; }
+  .infobar .ico svg { width: 22px; height: 22px; }
+  .infobar h3 { font-size: 1.1rem; color: var(--brown); margin-bottom: 4px; }
+  .infobar p { margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.5; }
+  .infobar a { text-decoration: none; font-weight: 600; }
+  @media (max-width: 860px) {
+    .infobar .grid { grid-template-columns: 1fr; }
+    .infobar .cell + .cell { border-left: 0; border-top: 1px solid var(--line); }
+  }
+
+  /* ---------- La salle ---------- */
+  .salle { padding-top: 110px; padding-bottom: 20px; }
+  .salle .intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; margin-bottom: 40px; }
+  .salle .intro .lead { margin: 0; }
+  @media (max-width: 860px) { .salle .intro { grid-template-columns: 1fr; gap: 16px; } }
+  .mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 210px; gap: 14px; }
+  .mosaic figure { margin: 0; border-radius: 18px; overflow: hidden; background: var(--sand); }
+  .mosaic img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+  .mosaic figure:hover img { transform: scale(1.04); }
+  .m-big { grid-column: span 2; grid-row: span 2; }
+  .m-tall { grid-row: span 2; }
+  .m-wide { grid-column: span 2; }
+  @media (max-width: 760px) {
+    .mosaic { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; gap: 10px; }
+    .m-big { grid-column: span 2; }
+    .m-tall { grid-row: span 2; }
+    .m-wide { grid-column: span 2; }
+  }
+
+  /* ---------- Carte ---------- */
+  #carte { padding-top: 90px; }
+  .tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 40px 0 36px; }
+  .tabs button { font: 500 .98rem var(--sans); padding: 11px 22px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--brown); cursor: pointer; transition: all .15s; }
+  .tabs button:hover { border-color: var(--gold); }
+  .tabs button[aria-selected="true"] { background: var(--brown); border-color: var(--brown); color: #fff; }
+  @media (max-width: 700px) {
+    .tabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; margin-left: -20px; margin-right: -20px; padding: 0 20px 6px; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tabs button { flex: none; }
+  }
+  .js .panel { display: none; }
+  .js .panel.active { display: block; animation: fade .35s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 24px; padding: 48px 56px; box-shadow: 0 24px 60px rgba(74,44,29,.08); position: relative; }
+  @media (max-width: 700px) { .sheet { padding: 30px 22px; border-radius: 18px; } }
+  .sheet-head { text-align: center; margin-bottom: 34px; }
+  .sheet-head h3 { font-size: clamp(1.8rem, 4vw, 2.5rem); color: var(--rust); font-weight: 800; letter-spacing: .01em; }
+  .sheet-head .de { font: 600 .8rem/1 var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin-top: 10px; display: block; }
+  .sheet-head p { color: var(--muted); font-style: italic; font-family: var(--serif); margin: 14px 0 0; }
+  .sheet .badge-note { position: absolute; top: 26px; right: 32px; transform: rotate(6deg); font-size: 1.5rem; }
+  @media (max-width: 900px) { .sheet .badge-note { display: none; } }
+  .sub { font: 700 1.25rem var(--serif); color: var(--brown); margin: 38px 0 6px; display: flex; align-items: center; gap: 12px; }
+  .sub::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .sub:first-child { margin-top: 0; }
+  .sub .star { color: var(--gold); }
+
+  .items { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
+  .items.one { grid-template-columns: 1fr; max-width: 760px; margin: 0 auto; }
+  @media (max-width: 860px) { .items { grid-template-columns: 1fr; } }
+  .item { padding: 16px 0; border-bottom: 1px dashed var(--line); break-inside: avoid; }
+  .item .row { display: flex; align-items: baseline; gap: 10px; }
+  .item h4 { font: 700 1.12rem/1.3 var(--serif); color: var(--ink); }
+  .item h4 small { font: 500 .85rem var(--sans); color: var(--muted); }
+  .item .dots { flex: 1; border-bottom: 2px dotted #d8c6ab; transform: translateY(-5px); min-width: 20px; }
+  .item .price { font: 700 1.08rem var(--serif); color: var(--rust); white-space: nowrap; }
+  .item .de { font: italic 500 .93rem/1.4 var(--serif); color: var(--orange); margin: 2px 0 0; }
+  .item .desc { margin: 4px 0 0; color: var(--muted); font-size: .95rem; line-height: 1.5; }
+  .item.tag h4::after { content: "Signature"; font: 600 .66rem/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; background: var(--gold); color: #fff; padding: 4px 8px; border-radius: 999px; margin-left: 8px; vertical-align: 3px; }
+
+  .bar .items { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 860px) { .bar .items { grid-template-columns: 1fr; } }
+  .bar .item { padding: 11px 0; }
+  .bar .item h4 { font-size: 1.02rem; }
+
+  .callout { margin-top: 34px; display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; background: var(--sand); border-radius: 16px; padding: 22px 26px; }
+  .callout .big { font: 800 1.9rem var(--serif); color: var(--rust); }
+  .callout h4 { font-size: 1.2rem; color: var(--brown); }
+  .callout p { margin: 2px 0 0; color: var(--muted); font-size: .95rem; }
+  .callout .emoji { font-size: 2.2rem; }
+  @media (max-width: 600px) { .callout { grid-template-columns: 1fr; text-align: center; } }
+  .ribbon { display: inline-block; margin-top: 30px; background: var(--rust); color: #fff; font: 700 1.5rem/1 var(--script); padding: 12px 30px; border-radius: 6px; transform: rotate(-2deg); }
+  .ribbon span { color: var(--gold-light); }
+  .glaces { margin-top: 34px; background: var(--sand); border-radius: 16px; padding: 26px 28px; }
+  .glaces h4 { font: 700 1.3rem var(--serif); color: var(--brown); margin-bottom: 10px; }
+  .glaces p { margin: 6px 0; color: var(--muted); }
+  .glaces strong { color: var(--brown); }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .chips span { background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-weight: 500; }
+  .chips b { color: var(--rust); }
+  .fineprint { text-align: center; color: var(--muted); font-size: .9rem; margin-top: 28px; }
+
+  /* ---------- Soirées ---------- */
+  .evenings { background: var(--ink); color: #f1e6d6; overflow: hidden; }
+  .evenings .title { color: #fff; }
+  .evenings .title em { color: var(--gold-light); }
+  .evenings .lead { color: #c9b8a4; }
+  .ev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 44px; position: relative; z-index: 2; }
+  @media (max-width: 760px) { .ev-grid { grid-template-columns: 1fr; } }
+  .ev { border: 1px solid rgba(231,182,106,.28); border-radius: 22px; padding: 34px; background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0)); position: relative; overflow: hidden; }
+  .ev .when { font: 600 .78rem/1 var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--gold-light); }
+  .ev h3 { font-size: 2rem; color: #fff; margin: 12px 0 10px; }
+  .ev p { color: #d6c7b4; margin: 0; }
+  .ev .next { margin-top: 22px; display: inline-flex; gap: 10px; align-items: center; background: rgba(231,182,106,.14); color: var(--gold-light); padding: 10px 18px; border-radius: 999px; font-weight: 600; }
+  .ev .deco { position: absolute; right: -20px; bottom: -30px; font-size: 9rem; opacity: .08; line-height: 1; }
+  .ag-title { text-align: center; color: #fff; font-size: 1.6rem; margin: 54px 0 18px; position: relative; z-index: 2; }
+  .agenda { list-style: none; padding: 0; margin: 0 auto; max-width: 760px; position: relative; z-index: 2; }
+  .agenda li { display: grid; grid-template-columns: 240px 1fr; gap: 18px; padding: 16px 4px; border-bottom: 1px solid rgba(231,182,106,.2); }
+  .agenda li:last-child { border-bottom: 0; }
+  .agenda .ag-when { font: 600 .8rem/1.5 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold-light); padding-top: 3px; }
+  .agenda .ag-what b { display: block; color: #fff; font-size: 1.08rem; }
+  .agenda .ag-what small { display: block; color: #c9b8a4; font-size: .92rem; margin-top: 4px; }
+  @media (max-width: 600px) { .agenda li { grid-template-columns: 1fr; gap: 4px; } }
+
+  /* ---------- Bons cadeaux ---------- */
+  .gift { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  @media (max-width: 860px) { .gift { grid-template-columns: 1fr; gap: 40px; } }
+  .giftcard { aspect-ratio: 1.62; border-radius: 22px; position: relative; overflow: hidden; color: #fff; padding: 30px 34px; display: flex; flex-direction: column; justify-content: space-between;
+      background: linear-gradient(135deg, #b7372a 0%, #8e2a20 55%, #5a1a14 100%); box-shadow: 0 30px 60px rgba(142,42,32,.35); transform: rotate(-3deg); }
+  .giftcard::before { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(255,255,255,.28); border-radius: 14px; }
+  .giftcard .brand b { color: #fff; font-size: 1.5rem; }
+  .giftcard .brand span { color: var(--gold-light); font-size: 1.9rem; }
+  .giftcard .big { font: 800 clamp(2rem, 4vw, 2.7rem) var(--serif); }
+  .giftcard .small { font-size: .82rem; letter-spacing: .2em; text-transform: uppercase; opacity: .85; }
+  .giftcard .leafc { position: absolute; right: 18px; top: 14px; width: 90px; opacity: .9; }
+  ul.check { list-style: none; padding: 0; margin: 26px 0 30px; }
+  ul.check li { padding: 10px 0 10px 40px; position: relative; border-bottom: 1px solid var(--line); }
+  ul.check li::before { content: ""; position: absolute; left: 0; top: 11px; width: 24px; height: 24px; border-radius: 50%; background: var(--sand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b7372a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E") center/14px no-repeat; }
+
+  /* ---------- Horaires & accès ---------- */
+  .visit { background: var(--sand); }
+  .visit .grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; margin-top: 40px; }
+  @media (max-width: 860px) { .visit .grid { grid-template-columns: 1fr; } }
+  .hours { background: var(--paper); border-radius: 20px; border: 1px solid var(--line); overflow: hidden; }
+  .hours .h-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; padding: 14px 24px; border-bottom: 1px solid var(--line); align-items: center; }
+  .hours .h-row:last-child { border-bottom: 0; }
+  .hours .h-head { font: 600 .74rem var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); background: #fdf6ea; }
+  .hours .day { font-weight: 600; color: var(--brown); }
+  .hours .on { color: var(--ink); }
+  .hours .off { color: #c5b6a4; }
+  .hours .closedrow { color: var(--rust); font-weight: 500; grid-column: span 2; }
+  .hours .today { background: #fbe9df; }
+  .hours .today .day::after { content: " · aujourd'hui"; font-weight: 500; font-size: .8rem; color: var(--rust); }
+  .addr { margin-top: 26px; background: var(--paper); border-radius: 20px; border: 1px solid var(--line); padding: 24px; }
+  .addr p { margin: 0 0 16px; font-size: 1.08rem; }
+  .addr .btns { display: flex; flex-wrap: wrap; gap: 10px; }
+  .map { width: 100%; height: 100%; min-height: 420px; border: 0; border-radius: 20px; filter: sepia(.15) saturate(.9); }
+
+  /* ---------- Pied de page ---------- */
+  footer { background: var(--ink); color: #b9a894; padding: 56px 0 40px; font-size: .95rem; }
+  footer .top-f { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; align-items: center; padding-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  footer .brand b { color: #fff; }
+  footer .tag { letter-spacing: .3em; text-transform: uppercase; font-size: .75rem; margin-top: 8px; }
+  footer .social { display: flex; gap: 12px; }
+  footer .social a { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); display: grid; place-items: center; color: #fff; }
+  footer .social a:hover { background: var(--rust); border-color: var(--rust); }
+  footer .social svg { width: 20px; height: 20px; }
+  footer .bottom { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; padding-top: 24px; font-size: .85rem; }
+  footer .bottom a { color: #e6d8c6; }
+
+  .call-mobile { display: none; }
+  @media (max-width: 760px) {
+    .call-mobile { display: flex; justify-content: center; position: fixed; left: 16px; right: 16px; bottom: 14px; z-index: 40; box-shadow: 0 10px 30px rgba(0,0,0,.3); transform: translateY(120%); transition: transform .3s; }
+    .call-mobile.show { transform: none; }
+    footer { padding-bottom: 100px; }
+  }
+</style>
+<style id="style-chic">
+  /* ===== Habillage « bistrot chic » : plus sobre, plus aéré ===== */
+  :root { --line: #e6dccd; --muted: #75685c; }
+  body { font-weight: 400; font-size: 17px; line-height: 1.7; }
+  section { padding: 120px 0; }
+  .wrap { max-width: 1180px; padding: 0 28px; }
+  h1, h2, h3, h4 { font-weight: 500; letter-spacing: -.005em; }
+
+  /* Décor retiré : feuilles animées, notes manuscrites, symboles */
+  .leaves, .note, .badge-note, .ev .deco, .giftcard .leafc { display: none !important; }
+
+  /* Titres */
+  .kicker { font-weight: 500; font-size: .72rem; letter-spacing: .32em; color: var(--gold); display: inline-flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .kicker::before { content: ""; width: 34px; height: 1px; background: var(--gold); }
+  .center .kicker::after { content: ""; width: 34px; height: 1px; background: var(--gold); }
+  .title { font-weight: 500; font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.1; color: var(--ink); }
+  .title em { font-style: italic; font-weight: 500; color: var(--rust); }
+  .lead { font-size: 1.06rem; line-height: 1.75; margin-top: 18px; }
+  .divider { display: none; }
+
+  /* Boutons : rectangulaires, sobres */
+  .btn { border-radius: 2px; padding: 15px 28px; font-weight: 500; font-size: .82rem; letter-spacing: .16em; text-transform: uppercase; border-width: 1px; }
+  .btn:hover { transform: none; }
+  .btn svg { width: 16px; height: 16px; }
+  .btn.ghost { border-color: rgba(43,29,22,.35); color: var(--ink); }
+  nav.links .btn { padding: 11px 20px; font-size: .74rem; }
+
+  /* En-tête */
+  header.top .wrap { height: 76px; }
+  .brand { gap: 6px; align-items: baseline; }
+  .brand b, .brand span { font: 600 1.55rem/1 var(--serif) !important; letter-spacing: .02em; }
+  .brand span { color: var(--gold) !important; }
+  nav.links { gap: 34px; }
+  nav.links a:not(.btn) { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 500; }
+
+  /* Haut de page */
+  .hero { background: var(--cream); padding: 130px 0 90px; }
+  .hero .wrap { grid-template-columns: 1fr 1fr; gap: 80px; }
+  .status { border-radius: 2px; background: transparent; border: 0; padding: 0; font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .status i { width: 7px; height: 7px; box-shadow: none; }
+  .logo-xl { margin: 30px 0 4px; gap: 18px; align-items: baseline; }
+  .logo-xl b, .logo-xl span { font: 500 clamp(5rem, 11vw, 8.5rem)/.9 var(--serif) !important; letter-spacing: -.02em; transform: none !important; }
+  .logo-xl b { color: var(--ink); }
+  .logo-xl span { color: var(--gold); font-style: italic !important; }
+  .tagline { font-weight: 500; font-size: .74rem; letter-spacing: .34em; color: var(--muted); margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); display: inline-block; }
+  .hero .lead { font-size: 1.1rem; max-width: 30em; }
+  .hero .lead strong { font-weight: 500; color: var(--ink); }
+  .hero-actions { margin-top: 38px; gap: 14px; }
+  .hero-photo img { border-radius: 2px; aspect-ratio: 4/5; box-shadow: none; }
+  .hero-photo::after { content: ""; position: absolute; inset: 18px -18px -18px 18px; border: 1px solid var(--gold); z-index: -1; }
+  .hero-photo { z-index: 0; }
+  @media (max-width: 860px) {
+    .hero { padding: 110px 0 60px; }
+    .hero .wrap { grid-template-columns: 1fr; gap: 50px; }
+    .hero-photo::after { inset: 12px -12px -12px 12px; }
+    .logo-xl { justify-content: center; }
+  }
+
+  /* Bandeau infos */
+  .infobar { margin-top: 0; }
+  .infobar .grid { border-radius: 0; box-shadow: none; background: transparent; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .infobar .cell { padding: 34px 28px; }
+  .infobar .ico { background: transparent; border: 1px solid var(--line); width: 44px; height: 44px; color: var(--gold); }
+  .infobar h3 { font: 500 1.15rem var(--serif); color: var(--ink); }
+
+  /* La salle */
+  .salle { padding-top: 120px; }
+  .mosaic { gap: 10px; grid-auto-rows: 240px; }
+  .mosaic figure { border-radius: 2px; }
+  @media (max-width: 760px) { .mosaic { grid-auto-rows: 160px; gap: 8px; } }
+
+  /* La carte : façon menu imprimé */
+  #carte { background: var(--paper); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .tabs { gap: 0; margin: 50px 0 44px; border-bottom: 1px solid var(--line); }
+  .tabs button { border: 0; border-radius: 0; background: transparent; padding: 14px 22px; font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-selected="true"] { background: transparent; color: var(--rust); border-bottom-color: var(--rust); }
+  .sheet { border-radius: 0; box-shadow: none; background: var(--paper); border: 1px solid var(--line); outline: 1px solid var(--line); outline-offset: 6px; padding: 60px 70px; margin: 0 6px; }
+  @media (max-width: 700px) { .sheet { padding: 36px 22px; } }
+  .sheet-head h3 { font-weight: 500; font-style: italic; color: var(--ink); }
+  .sheet-head .de { font-weight: 500; letter-spacing: .32em; }
+  .sub { font-weight: 500; font-size: 1.05rem; letter-spacing: .14em; text-transform: uppercase; font-family: var(--sans); color: var(--gold); }
+  .item { border-bottom: 1px solid #efe6d8; padding: 18px 0; }
+  .item h4 { font-weight: 500; font-size: 1.15rem; }
+  .item .dots { border-bottom: 1px dotted #cdbba0; }
+  .item .price { font-weight: 500; color: var(--ink); }
+  .item .de { font-style: italic; font-weight: 400; color: var(--muted); font-size: .9rem; }
+  .item.tag h4::after { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 0; font-weight: 500; padding: 3px 7px; }
+  .callout, .glaces { border-radius: 0; background: var(--cream); border: 1px solid var(--line); }
+  .callout .emoji { display: none; }
+  .callout { grid-template-columns: 1fr auto; }
+  .callout .big { font-weight: 500; }
+  .ribbon { transform: none; border-radius: 0; font: 500 .8rem/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; padding: 14px 26px; }
+  .chips span { border-radius: 0; }
+
+  /* Soirées */
+  .evenings { padding: 120px 0; }
+  .evenings .title em { color: var(--gold-light); }
+  .ev { border-radius: 0; border-color: rgba(231,182,106,.3); background: transparent; padding: 40px; }
+  .ev h3 { font-weight: 500; font-size: 2.1rem; }
+  .ev .next { border-radius: 0; background: transparent; border: 1px solid rgba(231,182,106,.45); font-weight: 500; font-size: .85rem; letter-spacing: .04em; }
+  .ag-title { font-weight: 500; font-style: italic; }
+
+  /* Bon cadeau */
+  .giftcard { transform: none; border-radius: 4px; background: #2b1d16; box-shadow: 0 30px 60px rgba(43,29,22,.25); }
+  .giftcard::before { border-color: rgba(201,138,58,.55); border-radius: 0; }
+  .giftcard .brand b, .giftcard .brand span { font: 500 1.6rem/1 var(--serif) !important; }
+  .giftcard .brand span { color: var(--gold-light) !important; font-style: italic; }
+  .giftcard .big { font-weight: 500; font-style: italic; }
+  ul.check li { border-bottom-color: var(--line); }
+
+  /* Horaires & accès */
+  .visit { background: var(--cream); }
+  .hours, .addr { border-radius: 0; }
+  .hours .h-head { background: transparent; }
+  .map { border-radius: 0; filter: grayscale(.35) sepia(.12); }
+
+  /* Pied de page */
+  footer .brand b, footer .brand span { font: 500 1.5rem/1 var(--serif) !important; }
+  footer .brand span { color: var(--gold) !important; font-style: italic; }
+  .call-mobile { border-radius: 2px; }
+</style>
+
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="maple" viewBox="0 0 100 100"><path d="M50 2 57 20 68 14 65 34 82 26 78 40 96 42 82 54 88 60 66 64 70 76 54 68 52 98 48 98 46 68 30 76 34 64 12 60 18 54 4 42 22 40 18 26 35 34 32 14 43 20Z"/></symbol>
+  <symbol id="leaf2" viewBox="0 0 100 100"><path d="M50 4C78 22 92 52 52 96 50 98 48 98 46 96 8 52 22 22 50 4Z"/><path d="M50 12V94" stroke="rgba(0,0,0,.18)" stroke-width="2" fill="none"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></g></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></g></symbol>
+  <symbol id="i-fb" viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3c-2.8 0-4 1.8-4 4.3V10H7v4h3v8h4v-8h3l1-4h-4V8.6c0-.4.3-.6.6-.6z"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></g></symbol>
+</svg>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="#"><b>Le</b><span>76</span></a>
+    <nav class="links">
+      <a href="#carte">La carte</a>
+      <a href="#soirees">Soirées</a>
+      <a href="#cadeaux">Bons cadeaux</a>
+      <a href="#infos">Horaires & accès</a>
+      <a class="btn" href="/reserver/">Réserver</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="hero">
+  <div class="leaves" aria-hidden="true">
+    <svg class="leaf" style="--r:-20deg;left:-30px;top:90px;width:150px;fill:#c0392b"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:25deg;left:90px;top:40px;width:80px;fill:#e08a2c;animation-delay:-2s"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:-50deg;left:20px;top:260px;width:70px;fill:#d9a23f;animation-delay:-4s"><use href="#leaf2"/></svg>
+    <svg class="leaf" style="--r:15deg;right:-40px;top:120px;width:170px;fill:#d9762b;animation-delay:-1s"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:-30deg;right:110px;top:70px;width:70px;fill:#b7372a;animation-delay:-3s"><use href="#leaf2"/></svg>
+    <svg class="leaf" style="--r:40deg;right:30px;bottom:110px;width:90px;fill:#c98a3a;animation-delay:-5s"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:-10deg;left:8%;bottom:90px;width:110px;fill:#a83226;animation-delay:-2.5s"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:60deg;left:22%;bottom:40px;width:50px;fill:#e3a33a;animation-delay:-6s"><use href="#leaf2"/></svg>
+  </div>
+  <div class="wrap">
+    <div>
+      <span class="status" id="status"><i></i><span>Restaurant · Beinheim</span></span>
+      <div><div class="logo-xl"><b>Le</b><span>76</span><em class="note">Saveurs d'automne</em></div></div>
+      <p class="tagline">Restaurant · Tartes flambées · Bonheur simple</p>
+      <p class="lead">Une cuisine de saison et généreuse, nos plats signatures, des tartes flambées le soir et des soirées qui font du bien. <strong>Une nouvelle ambiance, une nouvelle carte. Toujours le même plaisir.</strong></p>
+      <div class="hero-actions">
+        <a class="btn" href="/reserver/"><svg><use href="#i-cal"/></svg>Réserver une table</a>
+        <a class="btn ghost" href="#carte">Découvrir la carte</a>
+      </div>
+    </div>
+    <!-- Photo facultative : dépose images/salle.jpg (format portrait) et elle s'affichera ici toute seule -->
+    <div class="hero-photo" id="heroPhoto">
+      <img src="/images/accueil-table.jpg" alt="Une table dressée dans la salle lumineuse du 76" fetchpriority="high" onerror="document.getElementById('heroPhoto').remove();document.getElementById('hero').classList.add('no-photo')">
+      <span class="note">Bienvenue au 76 !</span>
+    </div>
+  </div>
+</section>
+
+<section class="infobar" id="infos-rapides">
+  <div class="wrap">
+    <div class="grid">
+      <div class="cell">
+        <div class="ico"><svg><use href="#i-clock"/></svg></div>
+        <div><h3>Ouvert</h3><p>Midi : mar. au ven. et dim.<br>Soir : jeu. au dim. · Fermé le lundi</p></div>
+      </div>
+      <div class="cell">
+        <div class="ico"><svg><use href="#i-pin"/></svg></div>
+        <div><h3>76 rue Principale</h3><p>67930 Beinheim<br><a href="https://www.google.com/maps/dir/?api=1&destination=76+rue+Principale+67930+Beinheim" target="_blank" rel="noopener">Itinéraire →</a></p></div>
+      </div>
+      <div class="cell">
+        <div class="ico"><svg><use href="#i-phone"/></svg></div>
+        <div><h3>Réservations</h3><p><a href="/reserver/">En ligne</a> ou par téléphone<br><a href="tel:+33388863187">03 88 86 31 87</a></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="salle" class="salle">
+  <div class="wrap">
+    <div class="intro">
+      <div>
+        <span class="kicker">Bienvenue au 76</span>
+        <h2 class="title">Une salle <em>chaleureuse</em>, comme à la maison</h2>
+      </div>
+      <p class="lead">Colombages, bois et pierre : on prend le temps de bien manger, en famille, entre amis ou entre collègues le midi. <span class="note" style="display:block;margin-top:10px">Toujours le même plaisir !</span></p>
+    </div>
+    <div class="mosaic">
+      <figure class="m-big"><img src="/images/salle-1.jpg" alt="La salle principale aux colombages" loading="lazy"></figure>
+      <figure class="m-tall"><img src="/images/table.jpg" alt="Table dressée vue du dessus" loading="lazy"></figure>
+      <figure><img src="/images/salle-2.jpg" alt="Table dressée près des fenêtres" loading="lazy"></figure>
+      <figure><img src="/images/salle-3.jpg" alt="Grande table familiale" loading="lazy"></figure>
+    </div>
+  </div>
+</section>
+
+<section id="carte">
+  <div class="wrap">
+    <!-- CARTE:DEBUT (généré automatiquement : modifier contenu/carte.json et pas ici) -->
+    <div class="center">
+      <span class="kicker">Cuisine · Partage · Convivialité</span>
+      <h2 class="title">La <em>carte</em> d&#x27;automne</h2>
+      <p class="lead">Des produits de saison, des assiettes gourmandes. <span style="font-style:italic">Saisonale Produkte, genussvolle Gerichte.</span></p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Rubriques de la carte">
+      <button role="tab" aria-selected="true" data-tab="p-1">Entrées &amp; signatures</button>
+      <button role="tab" aria-selected="false" data-tab="p-2">Carte d&#x27;automne</button>
+      <button role="tab" aria-selected="false" data-tab="p-3">Tartes flambées</button>
+      <button role="tab" aria-selected="false" data-tab="p-4">Desserts</button>
+      <button role="tab" aria-selected="false" data-tab="p-5">Boissons</button>
+    </div>
+
+<div class="panel " id="p-1" role="tabpanel"><div class="sheet"><span class="note badge-note">Toujours nos incontournables !</span><div class="sheet-head"><h3>Nos entrées &amp; plats signatures</h3><span class="de">Vorspeisen · Signaturgerichte</span></div><h4 class="sub">Entrées</h4><ul class="items"><li class="item"><div class="row"><h4>Velouté de potimarron</h4><span class="dots"></span><span class="price">8 €</span></div><p class="de">Kürbiscremesuppe</p><p class="desc">Crème de châtaigne, noisettes torréfiées</p></li><li class="item"><div class="row"><h4>Œuf parfait du 76</h4><span class="dots"></span><span class="price">9 €</span></div><p class="de">Das perfekte Ei vom 76</p><p class="desc">Champignons &amp; crème de parmesan</p></li><li class="item"><div class="row"><h4>Salade de chèvre chaud</h4><span class="dots"></span><span class="price">11 € / 17 €</span></div><p class="de">Salat mit warmem Ziegenkäse</p><p class="desc">Miel, noix, pommes &amp; jambon cru · petite ou grande assiette</p></li><li class="item"><div class="row"><h4>Saumon fumé</h4><span class="dots"></span><span class="price">12 € / 18 €</span></div><p class="de">Geräucherter Lachs</p><p class="desc">Crème citronnée &amp; blinis · petite ou grande assiette</p></li></ul><h4 class="sub"><span class=star>★</span>Plats signatures · nos incontournables</h4><ul class="items"><li class="item tag"><div class="row"><h4>Cordon bleu de veau à la crème</h4><span class="dots"></span><span class="price">22 €</span></div><p class="de">Kalbs-Cordon-Bleu mit Rahmsauce</p><p class="desc">Frites &amp; salade</p></li><li class="item tag"><div class="row"><h4>Onglet de bœuf à l&#x27;échalote</h4><span class="dots"></span><span class="price">22 €</span></div><p class="de">Rinderhüftsteak mit Schalotten</p><p class="desc">Frites &amp; salade</p></li><li class="item tag"><div class="row"><h4>Onglet de bœuf à l&#x27;échalote flambé au cognac</h4><span class="dots"></span><span class="price">25 €</span></div><p class="de">Rinderhüftsteak mit Schalotten, mit Cognac flambiert</p><p class="desc">Frites &amp; salade</p></li><li class="item tag"><div class="row"><h4>Burger du 76 · Métamorphose Automne</h4><span class="dots"></span><span class="price">21 €</span></div><p class="de">Burger vom 76 – Herbstliche Verwandlung</p><p class="desc">Pain rustique, steak haché 150 g, cheddar, champignons persillés, poitrine fumée croustillante, oignons confits au vin rouge &amp; sauce maison. Frites</p></li></ul></div></div>
+<div class="panel " id="p-2" role="tabpanel"><div class="sheet"><span class="note badge-note">Saison de bons moments</span><div class="sheet-head"><h3>La carte d&#x27;automne</h3><span class="de">Unsere Herbstkarte</span><p>Des produits de saison, des assiettes gourmandes.</p></div><ul class="items"><li class="item"><div class="row"><h4>Magret de canard à l&#x27;orange</h4><span class="dots"></span><span class="price">24 €</span></div><p class="de">Entenbrust mit Orange</p><p class="desc">Purée de patates douces, endives braisées &amp; noisettes torréfiées</p></li><li class="item"><div class="row"><h4>Entrecôte de veau aux girolles</h4><span class="dots"></span><span class="price">27 €</span></div><p class="de">Kalbsentrecôte mit Pfifferlingen</p><p class="desc">Girolles persillées, jus de veau &amp; pommes de terre grenailles rôties</p></li><li class="item"><div class="row"><h4>Bœuf façon bourguignon</h4><span class="dots"></span><span class="price">23 €</span></div><p class="de">Rindfleisch nach Burgunder Art</p><p class="desc">Bœuf mijoté au vin rouge, lardons, champignons &amp; petits oignons, pommes de terre grenailles rôties</p></li><li class="item"><div class="row"><h4>Suprême de poulet rôti</h4><span class="dots"></span><span class="price">21 €</span></div><p class="de">Gebratenes Hähnchensuprême</p><p class="desc">Sauce moutarde à l&#x27;ancienne &amp; miel, endives braisées, pommes de terre grenailles rôties</p></li><li class="item"><div class="row"><h4>Filet de poisson selon arrivage</h4><span class="dots"></span><span class="price">22 €</span></div><p class="de">Fischfilet je nach Ankunft</p><p class="desc">Beurre blanc, fondue de poireaux &amp; pommes de terre grenailles rôties</p></li></ul><div class="callout"><div class="emoji">🧸</div><div><h4>Menu enfants · Kindermenü</h4><p>Nuggets frites + glace HARIBO push up</p></div><div class="big">13,50 €</div></div><p class="fineprint" style="margin-top:14px">Supplément portion de frites, sauce ou tout autre supplément : + 4 €</p></div></div>
+<div class="panel " id="p-3" role="tabpanel"><div class="sheet"><span class="note badge-note">Une tarte pour chaque envie !</span><div class="sheet-head"><h3>Tartes flambées</h3><span class="de">Flammkuchen</span><p>Tradition, gourmandise et esprit alsacien.</p></div><ul class="items"><li class="item"><div class="row"><h4>Traditionnelle</h4><span class="dots"></span><span class="price">9,90 €</span></div><p class="de">Klassisch</p><p class="desc">Crème, fromage blanc, lardons &amp; oignons</p></li><li class="item"><div class="row"><h4>Gratinée</h4><span class="dots"></span><span class="price">10,90 €</span></div><p class="de">Überbacken</p><p class="desc">Crème, fromage blanc, lardons, oignons &amp; emmental</p></li><li class="item"><div class="row"><h4>Forestière</h4><span class="dots"></span><span class="price">10,90 €</span></div><p class="de">Waldpilz</p><p class="desc">Crème, fromage blanc, lardons, oignons &amp; champignons</p></li><li class="item"><div class="row"><h4>Ail &amp; persil</h4><span class="dots"></span><span class="price">10,90 €</span></div><p class="de">Knoblauch &amp; Petersilie</p><p class="desc">Crème, fromage blanc, lardons, oignons, ail &amp; persil</p></li><li class="item"><div class="row"><h4>Forestière gratinée</h4><span class="dots"></span><span class="price">12,20 €</span></div><p class="de">Waldpilz überbacken</p><p class="desc">Crème, fromage blanc, lardons, oignons, champignons &amp; emmental</p></li><li class="item"><div class="row"><h4>Munster</h4><span class="dots"></span><span class="price">13,90 €</span></div><p class="de">Munsterkäse</p><p class="desc">Crème, fromage blanc, lardons, oignons &amp; munster</p></li><li class="item"><div class="row"><h4>Tarte flambée de saison</h4></div><p class="de">Saisonaler Flammkuchen</p><p class="desc">Une création renouvelée au fil des saisons · demandez-nous !</p></li></ul><div class="center"><span class="ribbon">Seulement le soir · <span>Nur abends</span></span></div></div></div>
+<div class="panel " id="p-4" role="tabpanel"><div class="sheet"><span class="note badge-note">Un goût d&#x27;automne</span><div class="sheet-head"><h3>Nos desserts</h3><span class="de">Unsere Herbstdesserts</span><p>Un goût d&#x27;automne.</p></div><ul class="items"><li class="item"><div class="row"><h4>Café ou chocolat liégeois</h4><span class="dots"></span><span class="price">8 €</span></div><p class="de">Eiskaffee oder Eisschokolade</p><p class="desc">2 boules café, 1 expresso et chantilly · ou 2 boules chocolat noir, 1 chocolat chaud et chantilly</p></li><li class="item"><div class="row"><h4>Émotion café</h4><span class="dots"></span><span class="price">5,50 €</span></div><p class="de">Kaffee-Emotion</p><p class="desc">1 boule café, 1 expresso et chantilly</p></li><li class="item"><div class="row"><h4>Framboises chaudes</h4><span class="dots"></span><span class="price">8 €</span></div><p class="de">Warme Himbeeren</p><p class="desc">2 boules vanille, framboises chaudes et chantilly</p></li><li class="item"><div class="row"><h4>Dame blanche</h4><span class="dots"></span><span class="price">9 €</span></div><p class="de">Dame Blanche</p><p class="desc">3 boules vanille, sauce chocolat et chantilly</p></li><li class="item"><div class="row"><h4>Café gourmand</h4><span class="dots"></span><span class="price">8,50 €</span></div><p class="de">Kaffee-Genuss</p><p class="desc">1 expresso accompagné de ses mini-desserts</p></li><li class="item"><div class="row"><h4>Moelleux du moment</h4><span class="dots"></span><span class="price">9 €</span></div><p class="de">Kuchen des Tages mit einer Kugel Vanilleeis</p><p class="desc">Et sa boule de glace vanille</p></li><li class="item"><div class="row"><h4>Coupe l&#x27;Incroyable</h4><span class="dots"></span><span class="price">8 €</span></div><p class="desc">1 boule pistache et 1 boule framboise, nappage pistache et framboises</p></li><li class="item"><div class="row"><h4>Tiramisu aux pommes caramélisées</h4><span class="dots"></span><span class="price">8 €</span></div><p class="de">Tiramisu mit karamellisierten Äpfeln</p></li><li class="item"><div class="row"><h4>Crumble aux poires caramélisées</h4><span class="dots"></span><span class="price">8 €</span></div><p class="de">Crumble mit karamellisierten Birnen und Haselnüssen</p><p class="desc">Et ses noisettes, avec sa boule de glace noisette</p></li><li class="item"><div class="row"><h4>Crème brûlée à la vanille</h4><span class="dots"></span><span class="price">7 €</span></div><p class="de">Vanille-Crème-brûlée mit einer Kugel Vanilleeis</p><p class="desc">Et sa boule de glace vanille</p></li><li class="item"><div class="row"><h4>Crème brûlée flambée au Grand Marnier</h4><span class="dots"></span><span class="price">9 €</span></div><p class="de">Vanille-Crème-brûlée mit Grand Marnier flambiert</p><p class="desc">À la vanille, et sa boule de glace vanille</p></li><li class="item"><div class="row"><h4>Coupe Calvados</h4><span class="dots"></span><span class="price">8,50 €</span></div><p class="desc">2 boules pomme arrosées au calvados</p></li><li class="item"><div class="row"><h4>Brioche perdue</h4><span class="dots"></span><span class="price">9,50 €</span></div><p class="de">Armer Ritter mit Spekulatiuscreme</p><p class="desc">Sa crème de spéculoos et sa boule de glace vanille</p></li></ul><div class="glaces"><h4>Nos parfums de glaces · Unsere Eissorten</h4><p><strong>Crèmes glacées :</strong> vanille, café, chocolat noir, pistache, noisette, rhum-raisin et stracciatella</p><p><strong>Sorbets :</strong> citron jaune, framboise et pomme</p><div class="chips"><span>1 boule <b>2,50 €</b></span><span>2 boules <b>5 €</b></span><span>3 boules <b>7,50 €</b></span><span>Sauce ou chantilly <b>+ 1 €</b></span></div></div></div></div>
+<div class="panel bar" id="p-5" role="tabpanel"><div class="sheet"><span class="note badge-note">À chaque saison ses saveurs !</span><div class="sheet-head"><h3>Les boissons</h3><span class="de">Getränke · Cocktails</span><p>Des produits de saison, des émotions toute l&#x27;année.</p></div><h4 class="sub">Cocktails</h4><ul class="items"><li class="item"><div class="row"><h4>Gin Tonic</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Gin Hendrick&#x27;s, Schweppes tonic, rondelles de citron jaune</p></li><li class="item"><div class="row"><h4>Hugo Spritz</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Liqueur de sureau, limonade, crémant, citron jaune</p></li><li class="item"><div class="row"><h4>Apérol Spritz</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Apérol, crémant, limonade, rondelles d&#x27;orange</p></li><li class="item"><div class="row"><h4>Apple Spritz</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Jus de pomme, crémant, Cointreau, bâton de cannelle</p></li><li class="item"><div class="row"><h4>Tequila Sunrise</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Tequila, jus d&#x27;orange, sirop de grenadine</p></li><li class="item"><div class="row"><h4>Pom&#x27; d&#x27;Or</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Gin, cidre de pomme, jus de citron, sirop d&#x27;érable</p></li><li class="item"><div class="row"><h4>Rubis d&#x27;automne</h4><span class="dots"></span><span class="price">10,50 €</span></div><p class="desc">Rhum brun, jus d&#x27;orange, jus de cranberry, jus de citron jaune</p></li><li class="item"><div class="row"><h4>Rubis pétillant · sans alcool</h4><span class="dots"></span><span class="price">8,50 €</span></div><p class="desc">Jus d&#x27;orange, cranberry, citron, sirop de gingembre</p></li><li class="item"><div class="row"><h4>Pomme Caramel Fizz · sans alcool</h4><span class="dots"></span><span class="price">8,50 €</span></div><p class="desc">Jus de pomme, sirop de caramel, jus de citron, eau pétillante</p></li></ul><h4 class="sub">Apéritifs &amp; bières</h4><ul class="items"><li class="item"><div class="row"><h4>Bière Licorne</h4><span class="dots"></span><span class="price">3,50 € / 7 €</span></div><p class="desc">25 cl · 50 cl</p></li><li class="item"><div class="row"><h4>Monaco, Panaché ou Tango Radler</h4><span class="dots"></span><span class="price">3,50 € / 7 €</span></div><p class="desc">25 cl · 50 cl</p></li><li class="item"><div class="row"><h4>Picon ou Cynar</h4><span class="dots"></span><span class="price">4,30 € / 8,60 €</span></div><p class="desc">25 cl · 50 cl</p></li><li class="item"><div class="row"><h4>Bière Weizen Hefe Hell</h4><span class="dots"></span><span class="price">5,50 €</span></div><p class="desc">50 cl</p></li><li class="item"><div class="row"><h4>Bière sans alcool</h4><span class="dots"></span><span class="price">4 €</span></div><p class="desc">33 cl</p></li><li class="item"><div class="row"><h4>Bière du moment</h4></div><p class="desc">À demander au serveur</p></li><li class="item"><div class="row"><h4>Coupe de Crémant nature ou rosé</h4><span class="dots"></span><span class="price">7,50 €</span></div><p class="desc">12,5 cl</p></li><li class="item"><div class="row"><h4>Kir Royal au Crémant</h4><span class="dots"></span><span class="price">8,50 €</span></div><p class="desc">Cassis, pêche, pamplemousse, violette ou mûre · 12,5 cl</p></li><li class="item"><div class="row"><h4>Kir au vin blanc</h4><span class="dots"></span><span class="price">4,50 €</span></div><p class="desc">Cassis, pêche, pamplemousse, violette ou mûre · 12,5 cl</p></li><li class="item"><div class="row"><h4>Ricard, Ricard tomate ou Perroquet</h4><span class="dots"></span><span class="price">4,30 €</span></div><p class="desc">3 cl</p></li><li class="item"><div class="row"><h4>Porto, Suze ou Campari</h4><span class="dots"></span><span class="price">4,50 €</span></div><p class="desc">3 cl</p></li><li class="item"><div class="row"><h4>Martini rouge ou blanc</h4><span class="dots"></span><span class="price">4,50 €</span></div><p class="desc">3 cl</p></li><li class="item"><div class="row"><h4>J&amp;B, Jameson, Tequila, Gin Hendrick&#x27;s ou Vodka</h4><span class="dots"></span><span class="price">7,10 €</span></div><p class="desc">4 cl</p></li></ul><h4 class="sub">Softs</h4><ul class="items"><li class="item"><div class="row"><h4>Carola bleue, verte ou rouge</h4><span class="dots"></span><span class="price">3,50 €</span></div><p class="desc">50 cl</p></li><li class="item"><div class="row"><h4>Jus de fruits</h4><span class="dots"></span><span class="price">4 €</span></div><p class="desc">Ananas, orange, pomme ou tomate · 20 cl</p></li><li class="item"><div class="row"><h4>Sirop à l&#x27;eau</h4><span class="dots"></span><span class="price">3 €</span></div><p class="desc">Grenadine, fraise, citron, violette, menthe ou pêche · 25 cl</p></li><li class="item"><div class="row"><h4>Limonade</h4><span class="dots"></span><span class="price">3,50 €</span></div><p class="desc">33 cl</p></li><li class="item"><div class="row"><h4>Diabolo</h4><span class="dots"></span><span class="price">3,70 €</span></div><p class="desc">Grenadine, fraise, citron, violette, menthe ou pêche · 33 cl</p></li><li class="item"><div class="row"><h4>Pepsi ou Pepsi Max</h4><span class="dots"></span><span class="price">3,90 €</span></div><p class="desc">33 cl</p></li><li class="item"><div class="row"><h4>Coca-Cola Cherry</h4><span class="dots"></span><span class="price">4,20 €</span></div><p class="desc">33 cl</p></li><li class="item"><div class="row"><h4>Orangina</h4><span class="dots"></span><span class="price">4,40 €</span></div><p class="desc">35 cl</p></li><li class="item"><div class="row"><h4>Thé glacé</h4><span class="dots"></span><span class="price">3,50 €</span></div><p class="desc">25 cl</p></li><li class="item"><div class="row"><h4>Schweppes tonic ou agrume</h4><span class="dots"></span><span class="price">4,40 €</span></div><p class="desc">25 cl</p></li><li class="item"><div class="row"><h4>Perrier</h4><span class="dots"></span><span class="price">4,40 €</span></div><p class="desc">33 cl</p></li><li class="item"><div class="row"><h4>Apfelschorle</h4><span class="dots"></span><span class="price">4 €</span></div><p class="desc">33 cl</p></li></ul><h4 class="sub">Boissons chaudes</h4><ul class="items"><li class="item"><div class="row"><h4>Expresso</h4><span class="dots"></span><span class="price">2,50 €</span></div></li><li class="item"><div class="row"><h4>Double expresso</h4><span class="dots"></span><span class="price">4,90 €</span></div></li><li class="item"><div class="row"><h4>Déca</h4><span class="dots"></span><span class="price">3,10 €</span></div></li><li class="item"><div class="row"><h4>Café rallongé</h4><span class="dots"></span><span class="price">2,90 €</span></div></li><li class="item"><div class="row"><h4>Chocolat chaud</h4><span class="dots"></span><span class="price">3,50 €</span></div></li><li class="item"><div class="row"><h4>Cappuccino</h4><span class="dots"></span><span class="price">3,50 €</span></div></li><li class="item"><div class="row"><h4>Thé noir</h4><span class="dots"></span><span class="price">3,50 €</span></div></li><li class="item"><div class="row"><h4>Thé vert menthe</h4><span class="dots"></span><span class="price">3,10 €</span></div></li><li class="item"><div class="row"><h4>Infusion</h4><span class="dots"></span><span class="price">3,10 €</span></div><p class="desc">Verveine ou verveine menthe</p></li><li class="item"><div class="row"><h4>Irish café</h4><span class="dots"></span><span class="price">9,50 €</span></div></li></ul><h4 class="sub">Digestifs</h4><ul class="items"><li class="item"><div class="row"><h4>Cognac, Calvados, Bailey&#x27;s, Get 27</h4><span class="dots"></span><span class="price">7,20 €</span></div><p class="desc">4 cl</p></li><li class="item"><div class="row"><h4>Golden Eight, Grand Marnier</h4><span class="dots"></span><span class="price">7,20 €</span></div><p class="desc">4 cl</p></li><li class="item"><div class="row"><h4>Framboise, Mirabelle, Poire Williams</h4><span class="dots"></span><span class="price">7,20 €</span></div><p class="desc">4 cl</p></li><li class="item"><div class="row"><h4>Marc de Gewurztraminer</h4><span class="dots"></span><span class="price">7,20 €</span></div><p class="desc">4 cl</p></li><li class="item"><div class="row"><h4>Rhum Negrita</h4><span class="dots"></span><span class="price">3,50 €</span></div><p class="desc">4 cl</p></li><li class="item"><div class="row"><h4>Rhum arrangé du moment</h4><span class="dots"></span><span class="price">5 €</span></div><p class="desc">4 cl</p></li></ul></div></div>
+
+    <p class="fineprint">Prix nets, service compris · Liste des allergènes disponible sur demande · Alle Preise inkl. Service</p>
+    <!-- CARTE:FIN -->
+  </div>
+</section>
+
+<section class="evenings" id="soirees">
+  <div class="leaves" aria-hidden="true">
+    <svg class="leaf" style="--r:20deg;right:-30px;top:30px;width:140px;fill:#8e2a20;opacity:.5"><use href="#maple"/></svg>
+    <svg class="leaf" style="--r:-30deg;left:-30px;bottom:20px;width:120px;fill:#c98a3a;opacity:.25;animation-delay:-3s"><use href="#maple"/></svg>
+  </div>
+  <div class="wrap">
+    <!-- SOIREES:DEBUT (généré automatiquement : modifier contenu/soirees.json et pas ici) -->
+    <div class="center">
+      <span class="kicker">Bonne table · Bons moments</span>
+      <h2 class="title">Les <em>Soirées</em> du 76</h2>
+      <p class="lead">Pour connaître le thème des prochaines soirées, appelez-nous ou demandez au restaurant. Et pensez à réserver, les places partent vite !</p>
+    </div>
+    <div class="ev-grid">
+      <div class="ev">
+        <div class="when">Régulièrement le samedi soir</div>
+        <h3>Soirées à thème</h3>
+        <p>Un thème, un menu spécial, une ambiance : de quoi passer un samedi soir qui sort de l&#x27;ordinaire.</p>
+        <a class="next" href="tel:+33388863187" style="text-decoration:none">Le programme au 03 88 86 31 87</a>
+        <div class="deco">✦</div>
+      </div>
+      <div class="ev">
+        <div class="when">Chaque 1er vendredi du mois</div>
+        <h3>Soirée karaoké</h3>
+        <p>On dîne, on trinque et on chante ! Ambiance garantie, même pour les timides.</p>
+        <span class="next">Prochaine : <strong id="karaoke">1er vendredi du mois</strong></span>
+        <div class="deco">♪</div>
+      </div>
+    </div>
+    <h3 class="ag-title">Les prochaines dates</h3>
+    <ul class="agenda">
+      <li data-fin="2026-10-31"><span class="ag-when">samedi 31 octobre</span><span class="ag-what"><b>Halloween : le Grand Bal des Sorcières</b><small>Menu spécial 29,90 € · concours du plus beau déguisement · soirée dansante</small></span></li>
+      <li data-fin="2026-11-06"><span class="ag-when">vendredi 6 novembre · 20h</span><span class="ag-what"><b>Soirée karaoké avec KJ Patric</b></span></li>
+      <li data-fin="2026-11-07"><span class="ag-when">samedi 7 novembre · 20h</span><span class="ag-what"><b>Jean-Claude des Diamond Star</b><small>Menu 25 € : feuilleté aux champignons, palette fumée braisée sauce moutarde à l&#x27;ancienne et gratin dauphinois, strudel aux pommes</small></span></li>
+      <li data-fin="2026-11-14"><span class="ag-when">samedi 14 novembre</span><span class="ag-what"><b>Soirée cordon bleu XXL</b><small>29,90 €</small></span></li>
+      <li data-fin="2026-11-21"><span class="ag-when">samedi 21 novembre · 20h</span><span class="ag-what"><b>Onglet à volonté + blind test avec KJ Patric</b><small>Onglet à volonté 29,90 €</small></span></li>
+      <li data-fin="2026-11-28"><span class="ag-when">samedi 28 novembre · 20h</span><span class="ag-what"><b>Le 76 fête ses 10 ans !</b><small>Avec l&#x27;orchestre Santa Lucia · menu anniversaire 29 €</small></span></li>
+    </ul>
+    <!-- SOIREES:FIN -->
+  </div>
+</section>
+
+<section id="cadeaux">
+  <div class="wrap gift">
+    <div class="giftcard" aria-hidden="true">
+      <svg class="leafc" style="fill:#e7b66a;opacity:.35"><use href="#maple"/></svg>
+      <div class="brand"><b>Le</b><span>76</span></div>
+      <div>
+        <div class="small">Bon cadeau</div>
+        <div class="big">Un bon moment à offrir</div>
+      </div>
+      <div class="small">Valable 1 an · Beinheim</div>
+    </div>
+    <div>
+      <span class="kicker">Idée cadeau</span>
+      <h2 class="title">Offrez un <em>bon cadeau</em></h2>
+      <p class="lead">Un anniversaire, un merci, une fête ? Offrez un repas au 76.</p>
+      <ul class="check">
+        <li>Montant libre : c'est vous qui choisissez</li>
+        <li>Valable 1 an à partir de la date d'achat</li>
+        <li>En vente directement au restaurant</li>
+        <li>Non valable le soir du Réveillon et à la Saint-Valentin</li>
+      </ul>
+      <a class="btn" href="tel:+33388863187"><svg><use href="#i-phone"/></svg>Nous appeler</a>
+    </div>
+  </div>
+</section>
+
+<section class="visit" id="infos">
+  <div class="wrap">
+    <div class="center">
+      <span class="kicker">Venir au 76</span>
+      <h2 class="title">Horaires & <em>accès</em></h2>
+    </div>
+    <div class="grid">
+      <div>
+        <div class="hours" id="hours">
+          <div class="h-row h-head"><span>Jour</span><span>Midi</span><span>Soir</span></div>
+          <div class="h-row" data-day="1"><span class="day">Lundi</span><span class="closedrow">Fermé</span></div>
+          <div class="h-row" data-day="2"><span class="day">Mardi</span><span class="on">✓ Ouvert</span><span class="off">—</span></div>
+          <div class="h-row" data-day="3"><span class="day">Mercredi</span><span class="on">✓ Ouvert</span><span class="off">—</span></div>
+          <div class="h-row" data-day="4"><span class="day">Jeudi</span><span class="on">✓ Ouvert</span><span class="on">✓ Ouvert</span></div>
+          <div class="h-row" data-day="5"><span class="day">Vendredi</span><span class="on">✓ Ouvert</span><span class="on">✓ Ouvert</span></div>
+          <div class="h-row" data-day="6"><span class="day">Samedi</span><span class="off">—</span><span class="on">✓ Ouvert</span></div>
+          <div class="h-row" data-day="0"><span class="day">Dimanche</span><span class="on">✓ Ouvert</span><span class="on">✓ Ouvert</span></div>
+        </div>
+        <div class="addr">
+          <p><strong>Le 76</strong> · 76 rue Principale, 67930 Beinheim</p>
+          <div class="btns">
+            <a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=76+rue+Principale+67930+Beinheim" target="_blank" rel="noopener"><svg><use href="#i-pin"/></svg>Itinéraire</a>
+            <a class="btn ghost" href="tel:+33388863187"><svg><use href="#i-phone"/></svg>03 88 86 31 87</a>
+          </div>
+        </div>
+      </div>
+      <iframe class="map" loading="lazy" title="Plan d'accès au restaurant Le 76" src="https://www.google.com/maps?q=76+rue+Principale,+67930+Beinheim&output=embed"></iframe>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="top-f">
+      <div>
+        <a class="brand" href="#"><b>Le</b><span>76</span></a>
+        <div class="tag">Bonne table · Bons moments</div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© <span id="year">2026</span> Le 76 · 76 rue Principale, 67930 Beinheim</span>
+      <span><a href="/mentions-legales.html">Mentions légales</a> · L'abus d'alcool est dangereux pour la santé, à consommer avec modération.</span>
+    </div>
+  </div>
+</footer>
+
+<a class="btn call-mobile" id="callMobile" href="/reserver/"><svg><use href="#i-cal"/></svg>Réserver une table</a>
+
+<script>
+  document.documentElement.classList.add("js");
+
+  // Onglets de la carte
+  var tabs = document.querySelectorAll(".tabs button");
+  function openTab(id) {
+    tabs.forEach(function (t) { t.setAttribute("aria-selected", t.dataset.tab === id); });
+    document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("active", p.id === id); });
+  }
+  tabs.forEach(function (t) { t.addEventListener("click", function () { openTab(t.dataset.tab); }); });
+  if (tabs.length) openTab(tabs[0].dataset.tab);
+
+  // En-tête et bouton mobile au défilement
+  var header = document.getElementById("top"), call = document.getElementById("callMobile");
+  function onScroll() {
+    var y = window.scrollY;
+    header.classList.toggle("scrolled", y > 30);
+    call.classList.toggle("show", y > 500);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+
+  // Ouvert / fermé aujourd'hui + jour en surbrillance
+  var now = new Date(), today = now.getDay();
+  var row = document.querySelector('#hours [data-day="' + today + '"]');
+  if (row) row.classList.add("today");
+  var services = {0: "midi et soir", 1: null, 2: "ce midi", 3: "ce midi", 4: "midi et soir", 5: "midi et soir", 6: "ce soir"};
+  var st = document.getElementById("status");
+  if (services[today]) { st.querySelector("span").textContent = "Ouvert aujourd'hui · " + services[today]; }
+  else { st.classList.add("closed"); st.querySelector("span").textContent = "Fermé le lundi · à demain midi !"; }
+
+  document.getElementById("year").textContent = now.getFullYear();
+
+  // Prochain karaoké (1er vendredi du mois)
+  function firstFriday(y, m) { var d = new Date(y, m, 1); while (d.getDay() !== 5) d.setDate(d.getDate() + 1); return d; }
+  var d0 = new Date(now); d0.setHours(0, 0, 0, 0);
+  var k = firstFriday(d0.getFullYear(), d0.getMonth());
+  if (k < d0) k = firstFriday(d0.getFullYear(), d0.getMonth() + 1);
+  var ke = document.getElementById("karaoke"); if (ke) ke.textContent = k.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+  // Prochaines dates : masquer celles qui sont passées
+  var iso = d0.getFullYear() + "-" + String(d0.getMonth() + 1).padStart(2, "0") + "-" + String(d0.getDate()).padStart(2, "0");
+  document.querySelectorAll(".agenda li[data-fin]").forEach(function (li) { if (li.getAttribute("data-fin") < iso) li.remove(); });
+  var ag = document.querySelector(".agenda");
+  if (ag && !ag.children.length) { ag.remove(); var at = document.querySelector(".ag-title"); if (at) at.remove(); }
+</script>
+</body>
+</html>
