@@ -1,2 +1,9 @@
 # Fichiers internes (édition du site) : non accessibles depuis le web
 RedirectMatch 404 ^/(\.github|\.git|outils|contenu|\.pages\.yml|api/lib|api/donnees)(/|$)
+
+# Pages et appli : toujours vérifier s'il y a une nouvelle version (évite les anciennes versions en cache)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
