@@ -189,7 +189,6 @@
       try { localStorage.setItem('le76_langue', autre); } catch (e) {}
       const u = new URL(location.href); u.searchParams.set('lang', autre); location.href = u.toString();
     };
-    try { if (qs.get('lang')) localStorage.setItem('le76_langue', LANG); } catch (e) {}
     document.getElementById('brandLink').href = accueil;
     document.getElementById('backLink').href = accueil;
     if (!DE) return;
