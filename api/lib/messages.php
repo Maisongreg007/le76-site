@@ -70,6 +70,9 @@ function smtp_config(): array
     $f = dossier_donnees() . '/smtp.json';
     $c = is_file($f) ? (json_decode((string) file_get_contents($f), true) ?: []) : [];
     $c += ['actif' => false, 'hote' => 'smtp.hostinger.com', 'port' => 465, 'utilisateur' => '', 'mdp' => '', 'derniere_erreur' => ''];
+    if ($c['utilisateur'] === '') {
+        $c['utilisateur'] = reglages()['expediteur']; // boîte vide = l'adresse d'envoi
+    }
     $c['pret'] = $c['actif'] && $c['utilisateur'] !== '' && $c['mdp'] !== '';
     return $c;
 }
