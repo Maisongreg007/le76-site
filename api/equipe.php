@@ -17,7 +17,7 @@ try {
     $q = lire_requete();
     $action = (string) ($q['action'] ?? '');
     $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    if ($methode !== 'POST' && $action !== 'export') {
+    if ($methode !== 'POST' && !in_array($action, ['export', 'export_abonnes'], true)) {
         erreur('Méthode non autorisée.', 405);
     }
 
@@ -94,6 +94,11 @@ try {
             equipe_supprimer($q, $moi);
         case 'export':
             export_csv();
+        case 'abonnes':
+            repondre(['ok' => true, 'abonnes' => db()->query('SELECT email, nom, telephone, inscrit_le FROM abonnes WHERE desinscrit_le IS NULL ORDER BY inscrit_le DESC')->fetchAll(),
+                'desinscrits' => (int) db()->query('SELECT COUNT(*) FROM abonnes WHERE desinscrit_le IS NOT NULL')->fetchColumn()]);
+        case 'export_abonnes':
+            export_abonnes();
     }
     erreur('Action inconnue.');
 } catch (Throwable $e) {
@@ -656,6 +661,20 @@ function export_csv(): never
     fputcsv($f, $cols, ';');
     foreach (db()->query('SELECT ' . implode(',', $cols) . ' FROM reservations ORDER BY date, heure') as $l) {
         fputcsv($f, $l, ';');
+    }
+    exit;
+}
+
+function export_abonnes(): never
+{
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="clients-infos-le76-' . date('Y-m-d') . '.csv"');
+    $f = fopen('php://output', 'w');
+    fwrite($f, "\xEF\xBB\xBF");
+    fputcsv($f, ['Nom', 'E-mail', 'Téléphone', 'Inscrit le', 'Lien de désinscription (à mettre dans chaque envoi)'], ';');
+    $site = rtrim(reglages()['site'], '/');
+    foreach (db()->query('SELECT * FROM abonnes WHERE desinscrit_le IS NULL ORDER BY nom') as $a) {
+        fputcsv($f, [$a['nom'], $a['email'], $a['telephone'], substr($a['inscrit_le'], 0, 10), $site . '/reserver/?desinscrire=' . $a['jeton']], ';');
     }
     exit;
 }

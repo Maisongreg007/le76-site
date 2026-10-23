@@ -24,6 +24,8 @@ try {
             annulation($q, false);
         case 'annuler':
             annulation($q, true);
+        case 'desinscrire':
+            desinscrire($q);
         default:
             erreur('Action inconnue.');
     }
@@ -178,6 +180,9 @@ function demande(array $q): never
     }
 
     // Réponse rapide au client, puis e-mails et notifications.
+    if (!empty($q['infos'])) {
+        abonner($email, $nom, $tel);
+    }
     mail_client($resa, 'recue');
     alerter_equipe($resa, 'nouvelle');
     repondre(['ok' => true, 'reservation' => resa_publique($resa)]);
@@ -215,4 +220,24 @@ function annulation(array $q, bool $confirmer): never
     mail_client($resa, 'annulee');
     alerter_equipe($resa, 'annulee');
     repondre(['ok' => true, 'reservation' => resa_publique($resa)]);
+}
+
+/** Inscription aux infos du 76 (case facultative cochée par le client). */
+function abonner(string $email, string $nom, string $tel): void
+{
+    db()->prepare("INSERT INTO abonnes (email, nom, telephone, inscrit_le, jeton) VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(email) DO UPDATE SET nom = excluded.nom, telephone = excluded.telephone, inscrit_le = excluded.inscrit_le, desinscrit_le = NULL")
+        ->execute([$email, $nom, $tel, maintenant(), jeton()]);
+}
+
+/** Lien « Ne plus recevoir les infos du 76 ». */
+function desinscrire(array $q): never
+{
+    $j = (string) ($q['jeton'] ?? '');
+    if (!preg_match('/^[a-f0-9]{32}$/', $j) || !limiter('desinscr:' . ip_client(), 30, 3600)) {
+        erreur('Lien invalide.', 404);
+    }
+    $st = db()->prepare('UPDATE abonnes SET desinscrit_le = ? WHERE jeton = ?');
+    $st->execute([maintenant(), $j]);
+    $st->rowCount() ? repondre(['ok' => true]) : erreur('Lien invalide.', 404);
 }

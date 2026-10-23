@@ -123,6 +123,15 @@ function creer_tables(PDO $pdo): void
         cree_le TEXT NOT NULL
     )");
     $pdo->exec("CREATE TABLE IF NOT EXISTS tentatives (cle TEXT NOT NULL, quand INTEGER NOT NULL)");
+    // Clients qui ont accepté de recevoir les infos des soirées (case facultative de la page Réserver)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS abonnes (
+        email TEXT PRIMARY KEY,
+        nom TEXT NOT NULL,
+        telephone TEXT NOT NULL DEFAULT '',
+        inscrit_le TEXT NOT NULL,
+        desinscrit_le TEXT,
+        jeton TEXT NOT NULL
+    )");
     $pdo->exec("CREATE TABLE IF NOT EXISTS reinit_mdp (jeton TEXT PRIMARY KEY, utilisateur_id INTEGER NOT NULL, expire INTEGER NOT NULL)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS journal_mails (id INTEGER PRIMARY KEY AUTOINCREMENT, quand TEXT NOT NULL, a TEXT NOT NULL, sujet TEXT NOT NULL, ok INTEGER NOT NULL)");
 }

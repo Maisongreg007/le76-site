@@ -157,7 +157,7 @@
 
   let data, parJour = {};
   const st = { n: 2, mois: null, date: null, heure: null, service: null, envoi: false };
-  const form = { prenom: '', nom: '', telephone: '', email: '', remarque: '', menu: false, accord: false };
+  const form = { prenom: '', nom: '', telephone: '', email: '', remarque: '', menu: false, accord: false, infos: false };
   const mobileOk = t => { const d = t.replace(/[\s.\-\/()]/g, ''); return /^(?:\+33|0033|0)[67]\d{8}$/.test(d) || /^(?:\+49|0049|0)1[5-7]\d{8,9}$/.test(d) || /^\+(?!33|49)\d{8,15}$/.test(d); };
 
   async function api(body) {
@@ -233,6 +233,7 @@
       <label class="f">Un message ? <small>(facultatif : anniversaire, allergie, chaise bébé, terrasse…)</small><textarea name="remarque" maxlength="500">${esc(form.remarque)}</textarea></label>
       ${v.menu_impose ? `<label class="check"><input type="checkbox" name="menu" ${form.menu ? 'checked' : ''}><span>J'ai bien noté que ce soir, c'est la soirée <b>${esc(v.soiree?.titre || 'spéciale')}</b>${v.soiree?.details ? ` avec son menu : ${esc(v.soiree.details)}` : ''}.</span></label>` : ''}
       <label class="check" style="background:#fff;border-color:var(--line)"><input type="checkbox" name="accord" ${form.accord ? 'checked' : ''}><span>J'accepte que mes coordonnées soient utilisées par Le 76 pour gérer ma réservation (confirmation, contact si besoin). Elles ne sont jamais transmises à des tiers. <a href="/mentions-legales.html" target="_blank">En savoir plus</a> *</span></label>
+      <label class="check" style="background:#fff;border-color:var(--line)"><input type="checkbox" name="infos" ${form.infos ? 'checked' : ''}><span>Je souhaite recevoir les infos des soirées et événements du 76 par e-mail (2 à 3 par mois maximum, désinscription en un clic). <i style="color:var(--muted)">Facultatif</i></span></label>
       <p class="hint" style="margin:0">* Champs obligatoires</p>
       <div class="pot" aria-hidden="true"><label>Site web<input name="site_web" tabindex="-1" autocomplete="off"></label></div>
     </div>`;
@@ -280,6 +281,7 @@
     form.prenom = f.prenom.value; form.nom = f.nom.value; form.telephone = f.telephone.value; form.email = f.email.value; form.remarque = f.remarque.value;
     form.menu = !!(f.menu && f.menu.checked);
     form.accord = !!(f.accord && f.accord.checked);
+    form.infos = !!(f.infos && f.infos.checked);
   }
 
   function rerender(focusSel) {
@@ -328,7 +330,7 @@
     else if (!form.accord) msg = 'Merci de cocher la case d’accord pour l’utilisation de vos coordonnées.';
     if (msg) { render(msg); return; }
     st.envoi = true; render();
-    const r = await api({ action: 'demande', date: st.date, heure: st.heure, couverts: st.n, prenom: form.prenom, nom: form.nom, telephone: form.telephone, accord: form.accord,
+    const r = await api({ action: 'demande', date: st.date, heure: st.heure, couverts: st.n, prenom: form.prenom, nom: form.nom, telephone: form.telephone, accord: form.accord, infos: form.infos,
       email: form.email, remarque: form.remarque, menu_accepte: form.menu, site_web: f.site_web?.value || '' });
     st.envoi = false;
     if (!r.ok) {
@@ -377,6 +379,14 @@
   }
 
   async function demarrer() {
+    const desinscr = new URLSearchParams(location.search).get('desinscrire');
+    if (desinscr) {
+      document.querySelector('.intro h1').innerHTML = 'Infos du <em>76</em>';
+      document.querySelector('.intro p').textContent = '';
+      const r = await api({ action: 'desinscrire', jeton: desinscr });
+      app.innerHTML = `<div class="card"><div class="done">${r.ok ? '<div class="ok">✓</div><h2>C\'est noté</h2><p>Vous ne recevrez plus les infos des soirées du 76. À bientôt quand même !</p>' : '<h2>Lien introuvable</h2><p>' + esc(r.erreur) + '</p>'}<p style="margin-top:20px"><a class="btn ghost" href="/">Retour au site</a></p></div></div>`;
+      return;
+    }
     const jeton = new URLSearchParams(location.search).get('annuler');
     if (jeton) return annulation(jeton);
     const d = await api();

@@ -743,6 +743,7 @@ async function vuePlus() {
       <button class="row link-row" data-a="reglages"><span>Réglages des réservations<small style="display:block;color:var(--muted);font-size:.82rem">Capacité, horaires, délais, e-mails…</small></span><span>›</span></button>
       <button class="row link-row" data-a="soirees"><span>Soirées à venir<small style="display:block;color:var(--muted);font-size:.82rem">Menu imposé, résa en ligne par soirée</small></span><span>›</span></button>
       <button class="row link-row" data-a="equipe"><span>L'équipe<small style="display:block;color:var(--muted);font-size:.82rem">Ajouter les accès des serveuses</small></span><span>›</span></button>
+      <button class="row link-row" data-a="abonnes"><span>Clients pour les infos des soirées<small style="display:block;color:var(--muted);font-size:.82rem">Ceux qui ont accepté de recevoir tes annonces</small></span><span>›</span></button>
       <button class="row link-row" data-a="journal"><span>Journal des e-mails<small style="display:block;color:var(--muted);font-size:.82rem">Ce qui est parti, à qui, et si l'hébergement l'a accepté</small></span><span>›</span></button>
       <a class="row link-row" href="${API}?action=export" style="text-decoration:none;color:inherit"><span>Télécharger toutes les réservations (Excel)</span><span>›</span></a>
     </div>` : ''}
@@ -755,6 +756,7 @@ async function vuePlus() {
     else if (a === 'soirees') ecranSoirees();
     else if (a === 'equipe') ecranEquipe();
     else if (a === 'journal') ecranJournal();
+    else if (a === 'abonnes') ecranAbonnes();
     else if (a === 'testpush') { const x = await api('push_test'); x.ok && x.envoyes ? toast('Notification envoyée') : toast("La notification n'est pas partie. Désactive puis réactive.", true); }
   };
   document.getElementById('notif')?.addEventListener('change', async e => {
@@ -884,6 +886,16 @@ async function ecranSoirees() {
       x.ok ? toast('Enregistré') : (toast(x.erreur, true), e.target.checked = !e.target.checked);
     });
   });
+}
+
+/* Clients inscrits aux infos */
+async function ecranAbonnes() {
+  const x = await api('abonnes'); if (!x.ok) return toast(x.erreur, true);
+  sheet(`<h2>Clients pour les infos</h2>
+    <div class="tip"><b>${x.abonnes.length} client${x.abonnes.length > 1 ? 's' : ''}</b> ont coché « Je souhaite recevoir les infos des soirées » en réservant${x.desinscrits ? ` · ${x.desinscrits} désinscrit${x.desinscrits > 1 ? 's' : ''}` : ''}. Seuls eux peuvent recevoir tes annonces. Le fichier contient pour chacun son lien de désinscription, à mettre dans chaque envoi.</div>
+    <a class="btn block" href="${API}?action=export_abonnes" style="margin-bottom:18px">Télécharger le fichier (Excel)</a>
+    <div class="group">${x.abonnes.length ? x.abonnes.map(a => `<div class="row"><div class="grow"><b style="font-weight:600">${esc(a.nom)}</b><small>${esc(a.email)}${a.telephone ? ' · ' + esc(a.telephone) : ''}</small></div><small style="color:var(--muted)">${esc(a.inscrit_le.slice(8, 10) + '/' + a.inscrit_le.slice(5, 7))}</small></div>`).join('') : '<div class="row">Personne pour l\'instant : la liste se remplit au fil des réservations.</div>'}</div>
+    <button class="btn ghost block" data-fermer>Fermer</button>`);
 }
 
 /* Journal des e-mails */
