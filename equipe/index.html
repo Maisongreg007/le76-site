@@ -629,6 +629,7 @@ async function vuePlus() {
       <button class="row link-row" data-a="reglages"><span>Réglages des réservations<small style="display:block;color:var(--muted);font-size:.82rem">Capacité, horaires, délais, e-mails…</small></span><span>›</span></button>
       <button class="row link-row" data-a="soirees"><span>Soirées à venir<small style="display:block;color:var(--muted);font-size:.82rem">Menu imposé, résa en ligne par soirée</small></span><span>›</span></button>
       <button class="row link-row" data-a="equipe"><span>L'équipe<small style="display:block;color:var(--muted);font-size:.82rem">Ajouter les accès des serveuses</small></span><span>›</span></button>
+      <button class="row link-row" data-a="journal"><span>Journal des e-mails<small style="display:block;color:var(--muted);font-size:.82rem">Ce qui est parti, à qui, et si l'hébergement l'a accepté</small></span><span>›</span></button>
       <a class="row link-row" href="${API}?action=export" style="text-decoration:none;color:inherit"><span>Télécharger toutes les réservations (Excel)</span><span>›</span></a>
     </div>` : ''}
     <p style="text-align:center;color:var(--muted);font-size:.8rem">Page client : <a href="/reserver/" target="_blank">le76.fr/reserver</a></p>`;
@@ -639,6 +640,7 @@ async function vuePlus() {
     else if (a === 'reglages') ecranReglages();
     else if (a === 'soirees') ecranSoirees();
     else if (a === 'equipe') ecranEquipe();
+    else if (a === 'journal') ecranJournal();
     else if (a === 'testpush') { const x = await api('push_test'); x.ok && x.envoyes ? toast('Notification envoyée') : toast("La notification n'est pas partie. Désactive puis réactive.", true); }
   };
   document.getElementById('notif')?.addEventListener('change', async e => {
@@ -749,6 +751,16 @@ async function ecranSoirees() {
       x.ok ? toast('Enregistré') : (toast(x.erreur, true), e.target.checked = !e.target.checked);
     });
   });
+}
+
+/* Journal des e-mails */
+async function ecranJournal() {
+  const x = await api('journal_mails'); if (!x.ok) return toast(x.erreur, true);
+  sheet(`<h2>Journal des e-mails</h2>
+    <div class="tip">Alertes envoyées à : <b>${x.alertes.length ? x.alertes.map(esc).join(', ') : 'aucune adresse réglée'}</b></div>
+    <div class="group">${x.journal.length ? x.journal.map(m => `<div class="row"><div class="grow"><b style="font-weight:500">${esc(m.sujet)}</b><small>${esc(m.quand.slice(8, 10) + '/' + m.quand.slice(5, 7) + ' ' + m.quand.slice(11, 16))} · ${esc(m.a)}</small></div><span class="chip ${+m.ok ? 'ok' : 'off'}">${+m.ok ? 'Parti' : 'Refusé'}</span></div>`).join('') : '<div class="row">Aucun e-mail envoyé depuis la mise en place du journal.</div>'}</div>
+    <p style="font-size:.85rem;color:var(--muted)">« Parti » veut dire que l'hébergement l'a accepté. S'il n'arrive pas, regarde dans les indésirables (spam).</p>
+    <button class="btn ghost block" data-fermer>Fermer</button>`);
 }
 
 /* Équipe */

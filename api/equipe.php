@@ -72,6 +72,8 @@ try {
             repondre(['ok' => true, 'reglages' => reglages_enregistrer(is_array($q['reglages'] ?? null) ? $q['reglages'] : [])]);
         case 'mail_test':
             mail_test();
+        case 'journal_mails':
+            repondre(['ok' => true, 'journal' => db()->query('SELECT quand, a, sujet, ok FROM journal_mails ORDER BY id DESC LIMIT 60')->fetchAll(), 'alertes' => reglages()['alertes_email']]);
         case 'equipe':
             repondre(['ok' => true, 'equipe' => liste_equipe()]);
         case 'equipe_ajouter':

@@ -119,6 +119,7 @@ function creer_tables(PDO $pdo): void
         cree_le TEXT NOT NULL
     )");
     $pdo->exec("CREATE TABLE IF NOT EXISTS tentatives (cle TEXT NOT NULL, quand INTEGER NOT NULL)");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS journal_mails (id INTEGER PRIMARY KEY AUTOINCREMENT, quand TEXT NOT NULL, a TEXT NOT NULL, sujet TEXT NOT NULL, ok INTEGER NOT NULL)");
 }
 
 function maintenant(): string

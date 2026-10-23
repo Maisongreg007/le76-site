@@ -36,9 +36,17 @@ function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?st
     // Pour les tests : les e-mails sont écrits dans un fichier au lieu d'être envoyés.
     if ($journal = getenv('RESA_MAIL_LOG')) {
         file_put_contents($journal, json_encode(['a' => $a, 'sujet' => $sujet, 'texte' => $texte, 'repondre_a' => $rep], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND);
-        return true;
+        $ok = true;
+    } else {
+        $ok = @mail($a, $sujet_enc, $corps, implode("\r\n", $entetes), '-f' . $exp);
     }
-    return @mail($a, $sujet_enc, $corps, implode("\r\n", $entetes), '-f' . $exp);
+    // Journal des envois (consultable dans l'appli : Plus → Journal des e-mails)
+    try {
+        db()->prepare('INSERT INTO journal_mails (quand, a, sujet, ok) VALUES (?, ?, ?, ?)')->execute([maintenant(), $a, $sujet, $ok ? 1 : 0]);
+        db()->exec('DELETE FROM journal_mails WHERE id NOT IN (SELECT id FROM journal_mails ORDER BY id DESC LIMIT 300)');
+    } catch (Throwable $e) {
+    }
+    return $ok;
 }
 
 function h($s): string
