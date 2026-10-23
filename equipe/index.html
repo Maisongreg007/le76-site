@@ -426,8 +426,9 @@ async function vueCarnet(silencieux) {
   enTete('Carnet', true);
   const main = document.getElementById('main');
   if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
-  const x = parse(S.date); const lundi = addDays(S.date, -((x.getDay() + 6) % 7));
-  const [d, sem] = await Promise.all([api('jour', { date: S.date }), api('avenir', { debut: lundi, jours: 7 })]);
+  // 7 prochains jours à partir d'aujourd'hui (ou du jour affiché s'il est en dehors)
+  const auj = today(), debut = (S.date >= auj && S.date < addDays(auj, 7)) ? auj : S.date;
+  const [d, sem] = await Promise.all([api('jour', { date: S.date }), api('avenir', { debut, jours: 7 })]);
   if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
   if (S.vue !== 'carnet' || d.date !== S.date) return;
   S.jour = d; majBadge(d.demandes);
@@ -479,7 +480,7 @@ async function vueCarnet(silencieux) {
     }
   };
 }
-/* Bande de la semaine en cours (lundi → dimanche) en haut du carnet */
+/* Bande des 7 prochains jours en haut du carnet */
 function semaine(jours) {
   const cel = v => {
     if (!v.ouvert && !v.occupe) return '<span class="sv x">–</span>';
