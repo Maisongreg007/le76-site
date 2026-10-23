@@ -502,25 +502,26 @@ function enregistrer(array $q, array $moi): never
         'nom' => $nom, 'telephone' => $tel, 'email' => $email,
         'remarque' => nettoyer_texte($q['remarque'] ?? '', 500),
         'note_interne' => nettoyer_texte($q['note_interne'] ?? '', 500),
+        'langue' => ($q['langue'] ?? 'fr') === 'de' ? 'de' : 'fr',
     ];
     if ($id) {
         $avant = charger_resa($id);
         $champs['modifie_le'] = maintenant();
         $champs['id'] = $id;
         db()->prepare('UPDATE reservations SET date=:date, service=:service, heure=:heure, couverts=:couverts, nom=:nom, telephone=:telephone,
-            email=:email, remarque=:remarque, note_interne=:note_interne, modifie_le=:modifie_le WHERE id=:id')->execute($champs);
+            email=:email, remarque=:remarque, note_interne=:note_interne, langue=:langue, modifie_le=:modifie_le WHERE id=:id')->execute($champs);
         $resa = charger_resa($id);
         $change = $avant['date'] !== $date || $avant['heure'] !== $heure || (int) $avant['couverts'] !== $couverts;
         if (!empty($q['envoyer_email']) && $change && $resa['statut'] === 'confirmee') {
-            mail_client($resa, 'confirmee', 'Votre réservation a été modifiée : voici les nouveaux détails.');
+            mail_client($resa, 'confirmee', t('Votre réservation a été modifiée : voici les nouveaux détails.', 'Ihre Reservierung wurde geändert: Hier sind die neuen Details.', langue_resa($resa)));
         }
     } else {
         $champs += [
             'statut' => 'confirmee', 'source' => $source, 'jeton' => jeton(), 'cree_le' => maintenant(),
             'cree_par' => $moi['nom'], 'traite_par' => $moi['nom'],
         ];
-        db()->prepare('INSERT INTO reservations (date, service, heure, couverts, nom, telephone, email, remarque, note_interne, statut, source, jeton, cree_le, cree_par, traite_par)
-            VALUES (:date, :service, :heure, :couverts, :nom, :telephone, :email, :remarque, :note_interne, :statut, :source, :jeton, :cree_le, :cree_par, :traite_par)')->execute($champs);
+        db()->prepare('INSERT INTO reservations (date, service, heure, couverts, nom, telephone, email, remarque, note_interne, langue, statut, source, jeton, cree_le, cree_par, traite_par)
+            VALUES (:date, :service, :heure, :couverts, :nom, :telephone, :email, :remarque, :note_interne, :langue, :statut, :source, :jeton, :cree_le, :cree_par, :traite_par)')->execute($champs);
         $resa = charger_resa((int) db()->lastInsertId());
         if (!empty($q['envoyer_email'])) {
             mail_client($resa, 'confirmee');
@@ -657,7 +658,7 @@ function export_csv(): never
     header('Content-Disposition: attachment; filename="reservations-le76-' . date('Y-m-d') . '.csv"');
     $f = fopen('php://output', 'w');
     fwrite($f, "\xEF\xBB\xBF");
-    $cols = ['id', 'date', 'heure', 'service', 'couverts', 'nom', 'telephone', 'email', 'remarque', 'note_interne', 'statut', 'source', 'arrive', 'cree_le', 'cree_par', 'traite_par'];
+    $cols = ['id', 'date', 'heure', 'service', 'couverts', 'nom', 'telephone', 'email', 'remarque', 'note_interne', 'langue', 'statut', 'source', 'arrive', 'cree_le', 'cree_par', 'traite_par'];
     fputcsv($f, $cols, ';');
     foreach (db()->query('SELECT ' . implode(',', $cols) . ' FROM reservations ORDER BY date, heure') as $l) {
         fputcsv($f, $l, ';');
@@ -671,10 +672,11 @@ function export_abonnes(): never
     header('Content-Disposition: attachment; filename="clients-infos-le76-' . date('Y-m-d') . '.csv"');
     $f = fopen('php://output', 'w');
     fwrite($f, "\xEF\xBB\xBF");
-    fputcsv($f, ['Nom', 'E-mail', 'Téléphone', 'Inscrit le', 'Lien de désinscription (à mettre dans chaque envoi)'], ';');
+    fputcsv($f, ['Nom', 'E-mail', 'Téléphone', 'Langue', 'Inscrit le', 'Lien de désinscription (à mettre dans chaque envoi)'], ';');
     $site = rtrim(reglages()['site'], '/');
     foreach (db()->query('SELECT * FROM abonnes WHERE desinscrit_le IS NULL ORDER BY nom') as $a) {
-        fputcsv($f, [$a['nom'], $a['email'], $a['telephone'], substr($a['inscrit_le'], 0, 10), $site . '/reserver/?desinscrire=' . $a['jeton']], ';');
+        $de = ($a['langue'] ?? 'fr') === 'de';
+        fputcsv($f, [$a['nom'], $a['email'], $a['telephone'], $de ? 'Allemand' : 'Français', substr($a['inscrit_le'], 0, 10), $site . '/reserver/?desinscrire=' . $a['jeton'] . ($de ? '&lang=de' : '')], ';');
     }
     exit;
 }

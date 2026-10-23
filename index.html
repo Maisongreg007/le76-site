@@ -6,6 +6,12 @@
 <title>Le 76 · Restaurant à Beinheim · Cuisine de saison & tartes flambées</title>
 <meta name="description" content="Le 76, restaurant au 76 rue Principale à Beinheim. Cuisine de saison, plats signatures, tartes flambées le soir, soirées à thème et karaoké. Réservation en ligne ou par téléphone.">
 <link rel="canonical" href="https://le76.fr/">
+<link rel="alternate" hreflang="fr" href="https://le76.fr/">
+<link rel="alternate" hreflang="de" href="https://le76.fr/de/">
+<script>
+  // Visiteur dont le navigateur est en allemand : version allemande, sauf s'il a choisi le français
+  try { if (!localStorage.getItem("le76_langue") && /^de/i.test(navigator.language || "")) location.replace("/de/"); } catch (e) {}
+</script>
 <meta property="og:title" content="Le 76 · Restaurant à Beinheim">
 <meta property="og:description" content="Cuisine de saison, tartes flambées le soir, soirées à thème et karaoké. 76 rue Principale, Beinheim.">
 <meta property="og:url" content="https://le76.fr/">
@@ -333,6 +339,8 @@
   footer .bottom { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; padding-top: 24px; font-size: .85rem; }
   footer .bottom a { color: #e6d8c6; }
 
+  nav.links a.lang { display: inline-flex !important; align-items: center; justify-content: center; min-width: 38px; height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; font-size: .8rem; font-weight: 600; letter-spacing: .06em; color: var(--brown); background: var(--paper); }
+  nav.links a.lang:hover { border-color: var(--gold); }
   .call-mobile { display: none; }
   nav.links .tel-mobile { display: none; }
   @media (max-width: 860px) {
@@ -370,6 +378,7 @@
       <a href="#soirees">Soirées</a>
       <a href="#cadeaux">Bons cadeaux</a>
       <a href="#infos">Horaires & accès</a>
+      <a class="lang" href="/de/" hreflang="de" lang="de" title="Deutsche Version" onclick="try{localStorage.setItem('le76_langue','de')}catch(e){}">DE</a>
       <a class="btn ghost tel-mobile" href="tel:+33388863187" aria-label="Appeler le restaurant"><svg><use href="#i-phone"/></svg>Appeler</a>
       <a class="btn" href="/reserver/">Réserver</a>
     </nav>

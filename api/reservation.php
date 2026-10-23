@@ -15,6 +15,7 @@ rappels_en_arriere_plan();
 
 try {
     $q = lire_requete();
+    langue((string) ($q['lang'] ?? $q['langue'] ?? 'fr'));
     switch ($q['action'] ?? '') {
         case 'calendrier':
             calendrier();
@@ -29,11 +30,11 @@ try {
         case 'desinscrire':
             desinscrire($q);
         default:
-            erreur('Action inconnue.');
+            erreur(t('Action inconnue.', 'Unbekannte Aktion.'));
     }
 } catch (Throwable $e) {
     error_log('[reservation] ' . $e->getMessage());
-    erreur("Un problème technique est survenu. Merci de nous appeler au " . reglages_defaut()['telephone'] . '.', 500);
+    erreur(t('Un problème technique est survenu. Merci de nous appeler au 03 88 86 31 87.', 'Ein technisches Problem ist aufgetreten. Bitte rufen Sie uns an: +33 3 88 86 31 87.'), 500);
 }
 
 function calendrier(): never
@@ -56,10 +57,10 @@ function calendrier(): never
                 'ouvert' => $e['ouvert'],
                 'commence' => $commence,
                 'en_ligne' => $e['en_ligne'],
-                'raison' => $e['ouvert'] ? ($e['en_ligne'] ? '' : 'Réservation par téléphone uniquement') : $e['raison'],
+                'raison' => $e['ouvert'] ? ($e['en_ligne'] ? '' : t('Réservation par téléphone uniquement', 'Reservierung nur telefonisch')) : traduire_raison($e['raison']),
                 'max' => $max,
                 'creneaux' => $cr,
-                'soiree' => $e['soiree'],
+                'soiree' => $e['soiree'] ? ['titre' => traduire($e['soiree']['titre']), 'details' => traduire($e['soiree']['details'])] + $e['soiree'] : null,
                 'menu_impose' => $e['menu_impose'],
                 'note' => $e['note'],
             ];
@@ -83,15 +84,15 @@ function calendrier(): never
 function demande(array $q): never
 {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        erreur('Méthode non autorisée.', 405);
+        erreur(t('Méthode non autorisée.', 'Nicht erlaubt.'), 405);
     }
-    $tel_resto = reglages()['telephone'];
+    $tel_resto = tel_affiche();
     // Piège à robots : ce champ est caché, un humain ne le remplit jamais.
     if (trim((string) ($q['site_web'] ?? '')) !== '') {
         repondre(['ok' => true, 'reservation' => null]);
     }
     if (!limiter('demande:' . ip_client(), 6, 3600)) {
-        erreur("Trop de demandes envoyées d'ici. Merci de nous appeler au $tel_resto.", 429);
+        erreur(t("Trop de demandes envoyées d'ici. Merci de nous appeler au $tel_resto.", "Zu viele Anfragen von diesem Gerät. Bitte rufen Sie uns an: $tel_resto."), 429);
     }
 
     $date = (string) ($q['date'] ?? '');
@@ -105,33 +106,33 @@ function demande(array $q): never
     $remarque = nettoyer_texte($q['remarque'] ?? '', 500);
 
     if (!date_valide($date) || !heure_valide($heure)) {
-        erreur('Choisissez une date et une heure.');
+        erreur(t('Choisissez une date et une heure.', 'Bitte wählen Sie Datum und Uhrzeit.'));
     }
     if ($couverts < 1) {
-        erreur('Indiquez le nombre de personnes.');
+        erreur(t('Indiquez le nombre de personnes.', 'Bitte geben Sie die Personenzahl an.'));
     }
     if (mb_strlen($prenom) < 2) {
-        erreur('Indiquez votre prénom.');
+        erreur(t('Indiquez votre prénom.', 'Bitte geben Sie Ihren Vornamen an.'));
     }
     if (mb_strlen($nom_famille) < 2) {
-        erreur('Indiquez votre nom.');
+        erreur(t('Indiquez votre nom.', 'Bitte geben Sie Ihren Nachnamen an.'));
     }
     if (!mobile_valide($tel)) {
-        erreur('Indiquez un numéro de téléphone mobile valide.');
+        erreur(t('Indiquez un numéro de téléphone mobile valide.', 'Bitte geben Sie eine gültige Handynummer an.'));
     }
     if (empty($q['accord'])) {
-        erreur("Merci de cocher la case d'accord pour l'utilisation de vos coordonnées.");
+        erreur(t("Merci de cocher la case d'accord pour l'utilisation de vos coordonnées.", 'Bitte bestätigen Sie die Verwendung Ihrer Kontaktdaten.'));
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        erreur("L'adresse e-mail ne semble pas correcte.");
+        erreur(t("L'adresse e-mail ne semble pas correcte.", 'Die E-Mail-Adresse scheint nicht korrekt zu sein.'));
     }
 
     $r = reglages();
     if ($couverts > $r['max_en_ligne']) {
-        erreur("Pour plus de {$r['max_en_ligne']} personnes, appelez-nous au $tel_resto.");
+        erreur(t("Pour plus de {$r['max_en_ligne']} personnes, appelez-nous au $tel_resto.", "Für mehr als {$r['max_en_ligne']} Personen rufen Sie uns bitte an: $tel_resto."));
     }
     if ($date > date('Y-m-d', strtotime("+{$r['jours_avance']} days"))) {
-        erreur('Cette date est trop lointaine pour réserver en ligne.');
+        erreur(t('Cette date est trop lointaine pour réserver en ligne.', 'Dieses Datum liegt zu weit in der Zukunft für eine Online-Reservierung.'));
     }
     $service = service_de($heure);
 
@@ -141,13 +142,13 @@ function demande(array $q): never
         $occ = occupation($date, $date);
         $etat = etat_service($date, $service, null, $occ);
         if (!$etat['ouvert']) {
-            throw new DomainException('Le restaurant est fermé à ce moment-là.');
+            throw new DomainException(t('Le restaurant est fermé à ce moment-là.', 'Das Restaurant ist zu dieser Zeit geschlossen.'));
         }
         if (!$etat['en_ligne']) {
-            throw new DomainException("La réservation en ligne est fermée pour ce service : appelez-nous au $tel_resto.");
+            throw new DomainException(t("La réservation en ligne est fermée pour ce service : appelez-nous au $tel_resto.", "Für diesen Service ist keine Online-Reservierung möglich. Bitte rufen Sie uns an: $tel_resto."));
         }
         if ($etat['menu_impose'] && empty($q['menu_accepte'])) {
-            throw new DomainException('Merci de confirmer que vous avez bien noté le menu de la soirée.');
+            throw new DomainException(t('Merci de confirmer que vous avez bien noté le menu de la soirée.', 'Bitte bestätigen Sie, dass Sie das Menü des Abends zur Kenntnis genommen haben.'));
         }
         $creneau = null;
         foreach (creneaux_en_ligne($etat, $occ) as $c) {
@@ -156,20 +157,20 @@ function demande(array $q): never
             }
         }
         if (!$creneau) {
-            throw new DomainException("Cette heure n'est pas proposée.");
+            throw new DomainException(t("Cette heure n'est pas proposée.", 'Diese Uhrzeit ist nicht verfügbar.'));
         }
         if ($creneau['max'] < $couverts) {
             throw new DomainException($creneau['max'] > 0
-                ? "Il ne reste de la place que pour {$creneau['max']} personne(s) à cette heure. Choisissez une autre heure ou appelez-nous."
-                : "Ce créneau n'est plus disponible. Choisissez une autre heure ou appelez-nous au $tel_resto.");
+                ? t("Il ne reste de la place que pour {$creneau['max']} personne(s) à cette heure. Choisissez une autre heure ou appelez-nous.", "Zu dieser Uhrzeit ist nur noch Platz für {$creneau['max']} Person(en). Bitte wählen Sie eine andere Uhrzeit oder rufen Sie uns an.")
+                : t("Ce créneau n'est plus disponible. Choisissez une autre heure ou appelez-nous au $tel_resto.", "Diese Uhrzeit ist nicht mehr verfügbar. Bitte wählen Sie eine andere oder rufen Sie uns an: $tel_resto."));
         }
         $resa = [
             'date' => $date, 'service' => $service, 'heure' => $heure, 'couverts' => $couverts,
             'nom' => $nom, 'telephone' => $tel, 'email' => $email, 'remarque' => $remarque,
-            'statut' => 'attente', 'source' => 'site', 'jeton' => jeton(), 'cree_le' => maintenant(),
+            'statut' => 'attente', 'source' => 'site', 'jeton' => jeton(), 'cree_le' => maintenant(), 'langue' => langue(),
         ];
-        $st = $pdo->prepare('INSERT INTO reservations (date, service, heure, couverts, nom, telephone, email, remarque, statut, source, jeton, cree_le)
-            VALUES (:date, :service, :heure, :couverts, :nom, :telephone, :email, :remarque, :statut, :source, :jeton, :cree_le)');
+        $st = $pdo->prepare('INSERT INTO reservations (date, service, heure, couverts, nom, telephone, email, remarque, statut, source, jeton, cree_le, langue)
+            VALUES (:date, :service, :heure, :couverts, :nom, :telephone, :email, :remarque, :statut, :source, :jeton, :cree_le, :langue)');
         $st->execute($resa);
         $resa['id'] = (int) $pdo->lastInsertId();
         $pdo->exec('COMMIT');
@@ -194,16 +195,19 @@ function annulation(array $q, bool $confirmer): never
 {
     $jeton = (string) ($q['jeton'] ?? '');
     if (!preg_match('/^[a-f0-9]{32}$/', $jeton)) {
-        erreur('Lien invalide.', 404);
+        erreur(t('Lien invalide.', 'Ungültiger Link.'), 404);
     }
     if (!limiter('annul:' . ip_client(), 30, 3600)) {
-        erreur('Trop de tentatives.', 429);
+        erreur(t('Trop de tentatives.', 'Zu viele Versuche.'), 429);
     }
     $st = db()->prepare('SELECT * FROM reservations WHERE jeton = ?');
     $st->execute([$jeton]);
     $resa = $st->fetch();
     if (!$resa) {
-        erreur("Cette réservation est introuvable.", 404);
+        erreur(t('Cette réservation est introuvable.', 'Diese Reservierung wurde nicht gefunden.'), 404);
+    }
+    if (!isset($q['lang']) && !isset($q['langue'])) {
+        langue($resa['langue'] ?? 'fr');
     }
     $passee = strtotime($resa['date'] . ' ' . $resa['heure']) < time();
     $annulable = in_array($resa['statut'], STATUTS_ACTIFS, true) && !$passee;
@@ -211,10 +215,10 @@ function annulation(array $q, bool $confirmer): never
         repondre(['ok' => true, 'reservation' => resa_publique($resa), 'annulable' => $annulable, 'passee' => $passee]);
     }
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        erreur('Méthode non autorisée.', 405);
+        erreur(t('Méthode non autorisée.', 'Nicht erlaubt.'), 405);
     }
     if (!$annulable) {
-        erreur($resa['statut'] === 'annulee' ? 'Cette réservation est déjà annulée.' : "Cette réservation ne peut plus être annulée en ligne. Appelez-nous au " . reglages()['telephone'] . '.');
+        erreur($resa['statut'] === 'annulee' ? t('Cette réservation est déjà annulée.', 'Diese Reservierung ist bereits storniert.') : t('Cette réservation ne peut plus être annulée en ligne. Appelez-nous au ', 'Diese Reservierung kann nicht mehr online storniert werden. Bitte rufen Sie uns an: ') . tel_affiche() . '.');
     }
     db()->prepare("UPDATE reservations SET statut = 'annulee', modifie_le = ?, traite_par = 'Client (lien e-mail)' WHERE id = ?")
         ->execute([maintenant(), $resa['id']]);
@@ -227,9 +231,9 @@ function annulation(array $q, bool $confirmer): never
 /** Inscription aux infos du 76 (case facultative cochée par le client). */
 function abonner(string $email, string $nom, string $tel): void
 {
-    db()->prepare("INSERT INTO abonnes (email, nom, telephone, inscrit_le, jeton) VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(email) DO UPDATE SET nom = excluded.nom, telephone = excluded.telephone, inscrit_le = excluded.inscrit_le, desinscrit_le = NULL")
-        ->execute([$email, $nom, $tel, maintenant(), jeton()]);
+    db()->prepare("INSERT INTO abonnes (email, nom, telephone, inscrit_le, jeton, langue) VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(email) DO UPDATE SET nom = excluded.nom, telephone = excluded.telephone, inscrit_le = excluded.inscrit_le, langue = excluded.langue, desinscrit_le = NULL")
+        ->execute([$email, $nom, $tel, maintenant(), jeton(), langue()]);
 }
 
 /** Lien « Ne plus recevoir les infos du 76 ». */
@@ -237,11 +241,11 @@ function desinscrire(array $q): never
 {
     $j = (string) ($q['jeton'] ?? '');
     if (!preg_match('/^[a-f0-9]{32}$/', $j) || !limiter('desinscr:' . ip_client(), 30, 3600)) {
-        erreur('Lien invalide.', 404);
+        erreur(t('Lien invalide.', 'Ungültiger Link.'), 404);
     }
     $st = db()->prepare('UPDATE abonnes SET desinscrit_le = ? WHERE jeton = ?');
     $st->execute([maintenant(), $j]);
-    $st->rowCount() ? repondre(['ok' => true]) : erreur('Lien invalide.', 404);
+    $st->rowCount() ? repondre(['ok' => true]) : erreur(t('Lien invalide.', 'Ungültiger Link.'), 404);
 }
 
 /** Places restantes pour un service, communiquées seulement quand il en reste peu (sinon null). */
@@ -250,9 +254,29 @@ function places(array $q): never
     $date = (string) ($q['date'] ?? '');
     $service = in_array($q['service'] ?? '', SERVICES, true) ? $q['service'] : 'soir';
     if (!date_valide($date)) {
-        erreur('Date invalide.');
+        erreur(t('Date invalide.', 'Ungültiges Datum.'));
     }
     $e = etat_service($date, $service);
     $seuil = 30;
     repondre(['ok' => true, 'complet' => $e['ouvert'] && $e['restant'] <= 0, 'restant' => ($e['restant'] > 0 && $e['restant'] <= $seuil) ? $e['restant'] : null]);
+}
+
+/** Numéro du restaurant, au format international pour les clients allemands. */
+function tel_affiche(): string
+{
+    $tel = reglages()['telephone'];
+    return langue() === 'de' && str_starts_with($tel, '0') ? '+33 ' . substr($tel, 1) : $tel;
+}
+
+function traduire_raison(string $r): string
+{
+    if (langue() !== 'de' || $r === '') {
+        return $r;
+    }
+    return match ($r) {
+        'Fermé ce midi' => 'Mittags geschlossen',
+        'Fermé ce soir' => 'Abends geschlossen',
+        'Fermé exceptionnellement' => 'Ausnahmsweise geschlossen',
+        default => traduire($r),
+    };
 }

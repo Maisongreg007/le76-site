@@ -275,6 +275,7 @@ const SOURCES = { site: 'Site', telephone: 'Téléphone', sur_place: 'Sur place'
 const STATUTS = { attente: 'En attente', confirmee: 'Confirmée', refusee: 'Refusée', annulee: 'Annulée' };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const drap = r => r && r.langue === 'de' ? ' 🇩🇪' : '';
 const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date(y, m - 1, j); };
 const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 const today = () => iso(new Date());
@@ -525,7 +526,7 @@ function ligneResa(r) {
   const infos = [r.telephone, r.remarque ? `« ${r.remarque} »` : '', r.note_interne ? `📝 ${r.note_interne}` : ''].filter(Boolean).join(' · ');
   return `<button class="resa ${r.statut}${r.arrive ? ' arrive' : ''}" data-id="${r.id}">
     <span class="h">${hFr(r.heure)}</span>
-    <span class="who"><b>${r.arrive ? '✓ ' : ''}${esc(r.nom)}${r.statut === 'attente' ? '<span class="tag att">à valider</span>' : ''}${r.source === 'site' && r.statut !== 'attente' ? '<span class="tag web">site</span>' : ''}</b>
+    <span class="who"><b>${r.arrive ? '✓ ' : ''}${esc(r.nom)}${drap(r)}${r.statut === 'attente' ? '<span class="tag att">à valider</span>' : ''}${r.source === 'site' && r.statut !== 'attente' ? '<span class="tag web">site</span>' : ''}</b>
     <span>${esc(infos) || '&nbsp;'}</span></span>
     <span class="pers">${r.couverts}</span></button>`;
 }
@@ -565,7 +566,7 @@ function ficheResa(r) {
   if (!r) return;
   const ligne = (l, v) => v ? `<div><span>${l}</span><b style="font-weight:500">${v}</b></div>` : '';
   const actif = r.statut === 'confirmee' || r.statut === 'attente';
-  sheet(`<h2>${esc(r.nom)} · ${r.couverts} pers.</h2>
+  sheet(`<h2>${esc(r.nom)}${drap(r)} · ${r.couverts} pers.</h2>${r.langue === 'de' ? '<p style="margin:-6px 0 10px;color:var(--muted);font-size:.9rem">🇩🇪 Client allemand : ses e-mails partent en allemand</p>' : ''}
     <div class="det">
       ${ligne('Quand', `${dateLong(r.date)} à ${hFr(r.heure)}`)}
       ${ligne('Statut', STATUTS[r.statut] + (r.traite_par ? ` <small style="color:var(--muted)">· ${esc(r.traite_par)}</small>` : ''))}
@@ -604,7 +605,7 @@ async function accepter(r) {
 function refuser(r, statut) {
   const refus = statut === 'refusee';
   sheet(`<h2>${refus ? 'Refuser la demande' : 'Annuler la réservation'}</h2>
-    <p style="margin:-4px 0 12px;color:var(--muted)">${esc(r.nom)} · ${r.couverts} pers. · ${dateCourt(r.date)} à ${hFr(r.heure)}</p>
+    <p style="margin:-4px 0 12px;color:var(--muted)">${esc(r.nom)}${drap(r)} · ${r.couverts} pers. · ${dateCourt(r.date)} à ${hFr(r.heure)}</p>
     ${r.email ? `<label class="checkline"><input type="checkbox" name="prevenir" checked>Prévenir le client par e-mail</label>
     <label class="field">Petit mot pour le client <small>(facultatif)</small><textarea name="message" placeholder="${refus ? 'Ex. : nous sommes complets à 19h, mais il reste de la place à 20h30.' : ''}"></textarea></label>` : `<div class="tip">Pas d'e-mail pour ce client${r.telephone ? ` : pense à l'appeler au <a href="${telHref(r.telephone)}">${esc(r.telephone)}</a>` : ''}.</div>`}
     <div class="actions"><button class="btn ghost" data-fermer>Retour</button><button class="btn" id="ok">${refus ? 'Refuser' : 'Annuler la résa'}</button></div>`, (el, fermer) => {
@@ -633,11 +634,13 @@ function formulaireResa(r, date) {
       <label class="field">Message du client <small>(anniversaire, allergie…)</small><textarea name="remarque">${esc(r.remarque)}</textarea></label>
       <label class="field">Note interne <small>(visible seulement par l'équipe)</small><input name="note_interne" value="${esc(r.note_interne)}" placeholder="Ex. : table près de la fenêtre"></label>
       ${nouveau ? `<div class="field">Prise par<div class="seg" id="src">${['telephone', 'sur_place', 'autre'].map(s => `<button type="button" data-s="${s}" class="${r.source === s ? 'on' : ''}">${SOURCES[s]}</button>`).join('')}</div></div>` : ''}
+      <div class="field">Langue des e-mails<div class="seg" id="lng"><button type="button" data-l="fr" class="${r.langue !== 'de' ? 'on' : ''}">🇫🇷 Français</button><button type="button" data-l="de" class="${r.langue === 'de' ? 'on' : ''}">🇩🇪 Deutsch</button></div></div>
       <label class="checkline"><input type="checkbox" name="envoyer_email" ${nouveau ? '' : 'checked'}>${nouveau ? 'Envoyer une confirmation par e-mail au client' : 'Prévenir le client par e-mail si la date, l\'heure ou le nombre change'}</label>
       <div class="actions"><button type="button" class="btn ghost" data-fermer>Annuler</button><button class="btn">${nouveau ? 'Ajouter' : 'Enregistrer'}</button></div>
     </form>`, (el, fermer) => {
     const f = el.querySelector('#fr');
-    let source = r.source;
+    let source = r.source, langue = r.langue === 'de' ? 'de' : 'fr';
+    el.querySelector('#lng').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (!b) return; langue = b.dataset.l; el.querySelectorAll('#lng button').forEach(x => x.classList.toggle('on', x === b)); });
     el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { f.couverts.value = Math.max(1, (+f.couverts.value || 0) + +b.dataset.n); });
     el.querySelector('#src')?.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; source = b.dataset.s; el.querySelectorAll('#src button').forEach(x => x.classList.toggle('on', x === b)); });
     const majMail = () => { const c = f.envoyer_email; c.disabled = !f.email.value.trim(); if (c.disabled) c.checked = false; };
@@ -646,7 +649,7 @@ function formulaireResa(r, date) {
     f.onsubmit = async ev => {
       ev.preventDefault();
       const x = await api('enregistrer', { id: nouveau ? 0 : r.id, date: f.date.value, heure: f.heure.value, couverts: +f.couverts.value, nom: f.nom.value,
-        telephone: f.telephone.value, email: f.email.value, remarque: f.remarque.value, note_interne: f.note_interne.value, source, envoyer_email: f.envoyer_email.checked });
+        telephone: f.telephone.value, email: f.email.value, remarque: f.remarque.value, note_interne: f.note_interne.value, source, langue, envoyer_email: f.envoyer_email.checked });
       if (!x.ok) return toast(x.erreur, true);
       fermer();
       toast(x.depasse ? `Enregistré · attention : ${x.depasse} couvert(s) au-dessus de la capacité` : 'Enregistré', !!x.depasse);
@@ -669,7 +672,7 @@ async function vueDemandes(silencieux) {
     const e = r.etat, apres = e.occupe;
     return `<div class="dem" data-id="${r.id}">
       <div class="quand">${dateLong(r.date)} · ${hFr(r.heure)}</div>
-      <div class="qui"><b>${esc(r.nom)}</b> · ${pers(r.couverts)}</div>
+      <div class="qui"><b>${esc(r.nom)}</b>${drap(r)} · ${pers(r.couverts)}</div>
       <div class="meta"><a href="${telHref(r.telephone)}">${esc(r.telephone)}</a> · ${esc(r.email)}</div>
       <div class="meta">${r.service === 'midi' ? 'Midi' : 'Soir'} : ${apres} / ${e.capacite} couverts avec cette demande${apres > e.capacite ? ' <b style="color:var(--rust)">· au-dessus de la capacité</b>' : ''}${e.soiree ? ` · ✦ ${esc(e.soiree.titre)}` : ''}</div>
       ${r.remarque ? `<div class="msg">« ${esc(r.remarque)} »</div>` : ''}
@@ -826,6 +829,7 @@ async function ecranReglages() {
       <div class="row" style="display:block"><label class="field" style="margin:0">Adresses qui reçoivent les alertes <small>(une ou plusieurs, séparées par une virgule)</small><input name="alertes_email" value="${esc(r.alertes_email.join(', '))}" placeholder="ex. le76@email.fr" autocapitalize="none"></label></div>
       <div class="row" style="display:block"><label class="field" style="margin:0">Adresse d'envoi <small>(doit être une adresse @le76.fr)</small><input name="expediteur" value="${esc(r.expediteur)}" autocapitalize="none"></label></div>
       <div class="row" style="display:block"><label class="field" style="margin:0">Petit mot ajouté aux confirmations <small>(facultatif)</small><textarea name="mot_client" placeholder="Ex. : Parking gratuit derrière le restaurant.">${esc(r.mot_client)}</textarea></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">🇩🇪 Le même mot en allemand <small>(pour les clients allemands, facultatif)</small><textarea name="mot_client_de" placeholder="Z. B.: Kostenlose Parkplätze hinter dem Restaurant.">${esc(r.mot_client_de || '')}</textarea></label></div>
       <div class="row"><div class="grow">Rappel par e-mail la veille<small>Envoyé aux réservations confirmées, à partir de l'heure choisie</small></div><input name="rappel_heure" type="time" step="900" value="${r.rappel_heure}" style="width:100px">${sw('rappel_veille', r.rappel_veille)}</div>
       <div class="row"><button type="button" class="btn ghost small" id="mailtest">Envoyer un e-mail de test</button></div>
     </div>
@@ -853,7 +857,7 @@ async function ecranReglages() {
       fermer_pendant_service: v('fermer_pendant_service').checked,
       rappel_veille: v('rappel_veille').checked, rappel_heure: v('rappel_heure').value,
       max_par_creneau: +v('max_par_creneau').value, jours_avance: +v('jours_avance').value,
-      alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value,
+      alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value, mot_client_de: v('mot_client_de').value,
     });
     const sauver = async () => {
       const x = await api('reglages_ecrire', { reglages: collecter() }); if (!x.ok) { toast(x.erreur, true); return false; }
@@ -1041,7 +1045,7 @@ function montrerAlertes(evts) {
     el.className = 'alerte ' + e.type;
     el.innerHTML = `<div class="ico">${nouv ? '🔔' : '❌'}</div>
       <div class="k">${nouv ? 'Nouvelle réservation' : 'Réservation annulée'}</div>
-      <h3>${esc(r.nom)} · ${r.couverts} pers.</h3>
+      <h3>${esc(r.nom)}${drap(r)} · ${r.couverts} pers.</h3>
       <p>${dateLong(r.date)} à ${hFr(r.heure)}</p>
       ${nouv ? `<p>${esc(r.telephone)}</p>${r.remarque ? `<div class="msg">« ${esc(r.remarque)} »</div>` : ''}` : '<p>Annulée par le client : les places sont libérées.</p>'}
       <div class="actions">${nouv && r.statut === 'attente'

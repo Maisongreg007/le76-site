@@ -197,10 +197,11 @@ function h($s): string
 }
 
 /** Mise en page commune des e-mails : titre, paragraphes, encadré récapitulatif, bouton éventuel. */
-function gabarit_mail(string $titre, array $paragraphes, array $recap = [], ?array $bouton = null, string $pied = ''): array
+function gabarit_mail(string $titre, array $paragraphes, array $recap = [], ?array $bouton = null, string $pied = '', string $l = 'fr'): array
 {
     $r = reglages();
-    $html = '<!doctype html><html><body style="margin:0;background:#fbf5ec;font-family:Helvetica,Arial,sans-serif;color:#2b1d16">'
+    $site = rtrim($r['site'], '/') . ($l === 'de' ? '/de/' : '');
+    $html = '<!doctype html><html lang="' . $l . '"><body style="margin:0;background:#fbf5ec;font-family:Helvetica,Arial,sans-serif;color:#2b1d16">'
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbf5ec;padding:24px 12px"><tr><td align="center">'
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fffbf5;border:1px solid #e8d9c3;border-radius:14px">'
         . '<tr><td style="padding:22px 26px 6px;font-family:Georgia,serif;font-size:28px;font-weight:bold;color:#2b1d16">Le <span style="color:#c98a3a">76</span></td></tr>'
@@ -215,114 +216,139 @@ function gabarit_mail(string $titre, array $paragraphes, array $recap = [], ?arr
         foreach ($recap as $libelle => $valeur) {
             $html .= '<tr><td style="padding:8px 14px;font-size:13px;color:#7a6a5c;width:38%">' . h($libelle) . '</td>'
                 . '<td style="padding:8px 14px;font-size:15px;font-weight:bold">' . nl2br(h($valeur)) . '</td></tr>';
-            $txt .= "$libelle : $valeur\n";
+            $txt .= ($l === 'de' ? "$libelle: $valeur\n" : "$libelle : $valeur\n");
         }
         $html .= '</table></td></tr>';
         $txt .= "\n";
     }
     if ($bouton) {
         $html .= '<tr><td style="padding:12px 26px"><a href="' . h($bouton[1]) . '" style="display:inline-block;background:#b7372a;color:#fff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:999px">' . h($bouton[0]) . '</a></td></tr>';
-        $txt .= "{$bouton[0]} : {$bouton[1]}\n\n";
+        $txt .= ($l === 'de' ? "{$bouton[0]}: {$bouton[1]}\n\n" : "{$bouton[0]} : {$bouton[1]}\n\n");
     }
-    $signature = $r['nom'] . ' · ' . $r['adresse'] . ' · ' . $r['telephone'];
+    $signature = $r['nom'] . ' · ' . $r['adresse'] . ($l === 'de' ? ', Frankreich' : '') . ' · ' . tel_client($l);
     $html .= ($pied ? '<tr><td style="padding:8px 26px;font-size:13px;color:#7a6a5c">' . nl2br(h($pied)) . '</td></tr>' : '')
-        . '<tr><td style="padding:16px 26px 22px;font-size:12px;color:#7a6a5c;border-top:1px solid #e8d9c3">' . h($signature) . '<br><a href="' . h($r['site']) . '" style="color:#b7372a">' . h(preg_replace('#^https?://#', '', $r['site'])) . '</a></td></tr>'
+        . '<tr><td style="padding:16px 26px 22px;font-size:12px;color:#7a6a5c;border-top:1px solid #e8d9c3">' . h($signature) . '<br><a href="' . h($site) . '" style="color:#b7372a">' . h(rtrim(preg_replace('#^https?://#', '', $site), '/')) . '</a></td></tr>'
         . '</table></td></tr></table></body></html>';
-    $txt .= ($pied ? "$pied\n\n" : '') . "--\n$signature\n{$r['site']}\n";
+    $txt .= ($pied ? "$pied\n\n" : '') . "--\n$signature\n$site\n";
     return [$html, $txt];
+}
+
+/** Numéro du restaurant tel qu'on l'écrit au client (format international pour les Allemands). */
+function tel_client(string $l = 'fr'): string
+{
+    $tel = reglages()['telephone'];
+    return $l === 'de' && str_starts_with($tel, '0') ? '+33 ' . substr($tel, 1) : $tel;
+}
+
+function langue_resa(array $resa): string
+{
+    return ($resa['langue'] ?? 'fr') === 'de' ? 'de' : 'fr';
 }
 
 function recap_resa(array $resa): array
 {
+    $l = langue_resa($resa);
     $o = [
-        'Date' => ucfirst(date_fr($resa['date'], true)),
-        'Heure' => heure_fr($resa['heure']),
-        'Personnes' => (string) $resa['couverts'],
-        'Au nom de' => $resa['nom'],
+        t('Date', 'Datum', $l) => ($l === 'de' ? date_de($resa['date'], true) : ucfirst(date_fr($resa['date'], true))),
+        t('Heure', 'Uhrzeit', $l) => heure_l($resa['heure'], $l),
+        t('Personnes', 'Personen', $l) => (string) $resa['couverts'],
+        t('Au nom de', 'Name', $l) => $resa['nom'],
     ];
     if (trim($resa['remarque'] ?? '') !== '') {
-        $o['Votre message'] = $resa['remarque'];
+        $o[t('Votre message', 'Ihre Nachricht', $l)] = $resa['remarque'];
     }
     return $o;
 }
 
 function lien_annulation(array $resa): string
 {
-    return rtrim(reglages()['site'], '/') . '/reserver/?annuler=' . $resa['jeton'];
+    return rtrim(reglages()['site'], '/') . '/reserver/?annuler=' . $resa['jeton'] . (langue_resa($resa) === 'de' ? '&lang=de' : '');
 }
 
-/** E-mail au client : 'recue' | 'confirmee' | 'refusee' | 'annulee' */
+/** E-mail au client : 'recue' | 'confirmee' | 'refusee' | 'annulee' | 'rappel', dans sa langue. */
 function mail_client(array $resa, string $type, string $message = ''): bool
 {
     if (!filter_var($resa['email'] ?? '', FILTER_VALIDATE_EMAIL)) {
         return false;
     }
     $r = reglages();
-    $quand = date_fr($resa['date']) . ' à ' . heure_fr($resa['heure']);
+    $l = langue_resa($resa);
+    $de = $l === 'de';
+    $tel = tel_client($l);
+    $jour = $de ? date_de($resa['date']) : date_fr($resa['date']);
+    $heure = heure_l($resa['heure'], $l);
+    $quand = $de ? "$jour, $heure" : "$jour à $heure";
     $soiree = ($resa['service'] === 'soir') ? evenement_du($resa['date']) : null;
     $recap = recap_resa($resa);
     if ($soiree && !$soiree['fermeture']) {
-        $recap = ['Soirée' => $soiree['titre'] . ($soiree['details'] ? "\n" . $soiree['details'] : '')] + $recap;
+        $recap = [t('Soirée', 'Abend', $l) => traduire($soiree['titre'], $l) . ($soiree['details'] ? "\n" . traduire($soiree['details'], $l) : '')] + $recap;
     }
+    $bonjour = $de ? "Guten Tag {$resa['nom']}," : "Bonjour {$resa['nom']},";
+    $mot_resto = trim($de ? ($r['mot_client_de'] ?? '') : $r['mot_client']);
     $mot = trim($message);
     $bouton = null;
     $pied = '';
+    $annuler = [t('Annuler ma réservation', 'Reservierung stornieren', $l), lien_annulation($resa)];
+    $empechement = $de
+        ? "Sie können doch nicht kommen? Bitte sagen Sie uns Bescheid, über den Button oben oder telefonisch unter $tel: So kann der Tisch an andere Gäste gehen."
+        : "Un empêchement ? Merci de nous prévenir en annulant avec le bouton ci-dessus ou au $tel : la table pourra profiter à d'autres clients.";
     switch ($type) {
         case 'recue':
-            $sujet = "Votre demande de réservation au 76 · $quand";
-            $titre = 'Demande bien reçue';
-            $p = [
-                "Bonjour {$resa['nom']},",
-                "Merci pour votre demande de réservation. Ce n'est pas encore une réservation confirmée : nous vérifions et vous envoyons très vite un e-mail de confirmation.",
-            ];
-            $pied = "Une question ou un changement ? Appelez-nous au {$r['telephone']}.";
+            $sujet = $de ? "Ihre Reservierungsanfrage im Le 76 · $quand" : "Votre demande de réservation au 76 · $quand";
+            $titre = t('Demande bien reçue', 'Anfrage erhalten', $l);
+            $p = [$bonjour, $de
+                ? 'Vielen Dank für Ihre Reservierungsanfrage. Die Reservierung ist noch nicht bestätigt: Wir prüfen sie und schicken Ihnen sehr bald eine Bestätigung per E-Mail.'
+                : "Merci pour votre demande de réservation. Ce n'est pas encore une réservation confirmée : nous vérifions et vous envoyons très vite un e-mail de confirmation."];
+            $pied = $de ? "Fragen oder Änderungen? Rufen Sie uns an: $tel." : "Une question ou un changement ? Appelez-nous au $tel.";
             break;
         case 'confirmee':
-            $sujet = "Réservation confirmée au 76 · $quand";
-            $titre = 'Votre table est réservée';
-            $p = ["Bonjour {$resa['nom']},", 'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !'];
+            $sujet = $de ? "Reservierung bestätigt im Le 76 · $quand" : "Réservation confirmée au 76 · $quand";
+            $titre = t('Votre table est réservée', 'Ihr Tisch ist reserviert', $l);
+            $p = [$bonjour, t('Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !', 'Gute Nachricht: Ihre Reservierung ist bestätigt. Wir freuen uns auf Ihren Besuch!', $l)];
             if ($mot !== '') {
                 $p[] = $mot;
             }
-            if (trim($r['mot_client']) !== '') {
-                $p[] = $r['mot_client'];
+            if ($mot_resto !== '') {
+                $p[] = $mot_resto;
             }
-            $bouton = ['Annuler ma réservation', lien_annulation($resa)];
-            $pied = "Un empêchement ? Merci de nous prévenir en annulant avec le bouton ci-dessus ou au {$r['telephone']} : la table pourra profiter à d'autres clients.";
+            $bouton = $annuler;
+            $pied = $empechement;
             break;
         case 'refusee':
-            $sujet = "Votre demande de réservation au 76 · $quand";
-            $titre = 'Désolés, nous sommes complets';
-            $p = ["Bonjour {$resa['nom']},", "Nous ne pouvons malheureusement pas vous accueillir pour cette date et cette heure."];
+            $sujet = $de ? "Ihre Reservierungsanfrage im Le 76 · $quand" : "Votre demande de réservation au 76 · $quand";
+            $titre = t('Désolés, nous sommes complets', 'Leider sind wir ausgebucht', $l);
+            $p = [$bonjour, t('Nous ne pouvons malheureusement pas vous accueillir pour cette date et cette heure.', 'Leider können wir Sie zu diesem Datum und dieser Uhrzeit nicht empfangen.', $l)];
             if ($mot !== '') {
                 $p[] = $mot;
             }
-            $p[] = "N'hésitez pas à faire une nouvelle demande pour un autre moment, ou à nous appeler au {$r['telephone']}.";
-            $bouton = ['Choisir une autre date', rtrim($r['site'], '/') . '/reserver/'];
+            $p[] = $de ? "Gerne können Sie eine neue Anfrage für einen anderen Termin stellen oder uns unter $tel anrufen."
+                : "N'hésitez pas à faire une nouvelle demande pour un autre moment, ou à nous appeler au $tel.";
+            $bouton = [t('Choisir une autre date', 'Anderes Datum wählen', $l), rtrim($r['site'], '/') . '/reserver/' . ($de ? '?lang=de' : '')];
             break;
         case 'rappel':
-            $sujet = "Rappel : votre table au 76 demain à " . heure_fr($resa['heure']);
-            $titre = 'À demain au 76 !';
-            $p = ["Bonjour {$resa['nom']},", "Petit rappel : nous avons le plaisir de vous accueillir demain, " . date_fr($resa['date']) . ' à ' . heure_fr($resa['heure']) . '.'];
-            if (trim($r['mot_client']) !== '') {
-                $p[] = $r['mot_client'];
+            $sujet = $de ? "Erinnerung: Ihr Tisch im Le 76 morgen um $heure" : "Rappel : votre table au 76 demain à $heure";
+            $titre = t('À demain au 76 !', 'Bis morgen im Le 76!', $l);
+            $p = [$bonjour, $de ? "Eine kleine Erinnerung: Wir freuen uns, Sie morgen, $jour, um $heure bei uns begrüßen zu dürfen."
+                : "Petit rappel : nous avons le plaisir de vous accueillir demain, $jour à $heure."];
+            if ($mot_resto !== '') {
+                $p[] = $mot_resto;
             }
-            $bouton = ['Annuler ma réservation', lien_annulation($resa)];
-            $pied = "Un empêchement ? Merci de nous prévenir en annulant avec le bouton ci-dessus ou au {$r['telephone']} : la table pourra profiter à d'autres clients.";
+            $bouton = $annuler;
+            $pied = $empechement;
             break;
         case 'annulee':
-            $sujet = "Réservation annulée · $quand";
-            $titre = 'Votre réservation est annulée';
-            $p = ["Bonjour {$resa['nom']},", "Votre réservation a bien été annulée."];
+            $sujet = $de ? "Reservierung storniert · $quand" : "Réservation annulée · $quand";
+            $titre = t('Votre réservation est annulée', 'Ihre Reservierung ist storniert', $l);
+            $p = [$bonjour, t('Votre réservation a bien été annulée.', 'Ihre Reservierung wurde storniert.', $l)];
             if ($mot !== '') {
                 $p[] = $mot;
             }
-            $p[] = 'À bientôt au 76 !';
+            $p[] = t('À bientôt au 76 !', 'Bis bald im Le 76!', $l);
             break;
         default:
             return false;
     }
-    [$html, $txt] = gabarit_mail($titre, $p, $recap, $bouton, $pied);
+    [$html, $txt] = gabarit_mail($titre, $p, $recap, $bouton, $pied, $l);
     return envoyer_mail($resa['email'], $sujet, $html, $txt);
 }
 
@@ -331,7 +357,7 @@ function alerter_equipe(array $resa, string $type): void
 {
     $r = reglages();
     $quand = ucfirst(date_fr($resa['date'])) . ' à ' . heure_fr($resa['heure']);
-    $qui = "{$resa['nom']} · {$resa['couverts']} pers.";
+    $qui = "{$resa['nom']} · {$resa['couverts']} pers." . (langue_resa($resa) === 'de' ? ' 🇩🇪' : '');
     if ($type === 'nouvelle') {
         $titre = "🔔 Nouvelle réservation : $qui";
         $corps = "$quand · à valider dans l'appli" . ($resa['remarque'] ? "\n« {$resa['remarque']} »" : '');
@@ -341,8 +367,11 @@ function alerter_equipe(array $resa, string $type): void
     }
     $lien = rtrim($r['site'], '/') . '/equipe/' . ($type === 'nouvelle' ? '#demandes' : '#jour=' . $resa['date']);
 
-    $recap = recap_resa($resa);
+    $recap = recap_resa(['langue' => 'fr'] + $resa);
     unset($recap['Votre message']);
+    if (langue_resa($resa) === 'de') {
+        $recap['Langue'] = '🇩🇪 Client allemand : ses e-mails partent en allemand';
+    }
     $recap['Téléphone'] = $resa['telephone'];
     $recap['E-mail'] = $resa['email'];
     if ($resa['remarque']) {

@@ -1,0 +1,618 @@
+[
+  {
+    "fr": "1 boule",
+    "de": "1 Kugel"
+  },
+  {
+    "fr": "1 boule café, 1 expresso et chantilly",
+    "de": "1 Kugel Kaffee, 1 Espresso und Sahne"
+  },
+  {
+    "fr": "1 boule pistache et 1 boule framboise, nappage pistache et framboises",
+    "de": "1 Kugel Pistazie und 1 Kugel Himbeere, Pistaziensoße und Himbeeren"
+  },
+  {
+    "fr": "1 expresso accompagné de ses mini-desserts",
+    "de": "1 Espresso mit kleinen Desserts"
+  },
+  {
+    "fr": "2 boules",
+    "de": "2 Kugeln"
+  },
+  {
+    "fr": "2 boules café, 1 expresso et chantilly · ou 2 boules chocolat noir, 1 chocolat chaud et chantilly",
+    "de": "2 Kugeln Kaffee, 1 Espresso und Sahne · oder 2 Kugeln Zartbitterschokolade, 1 heiße Schokolade und Sahne"
+  },
+  {
+    "fr": "2 boules pomme arrosées au calvados",
+    "de": "2 Kugeln Apfel mit Calvados übergossen"
+  },
+  {
+    "fr": "2 boules vanille, framboises chaudes et chantilly",
+    "de": "2 Kugeln Vanille, heiße Himbeeren und Sahne"
+  },
+  {
+    "fr": "3 boules",
+    "de": "3 Kugeln"
+  },
+  {
+    "fr": "3 boules vanille, sauce chocolat et chantilly",
+    "de": "3 Kugeln Vanille, Schokoladensoße und Sahne"
+  },
+  {
+    "fr": "85 € · 42,50 € pour les enfants jusqu'à 16 ans · orchestre Santa Lucia · réservation obligatoire",
+    "de": "85 € · 42,50 € für Kinder bis 16 Jahre · Orchester Santa Lucia · Reservierung erforderlich"
+  },
+  {
+    "fr": "Ananas, orange, pomme ou tomate · 20 cl",
+    "de": "Ananas, Orange, Apfel oder Tomate · 20 cl"
+  },
+  {
+    "fr": "Apéritifs & bières",
+    "de": "Aperitifs & Biere"
+  },
+  {
+    "fr": "Apérol, crémant, limonade, rondelles d'orange",
+    "de": "Aperol, Crémant, Limonade, Orangenscheiben"
+  },
+  {
+    "fr": "Avec l'orchestre Santa Lucia · menu anniversaire 29 €",
+    "de": "Mit dem Orchester Santa Lucia · Jubiläumsmenü 29 €"
+  },
+  {
+    "fr": "Beurre blanc, fondue de poireaux & pommes de terre grenailles rôties",
+    "de": "Beurre blanc, geschmorter Lauch & geröstete Drillinge"
+  },
+  {
+    "fr": "Bière Licorne",
+    "de": "Licorne-Bier"
+  },
+  {
+    "fr": "Bière Weizen Hefe Hell",
+    "de": "Weizenbier Hefe Hell"
+  },
+  {
+    "fr": "Bière du moment",
+    "de": "Bier des Moments"
+  },
+  {
+    "fr": "Bière sans alcool",
+    "de": "Alkoholfreies Bier"
+  },
+  {
+    "fr": "Boissons",
+    "de": "Getränke"
+  },
+  {
+    "fr": "Boissons chaudes",
+    "de": "Heiße Getränke"
+  },
+  {
+    "fr": "Bonne table · Bons moments",
+    "de": "Gutes Essen · Schöne Momente"
+  },
+  {
+    "fr": "Bœuf mijoté au vin rouge, lardons, champignons & petits oignons, pommes de terre grenailles rôties",
+    "de": "In Rotwein geschmortes Rindfleisch, Speck, Champignons & Perlzwiebeln, geröstete Drillinge"
+  },
+  {
+    "fr": "Café",
+    "de": "Kaffee"
+  },
+  {
+    "fr": "Café rallongé",
+    "de": "Kaffee lang"
+  },
+  {
+    "fr": "Carola bleue, verte ou rouge",
+    "de": "Carola blau, grün oder rot"
+  },
+  {
+    "fr": "Carte d'automne",
+    "de": "Herbstkarte"
+  },
+  {
+    "fr": "Cassis, pêche, pamplemousse, violette ou mûre · 12,5 cl",
+    "de": "Cassis, Pfirsich, Grapefruit, Veilchen oder Brombeere · 12,5 cl"
+  },
+  {
+    "fr": "Champignons & crème de parmesan",
+    "de": "Champignons & Parmesancreme"
+  },
+  {
+    "fr": "Chaque 1er vendredi du mois",
+    "de": "Jeden 1. Freitag im Monat"
+  },
+  {
+    "fr": "Chocolat chaud",
+    "de": "Heiße Schokolade"
+  },
+  {
+    "fr": "Coupe Calvados",
+    "de": "Calvados-Becher"
+  },
+  {
+    "fr": "Coupe de Crémant nature ou rosé",
+    "de": "Glas Crémant weiß oder rosé"
+  },
+  {
+    "fr": "Coupe l'Incroyable",
+    "de": "Becher „L'Incroyable“"
+  },
+  {
+    "fr": "Crème citronnée & blinis · petite ou grande assiette",
+    "de": "Zitronencreme & Blinis · kleiner oder großer Teller"
+  },
+  {
+    "fr": "Crème de châtaigne, noisettes torréfiées",
+    "de": "Maronencreme, geröstete Haselnüsse"
+  },
+  {
+    "fr": "Crème, fromage blanc, lardons & oignons",
+    "de": "Sahne, Quark, Speck & Zwiebeln"
+  },
+  {
+    "fr": "Crème, fromage blanc, lardons, oignons & champignons",
+    "de": "Sahne, Quark, Speck, Zwiebeln & Champignons"
+  },
+  {
+    "fr": "Crème, fromage blanc, lardons, oignons & emmental",
+    "de": "Sahne, Quark, Speck, Zwiebeln & Emmentaler"
+  },
+  {
+    "fr": "Crème, fromage blanc, lardons, oignons & munster",
+    "de": "Sahne, Quark, Speck, Zwiebeln & Münsterkäse"
+  },
+  {
+    "fr": "Crème, fromage blanc, lardons, oignons, ail & persil",
+    "de": "Sahne, Quark, Speck, Zwiebeln, Knoblauch & Petersilie"
+  },
+  {
+    "fr": "Crème, fromage blanc, lardons, oignons, champignons & emmental",
+    "de": "Sahne, Quark, Speck, Zwiebeln, Champignons & Emmentaler"
+  },
+  {
+    "fr": "Cuisine · Partage · Convivialité",
+    "de": "Küche · Teilen · Geselligkeit"
+  },
+  {
+    "fr": "Des produits de saison, des assiettes gourmandes.",
+    "de": "Saisonale Produkte, genussvolle Gerichte."
+  },
+  {
+    "fr": "Des produits de saison, des émotions toute l'année.",
+    "de": "Saisonale Produkte, Genuss das ganze Jahr."
+  },
+  {
+    "fr": "Desserts",
+    "de": "Desserts"
+  },
+  {
+    "fr": "Diabolo",
+    "de": "Diabolo"
+  },
+  {
+    "fr": "Digestifs",
+    "de": "Digestifs"
+  },
+  {
+    "fr": "Double expresso",
+    "de": "Doppelter Espresso"
+  },
+  {
+    "fr": "Déca",
+    "de": "Entkoffeinierter Kaffee"
+  },
+  {
+    "fr": "Entrées",
+    "de": "Vorspeisen"
+  },
+  {
+    "fr": "Entrées & signatures",
+    "de": "Vorspeisen & Klassiker"
+  },
+  {
+    "fr": "Et sa boule de glace vanille",
+    "de": "Mit einer Kugel Vanilleeis"
+  },
+  {
+    "fr": "Et ses noisettes, avec sa boule de glace noisette",
+    "de": "Mit Haselnüssen und einer Kugel Haselnusseis"
+  },
+  {
+    "fr": "Expresso",
+    "de": "Espresso"
+  },
+  {
+    "fr": "Fermeture du samedi 19 au samedi 26 décembre inclus",
+    "de": "Geschlossen von Samstag, 19. bis einschließlich Samstag, 26. Dezember"
+  },
+  {
+    "fr": "Framboise, Mirabelle, Poire Williams",
+    "de": "Himbeere, Mirabelle, Williamsbirne"
+  },
+  {
+    "fr": "Frites & salade",
+    "de": "Pommes frites & Salat"
+  },
+  {
+    "fr": "Gin Hendrick's, Schweppes tonic, rondelles de citron jaune",
+    "de": "Hendrick's Gin, Schweppes Tonic, Zitronenscheiben"
+  },
+  {
+    "fr": "Gin, cidre de pomme, jus de citron, sirop d'érable",
+    "de": "Gin, Apfelcidre, Zitronensaft, Ahornsirup"
+  },
+  {
+    "fr": "Girolles persillées, jus de veau & pommes de terre grenailles rôties",
+    "de": "Pfifferlinge mit Petersilie, Kalbsjus & geröstete Drillinge"
+  },
+  {
+    "fr": "Grenadine, fraise, citron, violette, menthe ou pêche · 25 cl",
+    "de": "Grenadine, Erdbeere, Zitrone, Veilchen, Minze oder Pfirsich · 25 cl"
+  },
+  {
+    "fr": "Grenadine, fraise, citron, violette, menthe ou pêche · 33 cl",
+    "de": "Grenadine, Erdbeere, Zitrone, Veilchen, Minze oder Pfirsich · 33 cl"
+  },
+  {
+    "fr": "Halloween : le Grand Bal des Sorcières",
+    "de": "Halloween: Der große Hexenball"
+  },
+  {
+    "fr": "Infusion",
+    "de": "Kräutertee"
+  },
+  {
+    "fr": "Irish café",
+    "de": "Irish Coffee"
+  },
+  {
+    "fr": "J&B, Jameson, Tequila, Gin Hendrick's ou Vodka",
+    "de": "J&B, Jameson, Tequila, Hendrick's Gin oder Wodka"
+  },
+  {
+    "fr": "Jean-Claude · moules-frites à volonté",
+    "de": "Jean-Claude · Muscheln mit Pommes frites, so viel Sie wollen"
+  },
+  {
+    "fr": "Jus d'orange, cranberry, citron, sirop de gingembre",
+    "de": "Orangensaft, Cranberry, Zitrone, Ingwersirup"
+  },
+  {
+    "fr": "Jus de fruits",
+    "de": "Fruchtsäfte"
+  },
+  {
+    "fr": "Jus de pomme, crémant, Cointreau, bâton de cannelle",
+    "de": "Apfelsaft, Crémant, Cointreau, Zimtstange"
+  },
+  {
+    "fr": "Jus de pomme, sirop de caramel, jus de citron, eau pétillante",
+    "de": "Apfelsaft, Karamellsirup, Zitronensaft, Sprudelwasser"
+  },
+  {
+    "fr": "Kir Royal au Crémant",
+    "de": "Kir Royal mit Crémant"
+  },
+  {
+    "fr": "Kir au vin blanc",
+    "de": "Kir mit Weißwein"
+  },
+  {
+    "fr": "La carte d'automne",
+    "de": "Die Herbstkarte"
+  },
+  {
+    "fr": "Le 76 fête ses 10 ans !",
+    "de": "Das 76 feiert 10 Jahre!"
+  },
+  {
+    "fr": "Les Soirées du 76",
+    "de": "Die Abende im 76"
+  },
+  {
+    "fr": "Les boissons",
+    "de": "Die Getränke"
+  },
+  {
+    "fr": "Les prochaines dates",
+    "de": "Die nächsten Termine"
+  },
+  {
+    "fr": "Limonade",
+    "de": "Limonade"
+  },
+  {
+    "fr": "Liqueur de sureau, limonade, crémant, citron jaune",
+    "de": "Holunderlikör, Limonade, Crémant, Zitrone"
+  },
+  {
+    "fr": "Martini rouge ou blanc",
+    "de": "Martini rot oder weiß"
+  },
+  {
+    "fr": "Menu 25 € : feuilleté aux champignons, palette fumée braisée sauce moutarde à l'ancienne et gratin dauphinois, strudel aux pommes",
+    "de": "Menü 25 €: Blätterteig mit Champignons, geschmortes Schäufele mit Senfsoße und Gratin dauphinois, Apfelstrudel"
+  },
+  {
+    "fr": "Menu 27 € : saumon fumé, suprême de pintade sauce forestière, bûche de Noël",
+    "de": "Menü 27 €: Räucherlachs, Perlhuhnbrust mit Pilzsoße, Weihnachtsbaumkuchen (Bûche de Noël)"
+  },
+  {
+    "fr": "Menu 32 € · dessert des amoureux",
+    "de": "Menü 32 € · Dessert für Verliebte"
+  },
+  {
+    "fr": "Menu enfants · Kindermenü",
+    "de": "Kindermenü"
+  },
+  {
+    "fr": "Menu spécial 29,90 € · concours du plus beau déguisement · soirée dansante",
+    "de": "Spezialmenü 29,90 € · Kostümwettbewerb · Tanzabend"
+  },
+  {
+    "fr": "Miel, noix, pommes & jambon cru · petite ou grande assiette",
+    "de": "Honig, Walnüsse, Äpfel & Rohschinken · kleiner oder großer Teller"
+  },
+  {
+    "fr": "Monaco, Panaché ou Tango Radler",
+    "de": "Monaco, Panaché oder Tango Radler"
+  },
+  {
+    "fr": "Moules-frites à volonté",
+    "de": "Muscheln mit Pommes frites, so viel Sie wollen"
+  },
+  {
+    "fr": "Nos desserts",
+    "de": "Unsere Desserts"
+  },
+  {
+    "fr": "Nos entrées & plats signatures",
+    "de": "Unsere Vorspeisen & Klassiker"
+  },
+  {
+    "fr": "Nos parfums de glaces · Unsere Eissorten",
+    "de": "Unsere Eissorten"
+  },
+  {
+    "fr": "Nuggets frites + glace HARIBO push up",
+    "de": "Nuggets mit Pommes frites + HARIBO Push-up-Eis"
+  },
+  {
+    "fr": "On dîne, on trinque et on chante ! Ambiance garantie, même pour les timides.",
+    "de": "Essen, anstoßen und singen! Stimmung garantiert, auch für Schüchterne."
+  },
+  {
+    "fr": "Onglet à volonté + blind test avec KJ Patric",
+    "de": "Onglet-Steak, so viel Sie wollen + Musikquiz mit KJ Patric"
+  },
+  {
+    "fr": "Onglet à volonté 29,90 €",
+    "de": "Onglet-Steak, so viel Sie wollen: 29,90 €"
+  },
+  {
+    "fr": "Pain rustique, steak haché 150 g, cheddar, champignons persillés, poitrine fumée croustillante, oignons confits au vin rouge & sauce maison. Frites",
+    "de": "Landbrot, 150 g Rindfleisch-Patty, Cheddar, Champignons mit Petersilie, knuspriger Räucherspeck, in Rotwein geschmorte Zwiebeln & Haussoße. Pommes frites"
+  },
+  {
+    "fr": "Pepsi ou Pepsi Max",
+    "de": "Pepsi oder Pepsi Max"
+  },
+  {
+    "fr": "Picon ou Cynar",
+    "de": "Picon oder Cynar"
+  },
+  {
+    "fr": "Plats signatures · nos incontournables",
+    "de": "Unsere Klassiker"
+  },
+  {
+    "fr": "Pomme Caramel Fizz · sans alcool",
+    "de": "Apfel-Karamell-Fizz · alkoholfrei"
+  },
+  {
+    "fr": "Porto, Suze ou Campari",
+    "de": "Portwein, Suze oder Campari"
+  },
+  {
+    "fr": "Pour connaître le thème des prochaines soirées, appelez-nous ou demandez au restaurant. Et pensez à réserver, les places partent vite !",
+    "de": "Das Thema der nächsten Abende erfahren Sie telefonisch oder im Restaurant. Und denken Sie ans Reservieren, die Plätze sind schnell vergeben!"
+  },
+  {
+    "fr": "Prix nets, service compris · Liste des allergènes disponible sur demande · Alle Preise inkl. Service",
+    "de": "Alle Preise inkl. Service · Allergenliste auf Anfrage"
+  },
+  {
+    "fr": "Purée de patates douces, endives braisées & noisettes torréfiées",
+    "de": "Süßkartoffelpüree, geschmorter Chicorée & geröstete Haselnüsse"
+  },
+  {
+    "fr": "Restaurant fermé",
+    "de": "Restaurant geschlossen"
+  },
+  {
+    "fr": "Rhum arrangé du moment",
+    "de": "Hausgemachter Rum des Moments"
+  },
+  {
+    "fr": "Rhum brun, jus d'orange, jus de cranberry, jus de citron jaune",
+    "de": "Brauner Rum, Orangensaft, Cranberrysaft, Zitronensaft"
+  },
+  {
+    "fr": "Ricard, Ricard tomate ou Perroquet",
+    "de": "Ricard, Ricard Tomate oder Perroquet"
+  },
+  {
+    "fr": "Rubis d'automne",
+    "de": "Herbstrubin"
+  },
+  {
+    "fr": "Rubis pétillant · sans alcool",
+    "de": "Prickelnder Rubin · alkoholfrei"
+  },
+  {
+    "fr": "Régulièrement le samedi soir",
+    "de": "Regelmäßig am Samstagabend"
+  },
+  {
+    "fr": "Réveillon du Nouvel An",
+    "de": "Silvesterabend"
+  },
+  {
+    "fr": "Sa crème de spéculoos et sa boule de glace vanille",
+    "de": "Mit Spekulatiuscreme und einer Kugel Vanilleeis"
+  },
+  {
+    "fr": "Saint-Valentin avec Santa Lucia",
+    "de": "Valentinstag mit Santa Lucia"
+  },
+  {
+    "fr": "Saison de bons moments",
+    "de": "Eine Saison voller schöner Momente"
+  },
+  {
+    "fr": "Sauce moutarde à l'ancienne & miel, endives braisées, pommes de terre grenailles rôties",
+    "de": "Senf-Honig-Soße, geschmorter Chicorée, geröstete Drillinge"
+  },
+  {
+    "fr": "Sauce ou chantilly",
+    "de": "Soße oder Sahne"
+  },
+  {
+    "fr": "Schweppes tonic ou agrume",
+    "de": "Schweppes Tonic oder Zitrus"
+  },
+  {
+    "fr": "Seulement le soir",
+    "de": "Nur abends"
+  },
+  {
+    "fr": "Sirop",
+    "de": "Sirup"
+  },
+  {
+    "fr": "Sirop à l'eau",
+    "de": "Sirup mit Wasser"
+  },
+  {
+    "fr": "Softs",
+    "de": "Softdrinks"
+  },
+  {
+    "fr": "Soirée avec l'orchestre Santa Lucia",
+    "de": "Abend mit dem Orchester Santa Lucia"
+  },
+  {
+    "fr": "Soirée cordon bleu XXL",
+    "de": "Cordon-bleu-XXL-Abend"
+  },
+  {
+    "fr": "Soirée de Noël avec l'orchestre Santa Lucia",
+    "de": "Weihnachtsabend mit dem Orchester Santa Lucia"
+  },
+  {
+    "fr": "Soirée karaoké",
+    "de": "Karaoke-Abend"
+  },
+  {
+    "fr": "Soirée karaoké avec KJ Patric",
+    "de": "Karaoke-Abend mit KJ Patric"
+  },
+  {
+    "fr": "Soirée montagnarde avec Valery's",
+    "de": "Bergabend mit Valery's"
+  },
+  {
+    "fr": "Soirées à thème",
+    "de": "Themenabende"
+  },
+  {
+    "fr": "Supplément portion de frites, sauce ou tout autre supplément : + 4 €",
+    "de": "Extra-Portion Pommes frites, Soße oder sonstige Extras: + 4 €"
+  },
+  {
+    "fr": "Tartes flambées",
+    "de": "Flammkuchen"
+  },
+  {
+    "fr": "Tequila, jus d'orange, sirop de grenadine",
+    "de": "Tequila, Orangensaft, Grenadinesirup"
+  },
+  {
+    "fr": "Thé glacé",
+    "de": "Eistee"
+  },
+  {
+    "fr": "Thé noir",
+    "de": "Schwarzer Tee"
+  },
+  {
+    "fr": "Thé vert menthe",
+    "de": "Grüner Tee mit Minze"
+  },
+  {
+    "fr": "Toujours nos incontournables !",
+    "de": "Immer unsere Klassiker!"
+  },
+  {
+    "fr": "Tradition, gourmandise et esprit alsacien.",
+    "de": "Tradition, Genuss und elsässisches Flair."
+  },
+  {
+    "fr": "Un goût d'automne",
+    "de": "Ein Hauch von Herbst"
+  },
+  {
+    "fr": "Un goût d'automne.",
+    "de": "Ein Hauch von Herbst."
+  },
+  {
+    "fr": "Un thème, un menu spécial, une ambiance : de quoi passer un samedi soir qui sort de l'ordinaire.",
+    "de": "Ein Thema, ein besonderes Menü, eine Stimmung: für einen Samstagabend der etwas anderen Art."
+  },
+  {
+    "fr": "Une création renouvelée au fil des saisons · demandez-nous !",
+    "de": "Eine Kreation, die sich mit den Jahreszeiten ändert · fragen Sie uns!"
+  },
+  {
+    "fr": "Une tarte pour chaque envie !",
+    "de": "Ein Flammkuchen für jeden Geschmack!"
+  },
+  {
+    "fr": "Verveine ou verveine menthe",
+    "de": "Eisenkraut oder Eisenkraut-Minze"
+  },
+  {
+    "fr": "citron jaune, framboise et pomme",
+    "de": "Zitrone, Himbeere und Apfel"
+  },
+  {
+    "fr": "vanille, café, chocolat noir, pistache, noisette, rhum-raisin et stracciatella",
+    "de": "Vanille, Kaffee, Zartbitterschokolade, Pistazie, Haselnuss, Rum-Rosine und Stracciatella"
+  },
+  {
+    "fr": "À chaque saison ses saveurs !",
+    "de": "Jede Jahreszeit hat ihren Geschmack!"
+  },
+  {
+    "fr": "À demander au serveur",
+    "de": "Fragen Sie das Servicepersonal"
+  },
+  {
+    "fr": "À la carte",
+    "de": "À la carte"
+  },
+  {
+    "fr": "À la vanille, et sa boule de glace vanille",
+    "de": "Mit Vanille und einer Kugel Vanilleeis"
+  },
+  {
+    "fr": "🎤 Prochaine :",
+    "de": "🎤 Nächster Termin:"
+  },
+  {
+    "fr": "📞 Le programme au 03 88 86 31 87",
+    "de": "📞 Das Programm unter +33 3 88 86 31 87"
+  }
+]

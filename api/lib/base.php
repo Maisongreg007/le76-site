@@ -88,6 +88,9 @@ function creer_tables(PDO $pdo): void
     if (!in_array('rappel_envoye', $cols, true)) {
         $pdo->exec("ALTER TABLE reservations ADD COLUMN rappel_envoye INTEGER NOT NULL DEFAULT 0");
     }
+    if (!in_array('langue', $cols, true)) {
+        $pdo->exec("ALTER TABLE reservations ADD COLUMN langue TEXT NOT NULL DEFAULT 'fr'");
+    }
     $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_resa_jeton ON reservations(jeton)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS utilisateurs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,6 +135,9 @@ function creer_tables(PDO $pdo): void
         desinscrit_le TEXT,
         jeton TEXT NOT NULL
     )");
+    if (!in_array('langue', array_column($pdo->query("PRAGMA table_info(abonnes)")->fetchAll(), 'name'), true)) {
+        $pdo->exec("ALTER TABLE abonnes ADD COLUMN langue TEXT NOT NULL DEFAULT 'fr'");
+    }
     $pdo->exec("CREATE TABLE IF NOT EXISTS reinit_mdp (jeton TEXT PRIMARY KEY, utilisateur_id INTEGER NOT NULL, expire INTEGER NOT NULL)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS journal_mails (id INTEGER PRIMARY KEY AUTOINCREMENT, quand TEXT NOT NULL, a TEXT NOT NULL, sujet TEXT NOT NULL, ok INTEGER NOT NULL)");
 }
@@ -183,6 +189,7 @@ function reglages_defaut(): array
         'adresse' => '76 rue Principale, 67930 Beinheim',
         'site' => 'https://le76.fr',
         'mot_client' => '',
+        'mot_client_de' => '',
     ];
 }
 
@@ -297,7 +304,7 @@ function nettoyer_reglages(array $n, array $actuel): array
     if (isset($n['expediteur']) && filter_var(trim((string) $n['expediteur']), FILTER_VALIDATE_EMAIL)) {
         $o['expediteur'] = trim((string) $n['expediteur']);
     }
-    foreach (['nom' => 60, 'telephone' => 30, 'adresse' => 120, 'site' => 120, 'mot_client' => 600] as $c => $lg) {
+    foreach (['nom' => 60, 'telephone' => 30, 'adresse' => 120, 'site' => 120, 'mot_client' => 600, 'mot_client_de' => 600] as $c => $lg) {
         if (isset($n[$c]) && is_string($n[$c])) {
             $o[$c] = mb_substr(trim($n[$c]), 0, $lg);
         }
@@ -583,6 +590,65 @@ function heure_fr(string $h): string
     return str_replace(':', 'h', $h);
 }
 
+/* ------------------------------------------------------------------ */
+/* Langue (français par défaut, allemand pour les clients allemands)   */
+/* ------------------------------------------------------------------ */
+
+/** Langue de la requête en cours : 'de' ou 'fr'. */
+function langue(?string $choisir = null): string
+{
+    static $l = 'fr';
+    if ($choisir !== null) {
+        $l = $choisir === 'de' ? 'de' : 'fr';
+    }
+    return $l;
+}
+
+/** Texte en français ou en allemand selon la langue en cours (ou celle donnée). */
+function t(string $fr, string $de, ?string $l = null): string
+{
+    return ($l ?? langue()) === 'de' ? $de : $fr;
+}
+
+/** Traduction d'un texte du site (contenu/traductions.json), sinon le texte d'origine. */
+function traduire(string $texte, ?string $l = null): string
+{
+    static $tr = null;
+    if (($l ?? langue()) !== 'de' || trim($texte) === '') {
+        return $texte;
+    }
+    if ($tr === null) {
+        $tr = [];
+        $f = dirname(__DIR__, 2) . '/contenu/traductions.json';
+        foreach ((is_file($f) ? json_decode((string) file_get_contents($f), true) : []) ?: [] as $e) {
+            if (!empty($e['fr']) && !empty($e['de'])) {
+                $tr[trim($e['fr'])] = $e['de'];
+            }
+        }
+    }
+    return $tr[trim($texte)] ?? $texte;
+}
+
+function date_de(string $date, bool $avec_annee = false): string
+{
+    static $jours = ['', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+    static $mois = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    $t = strtotime($date);
+    return $jours[(int) date('N', $t)] . ', ' . date('j', $t) . '. ' . $mois[(int) date('n', $t)] . ($avec_annee ? ' ' . date('Y', $t) : '');
+}
+
+/** Date dans la langue voulue (« samedi 28 novembre » / « Samstag, 28. November »). */
+function date_l(string $date, bool $avec_annee = false, ?string $l = null): string
+{
+    return ($l ?? langue()) === 'de' ? date_de($date, $avec_annee) : date_fr($date, $avec_annee);
+}
+
+/** Heure dans la langue voulue (« 19h30 » / « 19:30 Uhr »). */
+function heure_l(string $h, ?string $l = null): string
+{
+    return ($l ?? langue()) === 'de' ? "$h Uhr" : heure_fr($h);
+}
+
 function repondre($donnees, int $code = 200): never
 {
     http_response_code($code);
@@ -614,7 +680,7 @@ function resa_publique(array $r): array
 {
     return [
         'date' => $r['date'],
-        'date_texte' => date_fr($r['date'], true),
+        'date_texte' => date_l($r['date'], true),
         'heure' => $r['heure'],
         'couverts' => (int) $r['couverts'],
         'nom' => $r['nom'],

@@ -6,6 +6,8 @@
 <title>Réserver une table · Le 76 · Beinheim</title>
 <meta name="description" content="Réservez votre table au 76, restaurant au 76 rue Principale à Beinheim. Demande en ligne, confirmation par e-mail.">
 <link rel="canonical" href="https://le76.fr/reserver/">
+<link rel="alternate" hreflang="fr" href="https://le76.fr/reserver/">
+<link rel="alternate" hreflang="de" href="https://le76.fr/reserver/?lang=de">
 <meta name="theme-color" content="#fbf5ec">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232b1d16'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='32' font-weight='700' fill='%23d4953f' text-anchor='middle'%3E76%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +35,9 @@
   .brand span { font: 700 1.95rem/1 var(--script); color: var(--gold); }
   .back { color: var(--brown); text-decoration: none; font-weight: 500; font-size: .95rem; }
   .back:hover { color: var(--rust); }
+  .hd-r { display: flex; align-items: center; gap: 14px; }
+  .lang { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--brown); text-decoration: none; font-size: .8rem; font-weight: 600; letter-spacing: .06em; }
+  .lang:hover { border-color: var(--gold); color: var(--brown); }
 
   .intro { padding: 18px 0 26px; text-align: center; }
   .kicker { font: 600 .74rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 12px; }
@@ -134,8 +139,8 @@
 <body>
 <div class="wrap">
   <header>
-    <a class="brand" href="/" aria-label="Le 76, retour au site"><b>Le</b><span>76</span></a>
-    <a class="back" href="/">← Retour au site</a>
+    <a class="brand" id="brandLink" href="/" aria-label="Le 76"><b>Le</b><span>76</span></a>
+    <div class="hd-r"><a class="lang" id="langBtn" href="#">DE</a><a class="back" id="backLink" href="/">← Retour au site</a></div>
   </header>
 
   <div class="intro">
@@ -151,20 +156,62 @@
 
   <main id="app"><div class="card"><div class="loading">Chargement des disponibilités…</div></div></main>
 
-  <footer>Le 76 · 76 rue Principale, 67930 Beinheim · <a href="tel:+33388863187">03 88 86 31 87</a><br>
-    Vos coordonnées servent uniquement à gérer votre réservation. · <a href="/mentions-legales.html">Mentions légales</a></footer>
+  <footer>Le 76 · 76 rue Principale, 67930 Beinheim<span class="de-only" hidden>, Frankreich</span> · <a href="tel:+33388863187" id="telPied">03 88 86 31 87</a><br>
+    <span id="piedTxt">Vos coordonnées servent uniquement à gérer votre réservation.</span> · <a href="/mentions-legales.html" id="mentions">Mentions légales</a></footer>
 </div>
 
 <script>
 (() => {
   const API = '/api/reservation.php';
   const app = document.getElementById('app');
-  const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-  const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  // Langue : ?lang=de / ?lang=fr, sinon le choix déjà fait, sinon la langue du navigateur
+  const qs = new URLSearchParams(location.search);
+  let LANG = qs.get('lang');
+  if (LANG !== 'de' && LANG !== 'fr') { LANG = null; try { LANG = localStorage.getItem('le76_langue'); } catch (e) {} }
+  if (LANG !== 'de' && LANG !== 'fr') LANG = /^de/i.test(navigator.language || '') ? 'de' : 'fr';
+  const DE = LANG === 'de';
+  const L = (fr, de) => DE ? de : fr;
+  const MOIS = DE ? ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'] : ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const JOURS = DE ? ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'] : ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  const TEL = DE ? '+33 3 88 86 31 87' : '03 88 86 31 87';
+  const pers = n => DE ? `${n} ${n > 1 ? 'Personen' : 'Person'}` : `${n} personne${n > 1 ? 's' : ''}`;
+  const quand = (d, h) => DE ? `${dateFr(d)}, ${h} Uhr` : `${dateFr(d)} à ${hFr(h)}`;
+  const accueil = DE ? '/de/' : '/';
+
+  // Textes fixes de la page
+  (function traduirePage() {
+    const btn = document.getElementById('langBtn');
+    btn.textContent = DE ? 'FR' : 'DE';
+    btn.title = DE ? 'Version française' : 'Deutsche Version';
+    btn.onclick = ev => {
+      ev.preventDefault();
+      const autre = DE ? 'fr' : 'de';
+      try { localStorage.setItem('le76_langue', autre); } catch (e) {}
+      const u = new URL(location.href); u.searchParams.set('lang', autre); location.href = u.toString();
+    };
+    try { if (qs.get('lang')) localStorage.setItem('le76_langue', LANG); } catch (e) {}
+    document.getElementById('brandLink').href = accueil;
+    document.getElementById('backLink').href = accueil;
+    if (!DE) return;
+    document.documentElement.lang = 'de';
+    document.title = 'Tisch reservieren · Le 76 · Beinheim (Elsass)';
+    document.getElementById('backLink').textContent = '← Zur Website';
+    document.querySelector('.intro .kicker').textContent = 'Reservierung';
+    document.querySelector('.intro h1').innerHTML = 'Einen <em>Tisch</em> reservieren';
+    document.querySelector('.intro p').textContent = 'Ihre Anfrage dauert nur wenige Sekunden, die Bestätigung erhalten Sie per E-Mail.';
+    document.querySelector('#dixResa > div > b').textContent = '🎉 Das 76 feiert 10 Jahre';
+    document.querySelector('#dixResa > div > b').nextSibling.textContent = ' · Samstag, 28. November, 20 Uhr';
+    document.getElementById('dixChoisir').textContent = 'Dieses Datum wählen';
+    document.querySelector('#app .loading').textContent = 'Verfügbarkeiten werden geladen…';
+    document.querySelector('.de-only').hidden = false;
+    document.getElementById('telPied').textContent = TEL;
+    document.getElementById('piedTxt').textContent = 'Ihre Daten dienen ausschließlich der Verwaltung Ihrer Reservierung.';
+    document.getElementById('mentions').textContent = 'Impressum / Datenschutz';
+  })();
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const hFr = h => h.replace(':', 'h');
+  const hFr = h => DE ? h : h.replace(':', 'h');
   const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date(y, m - 1, j); };
-  const dateFr = d => { const x = parse(d), j = x.getDate(); const t = `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
+  const dateFr = d => { const x = parse(d), j = x.getDate(); if (DE) return `${JOURS[x.getDay()]}, ${j}. ${MOIS[x.getMonth()]}`; const t = `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
   const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 
   let data, parJour = {};
@@ -173,14 +220,14 @@
   const mobileOk = t => { const d = t.replace(/[\s.\-\/()]/g, ''); return /^(?:\+33|0033|0)[67]\d{8}$/.test(d) || /^(?:\+49|0049|0)1[5-7]\d{8,9}$/.test(d) || /^\+(?!33|49)\d{8,15}$/.test(d); };
 
   async function api(body) {
-    const opts = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
-    const url = body ? API : API + '?action=calendrier';
+    const opts = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, lang: LANG }) } : {};
+    const url = body ? API : API + '?action=calendrier&lang=' + LANG;
     const r = await fetch(url, opts);
-    let d; try { d = await r.json(); } catch { d = { ok: false, erreur: 'Le service de réservation ne répond pas. Appelez-nous au 03 88 86 31 87.' }; }
+    let d; try { d = await r.json(); } catch { d = { ok: false, erreur: L('Le service de réservation ne répond pas. Appelez-nous au 03 88 86 31 87.', 'Der Reservierungsdienst antwortet nicht. Bitte rufen Sie uns an: +33 3 88 86 31 87.') }; }
     return d;
   }
 
-  const tel = () => `<a href="tel:+33${(data?.telephone || '03 88 86 31 87').replace(/\D/g, '').slice(1)}">${esc(data?.telephone || '03 88 86 31 87')}</a>`;
+  const tel = () => { const t = data?.telephone || '03 88 86 31 87'; return `<a href="tel:+33${t.replace(/\D/g, '').slice(1)}">${esc(DE && t[0] === '0' ? '+33 ' + t.slice(1) : t)}</a>`; };
 
   function etatJour(j) {
     if (!j) return 'hors';
@@ -195,22 +242,22 @@
     const m = st.mois;
     const debut = new Date(m.getFullYear(), m.getMonth(), 1);
     const nbJ = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
-    let cases = ['lun','mar','mer','jeu','ven','sam','dim'].map(d => `<div class="dow">${d}</div>`).join('');
+    let cases = (DE ? ['Mo','Di','Mi','Do','Fr','Sa','So'] : ['lun','mar','mer','jeu','ven','sam','dim']).map(d => `<div class="dow">${d}</div>`).join('');
     for (let i = 0; i < (debut.getDay() + 6) % 7; i++) cases += '<div></div>';
     for (let j = 1; j <= nbJ; j++) {
       const d = iso(new Date(m.getFullYear(), m.getMonth(), j));
       const jour = parJour[d], e = etatJour(jour);
       const soiree = jour && jour.services.soir.soiree;
-      const titre = e === 'dispo' ? '' : e === 'complet' ? 'Complet en ligne' : 'Fermé';
+      const titre = e === 'dispo' ? '' : e === 'complet' ? L('Complet en ligne', 'Online ausgebucht') : L('Fermé', 'Geschlossen');
       cases += `<button type="button" class="day ${e}${st.date === d ? ' sel' : ''}" data-d="${d}" ${e === 'dispo' || (jour && Object.values(jour.services).some(v => v.commence)) ? '' : 'disabled'} title="${titre}${soiree ? ' · ' + esc(soiree.titre) : ''}" aria-label="${dateFr(d)}${titre ? ', ' + titre : ''}">${j}${soiree ? '<span class="star">✦</span>' : ''}</button>`;
     }
     const prevOk = m > new Date(premier.getFullYear(), premier.getMonth(), 1);
     const nextOk = new Date(m.getFullYear(), m.getMonth() + 1, 1) <= dernier;
-    return `<div class="cal-head"><button type="button" data-mois="-1" ${prevOk ? '' : 'disabled'} aria-label="Mois précédent">‹</button>
+    return `<div class="cal-head"><button type="button" data-mois="-1" ${prevOk ? '' : 'disabled'} aria-label="${L('Mois précédent', 'Vorheriger Monat')}">‹</button>
       <strong>${MOIS[m.getMonth()]} ${m.getFullYear()}</strong>
-      <button type="button" data-mois="1" ${nextOk ? '' : 'disabled'} aria-label="Mois suivant">›</button></div>
+      <button type="button" data-mois="1" ${nextOk ? '' : 'disabled'} aria-label="${L('Mois suivant', 'Nächster Monat')}">›</button></div>
       <div class="grid">${cases}</div>
-      <div class="legend"><span><i style="background:var(--green-bg);border:1px solid #cfe1cb"></i>Disponible</span><span><i style="background:#eee4d8"></i>Complet ou fermé</span><span><span style="color:var(--orange)">✦</span> Soirée</span></div>`;
+      <div class="legend"><span><i style="background:var(--green-bg);border:1px solid #cfe1cb"></i>${L('Disponible', 'Verfügbar')}</span><span><i style="background:#eee4d8"></i>${L('Complet ou fermé', 'Ausgebucht oder geschlossen')}</span><span><span style="color:var(--orange)">✦</span> ${L('Soirée', 'Themenabend')}</span></div>`;
   }
 
   function vueCreneaux() {
@@ -219,70 +266,70 @@
     for (const s of ['midi', 'soir']) {
       const v = j.services[s];
       if (!v.ouvert) continue;
-      h += `<div class="service"><h3>${s === 'midi' ? 'Midi' : 'Soir'}</h3>`;
-      if (v.soiree) h += `<div class="soiree"><div class="k">Soirée au programme</div><h4>${esc(v.soiree.titre)}</h4>${v.soiree.details ? `<p>${esc(v.soiree.details)}</p>` : ''}${v.soiree.heure ? `<p>À partir de ${esc(v.soiree.heure)}</p>` : ''}</div>`;
+      h += `<div class="service"><h3>${s === 'midi' ? L('Midi', 'Mittags') : L('Soir', 'Abends')}</h3>`;
+      if (v.soiree) h += `<div class="soiree"><div class="k">${L('Soirée au programme', 'An diesem Abend')}</div><h4>${esc(v.soiree.titre)}</h4>${v.soiree.details ? `<p>${esc(v.soiree.details)}</p>` : ''}${v.soiree.heure ? `<p>${L('À partir de', 'Ab')} ${esc(DE ? v.soiree.heure.replace(/^(\d{1,2})h(\d\d)?$/, (m, a, b) => b ? `${a}:${b} Uhr` : `${a} Uhr`) : v.soiree.heure)}</p>` : ''}</div>`;
       if (v.note) h += `<div class="info" style="margin-bottom:10px">${esc(v.note)}</div>`;
-      if (v.commence) h += `<div class="info">Le service ${s === 'midi' ? 'du midi' : 'du soir'} a déjà commencé : on ne prend plus de réservation en ligne pour ${s === 'midi' ? 'ce midi' : 'ce soir'}. Appelez-nous, on vous dira s'il reste une table : ${tel()}</div>`;
-      else if (!v.en_ligne) h += `<div class="info">Pour ce service, la réservation se fait par téléphone : ${tel()}</div>`;
-      else if (!v.creneaux.some(c => c.max >= st.n)) h += `<div class="info">Plus de place en ligne pour ${st.n} personne${st.n > 1 ? 's' : ''}. Appelez-nous, on trouvera peut-être une solution : ${tel()}</div>`;
+      if (v.commence) h += `<div class="info">${DE ? `Der ${s === 'midi' ? 'Mittags' : 'Abend'}service hat bereits begonnen: Online-Reservierungen sind für heute ${s === 'midi' ? 'Mittag' : 'Abend'} nicht mehr möglich. Rufen Sie uns an, wir sagen Ihnen, ob noch ein Tisch frei ist: ` : `Le service ${s === 'midi' ? 'du midi' : 'du soir'} a déjà commencé : on ne prend plus de réservation en ligne pour ${s === 'midi' ? 'ce midi' : 'ce soir'}. Appelez-nous, on vous dira s'il reste une table : `}${tel()}</div>`;
+      else if (!v.en_ligne) h += `<div class="info">${L('Pour ce service, la réservation se fait par téléphone : ', 'Für diesen Service reservieren Sie bitte telefonisch: ')}${tel()}</div>`;
+      else if (!v.creneaux.some(c => c.max >= st.n)) h += `<div class="info">${DE ? `Online kein Platz mehr für ${pers(st.n)}. Rufen Sie uns an, vielleicht finden wir eine Lösung: ` : `Plus de place en ligne pour ${pers(st.n)}. Appelez-nous, on trouvera peut-être une solution : `}${tel()}</div>`;
       else h += `<div class="slots">${v.creneaux.map(c => `<button type="button" class="slot${st.heure === c.h ? ' sel' : ''}" data-h="${c.h}" ${c.max >= st.n ? '' : 'disabled'}>${hFr(c.h)}</button>`).join('')}</div>`;
       h += '</div>';
     }
-    return h || `<div class="info">Fermé ce jour-là.</div>`;
+    return h || `<div class="info">${L('Fermé ce jour-là.', 'An diesem Tag geschlossen.')}</div>`;
   }
 
   function vueFormulaire() {
     const v = parJour[st.date].services[st.service];
     return `<div class="fields">
       <div class="two">
-        <label class="f">Prénom *<input name="prenom" autocomplete="given-name" required maxlength="40" value="${esc(form.prenom)}"></label>
-        <label class="f">Nom *<input name="nom" autocomplete="family-name" required maxlength="40" value="${esc(form.nom)}"></label>
+        <label class="f">${L('Prénom', 'Vorname')} *<input name="prenom" autocomplete="given-name" required maxlength="40" value="${esc(form.prenom)}"></label>
+        <label class="f">${L('Nom', 'Nachname')} *<input name="nom" autocomplete="family-name" required maxlength="40" value="${esc(form.nom)}"></label>
       </div>
       <div class="two">
-        <label class="f">Téléphone mobile *<input name="telephone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" placeholder="06 12 34 56 78" value="${esc(form.telephone)}"></label>
-        <label class="f">E-mail * <small>(pour la confirmation)</small><input name="email" type="email" autocomplete="email" required maxlength="120" value="${esc(form.email)}"></label>
+        <label class="f">${L('Téléphone mobile', 'Handynummer')} *<input name="telephone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" placeholder="${L('06 12 34 56 78', '+49 151 23456789')}" value="${esc(form.telephone)}"></label>
+        <label class="f">E-Mail * <small>${L('(pour la confirmation)', '(für die Bestätigung)')}</small><input name="email" type="email" autocomplete="email" required maxlength="120" value="${esc(form.email)}"></label>
       </div>
-      <label class="f">Un message ? <small>(facultatif : anniversaire, allergie, chaise bébé, terrasse…)</small><textarea name="remarque" maxlength="500">${esc(form.remarque)}</textarea></label>
-      ${v.menu_impose ? `<label class="check"><input type="checkbox" name="menu" ${form.menu ? 'checked' : ''}><span>J'ai bien noté que ce soir, c'est la soirée <b>${esc(v.soiree?.titre || 'spéciale')}</b>${v.soiree?.details ? ` avec son menu : ${esc(v.soiree.details)}` : ''}.</span></label>` : ''}
-      <label class="check" style="background:#fff;border-color:var(--line)"><input type="checkbox" name="accord" ${form.accord ? 'checked' : ''}><span>J'accepte que mes coordonnées soient utilisées par Le 76 pour gérer ma réservation (confirmation, contact si besoin). Elles ne sont jamais transmises à des tiers. <a href="/mentions-legales.html" target="_blank">En savoir plus</a> *</span></label>
-      <label class="check" style="background:#fff;border-color:var(--line)"><input type="checkbox" name="infos" ${form.infos ? 'checked' : ''}><span>Je souhaite recevoir les infos des soirées et événements du 76 par e-mail (2 à 3 par mois maximum, désinscription en un clic). <i style="color:var(--muted)">Facultatif</i></span></label>
-      <p class="hint" style="margin:0">* Champs obligatoires</p>
+      <label class="f">${L('Un message ?', 'Eine Nachricht?')} <small>${L('(facultatif : anniversaire, allergie, chaise bébé, terrasse…)', '(optional: Geburtstag, Allergie, Kinderstuhl, Terrasse…)')}</small><textarea name="remarque" maxlength="500">${esc(form.remarque)}</textarea></label>
+      ${v.menu_impose ? `<label class="check"><input type="checkbox" name="menu" ${form.menu ? 'checked' : ''}><span>${DE ? `Ich habe zur Kenntnis genommen, dass heute Abend <b>${esc(v.soiree?.titre || 'ein Themenabend')}</b> stattfindet${v.soiree?.details ? `, mit diesem Menü: ${esc(v.soiree.details)}` : ''}.` : `J'ai bien noté que ce soir, c'est la soirée <b>${esc(v.soiree?.titre || 'spéciale')}</b>${v.soiree?.details ? ` avec son menu : ${esc(v.soiree.details)}` : ''}.`}</span></label>` : ''}
+      <label class="check" style="background:#fff;border-color:var(--line)"><input type="checkbox" name="accord" ${form.accord ? 'checked' : ''}><span>${L("J'accepte que mes coordonnées soient utilisées par Le 76 pour gérer ma réservation (confirmation, contact si besoin). Elles ne sont jamais transmises à des tiers.", 'Ich bin einverstanden, dass Le 76 meine Kontaktdaten zur Verwaltung meiner Reservierung verwendet (Bestätigung, Kontakt bei Bedarf). Sie werden niemals an Dritte weitergegeben.')} <a href="/mentions-legales.html" target="_blank">${L('En savoir plus', 'Mehr erfahren')}</a> *</span></label>
+      <label class="check" style="background:#fff;border-color:var(--line)"><input type="checkbox" name="infos" ${form.infos ? 'checked' : ''}><span>${L('Je souhaite recevoir les infos des soirées et événements du 76 par e-mail (2 à 3 par mois maximum, désinscription en un clic).', 'Ich möchte per E-Mail über Abende und Veranstaltungen im Le 76 informiert werden (höchstens 2 bis 3 pro Monat, Abmeldung mit einem Klick).')} <i style="color:var(--muted)">${L('Facultatif', 'Optional')}</i></span></label>
+      <p class="hint" style="margin:0">* ${L('Champs obligatoires', 'Pflichtfelder')}</p>
       <div class="pot" aria-hidden="true"><label>Site web<input name="site_web" tabindex="-1" autocomplete="off"></label></div>
     </div>`;
   }
 
   function render(erreur) {
     if (!data.resa_en_ligne) {
-      app.innerHTML = `<div class="card"><div class="done"><div class="ok" style="background:var(--sand);color:var(--brown)">☎</div><h2>Réservez par téléphone</h2><p>La réservation en ligne est momentanément fermée. Nous prenons vos réservations au ${tel()}.</p></div></div>`;
+      app.innerHTML = `<div class="card"><div class="done"><div class="ok" style="background:var(--sand);color:var(--brown)">☎</div><h2>${L('Réservez par téléphone', 'Telefonisch reservieren')}</h2><p>${L('La réservation en ligne est momentanément fermée. Nous prenons vos réservations au ', 'Die Online-Reservierung ist vorübergehend geschlossen. Reservierungen nehmen wir telefonisch entgegen: ')}${tel()}.</p></div></div>`;
       return;
     }
     const pret = st.date && st.heure;
     app.innerHTML = `<form class="card" id="f" novalidate>
       <div class="step">
-        <h2><span class="num">1</span>Combien serez-vous ?</h2>
-        <div class="stepper"><button type="button" data-n="-1" ${st.n <= 1 ? 'disabled' : ''} aria-label="Une personne de moins">−</button>
-          <output>${st.n}</output><button type="button" data-n="1" ${st.n >= data.max_en_ligne ? 'disabled' : ''} aria-label="Une personne de plus">+</button>
-          <span class="lbl">personne${st.n > 1 ? 's' : ''}</span></div>
-        <p class="hint">Plus de ${data.max_en_ligne} personnes ? Appelez-nous au ${tel()}.</p>
+        <h2><span class="num">1</span>${L('Combien serez-vous ?', 'Wie viele Personen?')}</h2>
+        <div class="stepper"><button type="button" data-n="-1" ${st.n <= 1 ? 'disabled' : ''} aria-label="${L('Une personne de moins', 'Eine Person weniger')}">−</button>
+          <output>${st.n}</output><button type="button" data-n="1" ${st.n >= data.max_en_ligne ? 'disabled' : ''} aria-label="${L('Une personne de plus', 'Eine Person mehr')}">+</button>
+          <span class="lbl">${DE ? (st.n > 1 ? 'Personen' : 'Person') : 'personne' + (st.n > 1 ? 's' : '')}</span></div>
+        <p class="hint">${DE ? `Mehr als ${data.max_en_ligne} Personen? Rufen Sie uns an: ` : `Plus de ${data.max_en_ligne} personnes ? Appelez-nous au `}${tel()}.</p>
       </div>
       <div class="step">
-        <h2><span class="num">2</span>Quel jour ?</h2>
-        ${data.fermer_pendant_service ? `<p class="hint" style="margin:-4px 0 14px">Pour le jour même, réservez en ligne avant ${hFr(data.midi_debut)} pour le midi et avant ${hFr(data.soir_debut)} pour le soir. Après, appelez-nous.</p>` : ''}
+        <h2><span class="num">2</span>${L('Quel jour ?', 'Welcher Tag?')}</h2>
+        ${data.fermer_pendant_service ? `<p class="hint" style="margin:-4px 0 14px">${DE ? `Für den gleichen Tag reservieren Sie online bis ${data.midi_debut} Uhr für mittags und bis ${data.soir_debut} Uhr für abends. Danach rufen Sie uns bitte an.` : `Pour le jour même, réservez en ligne avant ${hFr(data.midi_debut)} pour le midi et avant ${hFr(data.soir_debut)} pour le soir. Après, appelez-nous.`}</p>` : ''}
         ${vueCalendrier()}
       </div>
       <div class="step ${st.date ? '' : 'off'}" id="etape-heure">
-        <h2><span class="num">3</span>À quelle heure ?</h2>
-        ${st.date ? `<p class="hint" style="margin:-6px 0 14px">${dateFr(st.date)}</p>` + vueCreneaux() : '<p class="hint">Choisissez d\'abord un jour.</p>'}
+        <h2><span class="num">3</span>${L('À quelle heure ?', 'Um wie viel Uhr?')}</h2>
+        ${st.date ? `<p class="hint" style="margin:-6px 0 14px">${dateFr(st.date)}</p>` + vueCreneaux() : `<p class="hint">${L("Choisissez d'abord un jour.", 'Bitte wählen Sie zuerst einen Tag.')}</p>`}
       </div>
       <div class="step ${pret ? '' : 'off'}" id="etape-coord">
-        <h2><span class="num">4</span>Vos coordonnées</h2>
-        ${pret ? vueFormulaire() : '<p class="hint">Choisissez d\'abord une heure.</p>'}
+        <h2><span class="num">4</span>${L('Vos coordonnées', 'Ihre Kontaktdaten')}</h2>
+        ${pret ? vueFormulaire() : `<p class="hint">${L("Choisissez d'abord une heure.", 'Bitte wählen Sie zuerst eine Uhrzeit.')}</p>`}
       </div>
       ${pret ? `<div class="step">
         ${erreur ? `<div class="err" role="alert">${esc(erreur)}</div>` : ''}
-        <div class="recap"><b>${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
-        <button class="btn" type="submit" ${st.envoi ? 'disabled' : ''}>${st.envoi ? 'Envoi…' : 'Envoyer ma demande'}</button>
-        <p class="small">Ce n'est pas encore une réservation : nous vous envoyons la confirmation par e-mail très vite.</p>
+        <div class="recap"><b>${quand(st.date, st.heure)}</b><br>${pers(st.n)}</div>
+        <button class="btn" type="submit" ${st.envoi ? 'disabled' : ''}>${st.envoi ? L('Envoi…', 'Wird gesendet…') : L('Envoyer ma demande', 'Anfrage senden')}</button>
+        <p class="small">${L("Ce n'est pas encore une réservation : nous vous envoyons la confirmation par e-mail très vite.", 'Dies ist noch keine Reservierung: Die Bestätigung schicken wir Ihnen sehr bald per E-Mail.')}</p>
       </div>` : ''}
     </form>`;
   }
@@ -334,12 +381,12 @@
     const f = e.target;
     const v = parJour[st.date].services[st.service];
     let msg = '';
-    if (form.prenom.trim().length < 2) msg = 'Indiquez votre prénom.';
-    else if (form.nom.trim().length < 2) msg = 'Indiquez votre nom.';
-    else if (!mobileOk(form.telephone)) msg = 'Indiquez un numéro de téléphone mobile valide (ex. 06 12 34 56 78, ou avec l’indicatif +49…).';
-    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) msg = 'Indiquez une adresse e-mail valide pour recevoir la confirmation.';
-    else if (v.menu_impose && !form.menu) msg = 'Merci de cocher la case pour confirmer que vous avez noté le menu de la soirée.';
-    else if (!form.accord) msg = 'Merci de cocher la case d’accord pour l’utilisation de vos coordonnées.';
+    if (form.prenom.trim().length < 2) msg = L('Indiquez votre prénom.', 'Bitte geben Sie Ihren Vornamen an.');
+    else if (form.nom.trim().length < 2) msg = L('Indiquez votre nom.', 'Bitte geben Sie Ihren Nachnamen an.');
+    else if (!mobileOk(form.telephone)) msg = L('Indiquez un numéro de téléphone mobile valide (ex. 06 12 34 56 78, ou avec l’indicatif +49…).', 'Bitte geben Sie eine gültige Handynummer an (z. B. 0151 23456789 oder +49 151 23456789).');
+    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) msg = L('Indiquez une adresse e-mail valide pour recevoir la confirmation.', 'Bitte geben Sie eine gültige E-Mail-Adresse für die Bestätigung an.');
+    else if (v.menu_impose && !form.menu) msg = L('Merci de cocher la case pour confirmer que vous avez noté le menu de la soirée.', 'Bitte bestätigen Sie mit dem Häkchen, dass Sie das Menü des Abends zur Kenntnis genommen haben.');
+    else if (!form.accord) msg = L('Merci de cocher la case d’accord pour l’utilisation de vos coordonnées.', 'Bitte bestätigen Sie die Verwendung Ihrer Kontaktdaten.');
     if (msg) { render(msg); return; }
     st.envoi = true; render();
     const r = await api({ action: 'demande', date: st.date, heure: st.heure, couverts: st.n, prenom: form.prenom, nom: form.nom, telephone: form.telephone, accord: form.accord, infos: form.infos,
@@ -353,11 +400,11 @@
       if (!st.heure) { render(); alert(r.erreur); } else render(r.erreur);
       return;
     }
-    app.innerHTML = `<div class="card"><div class="done"><div class="ok">✓</div><h2>Demande envoyée !</h2>
-      <p>Merci ${esc(form.prenom.trim())}. Un e-mail de réception vient de partir à <b>${esc(form.email.trim())}</b>, et nous vous confirmons la réservation très vite.</p>
-      <div class="recap"><b>${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
-      <p>Pas d'e-mail ? Regardez dans les indésirables, ou appelez-nous au ${tel()}.</p>
-      <p style="margin-top:22px"><a class="btn ghost" href="/">Retour au site</a></p></div></div>`;
+    app.innerHTML = `<div class="card"><div class="done"><div class="ok">✓</div><h2>${L('Demande envoyée !', 'Anfrage gesendet!')}</h2>
+      <p>${DE ? `Danke, ${esc(form.prenom.trim())}. Eine Eingangsbestätigung wurde gerade an <b>${esc(form.email.trim())}</b> geschickt, die Bestätigung der Reservierung folgt sehr bald.` : `Merci ${esc(form.prenom.trim())}. Un e-mail de réception vient de partir à <b>${esc(form.email.trim())}</b>, et nous vous confirmons la réservation très vite.`}</p>
+      <div class="recap"><b>${quand(st.date, st.heure)}</b><br>${pers(st.n)}</div>
+      <p>${L("Pas d'e-mail ? Regardez dans les indésirables, ou appelez-nous au ", 'Keine E-Mail? Schauen Sie im Spam-Ordner nach oder rufen Sie uns an: ')}${tel()}.</p>
+      <p style="margin-top:22px"><a class="btn ghost" href="${accueil}">${L('Retour au site', 'Zurück zur Website')}</a></p></div></div>`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
@@ -367,26 +414,26 @@
   }
 
   async function annulation(jeton) {
-    document.querySelector('.intro h1').innerHTML = 'Annuler ma <em>réservation</em>';
-    document.querySelector('.intro p').textContent = 'Merci de nous prévenir : la table pourra profiter à d\'autres clients.';
+    document.querySelector('.intro h1').innerHTML = L('Annuler ma <em>réservation</em>', 'Reservierung <em>stornieren</em>');
+    document.querySelector('.intro p').textContent = L('Merci de nous prévenir : la table pourra profiter à d\'autres clients.', 'Danke, dass Sie uns Bescheid geben: So kann der Tisch an andere Gäste gehen.');
     const r = await api({ action: 'annulation', jeton });
-    if (!r.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>Lien introuvable</h2><p>${esc(r.erreur)}</p><p style="margin-top:20px"><a class="btn ghost" href="/reserver/">Faire une réservation</a></p></div></div>`; return; }
+    if (!r.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>${L('Lien introuvable', 'Link nicht gefunden')}</h2><p>${esc(r.erreur)}</p><p style="margin-top:20px"><a class="btn ghost" href="/reserver/${DE ? '?lang=de' : ''}">${L('Faire une réservation', 'Tisch reservieren')}</a></p></div></div>`; return; }
     const x = r.reservation;
-    const recap = `<div class="recap"><b>${dateFr(x.date)} à ${hFr(x.heure)}</b><br>${x.couverts} personne${x.couverts > 1 ? 's' : ''} · au nom de ${esc(x.nom)}</div>`;
+    const recap = `<div class="recap"><b>${quand(x.date, x.heure)}</b><br>${pers(x.couverts)} · ${L('au nom de', 'auf den Namen')} ${esc(x.nom)}</div>`;
     if (!r.annulable) {
-      const pourquoi = x.statut === 'annulee' ? 'Cette réservation est déjà annulée.' : x.statut === 'refusee' ? 'Cette demande n\'avait pas pu être acceptée.' : 'Cette réservation est passée.';
-      app.innerHTML = `<div class="card"><div class="done"><h2>${pourquoi}</h2>${recap}<a class="btn ghost" href="/reserver/">Faire une nouvelle réservation</a></div></div>`;
+      const pourquoi = x.statut === 'annulee' ? L('Cette réservation est déjà annulée.', 'Diese Reservierung ist bereits storniert.') : x.statut === 'refusee' ? L('Cette demande n\'avait pas pu être acceptée.', 'Diese Anfrage konnte leider nicht angenommen werden.') : L('Cette réservation est passée.', 'Diese Reservierung liegt in der Vergangenheit.');
+      app.innerHTML = `<div class="card"><div class="done"><h2>${pourquoi}</h2>${recap}<a class="btn ghost" href="/reserver/${DE ? '?lang=de' : ''}">${L('Faire une nouvelle réservation', 'Neue Reservierung')}</a></div></div>`;
       return;
     }
-    app.innerHTML = `<div class="card"><div class="done"><h2>Annuler cette réservation ?</h2>${recap}
-      <button class="btn" id="annul">Oui, annuler ma réservation</button>
-      <p style="margin-top:12px"><a href="/">Non, je garde ma table</a></p></div></div>`;
+    app.innerHTML = `<div class="card"><div class="done"><h2>${L('Annuler cette réservation ?', 'Diese Reservierung stornieren?')}</h2>${recap}
+      <button class="btn" id="annul">${L('Oui, annuler ma réservation', 'Ja, Reservierung stornieren')}</button>
+      <p style="margin-top:12px"><a href="${accueil}">${L('Non, je garde ma table', 'Nein, ich behalte meinen Tisch')}</a></p></div></div>`;
     document.getElementById('annul').onclick = async ev => {
-      ev.target.disabled = true; ev.target.textContent = 'Annulation…';
+      ev.target.disabled = true; ev.target.textContent = L('Annulation…', 'Wird storniert…');
       const a = await api({ action: 'annuler', jeton });
       app.innerHTML = a.ok
-        ? `<div class="card"><div class="done"><div class="ok">✓</div><h2>Réservation annulée</h2><p>Merci de nous avoir prévenus. À bientôt au 76 !</p>${recap}<a class="btn ghost" href="/reserver/">Réserver une autre date</a></div></div>`
-        : `<div class="card"><div class="done"><h2>Oups</h2><p>${esc(a.erreur)}</p></div></div>`;
+        ? `<div class="card"><div class="done"><div class="ok">✓</div><h2>${L('Réservation annulée', 'Reservierung storniert')}</h2><p>${L('Merci de nous avoir prévenus. À bientôt au 76 !', 'Danke für Ihre Nachricht. Bis bald im Le 76!')}</p>${recap}<a class="btn ghost" href="/reserver/${DE ? '?lang=de' : ''}">${L('Réserver une autre date', 'Anderes Datum reservieren')}</a></div></div>`
+        : `<div class="card"><div class="done"><h2>${L('Oups', 'Hoppla')}</h2><p>${esc(a.erreur)}</p></div></div>`;
     };
   }
 
@@ -406,12 +453,12 @@
     box.hidden = false;
     const majJ = () => {
       const ms = cible - new Date(), j = Math.ceil(ms / 864e5);
-      document.getElementById('dixJ').textContent = ms <= 0 ? "C'est ce soir !" : j <= 1 ? 'Demain soir !' : `J-${j}`;
+      document.getElementById('dixJ').textContent = ms <= 0 ? L("C'est ce soir !", 'Heute Abend!') : j <= 1 ? L('Demain soir !', 'Morgen Abend!') : DE ? `Noch ${j} Tage` : `J-${j}`;
     };
     majJ(); setInterval(majJ, 60000);
-    fetch('/api/reservation.php?action=places&date=' + D + '&service=soir').then(r => r.json()).then(p => {
-      if (p.complet) document.getElementById('dixPl').textContent = ' · complet en ligne';
-      else if (p.restant) document.getElementById('dixPl').textContent = ` · plus que ${p.restant} place${p.restant > 1 ? 's' : ''}`;
+    fetch('/api/reservation.php?action=places&date=' + D + '&service=soir&lang=' + LANG).then(r => r.json()).then(p => {
+      if (p.complet) document.getElementById('dixPl').textContent = L(' · complet en ligne', ' · online ausgebucht');
+      else if (p.restant) document.getElementById('dixPl').textContent = DE ? ` · nur noch ${p.restant} ${p.restant > 1 ? 'Plätze' : 'Platz'}` : ` · plus que ${p.restant} place${p.restant > 1 ? 's' : ''}`;
     }).catch(() => {});
     document.getElementById('dixChoisir').onclick = () => choisirDate(D);
   }
@@ -419,16 +466,16 @@
   async function demarrer() {
     const desinscr = new URLSearchParams(location.search).get('desinscrire');
     if (desinscr) {
-      document.querySelector('.intro h1').innerHTML = 'Infos du <em>76</em>';
+      document.querySelector('.intro h1').innerHTML = L('Infos du <em>76</em>', 'News vom <em>76</em>');
       document.querySelector('.intro p').textContent = '';
       const r = await api({ action: 'desinscrire', jeton: desinscr });
-      app.innerHTML = `<div class="card"><div class="done">${r.ok ? '<div class="ok">✓</div><h2>C\'est noté</h2><p>Vous ne recevrez plus les infos des soirées du 76. À bientôt quand même !</p>' : '<h2>Lien introuvable</h2><p>' + esc(r.erreur) + '</p>'}<p style="margin-top:20px"><a class="btn ghost" href="/">Retour au site</a></p></div></div>`;
+      app.innerHTML = `<div class="card"><div class="done">${r.ok ? `<div class="ok">✓</div><h2>${L("C'est noté", 'Erledigt')}</h2><p>${L('Vous ne recevrez plus les infos des soirées du 76. À bientôt quand même !', 'Sie erhalten keine Informationen mehr über die Abende im Le 76. Bis bald trotzdem!')}</p>` : `<h2>${L('Lien introuvable', 'Link nicht gefunden')}</h2><p>${esc(r.erreur)}</p>`}<p style="margin-top:20px"><a class="btn ghost" href="${accueil}">${L('Retour au site', 'Zurück zur Website')}</a></p></div></div>`;
       return;
     }
     const jeton = new URLSearchParams(location.search).get('annuler');
     if (jeton) return annulation(jeton);
     const d = await api();
-    if (!d.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>Oups</h2><p>${esc(d.erreur)}</p></div></div>`; return; }
+    if (!d.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>${L('Oups', 'Hoppla')}</h2><p>${esc(d.erreur)}</p></div></div>`; return; }
     charger(d);
     const prem = d.jours.find(j => etatJour(j) === 'dispo');
     const base = prem ? parse(prem.date) : parse(d.aujourdhui);
