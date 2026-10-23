@@ -119,6 +119,13 @@
   .done p { color: var(--muted); max-width: 26em; margin: 10px auto 0; }
   .done .recap { text-align: left; margin: 20px 0; }
   .loading { text-align: center; padding: 50px 0; color: var(--muted); }
+  .dix { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--ink); color: #f1e6d6; border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; font-size: .95rem; }
+  .dix[hidden] { display: none; }
+  .dix b { color: #fff; }
+  .dix #dixJ { color: #e7b66a; font-weight: 600; }
+  .dix #dixPl { color: #f4b4aa; font-weight: 600; }
+  .dixbtn { flex: none; border: 0; border-radius: 999px; background: #e7b66a; color: var(--ink); font-weight: 600; padding: 10px 16px; }
+  @media (max-width: 520px) { .dix { flex-direction: column; align-items: stretch; text-align: center; } }
   footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 6px 0 40px; }
   footer a { color: var(--muted); }
   [hidden] { display: none !important; }
@@ -135,6 +142,11 @@
     <span class="kicker">Réservation</span>
     <h1>Réserver une <em>table</em></h1>
     <p>Faites votre demande en quelques secondes, nous vous confirmons par e-mail.</p>
+  </div>
+
+  <div class="dix" id="dixResa" hidden>
+    <div><b>🎉 Le 76 fête ses 10 ans</b> · samedi 28 novembre à 20h<br><span id="dixJ"></span><span id="dixPl"></span></div>
+    <button type="button" class="dixbtn" id="dixChoisir">Choisir cette date</button>
   </div>
 
   <main id="app"><div class="card"><div class="loading">Chargement des disponibilités…</div></div></main>
@@ -378,6 +390,32 @@
     };
   }
 
+  function choisirDate(dt) {
+    const x = parse(dt);
+    st.mois = new Date(x.getFullYear(), x.getMonth(), 1);
+    if (etatJour(parJour[dt]) === 'dispo') { st.date = dt; st.heure = null; st.service = null; }
+    render();
+    setTimeout(() => document.querySelector(st.date === dt ? '#etape-heure' : '.cal-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  // Encart des 10 ans du 76 (jusqu'au 28 novembre inclus)
+  function dixAns() {
+    const D = '2026-11-28', cible = new Date(2026, 10, 28, 20, 0, 0);
+    const box = document.getElementById('dixResa');
+    if (!parJour[D] || new Date() >= new Date(2026, 10, 29)) return;
+    box.hidden = false;
+    const majJ = () => {
+      const ms = cible - new Date(), j = Math.ceil(ms / 864e5);
+      document.getElementById('dixJ').textContent = ms <= 0 ? "C'est ce soir !" : j <= 1 ? 'Demain soir !' : `J-${j}`;
+    };
+    majJ(); setInterval(majJ, 60000);
+    fetch('/api/reservation.php?action=places&date=' + D + '&service=soir').then(r => r.json()).then(p => {
+      if (p.complet) document.getElementById('dixPl').textContent = ' · complet en ligne';
+      else if (p.restant) document.getElementById('dixPl').textContent = ` · plus que ${p.restant} place${p.restant > 1 ? 's' : ''}`;
+    }).catch(() => {});
+    document.getElementById('dixChoisir').onclick = () => choisirDate(D);
+  }
+
   async function demarrer() {
     const desinscr = new URLSearchParams(location.search).get('desinscrire');
     if (desinscr) {
@@ -396,6 +434,10 @@
     const base = prem ? parse(prem.date) : parse(d.aujourdhui);
     st.mois = new Date(base.getFullYear(), base.getMonth(), 1);
     render();
+    // Une date demandée dans le lien (ex. /reserver/?date=2026-11-28)
+    const voulue = new URLSearchParams(location.search).get('date');
+    if (voulue && parJour[voulue]) choisirDate(voulue);
+    dixAns();
   }
   demarrer();
 })();

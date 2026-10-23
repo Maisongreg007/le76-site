@@ -18,6 +18,8 @@ try {
     switch ($q['action'] ?? '') {
         case 'calendrier':
             calendrier();
+        case 'places':
+            places($q);
         case 'demande':
             demande($q);
         case 'annulation':
@@ -240,4 +242,17 @@ function desinscrire(array $q): never
     $st = db()->prepare('UPDATE abonnes SET desinscrit_le = ? WHERE jeton = ?');
     $st->execute([maintenant(), $j]);
     $st->rowCount() ? repondre(['ok' => true]) : erreur('Lien invalide.', 404);
+}
+
+/** Places restantes pour un service, communiquées seulement quand il en reste peu (sinon null). */
+function places(array $q): never
+{
+    $date = (string) ($q['date'] ?? '');
+    $service = in_array($q['service'] ?? '', SERVICES, true) ? $q['service'] : 'soir';
+    if (!date_valide($date)) {
+        erreur('Date invalide.');
+    }
+    $e = etat_service($date, $service);
+    $seuil = 30;
+    repondre(['ok' => true, 'complet' => $e['ouvert'] && $e['restant'] <= 0, 'restant' => ($e['restant'] > 0 && $e['restant'] <= $seuil) ? $e['restant'] : null]);
 }
