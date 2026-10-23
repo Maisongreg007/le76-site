@@ -251,6 +251,14 @@
   .ev p { color: #d6c7b4; margin: 0; }
   .ev .next { margin-top: 22px; display: inline-flex; gap: 10px; align-items: center; background: rgba(231,182,106,.14); color: var(--gold-light); padding: 10px 18px; border-radius: 999px; font-weight: 600; }
   .ev .deco { position: absolute; right: -20px; bottom: -30px; font-size: 9rem; opacity: .08; line-height: 1; }
+  .ag-title { text-align: center; color: #fff; font-size: 1.6rem; margin: 54px 0 18px; position: relative; z-index: 2; }
+  .agenda { list-style: none; padding: 0; margin: 0 auto; max-width: 760px; position: relative; z-index: 2; }
+  .agenda li { display: grid; grid-template-columns: 240px 1fr; gap: 18px; padding: 16px 4px; border-bottom: 1px solid rgba(231,182,106,.2); }
+  .agenda li:last-child { border-bottom: 0; }
+  .agenda .ag-when { font: 600 .8rem/1.5 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold-light); padding-top: 3px; }
+  .agenda .ag-what b { display: block; color: #fff; font-size: 1.08rem; }
+  .agenda .ag-what small { display: block; color: #c9b8a4; font-size: .92rem; margin-top: 4px; }
+  @media (max-width: 600px) { .agenda li { grid-template-columns: 1fr; gap: 4px; } }
 
   /* ---------- Bons cadeaux ---------- */
   .gift { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
@@ -454,6 +462,15 @@
         <div class="deco">♪</div>
       </div>
     </div>
+    <h3 class="ag-title">Les prochaines dates</h3>
+    <ul class="agenda">
+      <li data-fin="2026-10-31"><span class="ag-when">samedi 31 octobre</span><span class="ag-what"><b>Halloween : le Grand Bal des Sorcières</b><small>Menu spécial 29,90 € · concours du plus beau déguisement · soirée dansante</small></span></li>
+      <li data-fin="2026-11-06"><span class="ag-when">vendredi 6 novembre · 20h</span><span class="ag-what"><b>Soirée karaoké avec KJ Patric</b></span></li>
+      <li data-fin="2026-11-07"><span class="ag-when">samedi 7 novembre · 20h</span><span class="ag-what"><b>Jean-Claude des Diamond Star</b><small>Menu 25 € : feuilleté aux champignons, palette fumée braisée sauce moutarde à l&#x27;ancienne et gratin dauphinois, strudel aux pommes</small></span></li>
+      <li data-fin="2026-11-14"><span class="ag-when">samedi 14 novembre</span><span class="ag-what"><b>Soirée cordon bleu XXL</b><small>29,90 €</small></span></li>
+      <li data-fin="2026-11-21"><span class="ag-when">samedi 21 novembre · 20h</span><span class="ag-what"><b>Onglet à volonté + blind test avec KJ Patric</b><small>Onglet à volonté 29,90 €</small></span></li>
+      <li data-fin="2026-11-28"><span class="ag-when">samedi 28 novembre · 20h</span><span class="ag-what"><b>Le 76 fête ses 10 ans !</b><small>Avec l&#x27;orchestre Santa Lucia · menu anniversaire 29 €</small></span></li>
+    </ul>
     <!-- SOIREES:FIN -->
   </div>
 </section>
@@ -570,6 +587,12 @@
   var k = firstFriday(d0.getFullYear(), d0.getMonth());
   if (k < d0) k = firstFriday(d0.getFullYear(), d0.getMonth() + 1);
   var ke = document.getElementById("karaoke"); if (ke) ke.textContent = k.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+  // Prochaines dates : masquer celles qui sont passées
+  var iso = d0.getFullYear() + "-" + String(d0.getMonth() + 1).padStart(2, "0") + "-" + String(d0.getDate()).padStart(2, "0");
+  document.querySelectorAll(".agenda li[data-fin]").forEach(function (li) { if (li.getAttribute("data-fin") < iso) li.remove(); });
+  var ag = document.querySelector(".agenda");
+  if (ag && !ag.children.length) { ag.remove(); var at = document.querySelector(".ag-title"); if (at) at.remove(); }
 </script>
 </body>
 </html>

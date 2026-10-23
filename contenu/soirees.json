@@ -22,5 +22,96 @@
       "date_karaoke_auto": true,
       "symbole": "♪"
     }
-  ]
+  ],
+  "agenda_titre": "Les prochaines dates",
+  "agenda": [
+    {
+      "date": "2026-10-31",
+      "titre": "Halloween : le Grand Bal des Sorcières",
+      "details": "Menu spécial 29,90 € · concours du plus beau déguisement · soirée dansante"
+    },
+    {
+      "date": "2026-11-06",
+      "heure": "20h",
+      "titre": "Soirée karaoké avec KJ Patric",
+      "details": ""
+    },
+    {
+      "date": "2026-11-07",
+      "heure": "20h",
+      "titre": "Jean-Claude des Diamond Star",
+      "details": "Menu 25 € : feuilleté aux champignons, palette fumée braisée sauce moutarde à l'ancienne et gratin dauphinois, strudel aux pommes"
+    },
+    {
+      "date": "2026-11-14",
+      "titre": "Soirée cordon bleu XXL",
+      "details": "29,90 €"
+    },
+    {
+      "date": "2026-11-21",
+      "heure": "20h",
+      "titre": "Onglet à volonté + blind test avec KJ Patric",
+      "details": "Onglet à volonté 29,90 €"
+    },
+    {
+      "date": "2026-11-28",
+      "heure": "20h",
+      "titre": "Le 76 fête ses 10 ans !",
+      "details": "Avec l'orchestre Santa Lucia · menu anniversaire 29 €"
+    },
+    {
+      "date": "2026-12-04",
+      "heure": "20h",
+      "titre": "Soirée karaoké avec KJ Patric",
+      "details": ""
+    },
+    {
+      "date": "2026-12-05",
+      "titre": "Moules-frites à volonté",
+      "details": "19 €"
+    },
+    {
+      "date": "2026-12-12",
+      "titre": "Soirée de Noël avec l'orchestre Santa Lucia",
+      "details": "Menu 27 € : saumon fumé, suprême de pintade sauce forestière, bûche de Noël"
+    },
+    {
+      "date": "2026-12-19",
+      "date_fin": "2026-12-26",
+      "titre": "Restaurant fermé",
+      "details": "Fermeture du samedi 19 au samedi 26 décembre inclus"
+    },
+    {
+      "date": "2026-12-31",
+      "heure": "19h",
+      "titre": "Réveillon du Nouvel An",
+      "details": "85 € · 42,50 € pour les enfants jusqu'à 16 ans · orchestre Santa Lucia · réservation obligatoire"
+    },
+    {
+      "date": "2027-01-09",
+      "titre": "Jean-Claude · moules-frites à volonté",
+      "details": "23 €"
+    },
+    {
+      "date": "2027-01-23",
+      "titre": "Soirée montagnarde avec Valery's",
+      "details": "24,90 €"
+    },
+    {
+      "date": "2027-02-05",
+      "titre": "Soirée karaoké",
+      "details": ""
+    },
+    {
+      "date": "2027-02-13",
+      "titre": "Soirée avec l'orchestre Santa Lucia",
+      "details": "À la carte"
+    },
+    {
+      "date": "2027-02-14",
+      "titre": "Saint-Valentin avec Santa Lucia",
+      "details": "Menu 32 € · dessert des amoureux"
+    }
+  ],
+  "agenda_nombre": 6
 }

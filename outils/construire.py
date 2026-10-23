@@ -10,6 +10,7 @@ import html
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -108,6 +109,46 @@ def bloc_carte(c):
     return "\n".join(out)
 
 
+JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
+        "septembre", "octobre", "novembre", "décembre"]
+
+
+def jour_fr(d):
+    return f"{JOURS[d.weekday()]} {d.day}{'er' if d.day == 1 else ''} {MOIS[d.month - 1]}"
+
+
+def bloc_agenda(s):
+    """Prochaines dates : seules les dates à venir sont affichées (les dates
+    passées sont aussi masquées dans le navigateur, entre deux mises à jour)."""
+    aujourd_hui = date.today()
+    lignes = []
+    for a in s.get("agenda") or []:
+        try:
+            debut = date.fromisoformat(str(a.get("date")).strip())
+            fin = date.fromisoformat(str(a.get("date_fin")).strip()) if (a.get("date_fin") or "").strip() else debut
+        except ValueError:
+            continue
+        if fin >= aujourd_hui and (a.get("titre") or "").strip():
+            lignes.append((debut, fin, a))
+    lignes.sort(key=lambda x: x[0])
+    lignes = lignes[: int(s.get("agenda_nombre") or 6)]
+    if not lignes:
+        return []
+    out = [f'    <h3 class="ag-title">{e(s.get("agenda_titre") or "Les prochaines dates")}</h3>',
+           '    <ul class="agenda">']
+    for debut, fin, a in lignes:
+        quand = jour_fr(debut) if fin == debut else f"du {jour_fr(debut)} au {jour_fr(fin)}"
+        if (a.get("heure") or "").strip():
+            quand += f" · {a['heure'].strip()}"
+        out.append(f'      <li data-fin="{fin.isoformat()}"><span class="ag-when">{e(quand)}</span>'
+                   f'<span class="ag-what"><b>{e(a.get("titre"))}</b>'
+                   + (f'<small>{e(a.get("details"))}</small>' if (a.get("details") or "").strip() else "")
+                   + '</span></li>')
+    out.append('    </ul>')
+    return out
+
+
 def bloc_soirees(s):
     out = ['    <div class="center">',
            f'      <span class="kicker">{e(s.get("petit_titre"))}</span>',
@@ -135,6 +176,7 @@ def bloc_soirees(s):
             out.append(f'        <div class="deco">{e(v["symbole"])}</div>')
         out.append('      </div>')
     out.append('    </div>')
+    out += bloc_agenda(s)
     return "\n".join(out)
 
 

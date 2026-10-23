@@ -51,6 +51,36 @@ content:
             label: Grand symbole décoratif en fond (ex. ✦ ♪ 🎃) — facultatif
             type: string
 
+      - name: agenda_titre
+        label: Titre de la liste des prochaines dates
+        type: string
+      - name: agenda_nombre
+        label: Nombre de prochaines dates affichées
+        type: number
+      - name: agenda
+        label: Prochaines dates (les dates passées disparaissent toutes seules)
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.date} — {fields.titre}"
+        fields:
+          - name: date
+            label: Date (format AAAA-MM-JJ, ex. 2026-11-14)
+            type: string
+          - name: date_fin
+            label: Date de fin (seulement pour une fermeture sur plusieurs jours)
+            type: string
+          - name: heure
+            label: Heure (facultatif, ex. 20h)
+            type: string
+          - name: titre
+            label: Nom de la soirée
+            type: string
+          - name: details
+            label: Détails (menu, prix…) — facultatif
+            type: string
+
   - name: carte
     label: La carte
     type: file
