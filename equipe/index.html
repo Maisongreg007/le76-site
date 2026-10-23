@@ -814,6 +814,7 @@ async function ecranReglages() {
     <div class="group"><h3>Règles de la réservation en ligne</h3>
       <div class="row"><div class="grow">Les clients peuvent demander</div><select name="delai_mode"><option value="heures" ${r.delai_mode === 'heures' ? 'selected' : ''}>jusqu'à … h avant</option><option value="veille" ${r.delai_mode === 'veille' ? 'selected' : ''}>jusqu'à la veille</option></select></div>
       <div class="row" id="rowHeures" ${r.delai_mode === 'veille' ? 'hidden' : ''}><div class="grow">Nombre d'heures avant</div><input name="delai_heures" type="number" min="0" value="${r.delai_heures}"></div>
+      <div class="row"><div class="grow">Fermer la résa en ligne dès le début du service<small>Aujourd'hui : plus de demande pour le midi dès ${esc(r.midi_debut.replace(':', 'h'))}, pour le soir dès ${esc(r.soir_debut.replace(':', 'h'))}</small></div>${sw('fermer_pendant_service', r.fermer_pendant_service)}</div>
       <div class="row"><div class="grow">Maximum de personnes en ligne<small>Au-delà : « appelez-nous »</small></div><input name="max_en_ligne" type="number" min="1" value="${r.max_en_ligne}"></div>
       <div class="row"><div class="grow">Maximum de couverts par créneau<small>0 = pas de limite (utile pour étaler l'arrivée en cuisine)</small></div><input name="max_par_creneau" type="number" min="0" value="${r.max_par_creneau}"></div>
       <div class="row"><div class="grow">Réservable jusqu'à … jours à l'avance</div><input name="jours_avance" type="number" min="1" value="${r.jours_avance}"></div>
@@ -846,6 +847,7 @@ async function ecranReglages() {
       semaine: Object.fromEntries([...el.querySelectorAll('.wk')].map(w => [w.dataset.j, { midi: w.querySelector('.m').checked, soir: w.querySelector('.s').checked, midi_fin: w.querySelector('.mf').value, soir_fin: w.querySelector('.sf').value }])),
       midi_debut: v('midi_debut').value, soir_debut: v('soir_debut').value, pas: +v('pas').value,
       delai_mode: v('delai_mode').value, delai_heures: +v('delai_heures').value, max_en_ligne: +v('max_en_ligne').value,
+      fermer_pendant_service: v('fermer_pendant_service').checked,
       max_par_creneau: +v('max_par_creneau').value, jours_avance: +v('jours_avance').value,
       alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value,
     });

@@ -156,6 +156,8 @@ function reglages_defaut(): array
         'delai_mode' => 'heures',
         'delai_heures' => 2,
         'max_en_ligne' => 12,
+        // Plus de demande en ligne pour le service du jour une fois qu'il a commencé (11h30 / 18h)
+        'fermer_pendant_service' => true,
         'max_par_creneau' => 0,
         'jours_avance' => 365,
         'alertes_email' => [],
@@ -215,6 +217,9 @@ function nettoyer_reglages(array $n, array $actuel): array
     $o = [];
     if (array_key_exists('resa_en_ligne', $n)) {
         $o['resa_en_ligne'] = (bool) $n['resa_en_ligne'];
+    }
+    if (array_key_exists('fermer_pendant_service', $n)) {
+        $o['fermer_pendant_service'] = (bool) $n['fermer_pendant_service'];
     }
     if (isset($n['capacite']) && is_array($n['capacite'])) {
         foreach (SERVICES as $s) {
@@ -478,6 +483,10 @@ function creneaux_en_ligne(array $etat, array $occ): array
         return $o;
     }
     $max_service = min($etat['restant'], (int) $r['max_en_ligne']);
+    // Service déjà commencé aujourd'hui : plus de demande en ligne pour ce service
+    if ($r['fermer_pendant_service'] && $etat['date'] === date('Y-m-d') && date('H:i') >= $etat['debut']) {
+        $max_service = 0;
+    }
     foreach (creneaux($etat['debut'], $etat['fin'], (int) $r['pas']) as $h) {
         $max = delai_ok($etat['date'], $h) ? $max_service : 0;
         if ($max > 0 && $r['max_par_creneau'] > 0) {
