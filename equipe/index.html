@@ -48,6 +48,9 @@
   .datenav { display: flex; align-items: center; gap: 8px; margin: 12px auto 0; max-width: 760px; }
   .datenav button.nav { width: 44px; height: 44px; flex: none; border-radius: 12px; border: 0; background: var(--paper); color: var(--rust); font-size: 1.5rem; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
   .datebox { flex: 1; position: relative; height: 44px; border-radius: 12px; background: var(--paper); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 1rem; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .datebox .dc { display: none; }
+  .datebox span { white-space: nowrap; }
+  @media (max-width: 520px) { .datebox .dl { display: none; } .datebox .dc { display: inline; } }
   .datebox input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; }
   .datebox small { font-weight: 600; font-size: .78rem; color: var(--rust); background: rgba(183,55,42,.1); padding: 3px 8px; border-radius: 999px; }
   .today-btn { height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--rust); color: #fff; font-weight: 600; font-size: .95rem; }
@@ -435,7 +438,7 @@ function enTete(titre, avecDate) {
   const r = relatif(S.date);
   document.getElementById('top').innerHTML = `<div class="top-row"><div class="logo">Le <span>76</span></div>${S.moi ? `<span style="font-size:.85rem;color:var(--muted)">${esc(S.moi.nom)}</span>` : ''}</div><h1>${esc(titre)}</h1>
     ${avecDate ? `<div class="datenav"><button class="nav" data-j="-1" aria-label="Jour précédent">‹</button>
-      <label class="datebox">${dateLong(S.date)}${r ? `<small>${r}</small>` : ''}<input type="date" id="pick" value="${S.date}"></label>
+      <label class="datebox"><span class="dl">${dateLong(S.date)}</span><span class="dc">${dateCourt(S.date)}</span>${r ? `<small>${r}</small>` : ''}<input type="date" id="pick" value="${S.date}"></label>
       <button class="nav" data-j="1" aria-label="Jour suivant">›</button>${S.date !== today() ? '<button class="today-btn" data-j="0">Auj.</button>' : ''}</div>` : ''}`;
   if (avecDate) {
     document.getElementById('top').onclick = e => { const b = e.target.closest('[data-j]'); if (b) aller('carnet', b.dataset.j === '0' ? today() : addDays(S.date, +b.dataset.j)); };
