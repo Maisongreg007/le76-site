@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Résas du 76</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2b1d16">
+<link rel="manifest" href="/equipe/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/equipe/icone-180.png">
+<link rel="icon" href="/equipe/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Résas 76">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Jost:wght@400;500;600&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fbf5ec; --paper: #fffbf5; --sand: #f3e7d6; --ink: #2b1d16; --brown: #4a2c1d;
+    --muted: #7a6a5c; --rust: #b7372a; --rust-dark: #8e2a20; --gold: #c98a3a; --orange: #d9762b;
+    --line: #e8d9c3; --green: #2f7a46; --green-bg: #e3efe1; --amber: #a86412; --amber-bg: #fdf0d9;
+    --serif: "Playfair Display", Georgia, serif; --sans: "Jost", system-ui, -apple-system, sans-serif;
+    --top: env(safe-area-inset-top, 0px); --bot: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--cream); color: var(--ink); font: 400 16px/1.45 var(--sans); }
+  body { padding-bottom: calc(76px + var(--bot)); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: var(--rust); }
+  h1, h2, h3 { margin: 0; }
+  [hidden] { display: none !important; }
+
+  /* Barre du haut */
+  .top { position: sticky; top: 0; z-index: 20; background: var(--ink); color: #f6e9d6; padding: calc(10px + var(--top)) 14px 12px; }
+  .top-row { display: flex; align-items: center; gap: 10px; }
+  .logo { font: 800 1.25rem/1 var(--serif); color: #fff; white-space: nowrap; }
+  .logo span { color: var(--gold); }
+  .top h1 { font: 600 1rem/1.2 var(--sans); flex: 1; text-align: right; color: #e9d8c0; }
+  .datenav { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .datenav button.nav { width: 42px; height: 42px; flex: none; border-radius: 12px; border: 0; background: rgba(255,255,255,.1); color: #fff; font-size: 1.3rem; }
+  .datebox { flex: 1; position: relative; height: 42px; border-radius: 12px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; font-weight: 600; text-transform: capitalize; overflow: hidden; }
+  .datebox input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; }
+  .datebox small { font-weight: 500; color: var(--gold); margin-left: 6px; text-transform: none; }
+  .today-btn { height: 42px; padding: 0 12px; border-radius: 12px; border: 0; background: var(--gold); color: var(--ink); font-weight: 600; }
+
+  main { padding: 14px 12px 20px; max-width: 760px; margin: 0 auto; }
+
+  /* Onglets du bas */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--paper); border-top: 1px solid var(--line); padding-bottom: var(--bot); }
+  nav.tabs button { border: 0; background: transparent; padding: 9px 0 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .74rem; font-weight: 500; color: var(--muted); position: relative; }
+  nav.tabs button svg { width: 24px; height: 24px; }
+  nav.tabs button.on { color: var(--rust); }
+  .badge { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: var(--rust); color: #fff; font: 600 .7rem/19px var(--sans); }
+
+  /* Cartes */
+  .svc { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; margin-bottom: 14px; overflow: hidden; }
+  .svc-head { padding: 13px 14px 10px; }
+  .svc-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .svc-title h2 { font: 700 1.25rem/1.1 var(--serif); color: var(--brown); }
+  .svc-title .count { font-weight: 600; font-size: 1.05rem; }
+  .svc-title .count small { color: var(--muted); font-weight: 500; }
+  .bar { height: 9px; border-radius: 6px; background: var(--sand); margin-top: 9px; overflow: hidden; display: flex; }
+  .bar i { display: block; height: 100%; background: var(--green); }
+  .bar i.att { background: repeating-linear-gradient(45deg, var(--orange), var(--orange) 4px, #efb37b 4px, #efb37b 8px); }
+  .bar.over i { background: var(--rust); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 5px 11px; font-size: .8rem; font-weight: 500; border: 1px solid var(--line); background: #fff; }
+  button.chip { cursor: pointer; }
+  .chip.ok { background: var(--green-bg); border-color: #c9dfc5; color: var(--green); }
+  .chip.off { background: #f8e3df; border-color: #eec5bd; color: var(--rust-dark); }
+  .chip.soir { background: var(--ink); color: #f6e9d6; border-color: var(--ink); }
+  .closed-note { padding: 12px 14px; color: var(--muted); font-size: .92rem; border-top: 1px solid var(--line); }
+
+  .resa { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-top: 1px solid var(--line); cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-bottom: 0; }
+  .resa:active { background: var(--sand); }
+  .resa .h { font-weight: 600; width: 48px; flex: none; font-variant-numeric: tabular-nums; }
+  .resa .who { flex: 1; min-width: 0; }
+  .resa .who b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .resa .who span { display: block; font-size: .82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .resa .pers { flex: none; min-width: 40px; height: 34px; border-radius: 10px; background: var(--sand); display: grid; place-items: center; font-weight: 600; padding: 0 8px; }
+  .resa.attente { background: var(--amber-bg); }
+  .resa.attente .pers { background: #f6d9a8; }
+  .resa.arrive .h, .resa.arrive .who b { color: var(--green); }
+  .resa.arrive .pers { background: var(--green-bg); color: var(--green); }
+  .resa.annulee, .resa.refusee { opacity: .5; }
+  .resa.annulee .who b, .resa.refusee .who b { text-decoration: line-through; }
+  .tag { display: inline-block; font-size: .7rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; border-radius: 6px; padding: 1px 6px; margin-left: 4px; vertical-align: 1px; }
+  .tag.att { background: var(--orange); color: #fff; }
+  .tag.web { background: var(--sand); color: var(--brown); }
+  .more { width: 100%; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 10px; color: var(--muted); font-size: .85rem; }
+  .empty { padding: 14px; color: var(--muted); font-size: .92rem; border-top: 1px solid var(--line); }
+
+  .fab { position: fixed; right: 16px; bottom: calc(86px + var(--bot)); z-index: 25; width: 60px; height: 60px; border-radius: 50%; border: 0; background: var(--rust); color: #fff; font-size: 2rem; line-height: 1; box-shadow: 0 10px 24px rgba(183,55,42,.4); }
+
+  /* Demandes */
+  .dem { background: var(--paper); border: 1px solid var(--line); border-left: 5px solid var(--orange); border-radius: 14px; padding: 13px 14px; margin-bottom: 12px; }
+  .dem .quand { font: 700 1.08rem/1.2 var(--serif); color: var(--brown); text-transform: capitalize; }
+  .dem .qui { margin-top: 4px; }
+  .dem .qui b { font-size: 1.05rem; }
+  .dem .meta { font-size: .86rem; color: var(--muted); margin-top: 3px; }
+  .dem .msg { background: var(--sand); border-radius: 10px; padding: 8px 10px; margin-top: 8px; font-size: .92rem; }
+  .dem .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
+  .h2 { font: 700 1.35rem/1.2 var(--serif); color: var(--brown); margin: 4px 2px 12px; }
+  .sub { font-size: .9rem; color: var(--muted); margin: -6px 2px 14px; }
+
+  /* À venir */
+  .search { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; margin-bottom: 14px; }
+  .day-row { display: grid; grid-template-columns: 84px 1fr 1fr; gap: 8px; align-items: stretch; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 8px; margin-bottom: 7px; cursor: pointer; width: 100%; text-align: left; }
+  .day-row.closed { opacity: .55; }
+  .day-row .d { font-weight: 600; font-size: .92rem; line-height: 1.2; text-transform: capitalize; padding: 4px 2px; }
+  .day-row .d small { display: block; color: var(--muted); font-weight: 400; }
+  .mini { border-radius: 9px; background: var(--sand); padding: 5px 8px; font-size: .85rem; line-height: 1.25; }
+  .mini b { font-size: .98rem; }
+  .mini .l { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .mini.x { background: transparent; color: #b9a898; display: flex; align-items: center; }
+  .mini .wait { color: var(--amber); font-weight: 600; }
+  .mini .st { color: var(--gold); }
+
+  /* Plus / réglages */
+  .group { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
+  .group > h3 { font: 600 .74rem/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); padding: 14px 14px 6px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-top: 1px solid var(--line); }
+  .group > h3 + .row { border-top: 0; }
+  .row .grow { flex: 1; min-width: 0; }
+  .row .grow small { display: block; color: var(--muted); font-size: .82rem; }
+  .row input[type=number] { width: 84px; text-align: center; }
+  .row input, .row select, .field input, .field select, .field textarea { padding: 10px 11px; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; min-width: 0; }
+  .row input[type=time] { width: 112px; }
+  .link-row { width: 100%; border: 0; background: transparent; text-align: left; justify-content: space-between; }
+  .wk { display: grid; grid-template-columns: 46px 1fr 1fr; gap: 6px 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+  .wk .n { font-weight: 600; }
+  .wk label { display: flex; align-items: center; gap: 6px; font-size: .88rem; }
+  .wk input[type=time] { width: 92px; padding: 6px 7px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; }
+
+  /* Interrupteur */
+  .sw { position: relative; width: 50px; height: 30px; flex: none; }
+  .sw input { opacity: 0; width: 100%; height: 100%; position: absolute; margin: 0; z-index: 1; cursor: pointer; }
+  .sw i { position: absolute; inset: 0; border-radius: 99px; background: #d6c8b6; transition: background .15s; pointer-events: none; }
+  .sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .15s; }
+  .sw input:checked + i { background: var(--green); }
+  .sw input:checked + i::after { transform: translateX(20px); }
+
+  /* Boutons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 600; background: var(--rust); color: #fff; text-decoration: none; }
+  .btn.block { width: 100%; }
+  .btn.green { background: var(--green); }
+  .btn.ghost { background: #fff; color: var(--brown); border: 1.5px solid var(--line); }
+  .btn.dark { background: var(--ink); }
+  .btn.small { padding: 8px 12px; font-size: .88rem; border-radius: 10px; }
+  .btn:disabled { opacity: .5; }
+
+  /* Feuille (fenêtre du bas) */
+  .veil { position: fixed; inset: 0; z-index: 50; background: rgba(43,29,22,.45); display: flex; align-items: flex-end; justify-content: center; animation: fade .15s; }
+  .sheet { background: var(--cream); width: 100%; max-width: 620px; max-height: 92vh; overflow: auto; border-radius: 20px 20px 0 0; padding: 8px 16px calc(18px + var(--bot)); animation: up .2s ease-out; }
+  .sheet .grip { width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 2px auto 12px; }
+  .sheet h2 { font: 700 1.35rem/1.2 var(--serif); color: var(--brown); margin-bottom: 12px; }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  .field { display: block; margin-bottom: 12px; font-size: .88rem; font-weight: 500; color: var(--brown); }
+  .field input, .field select, .field textarea { display: block; width: 100%; margin-top: 5px; font-size: 16px; }
+  .field textarea { min-height: 70px; resize: vertical; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .seg { display: flex; background: var(--sand); border-radius: 12px; padding: 3px; margin-top: 5px; }
+  .seg button { flex: 1; border: 0; background: transparent; border-radius: 10px; padding: 9px 4px; font-weight: 500; font-size: .9rem; }
+  .seg button.on { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.1); color: var(--rust); font-weight: 600; }
+  .num { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+  .num button { width: 46px; height: 46px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font-size: 1.4rem; flex: none; }
+  .num input { text-align: center; font-weight: 600; font-size: 1.2rem !important; margin: 0 !important; }
+  .checkline { display: flex; align-items: center; gap: 10px; margin: 6px 0 14px; font-size: .92rem; }
+  .checkline input { width: 22px; height: 22px; accent-color: var(--rust); flex: none; }
+  .det { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px; margin-bottom: 14px; }
+  .det div { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .det div:last-child { border-bottom: 0; }
+  .det span { color: var(--muted); width: 92px; flex: none; font-size: .85rem; padding-top: 1px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actions .full { grid-column: 1 / -1; }
+  .warn { background: #fbe5e1; color: var(--rust-dark); border-radius: 10px; padding: 9px 11px; font-size: .9rem; margin-bottom: 12px; }
+  .tip { background: var(--sand); border-radius: 10px; padding: 9px 11px; font-size: .88rem; color: var(--brown); margin-bottom: 12px; }
+
+  /* Connexion */
+  .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 18px calc(24px + var(--bot)); background: var(--ink); }
+  .login .box { width: 100%; max-width: 380px; background: var(--cream); border-radius: 22px; padding: 26px 22px; }
+  .login .big { font: 800 2.6rem/1 var(--serif); text-align: center; }
+  .login .big span { color: var(--gold); font-family: "Caveat", cursive; font-size: 3.3rem; }
+  .login p.lead { text-align: center; color: var(--muted); margin: 8px 0 20px; }
+  .toast { position: fixed; left: 50%; bottom: calc(92px + var(--bot)); transform: translateX(-50%); z-index: 80; background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 12px; font-size: .93rem; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: up .2s; }
+  .toast.err { background: var(--rust); }
+  .loading { text-align: center; color: var(--muted); padding: 40px 0; }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Chargement…</div></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+</svg>
+
+<script>
+(() => {
+'use strict';
+const API = '/api/equipe.php';
+const root = document.getElementById('root');
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const MOIS_C = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const JOURS_C = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+const SOURCES = { site: 'Site', telephone: 'Téléphone', sur_place: 'Sur place', autre: 'Autre' };
+const STATUTS = { attente: 'En attente', confirmee: 'Confirmée', refusee: 'Refusée', annulee: 'Annulée' };
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date(y, m - 1, j); };
+const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+const today = () => iso(new Date());
+const addDays = (d, n) => { const x = parse(d); x.setDate(x.getDate() + n); return iso(x); };
+const dateLong = d => { const x = parse(d), j = x.getDate(); return `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; };
+const dateCourt = d => { const x = parse(d); return `${JOURS_C[x.getDay()]} ${x.getDate()} ${MOIS_C[x.getMonth()]}`; };
+const hFr = h => h.replace(':', 'h');
+const telHref = t => 'tel:' + String(t).replace(/[^\d+]/g, '');
+const pers = n => `${n} pers.`;
+const relatif = d => d === today() ? "aujourd'hui" : d === addDays(today(), 1) ? 'demain' : d === addDays(today(), -1) ? 'hier' : '';
+
+const S = { moi: null, vapid: null, vue: 'carnet', date: today(), jour: null, demandes: 0, voirAnnulees: {} };
+
+/* ---------- Outils ---------- */
+async function api(action, data = {}) {
+  let r, d;
+  try {
+    r = await fetch(API, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ...data }) });
+    d = await r.json();
+  } catch { d = { ok: false, erreur: 'Pas de connexion au serveur. Vérifie internet.' }; }
+  if (r && r.status === 401 && !['connexion', 'installer', 'etat'].includes(action)) { S.moi = null; ecranConnexion(); }
+  return d;
+}
+let toastT;
+function toast(msg, err) {
+  document.querySelector('.toast')?.remove();
+  const t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : ''); t.textContent = msg;
+  document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), err ? 4500 : 2600);
+}
+function sheet(html, monter) {
+  const v = document.createElement('div'); v.className = 'veil';
+  v.innerHTML = `<div class="sheet" role="dialog"><div class="grip"></div>${html}</div>`;
+  const fermer = () => { v.remove(); document.body.style.overflow = ''; };
+  v.addEventListener('click', e => { if (e.target === v || e.target.closest('[data-fermer]')) fermer(); });
+  document.body.appendChild(v); document.body.style.overflow = 'hidden';
+  monter && monter(v.querySelector('.sheet'), fermer);
+  return fermer;
+}
+function sw(nom, on, attrs = '') { return `<span class="sw"><input type="checkbox" ${nom ? `name="${nom}"` : ''} ${on ? 'checked' : ''} ${attrs}><i></i></span>`; }
+function slotsHeures(debut = '11:00', fin = '14:30', debut2 = '17:30', fin2 = '22:30') {
+  const o = [];
+  for (const [a, b] of [[debut, fin], [debut2, fin2]]) {
+    let [h, m] = a.split(':').map(Number); const [hf, mf] = b.split(':').map(Number);
+    while (h * 60 + m <= hf * 60 + mf) { o.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`); m += 15; if (m >= 60) { m -= 60; h++; } }
+  }
+  return o;
+}
+
+/* ---------- Connexion / installation ---------- */
+async function demarrer() {
+  const e = await api('etat');
+  if (!e.ok) { root.innerHTML = `<div class="login"><div class="box"><div class="big">Le <span>76</span></div><p class="lead">${esc(e.erreur)}</p><button class="btn block" onclick="location.reload()">Réessayer</button></div></div>`; return; }
+  S.vapid = e.vapid;
+  if (!e.installe) return ecranInstallation();
+  if (!e.moi) return ecranConnexion();
+  S.moi = e.moi;
+  coque();
+  lireHash();
+  enregistrerSW();
+}
+
+function ecranInstallation() {
+  root.innerHTML = `<div class="login"><form class="box" id="inst">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Bienvenue ! Crée ton compte de responsable. Tu pourras ensuite ajouter l'équipe.</p>
+    <label class="field">Ton prénom<input name="nom" required autocomplete="given-name"></label>
+    <label class="field">Identifiant <small>(sans espace, ex. greg)</small><input name="identifiant" required autocapitalize="none" autocomplete="username"></label>
+    <label class="field">Mot de passe <small>(6 caractères minimum)</small><input name="mdp" type="password" required autocomplete="new-password"></label>
+    <button class="btn block">Créer mon compte</button></form></div>`;
+  document.getElementById('inst').onsubmit = async ev => {
+    ev.preventDefault(); const f = ev.target;
+    const r = await api('installer', { nom: f.nom.value, identifiant: f.identifiant.value, mdp: f.mdp.value });
+    r.ok ? demarrer() : toast(r.erreur, true);
+  };
+}
+
+function ecranConnexion() {
+  root.innerHTML = `<div class="login"><form class="box" id="cnx">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Carnet de réservations</p>
+    <label class="field">Identifiant<input name="identifiant" required autocapitalize="none" autocomplete="username"></label>
+    <label class="field">Mot de passe<input name="mdp" type="password" required autocomplete="current-password"></label>
+    <button class="btn block">Se connecter</button></form></div>`;
+  document.getElementById('cnx').onsubmit = async ev => {
+    ev.preventDefault(); const f = ev.target;
+    const r = await api('connexion', { identifiant: f.identifiant.value.trim(), mdp: f.mdp.value });
+    r.ok ? demarrer() : toast(r.erreur, true);
+  };
+}
+
+/* ---------- Coque de l'appli ---------- */
+function coque() {
+  root.innerHTML = `<header class="top" id="top"></header><main id="main"></main>
+    <button class="fab" id="fab" aria-label="Nouvelle réservation">+</button>
+    <nav class="tabs">
+      <button data-vue="carnet"><svg><use href="#i-book"/></svg>Carnet</button>
+      <button data-vue="demandes"><svg><use href="#i-bell"/></svg>Demandes<span class="badge" id="badge" hidden></span></button>
+      <button data-vue="avenir"><svg><use href="#i-cal"/></svg>À venir</button>
+      <button data-vue="plus"><svg><use href="#i-more"/></svg>Plus</button>
+    </nav>`;
+  root.querySelector('nav.tabs').onclick = e => { const b = e.target.closest('button'); if (b) aller(b.dataset.vue); };
+  document.getElementById('fab').onclick = () => formulaireResa(null, S.vue === 'carnet' ? S.date : today());
+}
+function majBadge(n) {
+  if (n !== undefined) S.demandes = n;
+  const b = document.getElementById('badge'); if (!b) return;
+  b.hidden = !S.demandes; b.textContent = S.demandes;
+  if ('setAppBadge' in navigator) { try { S.demandes ? navigator.setAppBadge(S.demandes) : navigator.clearAppBadge(); } catch {} }
+}
+function aller(vue, date) {
+  if (date) S.date = date;
+  const h = vue === 'carnet' ? `#jour=${S.date}` : `#${vue}`;
+  if (location.hash !== h) history.replaceState(null, '', h);
+  afficher(vue);
+}
+function lireHash() {
+  const h = location.hash.slice(1);
+  if (h.startsWith('jour=')) { S.date = h.slice(5); afficher('carnet'); }
+  else afficher(['demandes', 'avenir', 'plus'].includes(h) ? h : 'carnet');
+}
+window.addEventListener('hashchange', () => S.moi && lireHash());
+
+function afficher(vue) {
+  S.vue = vue;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.vue === vue));
+  document.getElementById('fab').hidden = vue === 'plus';
+  ({ carnet: vueCarnet, demandes: vueDemandes, avenir: vueAvenir, plus: vuePlus })[vue]();
+  window.scrollTo(0, 0);
+}
+function enTete(titre, avecDate) {
+  const r = relatif(S.date);
+  document.getElementById('top').innerHTML = `<div class="top-row"><div class="logo">Le <span>76</span></div><h1>${esc(titre)}</h1></div>
+    ${avecDate ? `<div class="datenav"><button class="nav" data-j="-1" aria-label="Jour précédent">‹</button>
+      <label class="datebox">${dateLong(S.date)}${r ? `<small>${r}</small>` : ''}<input type="date" id="pick" value="${S.date}"></label>
+      <button class="nav" data-j="1" aria-label="Jour suivant">›</button>${S.date !== today() ? '<button class="today-btn" data-j="0">Auj.</button>' : ''}</div>` : ''}`;
+  if (avecDate) {
+    document.getElementById('top').onclick = e => { const b = e.target.closest('[data-j]'); if (b) aller('carnet', b.dataset.j === '0' ? today() : addDays(S.date, +b.dataset.j)); };
+    document.getElementById('pick').onchange = e => e.target.value && aller('carnet', e.target.value);
+  }
+}
+
+/* ---------- Carnet du jour ---------- */
+async function vueCarnet(silencieux) {
+  enTete('Carnet', true);
+  const main = document.getElementById('main');
+  if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
+  const d = await api('jour', { date: S.date });
+  if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  if (S.vue !== 'carnet' || d.date !== S.date) return;
+  S.jour = d; majBadge(d.demandes);
+  let h = '';
+  for (const s of ['midi', 'soir']) {
+    const e = d.services[s];
+    const resas = d.reservations.filter(r => r.service === s);
+    const actives = resas.filter(r => r.statut === 'confirmee' || r.statut === 'attente');
+    const inactives = resas.filter(r => r.statut === 'annulee' || r.statut === 'refusee');
+    if (!e.ouvert && !actives.length && !inactives.length) {
+      h += `<div class="svc"><div class="svc-head"><div class="svc-title"><h2>${s === 'midi' ? 'Midi' : 'Soir'}</h2><span class="count"><small>${esc(e.raison || 'Fermé')}</small></span></div>
+        <div class="chips"><button class="chip" data-reglage="${s}">⚙︎ Ouvrir exceptionnellement…</button></div></div></div>`;
+      continue;
+    }
+    const conf = actives.filter(r => r.statut === 'confirmee').reduce((a, r) => a + r.couverts, 0);
+    const att = actives.filter(r => r.statut === 'attente').reduce((a, r) => a + r.couverts, 0);
+    const tot = conf + att, cap = e.capacite || 1;
+    const over = tot > e.capacite;
+    h += `<div class="svc"><div class="svc-head">
+      <div class="svc-title"><h2>${s === 'midi' ? 'Midi' : 'Soir'}</h2><span class="count">${tot} <small>/ ${e.capacite} couverts</small></span></div>
+      <div class="bar${over ? ' over' : ''}"><i style="width:${Math.min(100, conf / cap * 100)}%"></i><i class="att" style="width:${Math.min(100 - Math.min(100, conf / cap * 100), att / cap * 100)}%"></i></div>
+      <div class="chips">
+        ${e.soiree ? `<span class="chip soir">✦ ${esc(e.soiree.titre)}</span>` : ''}
+        ${!e.ouvert ? `<span class="chip off">${esc(e.raison || 'Fermé')}</span>` : `<button class="chip ${e.en_ligne ? 'ok' : 'off'}" data-enligne="${s}">${e.en_ligne ? '● Résa en ligne ouverte' : '○ Résa en ligne fermée'}</button>`}
+        ${att ? `<span class="chip" style="color:var(--amber)">${att} en attente</span>` : ''}
+        ${e.menu_impose ? '<span class="chip">Menu imposé</span>' : ''}
+        <button class="chip" data-reglage="${s}">⚙︎ Réglages</button>
+      </div></div>`;
+    if (!actives.length) h += `<div class="empty">Aucune réservation pour l'instant.</div>`;
+    h += actives.map(ligneResa).join('');
+    if (inactives.length) {
+      h += S.voirAnnulees[s] ? inactives.map(ligneResa).join('') + `<button class="more" data-annul="${s}">Masquer les annulées</button>`
+        : `<button class="more" data-annul="${s}">${inactives.length} annulée${inactives.length > 1 ? 's' : ''} / refusée${inactives.length > 1 ? 's' : ''} · afficher</button>`;
+    }
+    h += '</div>';
+  }
+  const main2 = document.getElementById('main');
+  main2.innerHTML = h;
+  main2.onclick = async ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.id) return ficheResa(S.jour.reservations.find(r => r.id === +b.dataset.id));
+    if (b.dataset.annul) { S.voirAnnulees[b.dataset.annul] = !S.voirAnnulees[b.dataset.annul]; return vueCarnet(true); }
+    if (b.dataset.reglage) return reglageService(b.dataset.reglage);
+    if (b.dataset.enligne) {
+      const e = S.jour.services[b.dataset.enligne];
+      const r = await api('jour_reglage', { date: S.date, service: b.dataset.enligne, ferme_en_ligne: e.en_ligne });
+      if (r.ok) { toast(e.en_ligne ? 'Résa en ligne fermée pour ce service' : 'Résa en ligne rouverte'); vueCarnet(true); } else toast(r.erreur, true);
+    }
+  };
+}
+function ligneResa(r) {
+  const infos = [r.telephone, r.remarque ? `« ${r.remarque} »` : '', r.note_interne ? `📝 ${r.note_interne}` : ''].filter(Boolean).join(' · ');
+  return `<button class="resa ${r.statut}${r.arrive ? ' arrive' : ''}" data-id="${r.id}">
+    <span class="h">${hFr(r.heure)}</span>
+    <span class="who"><b>${r.arrive ? '✓ ' : ''}${esc(r.nom)}${r.statut === 'attente' ? '<span class="tag att">à valider</span>' : ''}${r.source === 'site' && r.statut !== 'attente' ? '<span class="tag web">site</span>' : ''}</b>
+    <span>${esc(infos) || '&nbsp;'}</span></span>
+    <span class="pers">${r.couverts}</span></button>`;
+}
+
+/* Réglages d'un service précis (capacité du jour, fermeture, menu…) */
+function reglageService(s) {
+  const e = S.jour.services[s];
+  sheet(`<h2>${s === 'midi' ? 'Midi' : 'Soir'} · ${dateCourt(S.date)}</h2>
+    ${e.soiree ? `<div class="tip">✦ <b>${esc(e.soiree.titre)}</b>${e.soiree.details ? '<br>' + esc(e.soiree.details) : ''}</div>` : ''}
+    <label class="field">Ouverture
+      <select name="ouvert"><option value="auto">Horaires habituels</option><option value="1">Ouvert exceptionnellement</option><option value="0">Fermé exceptionnellement</option></select></label>
+    <div class="row" style="padding:6px 0 12px;border:0"><div class="grow">Réservation en ligne<small>Fermer si complet ou par téléphone seulement</small></div>${sw('en_ligne', !e.ferme_en_ligne)}</div>
+    <label class="field">Capacité ce ${s === 'midi' ? 'midi' : 'soir'} <small>(vide = capacité habituelle)</small><input name="capacite" type="number" inputmode="numeric" min="0" placeholder="${e.capacite_auto ? e.capacite : ''}" value="${e.capacite_auto ? '' : e.capacite}"></label>
+    <label class="field">Menu imposé <small>(le client doit cocher qu'il l'a bien noté)</small>
+      <select name="menu"><option value="auto">Automatique (oui si une soirée avec prix est prévue)</option><option value="1">Oui</option><option value="0">Non</option></select></label>
+    <label class="field">Message affiché aux clients <small>(facultatif)</small><textarea name="note" maxlength="300" placeholder="Ex. : terrasse fermée ce soir">${esc(e.note)}</textarea></label>
+    <div class="actions"><button class="btn ghost" data-fermer>Annuler</button><button class="btn" id="ok">Enregistrer</button></div>`, (el, fermer) => {
+    el.querySelector('[name=ouvert]').value = e.ouverture_forcee === null ? 'auto' : String(e.ouverture_forcee);
+    el.querySelector('[name=menu]').value = e.menu_impose_auto ? 'auto' : (e.menu_impose ? '1' : '0');
+    el.querySelector('#ok').onclick = async () => {
+      const ouvertSel = el.querySelector('[name=ouvert]').value;
+      const r = await api('jour_reglage', {
+        date: S.date, service: s,
+        ...(ouvertSel === 'auto' ? { ouvert: 'auto' } : { ouvert: ouvertSel === '1' }),
+        ferme_en_ligne: !el.querySelector('[name=en_ligne]').checked,
+        capacite: el.querySelector('[name=capacite]').value,
+        menu_impose: el.querySelector('[name=menu]').value === 'auto' ? 'auto' : el.querySelector('[name=menu]').value === '1',
+        note: el.querySelector('[name=note]').value,
+      });
+      if (r.ok) { fermer(); toast('Enregistré'); vueCarnet(true); } else toast(r.erreur, true);
+    };
+  });
+}
+
+/* Fiche d'une réservation */
+function ficheResa(r) {
+  if (!r) return;
+  const ligne = (l, v) => v ? `<div><span>${l}</span><b style="font-weight:500">${v}</b></div>` : '';
+  const actif = r.statut === 'confirmee' || r.statut === 'attente';
+  sheet(`<h2>${esc(r.nom)} · ${r.couverts} pers.</h2>
+    <div class="det">
+      ${ligne('Quand', `<span style="text-transform:capitalize;width:auto;color:inherit;font-size:inherit">${dateLong(r.date)}</span> à ${hFr(r.heure)}`)}
+      ${ligne('Statut', STATUTS[r.statut] + (r.traite_par ? ` <small style="color:var(--muted)">· ${esc(r.traite_par)}</small>` : ''))}
+      ${ligne('Téléphone', r.telephone ? `<a href="${telHref(r.telephone)}">${esc(r.telephone)}</a>` : '')}
+      ${ligne('E-mail', r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : '')}
+      ${ligne('Message', esc(r.remarque))}
+      ${ligne('Note interne', esc(r.note_interne))}
+      ${ligne('Origine', SOURCES[r.source] + (r.cree_par ? ` · ${esc(r.cree_par)}` : ''))}
+    </div>
+    <div class="actions">
+      ${r.statut === 'attente' ? `<button class="btn green" data-a="accepter">✓ Accepter</button><button class="btn" data-a="refuser">✕ Refuser</button>` : ''}
+      ${r.statut === 'confirmee' ? `<button class="btn ${r.arrive ? 'ghost' : 'green'} full" data-a="arrive">${r.arrive ? 'Annuler « arrivé »' : '✓ Client arrivé'}</button>` : ''}
+      ${r.telephone ? `<a class="btn ghost" href="${telHref(r.telephone)}">📞 Appeler</a>` : ''}
+      <button class="btn ghost" data-a="modifier">Modifier</button>
+      ${actif ? `<button class="btn ghost full" data-a="annuler" style="color:var(--rust)">Annuler la réservation</button>` : `<button class="btn ghost full" data-a="retablir">Remettre en confirmée</button>`}
+    </div>`, (el, fermer) => {
+    el.onclick = async e => {
+      const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+      if (a === 'accepter') { fermer(); accepter(r); }
+      else if (a === 'refuser') { fermer(); refuser(r, 'refusee'); }
+      else if (a === 'annuler') { fermer(); refuser(r, 'annulee'); }
+      else if (a === 'modifier') { fermer(); formulaireResa(r); }
+      else if (a === 'arrive') { const x = await api('arrive', { id: r.id, arrive: !r.arrive }); fermer(); x.ok ? rafraichir() : toast(x.erreur, true); }
+      else if (a === 'retablir') { const x = await api('statut', { id: r.id, statut: 'confirmee', prevenir: false }); fermer(); x.ok ? (toast('Réservation rétablie'), rafraichir()) : toast(x.erreur, true); }
+    };
+  });
+}
+
+async function accepter(r) {
+  const x = await api('statut', { id: r.id, statut: 'confirmee', prevenir: true });
+  if (!x.ok) return toast(x.erreur, true);
+  majBadge(x.demandes);
+  toast(r.email ? 'Acceptée · e-mail de confirmation envoyé' : 'Acceptée');
+  rafraichir();
+}
+function refuser(r, statut) {
+  const refus = statut === 'refusee';
+  sheet(`<h2>${refus ? 'Refuser la demande' : 'Annuler la réservation'}</h2>
+    <p style="margin:-4px 0 12px;color:var(--muted)">${esc(r.nom)} · ${r.couverts} pers. · ${dateCourt(r.date)} à ${hFr(r.heure)}</p>
+    ${r.email ? `<label class="checkline"><input type="checkbox" name="prevenir" checked>Prévenir le client par e-mail</label>
+    <label class="field">Petit mot pour le client <small>(facultatif)</small><textarea name="message" placeholder="${refus ? 'Ex. : nous sommes complets à 19h, mais il reste de la place à 20h30.' : ''}"></textarea></label>` : `<div class="tip">Pas d'e-mail pour ce client${r.telephone ? ` : pense à l'appeler au <a href="${telHref(r.telephone)}">${esc(r.telephone)}</a>` : ''}.</div>`}
+    <div class="actions"><button class="btn ghost" data-fermer>Retour</button><button class="btn" id="ok">${refus ? 'Refuser' : 'Annuler la résa'}</button></div>`, (el, fermer) => {
+    el.querySelector('#ok').onclick = async () => {
+      const x = await api('statut', { id: r.id, statut, prevenir: !!el.querySelector('[name=prevenir]')?.checked, message: el.querySelector('[name=message]')?.value || '' });
+      if (!x.ok) return toast(x.erreur, true);
+      fermer(); majBadge(x.demandes); toast(refus ? 'Demande refusée' : 'Réservation annulée'); rafraichir();
+    };
+  });
+}
+
+/* Nouvelle réservation / modification */
+function formulaireResa(r, date) {
+  const nouveau = !r;
+  r = r || { date: date || today(), heure: '', couverts: 2, nom: '', telephone: '', email: '', remarque: '', note_interne: '', source: 'telephone' };
+  const heures = slotsHeures();
+  if (r.heure && !heures.includes(r.heure)) heures.push(r.heure), heures.sort();
+  sheet(`<h2>${nouveau ? 'Nouvelle réservation' : 'Modifier la réservation'}</h2>
+    <form id="fr">
+      <div class="cols"><label class="field">Date<input type="date" name="date" value="${r.date}" required></label>
+        <label class="field">Heure<select name="heure" required><option value="">—</option>${heures.map(h => `<option value="${h}" ${h === r.heure ? 'selected' : ''}>${hFr(h)}</option>`).join('')}</select></label></div>
+      <label class="field">Personnes<div class="num"><button type="button" data-n="-1">−</button><input name="couverts" type="number" inputmode="numeric" min="1" max="500" value="${r.couverts}"><button type="button" data-n="1">+</button></div></label>
+      <label class="field">Nom<input name="nom" value="${esc(r.nom)}" required autocomplete="off" autocapitalize="words"></label>
+      <label class="field">Téléphone<input name="telephone" type="tel" inputmode="tel" value="${esc(r.telephone)}" autocomplete="off"></label>
+      <label class="field">E-mail <small>(facultatif)</small><input name="email" type="email" value="${esc(r.email)}" autocomplete="off" autocapitalize="none"></label>
+      <label class="field">Message du client <small>(anniversaire, allergie…)</small><textarea name="remarque">${esc(r.remarque)}</textarea></label>
+      <label class="field">Note interne <small>(visible seulement par l'équipe)</small><input name="note_interne" value="${esc(r.note_interne)}" placeholder="Ex. : table près de la fenêtre"></label>
+      ${nouveau ? `<div class="field">Prise par<div class="seg" id="src">${['telephone', 'sur_place', 'autre'].map(s => `<button type="button" data-s="${s}" class="${r.source === s ? 'on' : ''}">${SOURCES[s]}</button>`).join('')}</div></div>` : ''}
+      <label class="checkline"><input type="checkbox" name="envoyer_email" ${nouveau ? '' : 'checked'}>${nouveau ? 'Envoyer une confirmation par e-mail au client' : 'Prévenir le client par e-mail si la date, l\'heure ou le nombre change'}</label>
+      <div class="actions"><button type="button" class="btn ghost" data-fermer>Annuler</button><button class="btn">${nouveau ? 'Ajouter' : 'Enregistrer'}</button></div>
+    </form>`, (el, fermer) => {
+    const f = el.querySelector('#fr');
+    let source = r.source;
+    el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { f.couverts.value = Math.max(1, (+f.couverts.value || 0) + +b.dataset.n); });
+    el.querySelector('#src')?.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; source = b.dataset.s; el.querySelectorAll('#src button').forEach(x => x.classList.toggle('on', x === b)); });
+    const majMail = () => { const c = f.envoyer_email; c.disabled = !f.email.value.trim(); if (c.disabled) c.checked = false; };
+    f.email.addEventListener('input', () => { majMail(); if (nouveau && f.email.value.trim()) f.envoyer_email.checked = true; }); majMail();
+    if (nouveau) setTimeout(() => f.heure.focus(), 250);
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      const x = await api('enregistrer', { id: nouveau ? 0 : r.id, date: f.date.value, heure: f.heure.value, couverts: +f.couverts.value, nom: f.nom.value,
+        telephone: f.telephone.value, email: f.email.value, remarque: f.remarque.value, note_interne: f.note_interne.value, source, envoyer_email: f.envoyer_email.checked });
+      if (!x.ok) return toast(x.erreur, true);
+      fermer();
+      toast(x.depasse ? `Enregistré · attention : ${x.depasse} couvert(s) au-dessus de la capacité` : 'Enregistré', !!x.depasse);
+      aller('carnet', x.reservation.date);
+    };
+  });
+}
+
+/* ---------- Demandes ---------- */
+async function vueDemandes(silencieux) {
+  enTete('Demandes à valider');
+  const main = document.getElementById('main');
+  if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
+  const d = await api('demandes');
+  if (S.vue !== 'demandes') return;
+  if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  majBadge(d.demandes.length);
+  if (!d.demandes.length) { main.innerHTML = `<div class="loading" style="padding-top:60px">✓ Aucune demande en attente.<br><small>Les nouvelles demandes du site arrivent ici.</small></div>`; return; }
+  main.innerHTML = `<p class="sub" style="margin-top:2px">${d.demandes.length} demande${d.demandes.length > 1 ? 's' : ''} venant du site</p>` + d.demandes.map(r => {
+    const e = r.etat, apres = e.occupe;
+    return `<div class="dem" data-id="${r.id}">
+      <div class="quand">${dateLong(r.date)} · ${hFr(r.heure)}</div>
+      <div class="qui"><b>${esc(r.nom)}</b> · ${pers(r.couverts)}</div>
+      <div class="meta"><a href="${telHref(r.telephone)}">${esc(r.telephone)}</a> · ${esc(r.email)}</div>
+      <div class="meta">${r.service === 'midi' ? 'Midi' : 'Soir'} : ${apres} / ${e.capacite} couverts avec cette demande${apres > e.capacite ? ' <b style="color:var(--rust)">· au-dessus de la capacité</b>' : ''}${e.soiree ? ` · ✦ ${esc(e.soiree.titre)}` : ''}</div>
+      ${r.remarque ? `<div class="msg">« ${esc(r.remarque)} »</div>` : ''}
+      <div class="actions"><button class="btn green" data-a="ok">✓ Accepter</button><button class="btn ghost" data-a="non">✕ Refuser</button></div>
+    </div>`;
+  }).join('');
+  main.onclick = e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const r = d.demandes.find(x => x.id === +a.closest('.dem').dataset.id);
+    a.dataset.a === 'ok' ? accepter(r) : refuser(r, 'refusee');
+  };
+}
+
+/* ---------- À venir + recherche ---------- */
+async function vueAvenir(silencieux) {
+  enTete('À venir');
+  const main = document.getElementById('main');
+  if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
+  const d = await api('avenir', { debut: today(), jours: 28 });
+  if (S.vue !== 'avenir') return;
+  if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  const cel = (v, s) => {
+    if (!v.ouvert && !v.confirmees.resas && !v.attente.resas) return `<div class="mini x">${s === 'midi' ? 'Midi' : 'Soir'} · fermé</div>`;
+    return `<div class="mini"><div class="l">${s === 'midi' ? 'Midi' : 'Soir'}${v.soiree ? ' <span class="st">✦</span>' : ''}${v.ouvert && !v.en_ligne ? ' · tél.' : ''}</div><b>${v.occupe}</b> / ${v.capacite}${v.attente.resas ? ` <span class="wait">· ${v.attente.resas} à valider</span>` : ''}</div>`;
+  };
+  main.innerHTML = `<input class="search" id="q" type="search" placeholder="Chercher un nom, un téléphone…" autocomplete="off"><div id="res"></div>
+    <div id="liste">${d.jours.map(j => {
+      const ferme = !j.services.midi.ouvert && !j.services.soir.ouvert && !j.services.midi.occupe && !j.services.soir.occupe;
+      return `<button class="day-row${ferme ? ' closed' : ''}" data-d="${j.date}"><div class="d">${dateCourt(j.date)}<small>${relatif(j.date)}</small></div>${cel(j.services.midi, 'midi')}${cel(j.services.soir, 'soir')}</button>`;
+    }).join('')}</div>`;
+  main.onclick = e => {
+    const b = e.target.closest('[data-d]'); if (b) return aller('carnet', b.dataset.d);
+    const x = e.target.closest('[data-id]'); if (x) { const r = (S.resultats || []).find(r => r.id === +x.dataset.id); r && ficheResa(r); }
+  };
+  let t;
+  document.getElementById('q').oninput = e => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const v = e.target.value.trim(), res = document.getElementById('res'), liste = document.getElementById('liste');
+      if (v.length < 2) { res.innerHTML = ''; liste.hidden = false; return; }
+      const x = await api('chercher', { q: v });
+      if (!x.ok) return;
+      S.resultats = x.resultats; liste.hidden = true;
+      res.innerHTML = x.resultats.length ? `<div class="svc">${x.resultats.map(r => ligneResa(r).replace('<span class="h">', `<span class="h" style="width:auto;min-width:48px;font-size:.85rem;line-height:1.2">${dateCourt(r.date)}<br>`)).join('')}</div>` : '<div class="loading">Aucun résultat.</div>';
+    }, 250);
+  };
+}
+
+/* ---------- Plus : compte, notifications, réglages, équipe ---------- */
+async function vuePlus() {
+  enTete('Plus');
+  const main = document.getElementById('main');
+  const notif = await etatNotif();
+  const iOSnonInstalle = /iphone|ipad/i.test(navigator.userAgent) && !navigator.standalone;
+  main.innerHTML = `
+    <div class="group"><h3>Mon compte</h3>
+      <div class="row"><div class="grow"><b>${esc(S.moi.nom)}</b><small>Identifiant : ${esc(S.moi.identifiant)}${S.moi.admin ? ' · responsable' : ''}</small></div></div>
+      <button class="row link-row" data-a="mdp"><span>Changer mon mot de passe</span><span>›</span></button>
+      <button class="row link-row" data-a="deco"><span style="color:var(--rust)">Se déconnecter</span><span>›</span></button>
+    </div>
+    <div class="group"><h3>Notifications sur ce téléphone</h3>
+      ${iOSnonInstalle ? `<div class="row"><div class="grow">Sur iPhone, installe d'abord l'appli : bouton <b>Partager</b> <span style="font-size:1.1em">⎋</span> de Safari puis <b>« Sur l'écran d'accueil »</b>. Ouvre ensuite « Résas 76 » depuis l'écran d'accueil pour activer les notifications.</div></div>`
+        : notif === 'non-supporte' ? `<div class="row"><div class="grow">Ce navigateur ne gère pas les notifications. Sur Android, utilise Chrome ; sur iPhone, installe l'appli sur l'écran d'accueil.</div></div>`
+        : `<div class="row"><div class="grow">Prévenir sur ce téléphone<small>${notif === 'bloque' ? 'Bloquées dans les réglages du téléphone : autorise-les pour « Résas 76 ».' : 'À chaque nouvelle demande ou annulation du site'}</small></div>${sw('', notif === 'actif', `id="notif" ${notif === 'bloque' ? 'disabled' : ''}`)}</div>
+          ${notif === 'actif' ? '<button class="row link-row" data-a="testpush"><span>Envoyer une notification de test</span><span>›</span></button>' : ''}`}    </div>
+    ${S.moi.admin ? `<div class="group"><h3>Responsable</h3>
+      <button class="row link-row" data-a="reglages"><span>Réglages des réservations<small style="display:block;color:var(--muted);font-size:.82rem">Capacité, horaires, délais, e-mails…</small></span><span>›</span></button>
+      <button class="row link-row" data-a="soirees"><span>Soirées à venir<small style="display:block;color:var(--muted);font-size:.82rem">Menu imposé, résa en ligne par soirée</small></span><span>›</span></button>
+      <button class="row link-row" data-a="equipe"><span>L'équipe<small style="display:block;color:var(--muted);font-size:.82rem">Ajouter les accès des serveuses</small></span><span>›</span></button>
+      <a class="row link-row" href="${API}?action=export" style="text-decoration:none;color:inherit"><span>Télécharger toutes les réservations (Excel)</span><span>›</span></a>
+    </div>` : ''}
+    <p style="text-align:center;color:var(--muted);font-size:.8rem">Page client : <a href="/reserver/" target="_blank">le76.fr/reserver</a></p>`;
+  main.onclick = async e => {
+    const a = e.target.closest('[data-a]')?.dataset.a;
+    if (a === 'deco') { await api('deconnexion'); S.moi = null; ecranConnexion(); }
+    else if (a === 'mdp') changerMdp();
+    else if (a === 'reglages') ecranReglages();
+    else if (a === 'soirees') ecranSoirees();
+    else if (a === 'equipe') ecranEquipe();
+    else if (a === 'testpush') { const x = await api('push_test'); x.ok && x.envoyes ? toast('Notification envoyée') : toast("La notification n'est pas partie. Désactive puis réactive.", true); }
+  };
+  document.getElementById('notif')?.addEventListener('change', async e => {
+    e.target.disabled = true;
+    const ok = e.target.checked ? await activerNotif() : await desactiverNotif();
+    if (!ok) e.target.checked = !e.target.checked;
+    vuePlus();
+  });
+}
+
+function changerMdp() {
+  sheet(`<h2>Changer mon mot de passe</h2>
+    <label class="field">Mot de passe actuel<input type="password" name="a" autocomplete="current-password"></label>
+    <label class="field">Nouveau mot de passe<input type="password" name="n" autocomplete="new-password"></label>
+    <div class="actions"><button class="btn ghost" data-fermer>Annuler</button><button class="btn" id="ok">Changer</button></div>`, (el, fermer) => {
+    el.querySelector('#ok').onclick = async () => {
+      const x = await api('mdp_changer', { ancien: el.querySelector('[name=a]').value, nouveau: el.querySelector('[name=n]').value });
+      x.ok ? (fermer(), toast('Mot de passe changé')) : toast(x.erreur, true);
+    };
+  });
+}
+
+/* Réglages généraux */
+async function ecranReglages() {
+  const x = await api('reglages'); if (!x.ok) return toast(x.erreur, true);
+  const r = x.reglages;
+  const NJ = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 7: 'Dim' };
+  const opts = (n, v) => Array.from({ length: n }, (_, i) => i + 1).map(i => `<option value="${String(i).padStart(2, '0')}" ${+v === i ? 'selected' : ''}>${i}</option>`).join('');
+  const saisonHtml = (s = { nom: 'Été', debut: '06-01', fin: '09-15', midi: 250, soir: 250 }) => `<div class="saison" style="border-top:1px solid var(--line);padding:10px 14px">
+      <div class="cols" style="grid-template-columns:1fr auto"><input class="sn" value="${esc(s.nom)}" placeholder="Nom" style="padding:9px;border:1.5px solid var(--line);border-radius:10px"><button type="button" class="btn ghost small" data-suppr>Supprimer</button></div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:.88rem">Du <select class="dj">${opts(31, s.debut.slice(3))}</select><select class="dm">${MOIS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}" ${+s.debut.slice(0, 2) === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select>
+        au <select class="fj">${opts(31, s.fin.slice(3))}</select><select class="fm">${MOIS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}" ${+s.fin.slice(0, 2) === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:.88rem">Midi <input class="sm" type="number" value="${s.midi}" style="width:76px;padding:7px;border:1.5px solid var(--line);border-radius:8px"> Soir <input class="ss" type="number" value="${s.soir}" style="width:76px;padding:7px;border:1.5px solid var(--line);border-radius:8px"> couverts</div></div>`;
+  sheet(`<h2>Réglages des réservations</h2>
+    <div class="group"><div class="row"><div class="grow"><b>Réservation en ligne</b><small>Interrupteur général de la page client</small></div>${sw('resa_en_ligne', r.resa_en_ligne)}</div></div>
+
+    <div class="group"><h3>Capacité habituelle (couverts)</h3>
+      <div class="row"><div class="grow">Midi</div><input name="cap_midi" type="number" inputmode="numeric" value="${r.capacite.midi}"></div>
+      <div class="row"><div class="grow">Soir</div><input name="cap_soir" type="number" inputmode="numeric" value="${r.capacite.soir}"></div>
+    </div>
+
+    <div class="group"><h3>Saisons (reviennent chaque année)</h3>
+      <div class="row" style="border:0;padding-top:0"><div class="grow"><small>Ex. : l'été avec la terrasse, capacité plus grande.</small></div></div>
+      <div id="saisons">${r.saisons.map(saisonHtml).join('')}</div>
+      <div class="row"><button type="button" class="btn ghost small" id="addSaison">+ Ajouter une saison</button></div>
+    </div>
+
+    <div class="group"><h3>Jours d'ouverture et dernier créneau</h3>
+      ${Object.entries(r.semaine).map(([j, v]) => `<div class="wk" data-j="${j}"><span class="n">${NJ[j]}</span>
+        <label><input type="checkbox" class="m" ${v.midi ? 'checked' : ''}>Midi <input type="time" class="mf" value="${v.midi_fin}" step="900"></label>
+        <label><input type="checkbox" class="s" ${v.soir ? 'checked' : ''}>Soir <input type="time" class="sf" value="${v.soir_fin}" step="900"></label></div>`).join('')}
+      <div class="row"><div class="grow">Premier créneau du midi</div><input name="midi_debut" type="time" step="900" value="${r.midi_debut}"></div>
+      <div class="row"><div class="grow">Premier créneau du soir</div><input name="soir_debut" type="time" step="900" value="${r.soir_debut}"></div>
+      <div class="row"><div class="grow">Créneaux toutes les</div><select name="pas">${[10, 15, 20, 30, 60].map(p => `<option ${p === r.pas ? 'selected' : ''} value="${p}">${p} min</option>`).join('')}</select></div>
+    </div>
+
+    <div class="group"><h3>Règles de la réservation en ligne</h3>
+      <div class="row"><div class="grow">Les clients peuvent demander</div><select name="delai_mode"><option value="heures" ${r.delai_mode === 'heures' ? 'selected' : ''}>jusqu'à … h avant</option><option value="veille" ${r.delai_mode === 'veille' ? 'selected' : ''}>jusqu'à la veille</option></select></div>
+      <div class="row" id="rowHeures" ${r.delai_mode === 'veille' ? 'hidden' : ''}><div class="grow">Nombre d'heures avant</div><input name="delai_heures" type="number" min="0" value="${r.delai_heures}"></div>
+      <div class="row"><div class="grow">Maximum de personnes en ligne<small>Au-delà : « appelez-nous »</small></div><input name="max_en_ligne" type="number" min="1" value="${r.max_en_ligne}"></div>
+      <div class="row"><div class="grow">Maximum de couverts par créneau<small>0 = pas de limite (utile pour étaler l'arrivée en cuisine)</small></div><input name="max_par_creneau" type="number" min="0" value="${r.max_par_creneau}"></div>
+      <div class="row"><div class="grow">Réservable jusqu'à … jours à l'avance</div><input name="jours_avance" type="number" min="1" value="${r.jours_avance}"></div>
+    </div>
+
+    <div class="group"><h3>E-mails</h3>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Adresses qui reçoivent les alertes <small>(une ou plusieurs, séparées par une virgule)</small><input name="alertes_email" value="${esc(r.alertes_email.join(', '))}" placeholder="ex. le76@email.fr" autocapitalize="none"></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Adresse d'envoi <small>(doit être une adresse @le76.fr)</small><input name="expediteur" value="${esc(r.expediteur)}" autocapitalize="none"></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Petit mot ajouté aux confirmations <small>(facultatif)</small><textarea name="mot_client" placeholder="Ex. : Parking gratuit derrière le restaurant.">${esc(r.mot_client)}</textarea></label></div>
+      <div class="row"><button type="button" class="btn ghost small" id="mailtest">Envoyer un e-mail de test</button></div>
+    </div>
+    <div class="actions" style="position:sticky;bottom:0;background:var(--cream);padding:10px 0"><button class="btn ghost" data-fermer>Fermer</button><button class="btn" id="ok">Enregistrer</button></div>`, (el, fermer) => {
+    const v = n => el.querySelector(`[name=${n}]`);
+    el.querySelector('#addSaison').onclick = () => el.querySelector('#saisons').insertAdjacentHTML('beforeend', saisonHtml());
+    el.querySelector('#saisons').onclick = e => { if (e.target.closest('[data-suppr]')) e.target.closest('.saison').remove(); };
+    v('delai_mode').onchange = e => el.querySelector('#rowHeures').hidden = e.target.value === 'veille';
+    const collecter = () => ({
+      resa_en_ligne: v('resa_en_ligne').checked,
+      capacite: { midi: +v('cap_midi').value, soir: +v('cap_soir').value },
+      saisons: [...el.querySelectorAll('.saison')].map(s => ({ nom: s.querySelector('.sn').value, debut: s.querySelector('.dm').value + '-' + s.querySelector('.dj').value, fin: s.querySelector('.fm').value + '-' + s.querySelector('.fj').value, midi: +s.querySelector('.sm').value, soir: +s.querySelector('.ss').value })),
+      semaine: Object.fromEntries([...el.querySelectorAll('.wk')].map(w => [w.dataset.j, { midi: w.querySelector('.m').checked, soir: w.querySelector('.s').checked, midi_fin: w.querySelector('.mf').value, soir_fin: w.querySelector('.sf').value }])),
+      midi_debut: v('midi_debut').value, soir_debut: v('soir_debut').value, pas: +v('pas').value,
+      delai_mode: v('delai_mode').value, delai_heures: +v('delai_heures').value, max_en_ligne: +v('max_en_ligne').value,
+      max_par_creneau: +v('max_par_creneau').value, jours_avance: +v('jours_avance').value,
+      alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value,
+    });
+    const sauver = async () => { const x = await api('reglages_ecrire', { reglages: collecter() }); if (!x.ok) toast(x.erreur, true); return x.ok; };
+    el.querySelector('#ok').onclick = async () => { if (await sauver()) { fermer(); toast('Réglages enregistrés'); } };
+    el.querySelector('#mailtest').onclick = async () => { if (!(await sauver())) return; const x = await api('mail_test'); x.ok ? toast('E-mail de test envoyé : regarde ta boîte (et les spams)') : toast(x.erreur, true); };
+  });
+}
+
+/* Soirées à venir (lues dans le programme du site) */
+async function ecranSoirees() {
+  const x = await api('reglages'); if (!x.ok) return toast(x.erreur, true);
+  const liste = x.soirees;
+  sheet(`<h2>Soirées à venir</h2>
+    <div class="tip">Ces soirées viennent du programme du site (la liste « prochaines dates »). Une soirée avec un prix est en « menu imposé » automatiquement : le client doit cocher qu'il l'a bien noté.</div>
+    ${liste.length ? liste.map((s, i) => s.fermeture
+      ? `<div class="group"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small>${dateCourt(s.date)}${s.date_fin !== s.date ? ' → ' + dateCourt(s.date_fin) : ''} · résa en ligne fermée automatiquement</small></div></div></div>`
+      : `<div class="group" data-i="${i}"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small style="text-transform:capitalize">${dateLong(s.date)}${s.heure ? ' · ' + esc(s.heure) : ''}</small>${s.details ? `<small>${esc(s.details)}</small>` : ''}<small>${s.etat.occupe} / ${s.etat.capacite} couverts</small></div></div>
+        <div class="row"><div class="grow">Menu imposé</div>${sw('', s.etat.menu_impose, 'data-k="menu"')}</div>
+        <div class="row"><div class="grow">Réservation en ligne</div>${sw('', !s.etat.ferme_en_ligne, 'data-k="en_ligne"')}</div></div>`).join('') : '<p>Aucune soirée au programme.</p>'}
+    <button class="btn ghost block" data-fermer>Fermer</button>`, el => {
+    el.addEventListener('change', async e => {
+      const k = e.target.dataset.k; if (!k) return;
+      const s = liste[+e.target.closest('[data-i]').dataset.i];
+      const x = await api('jour_reglage', { date: s.date, service: 'soir', ...(k === 'menu' ? { menu_impose: e.target.checked } : { ferme_en_ligne: !e.target.checked }) });
+      x.ok ? toast('Enregistré') : (toast(x.erreur, true), e.target.checked = !e.target.checked);
+    });
+  });
+}
+
+/* Équipe */
+async function ecranEquipe() {
+  const x = await api('equipe'); if (!x.ok) return toast(x.erreur, true);
+  const fermer = sheet(`<h2>L'équipe</h2><div id="eq"></div>
+    <div class="group"><h3>Ajouter quelqu'un</h3><div style="padding:6px 14px 12px">
+      <label class="field">Prénom<input name="nom" autocomplete="off"></label>
+      <label class="field">Identifiant <small>(sans espace ni accent, ex. lea)</small><input name="identifiant" autocapitalize="none" autocomplete="off"></label>
+      <label class="field">Mot de passe <small>(6 caractères minimum, à lui/lui donner)</small><input name="mdp" autocomplete="off"></label>
+      <label class="checkline"><input type="checkbox" name="admin">Responsable (accès aux réglages et à l'équipe)</label>
+      <button class="btn block" id="add">Ajouter</button></div></div>
+    <button class="btn ghost block" data-fermer>Fermer</button>`, el => {
+    const dessiner = eq => el.querySelector('#eq').innerHTML = `<div class="group">${eq.map(u => `<div class="row" data-u="${u.id}" style="${u.actif ? '' : 'opacity:.5'}"><div class="grow"><b>${esc(u.nom)}</b>${u.admin ? ' <span class="tag web">resp.</span>' : ''}<small>${esc(u.identifiant)} · ${u.telephones ? u.telephones + ' téléphone(s) notifié(s)' : 'pas de notification'}${u.actif ? '' : ' · désactivé'}</small></div>
+      ${u.id === S.moi.id ? '<small style="color:var(--muted)">toi</small>' : `<button class="btn ghost small" data-act="mdp">Mot de passe</button><button class="btn ghost small" data-act="actif">${u.actif ? 'Retirer' : 'Rétablir'}</button>`}</div>`).join('')}</div>`;
+    dessiner(x.equipe);
+    let eq = x.equipe;
+    el.querySelector('#eq').onclick = async e => {
+      const b = e.target.closest('[data-act]'); if (!b) return;
+      const u = eq.find(u => u.id === +b.closest('[data-u]').dataset.u);
+      let y;
+      if (b.dataset.act === 'mdp') { const m = prompt(`Nouveau mot de passe pour ${u.nom} (6 caractères minimum)`); if (!m) return; y = await api('equipe_modifier', { id: u.id, mdp: m }); }
+      else { if (u.actif && !confirm(`Retirer l'accès de ${u.nom} ? Elle/il sera déconnecté(e) tout de suite.`)) return; y = await api('equipe_modifier', { id: u.id, actif: !u.actif }); }
+      if (!y.ok) return toast(y.erreur, true);
+      eq = y.equipe; dessiner(eq); toast('Enregistré');
+    };
+    el.querySelector('#add').onclick = async () => {
+      const g = n => el.querySelector(`[name=${n}]`);
+      const y = await api('equipe_ajouter', { nom: g('nom').value, identifiant: g('identifiant').value.trim(), mdp: g('mdp').value, admin: g('admin').checked });
+      if (!y.ok) return toast(y.erreur, true);
+      eq = y.equipe; dessiner(eq);
+      toast(`${g('nom').value} ajouté(e) : identifiant « ${g('identifiant').value.trim()} »`);
+      ['nom', 'identifiant', 'mdp'].forEach(n => g(n).value = ''); g('admin').checked = false;
+    };
+  });
+}
+
+/* ---------- Notifications ---------- */
+let swReg = null;
+async function enregistrerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  try { swReg = await navigator.serviceWorker.register('/equipe/sw.js', { scope: '/equipe/' }); } catch {}
+}
+async function etatNotif() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return 'non-supporte';
+  if (Notification.permission === 'denied') return 'bloque';
+  const reg = swReg || await navigator.serviceWorker.getRegistration('/equipe/');
+  const sub = reg && await reg.pushManager.getSubscription();
+  return sub ? 'actif' : 'inactif';
+}
+const b64 = s => { const p = '='.repeat((4 - s.length % 4) % 4); const r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...r].map(c => c.charCodeAt(0))); };
+async function activerNotif() {
+  try {
+    if (await Notification.requestPermission() !== 'granted') { toast('Notifications refusées sur ce téléphone.', true); return false; }
+    const reg = swReg || await navigator.serviceWorker.register('/equipe/sw.js', { scope: '/equipe/' });
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(S.vapid) });
+    const x = await api('push_abonner', { abonnement: sub.toJSON() });
+    if (!x.ok) { toast(x.erreur, true); return false; }
+    toast('Notifications activées sur ce téléphone');
+    return true;
+  } catch (e) { toast("Impossible d'activer les notifications : " + e.message, true); return false; }
+}
+async function desactiverNotif() {
+  const reg = swReg || await navigator.serviceWorker.getRegistration('/equipe/');
+  const sub = reg && await reg.pushManager.getSubscription();
+  if (sub) { await api('push_desabonner', { endpoint: sub.endpoint }); await sub.unsubscribe(); }
+  toast('Notifications coupées sur ce téléphone');
+  return true;
+}
+
+/* ---------- Rafraîchissement ---------- */
+function rafraichir() {
+  if (!S.moi) return;
+  if (document.querySelector('.veil')) return; // ne pas déranger une saisie en cours
+  if (S.vue === 'carnet') vueCarnet(true);
+  else if (S.vue === 'demandes') vueDemandes(true);
+  else if (S.vue === 'avenir' && !document.getElementById('q')?.value) vueAvenir(true);
+  else api('demandes').then(d => d.ok && majBadge(d.demandes.length));
+}
+setInterval(() => document.visibilityState === 'visible' && rafraichir(), 45000);
+document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && rafraichir());
+navigator.serviceWorker?.addEventListener('message', e => { if (e.data?.type === 'push') rafraichir(); });
+
+demarrer();
+})();
+</script>
+</body>
+</html>

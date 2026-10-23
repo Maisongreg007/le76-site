@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Réserver une table · Le 76 · Beinheim</title>
+<meta name="description" content="Réservez votre table au 76, restaurant au 76 rue Principale à Beinheim. Demande en ligne, confirmation par e-mail.">
+<link rel="canonical" href="https://le76.fr/reserver/">
+<meta name="theme-color" content="#fbf5ec">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232b1d16'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='32' font-weight='700' fill='%23d4953f' text-anchor='middle'%3E76%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Jost:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fbf5ec; --paper: #fffbf5; --sand: #f3e7d6; --ink: #2b1d16; --brown: #4a2c1d;
+    --muted: #7a6a5c; --rust: #b7372a; --rust-dark: #8e2a20; --orange: #d9762b; --gold: #c98a3a;
+    --line: #e8d9c3; --green: #3d7a4f; --green-bg: #e6f0e4;
+    --serif: "Playfair Display", Georgia, serif; --sans: "Jost", system-ui, sans-serif; --script: "Caveat", cursive;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 400 17px/1.55 var(--sans);
+    background-image: radial-gradient(ellipse at 10% 0%, rgba(217,118,43,.10), transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(183,55,42,.07), transparent 50%);
+    background-attachment: fixed; min-height: 100vh; }
+  a { color: var(--rust); }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { text-decoration: none; display: flex; align-items: baseline; gap: 2px; color: var(--ink); }
+  .brand b { font: 800 1.55rem/1 var(--serif); }
+  .brand span { font: 700 1.95rem/1 var(--script); color: var(--gold); }
+  .back { color: var(--brown); text-decoration: none; font-weight: 500; font-size: .95rem; }
+  .back:hover { color: var(--rust); }
+
+  .intro { padding: 18px 0 26px; text-align: center; }
+  .kicker { font: 600 .74rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 12px; }
+  .intro h1 { font-size: clamp(2.1rem, 7vw, 3rem); color: var(--brown); }
+  .intro h1 em { font-style: normal; color: var(--rust); }
+  .intro p { color: var(--muted); margin: 12px auto 0; max-width: 30em; }
+  .intro .note { font: 700 1.45rem/1 var(--script); color: var(--rust); display: block; margin-top: 10px; transform: rotate(-2deg); }
+
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 20px 50px rgba(74,44,29,.08); padding: 6px 22px; margin-bottom: 26px; }
+  .step { padding: 22px 0; border-bottom: 1px dashed var(--line); }
+  .step:last-child { border-bottom: 0; }
+  .step h2 { font-size: 1.3rem; color: var(--brown); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .step h2 .num { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--rust); color: #fff; font: 600 .95rem/30px var(--sans); text-align: center; }
+  .step.off { opacity: .45; pointer-events: none; }
+  .hint { color: var(--muted); font-size: .92rem; margin: 10px 0 0; }
+
+  /* Personnes */
+  .stepper { display: flex; align-items: center; gap: 16px; }
+  .stepper button { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--brown); background: transparent; font-size: 1.6rem; line-height: 1; color: var(--brown); }
+  .stepper button:disabled { opacity: .3; cursor: default; }
+  .stepper output { font: 800 2.4rem/1 var(--serif); min-width: 64px; text-align: center; }
+  .stepper .lbl { color: var(--muted); }
+
+  /* Calendrier */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .cal-head strong { font: 700 1.1rem var(--serif); text-transform: capitalize; }
+  .cal-head button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); font-size: 1.1rem; }
+  .cal-head button:disabled { opacity: .3; cursor: default; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .grid .dow { text-align: center; font-size: .75rem; font-weight: 600; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; padding: 4px 0; }
+  .day { aspect-ratio: 1; border-radius: 12px; border: 1px solid transparent; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 500; position: relative; padding: 0; }
+  .day.dispo { background: var(--green-bg); color: var(--green); border-color: #cfe1cb; }
+  .day.dispo:hover { border-color: var(--green); }
+  .day.complet { color: #b9a898; text-decoration: line-through; cursor: default; }
+  .day.ferme, .day.hors { color: #cdbfb0; cursor: default; }
+  .day.sel { background: var(--rust); color: #fff; border-color: var(--rust); }
+  .day .star { position: absolute; top: 3px; right: 6px; font-size: .62rem; color: var(--orange); }
+  .day.sel .star { color: #ffd9a8; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: .82rem; color: var(--muted); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; vertical-align: -1px; margin-right: 5px; }
+
+  /* Créneaux */
+  .service { margin-top: 4px; }
+  .service + .service { margin-top: 20px; }
+  .service h3 { font: 600 .8rem/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+  .slot { padding: 11px 0; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font-weight: 600; font-size: 1rem; }
+  .slot:hover:not(:disabled) { border-color: var(--brown); }
+  .slot:disabled { color: #cdbfb0; background: transparent; text-decoration: line-through; cursor: default; }
+  .slot.sel { background: var(--rust); color: #fff; border-color: var(--rust); }
+  .info { background: var(--sand); border-radius: 12px; padding: 12px 14px; font-size: .94rem; color: var(--brown); }
+  .info a { font-weight: 600; }
+  .soiree { background: var(--ink); color: #f6e9d6; border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; position: relative; overflow: hidden; }
+  .soiree .k { font: 600 .7rem/1 var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+  .soiree h4 { font: 700 1.25rem/1.2 var(--serif); margin: 6px 0 4px; color: #fff; }
+  .soiree p { margin: 0; font-size: .93rem; color: #e3d2bb; }
+  .soiree::after { content: "✦"; position: absolute; right: 14px; top: 4px; font-size: 3.2rem; color: rgba(201,138,58,.25); }
+
+  /* Formulaire */
+  .fields { display: grid; gap: 14px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+  label.f { display: block; font-weight: 500; font-size: .92rem; color: var(--brown); }
+  label.f input, label.f textarea { display: block; width: 100%; margin-top: 6px; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; font: inherit; color: var(--ink); }
+  label.f input:focus, label.f textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,138,58,.18); }
+  label.f textarea { min-height: 84px; resize: vertical; }
+  label.f small { color: var(--muted); font-weight: 400; }
+  .check { display: flex; gap: 12px; align-items: flex-start; background: #fff3e0; border: 1.5px solid #f0cf9d; border-radius: 12px; padding: 12px 14px; font-size: .94rem; }
+  .check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--rust); }
+  .pot { position: absolute; left: -5000px; width: 1px; height: 1px; overflow: hidden; }
+
+  .recap { background: var(--sand); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; }
+  .recap b { font-family: var(--serif); font-size: 1.12rem; }
+  .btn { display: flex; width: 100%; align-items: center; justify-content: center; gap: 10px; background: var(--rust); color: #fff; padding: 16px 26px; border-radius: 999px; font-weight: 600; font-size: 1.05rem; border: 0; transition: background .15s, transform .15s; text-decoration: none; }
+  .btn:hover:not(:disabled) { background: var(--rust-dark); transform: translateY(-1px); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--brown); border: 2px solid var(--brown); }
+  .err { background: #fbe5e1; color: var(--rust-dark); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: .95rem; }
+  .small { font-size: .82rem; color: var(--muted); text-align: center; margin: 12px 0 0; }
+
+  .done { text-align: center; padding: 34px 6px; }
+  .done .ok { width: 74px; height: 74px; border-radius: 50%; background: var(--green-bg); color: var(--green); display: grid; place-items: center; margin: 0 auto 16px; font-size: 2.2rem; }
+  .done h2 { font-size: 1.8rem; color: var(--brown); }
+  .done p { color: var(--muted); max-width: 26em; margin: 10px auto 0; }
+  .done .recap { text-align: left; margin: 20px 0; }
+  .loading { text-align: center; padding: 50px 0; color: var(--muted); }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 6px 0 40px; }
+  footer a { color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/" aria-label="Le 76, retour au site"><b>Le</b><span>76</span></a>
+    <a class="back" href="/">← Retour au site</a>
+  </header>
+
+  <div class="intro">
+    <span class="kicker">Réservation</span>
+    <h1>Réserver une <em>table</em></h1>
+    <p>Faites votre demande en quelques secondes, nous vous confirmons par e-mail.</p>
+  </div>
+
+  <main id="app"><div class="card"><div class="loading">Chargement des disponibilités…</div></div></main>
+
+  <footer>Le 76 · 76 rue Principale, 67930 Beinheim · <a href="tel:+33388863187">03 88 86 31 87</a><br>
+    Vos coordonnées servent uniquement à gérer votre réservation. · <a href="/mentions-legales.html">Mentions légales</a></footer>
+</div>
+
+<script>
+(() => {
+  const API = '/api/reservation.php';
+  const app = document.getElementById('app');
+  const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const hFr = h => h.replace(':', 'h');
+  const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date(y, m - 1, j); };
+  const dateFr = d => { const x = parse(d), j = x.getDate(); return `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; };
+  const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+
+  let data, parJour = {};
+  const st = { n: 2, mois: null, date: null, heure: null, service: null, envoi: false };
+  const form = { nom: '', telephone: '', email: '', remarque: '', menu: false };
+
+  async function api(body) {
+    const opts = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
+    const url = body ? API : API + '?action=calendrier';
+    const r = await fetch(url, opts);
+    let d; try { d = await r.json(); } catch { d = { ok: false, erreur: 'Le service de réservation ne répond pas. Appelez-nous au 03 88 86 31 87.' }; }
+    return d;
+  }
+
+  const tel = () => `<a href="tel:+33${(data?.telephone || '03 88 86 31 87').replace(/\D/g, '').slice(1)}">${esc(data?.telephone || '03 88 86 31 87')}</a>`;
+
+  function etatJour(j) {
+    if (!j) return 'hors';
+    const s = Object.values(j.services);
+    if (s.some(v => v.creneaux.some(c => c.max >= st.n))) return 'dispo';
+    if (s.some(v => v.ouvert)) return 'complet';
+    return 'ferme';
+  }
+
+  function vueCalendrier() {
+    const premier = parse(data.aujourdhui), dernier = parse(data.jours[data.jours.length - 1].date);
+    const m = st.mois;
+    const debut = new Date(m.getFullYear(), m.getMonth(), 1);
+    const nbJ = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+    let cases = ['lun','mar','mer','jeu','ven','sam','dim'].map(d => `<div class="dow">${d}</div>`).join('');
+    for (let i = 0; i < (debut.getDay() + 6) % 7; i++) cases += '<div></div>';
+    for (let j = 1; j <= nbJ; j++) {
+      const d = iso(new Date(m.getFullYear(), m.getMonth(), j));
+      const jour = parJour[d], e = etatJour(jour);
+      const soiree = jour && jour.services.soir.soiree;
+      const titre = e === 'dispo' ? '' : e === 'complet' ? 'Complet en ligne' : 'Fermé';
+      cases += `<button type="button" class="day ${e}${st.date === d ? ' sel' : ''}" data-d="${d}" ${e === 'dispo' ? '' : 'disabled'} title="${titre}${soiree ? ' · ' + esc(soiree.titre) : ''}" aria-label="${dateFr(d)}${titre ? ', ' + titre : ''}">${j}${soiree ? '<span class="star">✦</span>' : ''}</button>`;
+    }
+    const prevOk = m > new Date(premier.getFullYear(), premier.getMonth(), 1);
+    const nextOk = new Date(m.getFullYear(), m.getMonth() + 1, 1) <= dernier;
+    return `<div class="cal-head"><button type="button" data-mois="-1" ${prevOk ? '' : 'disabled'} aria-label="Mois précédent">‹</button>
+      <strong>${MOIS[m.getMonth()]} ${m.getFullYear()}</strong>
+      <button type="button" data-mois="1" ${nextOk ? '' : 'disabled'} aria-label="Mois suivant">›</button></div>
+      <div class="grid">${cases}</div>
+      <div class="legend"><span><i style="background:var(--green-bg);border:1px solid #cfe1cb"></i>Disponible</span><span><i style="background:#eee4d8"></i>Complet ou fermé</span><span><span style="color:var(--orange)">✦</span> Soirée</span></div>`;
+  }
+
+  function vueCreneaux() {
+    const j = parJour[st.date];
+    let h = '';
+    for (const s of ['midi', 'soir']) {
+      const v = j.services[s];
+      if (!v.ouvert) continue;
+      h += `<div class="service"><h3>${s === 'midi' ? 'Midi' : 'Soir'}</h3>`;
+      if (v.soiree) h += `<div class="soiree"><div class="k">Soirée au programme</div><h4>${esc(v.soiree.titre)}</h4>${v.soiree.details ? `<p>${esc(v.soiree.details)}</p>` : ''}${v.soiree.heure ? `<p>À partir de ${esc(v.soiree.heure)}</p>` : ''}</div>`;
+      if (v.note) h += `<div class="info" style="margin-bottom:10px">${esc(v.note)}</div>`;
+      if (!v.en_ligne) h += `<div class="info">Pour ce service, la réservation se fait par téléphone : ${tel()}</div>`;
+      else if (!v.creneaux.some(c => c.max >= st.n)) h += `<div class="info">Plus de place en ligne pour ${st.n} personne${st.n > 1 ? 's' : ''}. Appelez-nous, on trouvera peut-être une solution : ${tel()}</div>`;
+      else h += `<div class="slots">${v.creneaux.map(c => `<button type="button" class="slot${st.heure === c.h ? ' sel' : ''}" data-h="${c.h}" ${c.max >= st.n ? '' : 'disabled'}>${hFr(c.h)}</button>`).join('')}</div>`;
+      h += '</div>';
+    }
+    return h || `<div class="info">Fermé ce jour-là.</div>`;
+  }
+
+  function vueFormulaire() {
+    const v = parJour[st.date].services[st.service];
+    return `<div class="fields">
+      <label class="f">Nom<input name="nom" autocomplete="name" required maxlength="80" value="${esc(form.nom)}"></label>
+      <div class="two">
+        <label class="f">Téléphone<input name="telephone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" value="${esc(form.telephone)}"></label>
+        <label class="f">E-mail <small>(pour la confirmation)</small><input name="email" type="email" autocomplete="email" required maxlength="120" value="${esc(form.email)}"></label>
+      </div>
+      <label class="f">Un message ? <small>(facultatif : anniversaire, allergie, chaise bébé, terrasse…)</small><textarea name="remarque" maxlength="500">${esc(form.remarque)}</textarea></label>
+      ${v.menu_impose ? `<label class="check"><input type="checkbox" name="menu" ${form.menu ? 'checked' : ''}><span>J'ai bien noté que ce soir, c'est la soirée <b>${esc(v.soiree?.titre || 'spéciale')}</b>${v.soiree?.details ? ` avec son menu : ${esc(v.soiree.details)}` : ''}.</span></label>` : ''}
+      <div class="pot" aria-hidden="true"><label>Site web<input name="site_web" tabindex="-1" autocomplete="off"></label></div>
+    </div>`;
+  }
+
+  function render(erreur) {
+    if (!data.resa_en_ligne) {
+      app.innerHTML = `<div class="card"><div class="done"><div class="ok" style="background:var(--sand);color:var(--brown)">☎</div><h2>Réservez par téléphone</h2><p>La réservation en ligne est momentanément fermée. Nous prenons vos réservations au ${tel()}.</p></div></div>`;
+      return;
+    }
+    const pret = st.date && st.heure;
+    app.innerHTML = `<form class="card" id="f" novalidate>
+      <div class="step">
+        <h2><span class="num">1</span>Combien serez-vous ?</h2>
+        <div class="stepper"><button type="button" data-n="-1" ${st.n <= 1 ? 'disabled' : ''} aria-label="Une personne de moins">−</button>
+          <output>${st.n}</output><button type="button" data-n="1" ${st.n >= data.max_en_ligne ? 'disabled' : ''} aria-label="Une personne de plus">+</button>
+          <span class="lbl">personne${st.n > 1 ? 's' : ''}</span></div>
+        <p class="hint">Plus de ${data.max_en_ligne} personnes ? Appelez-nous au ${tel()}.</p>
+      </div>
+      <div class="step">
+        <h2><span class="num">2</span>Quel jour ?</h2>
+        ${vueCalendrier()}
+      </div>
+      <div class="step ${st.date ? '' : 'off'}" id="etape-heure">
+        <h2><span class="num">3</span>À quelle heure ?</h2>
+        ${st.date ? `<p class="hint" style="margin:-6px 0 14px;text-transform:capitalize">${dateFr(st.date)}</p>` + vueCreneaux() : '<p class="hint">Choisissez d\'abord un jour.</p>'}
+      </div>
+      <div class="step ${pret ? '' : 'off'}" id="etape-coord">
+        <h2><span class="num">4</span>Vos coordonnées</h2>
+        ${pret ? vueFormulaire() : '<p class="hint">Choisissez d\'abord une heure.</p>'}
+      </div>
+      ${pret ? `<div class="step">
+        ${erreur ? `<div class="err" role="alert">${esc(erreur)}</div>` : ''}
+        <div class="recap"><b style="text-transform:capitalize">${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
+        <button class="btn" type="submit" ${st.envoi ? 'disabled' : ''}>${st.envoi ? 'Envoi…' : 'Envoyer ma demande'}</button>
+        <p class="small">Ce n'est pas encore une réservation : nous vous envoyons la confirmation par e-mail très vite.</p>
+      </div>` : ''}
+    </form>`;
+  }
+
+  function lireForm() {
+    const f = document.getElementById('f');
+    if (!f || !f.nom) return;
+    form.nom = f.nom.value; form.telephone = f.telephone.value; form.email = f.email.value; form.remarque = f.remarque.value;
+    form.menu = !!(f.menu && f.menu.checked);
+  }
+
+  function rerender(focusSel) {
+    lireForm();
+    const y = window.scrollY;
+    render();
+    window.scrollTo(0, y);
+    if (focusSel) document.querySelector(focusSel)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  app.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.disabled) return;
+    if (b.dataset.n) {
+      st.n = Math.max(1, Math.min(data.max_en_ligne, st.n + Number(b.dataset.n)));
+      // l'heure choisie n'a peut-être plus assez de place
+      if (st.date && st.heure) {
+        const c = parJour[st.date].services[st.service].creneaux.find(c => c.h === st.heure);
+        if (!c || c.max < st.n) st.heure = null;
+      }
+      if (st.date && etatJour(parJour[st.date]) !== 'dispo') { st.date = null; st.heure = null; }
+      rerender();
+    } else if (b.dataset.mois) {
+      st.mois = new Date(st.mois.getFullYear(), st.mois.getMonth() + Number(b.dataset.mois), 1);
+      rerender();
+    } else if (b.dataset.d) {
+      st.date = b.dataset.d; st.heure = null; st.service = null;
+      rerender('#etape-heure');
+    } else if (b.dataset.h) {
+      st.heure = b.dataset.h; st.service = b.dataset.h < '16:00' ? 'midi' : 'soir';
+      rerender('#etape-coord');
+    }
+  });
+
+  app.addEventListener('submit', async e => {
+    e.preventDefault();
+    lireForm();
+    const f = e.target;
+    const v = parJour[st.date].services[st.service];
+    let msg = '';
+    if (form.nom.trim().length < 2) msg = 'Indiquez votre nom.';
+    else if (form.telephone.replace(/\D/g, '').length < 9) msg = 'Indiquez un numéro de téléphone pour vous joindre.';
+    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) msg = 'Indiquez une adresse e-mail valide pour recevoir la confirmation.';
+    else if (v.menu_impose && !form.menu) msg = 'Merci de cocher la case pour confirmer que vous avez noté le menu de la soirée.';
+    if (msg) { render(msg); return; }
+    st.envoi = true; render();
+    const r = await api({ action: 'demande', date: st.date, heure: st.heure, couverts: st.n, nom: form.nom, telephone: form.telephone,
+      email: form.email, remarque: form.remarque, menu_accepte: form.menu, site_web: f.site_web?.value || '' });
+    st.envoi = false;
+    if (!r.ok) {
+      // la disponibilité a peut-être changé : on recharge le calendrier
+      const d = await api(); if (d.ok) charger(d);
+      if (st.date && etatJour(parJour[st.date]) !== 'dispo') { st.date = null; st.heure = null; }
+      else if (st.heure) { const c = parJour[st.date]?.services[st.service]?.creneaux.find(c => c.h === st.heure); if (!c || c.max < st.n) st.heure = null; }
+      if (!st.heure) { render(); alert(r.erreur); } else render(r.erreur);
+      return;
+    }
+    app.innerHTML = `<div class="card"><div class="done"><div class="ok">✓</div><h2>Demande envoyée !</h2>
+      <p>Merci ${esc(form.nom.trim())}. Un e-mail de réception vient de partir à <b>${esc(form.email.trim())}</b>, et nous vous confirmons la réservation très vite.</p>
+      <div class="recap"><b style="text-transform:capitalize">${dateFr(st.date)} à ${hFr(st.heure)}</b><br>${st.n} personne${st.n > 1 ? 's' : ''}</div>
+      <p>Pas d'e-mail ? Regardez dans les indésirables, ou appelez-nous au ${tel()}.</p>
+      <p style="margin-top:22px"><a class="btn ghost" href="/">Retour au site</a></p></div></div>`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function charger(d) {
+    data = d; parJour = {};
+    d.jours.forEach(j => parJour[j.date] = j);
+  }
+
+  async function annulation(jeton) {
+    document.querySelector('.intro h1').innerHTML = 'Annuler ma <em>réservation</em>';
+    document.querySelector('.intro p').textContent = 'Merci de nous prévenir : la table pourra profiter à d\'autres clients.';
+    const r = await api({ action: 'annulation', jeton });
+    if (!r.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>Lien introuvable</h2><p>${esc(r.erreur)}</p><p style="margin-top:20px"><a class="btn ghost" href="/reserver/">Faire une réservation</a></p></div></div>`; return; }
+    const x = r.reservation;
+    const recap = `<div class="recap"><b style="text-transform:capitalize">${dateFr(x.date)} à ${hFr(x.heure)}</b><br>${x.couverts} personne${x.couverts > 1 ? 's' : ''} · au nom de ${esc(x.nom)}</div>`;
+    if (!r.annulable) {
+      const pourquoi = x.statut === 'annulee' ? 'Cette réservation est déjà annulée.' : x.statut === 'refusee' ? 'Cette demande n\'avait pas pu être acceptée.' : 'Cette réservation est passée.';
+      app.innerHTML = `<div class="card"><div class="done"><h2>${pourquoi}</h2>${recap}<a class="btn ghost" href="/reserver/">Faire une nouvelle réservation</a></div></div>`;
+      return;
+    }
+    app.innerHTML = `<div class="card"><div class="done"><h2>Annuler cette réservation ?</h2>${recap}
+      <button class="btn" id="annul">Oui, annuler ma réservation</button>
+      <p style="margin-top:12px"><a href="/">Non, je garde ma table</a></p></div></div>`;
+    document.getElementById('annul').onclick = async ev => {
+      ev.target.disabled = true; ev.target.textContent = 'Annulation…';
+      const a = await api({ action: 'annuler', jeton });
+      app.innerHTML = a.ok
+        ? `<div class="card"><div class="done"><div class="ok">✓</div><h2>Réservation annulée</h2><p>Merci de nous avoir prévenus. À bientôt au 76 !</p>${recap}<a class="btn ghost" href="/reserver/">Réserver une autre date</a></div></div>`
+        : `<div class="card"><div class="done"><h2>Oups</h2><p>${esc(a.erreur)}</p></div></div>`;
+    };
+  }
+
+  async function demarrer() {
+    const jeton = new URLSearchParams(location.search).get('annuler');
+    if (jeton) return annulation(jeton);
+    const d = await api();
+    if (!d.ok) { app.innerHTML = `<div class="card"><div class="done"><h2>Oups</h2><p>${esc(d.erreur)}</p></div></div>`; return; }
+    charger(d);
+    const prem = d.jours.find(j => etatJour(j) === 'dispo');
+    const base = prem ? parse(prem.date) : parse(d.aujourdhui);
+    st.mois = new Date(base.getFullYear(), base.getMonth(), 1);
+    render();
+  }
+  demarrer();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "Réservations du 76",
+  "short_name": "Résas 76",
+  "description": "Carnet de réservations du restaurant Le 76",
+  "lang": "fr",
+  "start_url": "/equipe/",
+  "scope": "/equipe/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2b1d16",
+  "theme_color": "#2b1d16",
+  "icons": [
+    { "src": "/equipe/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/equipe/icone-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/equipe/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
