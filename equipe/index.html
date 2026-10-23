@@ -112,7 +112,15 @@
   .day-row.closed { opacity: .55; }
   .day-row .d { font-weight: 600; font-size: .92rem; line-height: 1.2; padding: 4px 2px; }
   .day-row .d small { display: block; color: var(--muted); font-weight: 400; }
-  .mini { border-radius: 9px; background: var(--sand); padding: 5px 8px; font-size: .85rem; line-height: 1.25; }
+  .mini { border-radius: 9px; background: #f7f1e8; border: 1.5px solid transparent; padding: 5px 8px 7px; font-size: .85rem; line-height: 1.25; position: relative; overflow: hidden; color: #a8998a; }
+  .mini b { color: inherit; }
+  .mini.resa { background: var(--green-bg); border-color: #b9d6b3; color: var(--green); }
+  .mini.attente { background: var(--amber-bg); border-color: #efc27c; color: var(--amber); }
+  .mini.presque { background: #fde3c8; border-color: #f0a560; color: #a2500f; }
+  .mini.complet { background: #f8dcd6; border-color: #e69a8d; color: var(--rust-dark); }
+  .mini .jauge { position: absolute; left: 0; bottom: 0; height: 4px; background: currentColor; opacity: .55; }
+  .legende { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: .78rem; color: var(--muted); margin: -4px 2px 12px; }
+  .legende i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1.5px solid; }
   .mini b { font-size: .98rem; }
   .mini .l { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
   .mini.x { background: transparent; color: #b9a898; display: flex; align-items: center; }
@@ -626,9 +634,13 @@ async function vueAvenir(silencieux) {
   if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
   const cel = (v, s) => {
     if (!v.ouvert && !v.confirmees.resas && !v.attente.resas) return `<div class="mini x">${s === 'midi' ? 'Midi' : 'Soir'} · fermé</div>`;
-    return `<div class="mini"><div class="l">${s === 'midi' ? 'Midi' : 'Soir'}${v.soiree ? ' <span class="st">✦</span>' : ''}${v.ouvert && !v.en_ligne ? ' · tél.' : ''}</div><b>${v.occupe}</b> / ${v.capacite}${v.attente.resas ? ` <span class="wait">· ${v.attente.resas} à valider</span>` : ''}</div>`;
+    const taux = v.capacite ? v.occupe / v.capacite : 0;
+    const etat = v.occupe >= v.capacite && v.capacite > 0 ? 'complet' : v.attente.resas ? 'attente' : taux >= 0.85 ? 'presque' : v.occupe > 0 ? 'resa' : '';
+    const nb = v.confirmees.resas + v.attente.resas;
+    return `<div class="mini ${etat}"><div class="l" style="color:inherit;opacity:.8">${s === 'midi' ? 'Midi' : 'Soir'}${v.soiree ? ' <span class="st">✦</span>' : ''}${v.ouvert && !v.en_ligne ? ' · tél.' : ''}</div><b>${v.occupe}</b> / ${v.capacite}${nb ? ` <small>· ${nb} résa${nb > 1 ? 's' : ''}</small>` : ''}${v.attente.resas ? `<br><span class="wait">${v.attente.resas} à valider</span>` : ''}<span class="jauge" style="width:${Math.min(100, taux * 100)}%"></span></div>`;
   };
-  main.innerHTML = `<input class="search" id="q" type="search" placeholder="Chercher un nom, un téléphone…" autocomplete="off"><div id="res"></div>
+  main.innerHTML = `<input class="search" id="q" type="search" placeholder="Chercher un nom, un téléphone…" autocomplete="off">
+    <div class="legende"><span><i style="background:#f7f1e8;border-color:#e8d9c3"></i>Vide</span><span><i style="background:var(--green-bg);border-color:#b9d6b3"></i>Réservations</span><span><i style="background:var(--amber-bg);border-color:#efc27c"></i>À valider</span><span><i style="background:#fde3c8;border-color:#f0a560"></i>Presque plein</span><span><i style="background:#f8dcd6;border-color:#e69a8d"></i>Complet</span></div><div id="res"></div>
     <div id="liste">${d.jours.map(j => {
       const ferme = !j.services.midi.ouvert && !j.services.soir.ouvert && !j.services.midi.occupe && !j.services.soir.occupe;
       return `<button class="day-row${ferme ? ' closed' : ''}" data-d="${j.date}"><div class="d">${dateCourt(j.date)}<small>${relatif(j.date)}</small></div>${cel(j.services.midi, 'midi')}${cel(j.services.soir, 'soir')}</button>`;
