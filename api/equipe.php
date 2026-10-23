@@ -11,6 +11,8 @@ require __DIR__ . '/lib/messages.php';
 const COOKIE = 'le76_equipe';
 const DUREE_SESSION = 400 * 86400;
 
+rappels_en_arriere_plan();
+
 try {
     $q = lire_requete();
     $action = (string) ($q['action'] ?? '');

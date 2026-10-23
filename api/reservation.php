@@ -11,6 +11,8 @@ declare(strict_types=1);
 require __DIR__ . '/lib/base.php';
 require __DIR__ . '/lib/messages.php';
 
+rappels_en_arriere_plan();
+
 try {
     $q = lire_requete();
     switch ($q['action'] ?? '') {

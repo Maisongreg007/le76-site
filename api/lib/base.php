@@ -84,6 +84,10 @@ function creer_tables(PDO $pdo): void
         traite_par TEXT NOT NULL DEFAULT ''
     )");
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_resa_date ON reservations(date, service)");
+    $cols = array_column($pdo->query("PRAGMA table_info(reservations)")->fetchAll(), 'name');
+    if (!in_array('rappel_envoye', $cols, true)) {
+        $pdo->exec("ALTER TABLE reservations ADD COLUMN rappel_envoye INTEGER NOT NULL DEFAULT 0");
+    }
     $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_resa_jeton ON reservations(jeton)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS utilisateurs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -158,6 +162,9 @@ function reglages_defaut(): array
         'max_en_ligne' => 12,
         // Plus de demande en ligne pour le service du jour une fois qu'il a commencé (11h30 / 18h)
         'fermer_pendant_service' => true,
+        // E-mail de rappel la veille, envoyé à partir de cette heure-là
+        'rappel_veille' => true,
+        'rappel_heure' => '10:00',
         'max_par_creneau' => 0,
         'jours_avance' => 365,
         'alertes_email' => [],
@@ -217,6 +224,12 @@ function nettoyer_reglages(array $n, array $actuel): array
     $o = [];
     if (array_key_exists('resa_en_ligne', $n)) {
         $o['resa_en_ligne'] = (bool) $n['resa_en_ligne'];
+    }
+    if (array_key_exists('rappel_veille', $n)) {
+        $o['rappel_veille'] = (bool) $n['rappel_veille'];
+    }
+    if (heure_valide($n['rappel_heure'] ?? null)) {
+        $o['rappel_heure'] = $n['rappel_heure'];
     }
     if (array_key_exists('fermer_pendant_service', $n)) {
         $o['fermer_pendant_service'] = (bool) $n['fermer_pendant_service'];

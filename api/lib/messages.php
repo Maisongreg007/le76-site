@@ -300,6 +300,16 @@ function mail_client(array $resa, string $type, string $message = ''): bool
             $p[] = "N'hésitez pas à faire une nouvelle demande pour un autre moment, ou à nous appeler au {$r['telephone']}.";
             $bouton = ['Choisir une autre date', rtrim($r['site'], '/') . '/reserver/'];
             break;
+        case 'rappel':
+            $sujet = "Rappel : votre table au 76 demain à " . heure_fr($resa['heure']);
+            $titre = 'À demain au 76 !';
+            $p = ["Bonjour {$resa['nom']},", "Petit rappel : nous avons le plaisir de vous accueillir demain, " . date_fr($resa['date']) . ' à ' . heure_fr($resa['heure']) . '.'];
+            if (trim($r['mot_client']) !== '') {
+                $p[] = $r['mot_client'];
+            }
+            $bouton = ['Annuler ma réservation', lien_annulation($resa)];
+            $pied = "Un empêchement ? Merci de nous prévenir en annulant avec le bouton ci-dessus ou au {$r['telephone']} : la table pourra profiter à d'autres clients.";
+            break;
         case 'annulee':
             $sujet = "Réservation annulée · $quand";
             $titre = 'Votre réservation est annulée';
@@ -513,4 +523,51 @@ function push_tous(string $titre, string $corps, string $url, string $tag = '', 
         }
     }
     return $envoyes;
+}
+
+/**
+ * Rappels de la veille : envoyés une seule fois par réservation confirmée, à partir de l'heure réglée.
+ * Lancé en arrière-plan à chaque passage sur l'appli ou la page client (au plus toutes les 10 minutes).
+ */
+function envoyer_rappels(bool $forcer = false): int
+{
+    $r = reglages();
+    if (!$r['rappel_veille'] || date('H:i') < $r['rappel_heure']) {
+        return 0;
+    }
+    $verrou = dossier_donnees() . '/rappels.last';
+    if (!$forcer && is_file($verrou) && time() - (int) @file_get_contents($verrou) < 600) {
+        return 0;
+    }
+    @file_put_contents($verrou, (string) time());
+    $demain = date('Y-m-d', strtotime('+1 day'));
+    $st = db()->prepare("SELECT * FROM reservations WHERE date = ? AND statut = 'confirmee' AND rappel_envoye = 0 AND email != '' AND substr(cree_le, 1, 10) < ?");
+    $st->execute([$demain, date('Y-m-d')]);
+    $n = 0;
+    foreach ($st->fetchAll() as $resa) {
+        // marquer d'abord : jamais deux rappels, même si deux passages tombent en même temps
+        $up = db()->prepare('UPDATE reservations SET rappel_envoye = 1 WHERE id = ? AND rappel_envoye = 0');
+        $up->execute([$resa['id']]);
+        if ($up->rowCount() === 1 && mail_client($resa, 'rappel')) {
+            $n++;
+        }
+    }
+    return $n;
+}
+
+/** Après avoir répondu au navigateur, lance les rappels sans faire attendre personne. */
+function rappels_en_arriere_plan(): void
+{
+    register_shutdown_function(function () {
+        if (function_exists('fastcgi_finish_request')) {
+            @fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            @litespeed_finish_request();
+        }
+        try {
+            envoyer_rappels();
+        } catch (Throwable $e) {
+            error_log('[rappels] ' . $e->getMessage());
+        }
+    });
 }

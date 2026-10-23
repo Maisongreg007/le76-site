@@ -824,6 +824,7 @@ async function ecranReglages() {
       <div class="row" style="display:block"><label class="field" style="margin:0">Adresses qui reçoivent les alertes <small>(une ou plusieurs, séparées par une virgule)</small><input name="alertes_email" value="${esc(r.alertes_email.join(', '))}" placeholder="ex. le76@email.fr" autocapitalize="none"></label></div>
       <div class="row" style="display:block"><label class="field" style="margin:0">Adresse d'envoi <small>(doit être une adresse @le76.fr)</small><input name="expediteur" value="${esc(r.expediteur)}" autocapitalize="none"></label></div>
       <div class="row" style="display:block"><label class="field" style="margin:0">Petit mot ajouté aux confirmations <small>(facultatif)</small><textarea name="mot_client" placeholder="Ex. : Parking gratuit derrière le restaurant.">${esc(r.mot_client)}</textarea></label></div>
+      <div class="row"><div class="grow">Rappel par e-mail la veille<small>Envoyé aux réservations confirmées, à partir de l'heure choisie</small></div><input name="rappel_heure" type="time" step="900" value="${r.rappel_heure}" style="width:100px">${sw('rappel_veille', r.rappel_veille)}</div>
       <div class="row"><button type="button" class="btn ghost small" id="mailtest">Envoyer un e-mail de test</button></div>
     </div>
 
@@ -848,6 +849,7 @@ async function ecranReglages() {
       midi_debut: v('midi_debut').value, soir_debut: v('soir_debut').value, pas: +v('pas').value,
       delai_mode: v('delai_mode').value, delai_heures: +v('delai_heures').value, max_en_ligne: +v('max_en_ligne').value,
       fermer_pendant_service: v('fermer_pendant_service').checked,
+      rappel_veille: v('rappel_veille').checked, rappel_heure: v('rappel_heure').value,
       max_par_creneau: +v('max_par_creneau').value, jours_avance: +v('jours_avance').value,
       alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value,
     });
