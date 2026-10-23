@@ -268,6 +268,7 @@ async function demarrer() {
   if (!e.ok) { root.innerHTML = `<div class="login"><div class="box"><div class="big">Le <span>76</span></div><p class="lead">${esc(e.erreur)}</p><button class="btn block" onclick="location.reload()">Réessayer</button></div></div>`; return; }
   S.vapid = e.vapid;
   if (!e.installe) return ecranInstallation();
+  if (location.hash.startsWith('#reinit=')) return ecranReinit(location.hash.slice(8));
   if (!e.moi) return ecranConnexion();
   S.moi = e.moi;
   coque();
@@ -296,11 +297,36 @@ function ecranConnexion() {
     <p class="lead">Carnet de réservations</p>
     <label class="field">Identifiant<input name="identifiant" required autocapitalize="none" autocomplete="username"></label>
     <label class="field">Mot de passe<input name="mdp" type="password" required autocomplete="current-password"></label>
-    <button class="btn block">Se connecter</button></form></div>`;
+    <button class="btn block">Se connecter</button>
+    <p style="text-align:center;margin:16px 0 0"><a href="#" id="oubli">Mot de passe oublié ?</a></p></form></div>`;
+  document.getElementById('oubli').onclick = async ev => {
+    ev.preventDefault();
+    const id = document.querySelector('#cnx [name=identifiant]').value.trim();
+    if (!id) return toast('Écris d’abord ton identifiant, puis appuie sur « Mot de passe oublié ».', true);
+    const r = await api('mdp_oublie', { identifiant: id });
+    if (!r.ok) return toast(r.erreur, true);
+    document.querySelector('#cnx .lead').innerHTML = esc(r.message);
+  };
   document.getElementById('cnx').onsubmit = async ev => {
     ev.preventDefault(); const f = ev.target;
     const r = await api('connexion', { identifiant: f.identifiant.value.trim(), mdp: f.mdp.value });
     r.ok ? demarrer() : toast(r.erreur, true);
+  };
+}
+
+function ecranReinit(jeton) {
+  root.innerHTML = `<div class="login"><form class="box" id="rei">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Choisis ton nouveau mot de passe</p>
+    <label class="field">Nouveau mot de passe <small>(6 caractères minimum)</small><input name="mdp" type="password" required autocomplete="new-password"></label>
+    <button class="btn block">Enregistrer et me connecter</button></form></div>`;
+  document.getElementById('rei').onsubmit = async ev => {
+    ev.preventDefault();
+    const r = await api('mdp_reinit', { jeton, mdp: ev.target.mdp.value });
+    if (!r.ok) return toast(r.erreur, true);
+    history.replaceState(null, '', '/equipe/');
+    toast('Mot de passe changé');
+    demarrer();
   };
 }
 

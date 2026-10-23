@@ -29,6 +29,10 @@ try {
             connexion($q);
         case 'deconnexion':
             deconnexion();
+        case 'mdp_oublie':
+            mdp_oublie($q);
+        case 'mdp_reinit':
+            mdp_reinit($q);
     }
 
     $moi = utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
@@ -191,6 +195,63 @@ function deconnexion(): never
         db()->prepare('DELETE FROM sessions WHERE jeton = ?')->execute([hash('sha256', $j)]);
     }
     setcookie(COOKIE, '', ['expires' => 1, 'path' => '/']);
+    repondre(['ok' => true]);
+}
+
+/**
+ * Mot de passe oublié : pour un responsable, un lien valable 1 heure part aux adresses d'alerte.
+ * Pour un compte d'équipe, c'est le responsable qui remet un mot de passe (Plus → L'équipe).
+ */
+function mdp_oublie(array $q): never
+{
+    $id = nettoyer_texte($q['identifiant'] ?? '', 30);
+    if (!limiter('oubli:' . ip_client(), 5, 3600)) {
+        erreur('Trop de demandes. Réessaie dans une heure.', 429);
+    }
+    $st = db()->prepare('SELECT * FROM utilisateurs WHERE identifiant = ? AND actif = 1');
+    $st->execute([$id]);
+    $u = $st->fetch();
+    $r = reglages();
+    if ($u && !$u['admin']) {
+        repondre(['ok' => true, 'message' => 'Demande à ton responsable de te remettre un mot de passe : dans l’appli, Plus → L’équipe → Mot de passe.']);
+    }
+    if ($u && $r['alertes_email']) {
+        $j = jeton(24);
+        db()->prepare('DELETE FROM reinit_mdp WHERE expire < ? OR utilisateur_id = ?')->execute([time(), $u['id']]);
+        db()->prepare('INSERT INTO reinit_mdp (jeton, utilisateur_id, expire) VALUES (?, ?, ?)')->execute([hash('sha256', $j), $u['id'], time() + 3600]);
+        $lien = rtrim($r['site'], '/') . '/equipe/#reinit=' . $j;
+        [$html, $txt] = gabarit_mail('Nouveau mot de passe', [
+            "Bonjour {$u['nom']},",
+            "Une demande de nouveau mot de passe a été faite pour l'identifiant « {$u['identifiant']} » de l'appli des réservations. Le lien ci-dessous est valable 1 heure.",
+            "Si ce n'est pas toi, ignore simplement cet e-mail : rien ne change.",
+        ], [], ['Choisir un nouveau mot de passe', $lien]);
+        foreach ($r['alertes_email'] as $a) {
+            envoyer_mail($a, 'Réservations du 76 : nouveau mot de passe', $html, $txt);
+        }
+    }
+    repondre(['ok' => true, 'message' => 'Si cet identifiant est celui d’un responsable, un lien vient de partir à l’adresse des alertes (regarde aussi les spams).']);
+}
+
+function mdp_reinit(array $q): never
+{
+    $j = (string) ($q['jeton'] ?? '');
+    $mdp = (string) ($q['mdp'] ?? '');
+    if (!limiter('reinit:' . ip_client(), 10, 3600)) {
+        erreur('Trop d’essais.', 429);
+    }
+    $st = db()->prepare('SELECT * FROM reinit_mdp WHERE jeton = ? AND expire > ?');
+    $st->execute([hash('sha256', $j), time()]);
+    $x = $st->fetch();
+    if (!$x) {
+        erreur('Ce lien a expiré ou a déjà servi. Refais une demande « Mot de passe oublié ».');
+    }
+    if (mb_strlen($mdp) < 6) {
+        erreur('Le mot de passe doit faire au moins 6 caractères.');
+    }
+    db()->prepare('UPDATE utilisateurs SET mdp = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $x['utilisateur_id']]);
+    db()->prepare('DELETE FROM reinit_mdp WHERE utilisateur_id = ?')->execute([$x['utilisateur_id']]);
+    db()->prepare('DELETE FROM sessions WHERE utilisateur_id = ?')->execute([$x['utilisateur_id']]);
+    ouvrir_session((int) $x['utilisateur_id']);
     repondre(['ok' => true]);
 }
 
