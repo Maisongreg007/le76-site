@@ -5,6 +5,7 @@ date_default_timezone_set('Europe/Paris');
 mb_internal_encoding('UTF-8');
 
 const ETABS = ['le76' => 'Le 76', 'camping' => 'Camping'];
+const POSTES = ['salle' => 'Salle', 'bar' => 'Bar', 'runner' => 'Runner', 'cuisine' => 'Cuisine', 'plonge' => 'Plonge'];
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const JOURS_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -166,6 +167,10 @@ function migrate(PDO $pdo): void
     CREATE INDEX IF NOT EXISTS idx_planning_jour ON planning(jour);
     CREATE TABLE IF NOT EXISTS tentatives (kind TEXT NOT NULL, ip TEXT NOT NULL, at INTEGER NOT NULL);
     ");
+    $cols = array_column($pdo->query('PRAGMA table_info(employes)')->fetchAll(), 'name');
+    if (!in_array('postes', $cols, true)) {
+        $pdo->exec("ALTER TABLE employes ADD COLUMN postes TEXT NOT NULL DEFAULT ''");
+    }
 }
 
 function setting(string $k, ?string $default = null): ?string
@@ -325,6 +330,36 @@ function emp_etabs(array $e): array
 function emp_nom(array $e): string
 {
     return trim($e['prenom'] . ' ' . $e['nom']);
+}
+
+/** Prénom + initiale du nom (ex. « Vanessa M. »), pour la pointeuse. */
+function emp_court(array $e): string
+{
+    $n = trim((string)$e['nom']);
+    return trim($e['prenom'] . ($n !== '' ? ' ' . mb_strtoupper(mb_substr($n, 0, 1)) . '.' : ''));
+}
+
+function emp_postes(array $e): array
+{
+    return array_values(array_filter(explode(',', (string)($e['postes'] ?? '')), fn($p) => isset(POSTES[$p])));
+}
+
+/** Petites étiquettes des postes (Salle, Bar…). */
+function postes_html(array $e): string
+{
+    $out = '';
+    foreach (emp_postes($e) as $p) {
+        $out .= '<span class="pill poste">' . h(POSTES[$p]) . '</span> ';
+    }
+    return trim($out);
+}
+
+/** Ordre de tri par poste : salle, bar, runner, cuisine, plonge, puis sans poste. */
+function poste_rang(array $e): int
+{
+    $ps = emp_postes($e);
+    $keys = array_keys(POSTES);
+    return $ps ? (int)array_search($ps[0], $keys, true) : count($keys);
 }
 
 function emp_get(int $id): ?array

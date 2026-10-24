@@ -36,14 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare('UPDATE pointages SET fin = ? WHERE id = ?')->execute([$now, $cur['id']]);
             $out([
                 'ok' => true, 'action' => 'depart', 'id' => (int)$cur['id'],
-                'prenom' => $e['prenom'], 'heure' => date('H:i'),
+                'prenom' => emp_court($e), 'heure' => date('H:i'),
                 'duree' => fmt_min(minutes_between($cur['debut'], $now)),
             ]);
         }
         db()->prepare('INSERT INTO pointages (employe_id, etab, debut) VALUES (?, ?, ?)')->execute([$e['id'], $etab, $now]);
         $out([
             'ok' => true, 'action' => 'arrivee', 'id' => (int)db()->lastInsertId(),
-            'prenom' => $e['prenom'], 'heure' => date('H:i'),
+            'prenom' => emp_court($e), 'heure' => date('H:i'),
         ]);
     }
 

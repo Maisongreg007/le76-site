@@ -164,7 +164,7 @@ if (!$rows) {
         echo '<tr><td><a href="' . $lien . '"><b>' . h(emp_nom($e)) . '</b></a>'
             . (!(int)$e['actif'] ? ' <span class="pill">archivé</span>' : '')
             . ($r['ouverts'] ? ' <a href="' . $lien . '" class="pill warn">' . $r['ouverts'] . ' sans départ</a>' : '')
-            . '<div class="muted small">' . h(implode(' · ', $detail)) . '</div></td>'
+            . '<div class="muted small">' . postes_html($e) . ' ' . h(implode(' · ', $detail)) . '</div></td>'
             . '<td><span class="pill ' . h($e['type']) . '">' . ($e['type'] === 'fixe' ? 'Fixe' : 'Extra') . '</span></td>'
             . '<td class="num nowrap">' . h(fmt_min($r['minutes'])) . '</td>'
             . '<td class="num nowrap"><b>' . h(eur($r['cout'])) . '</b></td></tr>';

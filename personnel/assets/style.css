@@ -90,3 +90,4 @@ body.kiosk{background:#14110f;color:#f6f1e8;min-height:100vh;min-height:100dvh;d
 .kiosk .off{max-width:420px;text-align:center;padding:24px}
 @media (max-width:640px){.hide-m{display:none}h1{font-size:1.3rem}}
 @media print{.top,.btn,button,.tabs{display:none!important}body{background:#fff}}
+.pill.poste{background:#efe6f7;color:#5b3a86}

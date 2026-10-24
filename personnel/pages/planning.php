@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ---------- Affichage ---------- */
 $fin = date('Y-m-d', strtotime($lundi . ' +6 days'));
 $emps = employes(true, $etab);
+usort($emps, fn($a, $b) => [poste_rang($a), $a['prenom'], $a['nom']] <=> [poste_rang($b), $b['prenom'], $b['nom']]);
 
 $st = db()->prepare('SELECT * FROM planning WHERE etab = ? AND jour BETWEEN ? AND ? ORDER BY debut');
 $st->execute([$etab, $lundi, $fin]);
@@ -107,16 +108,16 @@ echo '<th>Total</th></tr></thead><tbody>';
 foreach ($emps as $e) {
     $id = (int)$e['id'];
     $tot = 0;
-    echo '<tr><td class="emp">' . h($e['prenom']) . ' <span class="pill ' . h($e['type']) . '" style="font-size:.7rem">' . ($e['type'] === 'fixe' ? 'fixe' : 'extra') . '</span></td>';
+    echo '<tr><td class="emp">' . h(emp_nom($e)) . '<div style="margin-top:4px">' . postes_html($e) . ' <span class="pill ' . h($e['type']) . '">' . ($e['type'] === 'fixe' ? 'fixe' : 'extra') . '</span></div></td>';
     for ($i = 0; $i < 7; $i++) {
         $j = date('Y-m-d', strtotime($lundi . " +$i days"));
         echo '<td class="day ' . ($j === $today ? 'today' : '') . '">';
         foreach ($shifts[$id][$j] ?? [] as $s) {
             $tot += shift_minutes($s['debut'], $s['fin']);
-            echo '<button type="button" class="chip" data-id="' . (int)$s['id'] . '" data-emp="' . $id . '" data-jour="' . h($j) . '" data-debut="' . h($s['debut']) . '" data-fin="' . h($s['fin']) . '" data-nom="' . h($e['prenom']) . '">'
+            echo '<button type="button" class="chip" data-id="' . (int)$s['id'] . '" data-emp="' . $id . '" data-jour="' . h($j) . '" data-debut="' . h($s['debut']) . '" data-fin="' . h($s['fin']) . '" data-nom="' . h(emp_nom($e)) . '">'
                 . h($s['debut']) . '–' . h($s['fin']) . '</button>';
         }
-        echo '<button type="button" class="chip add" data-id="0" data-emp="' . $id . '" data-jour="' . h($j) . '" data-nom="' . h($e['prenom']) . '" aria-label="Ajouter">+</button></td>';
+        echo '<button type="button" class="chip add" data-id="0" data-emp="' . $id . '" data-jour="' . h($j) . '" data-nom="' . h(emp_nom($e)) . '" aria-label="Ajouter">+</button></td>';
     }
     echo '<td class="tot">' . ($tot ? h(fmt_min($tot)) : '<span class="muted">–</span>') . '</td></tr>';
 }

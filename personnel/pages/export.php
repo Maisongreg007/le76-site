@@ -20,11 +20,12 @@ $put = static function (array $row) use ($out): void {
 };
 
 if ($type === 'resume') {
-    $put(['Nom', 'Contrat', 'Restaurant(s)', 'Heures', 'Heures (décimal)', 'Taux horaire net', 'À payer (net)', 'Remarque']);
+    $put(['Nom', 'Poste', 'Contrat', 'Restaurant(s)', 'Heures', 'Heures (décimal)', 'Taux horaire net', 'À payer (net)', 'Remarque']);
     foreach (rapport_mois($ym, $etabF) as $r) {
         $e = $r['e'];
         $put([
             emp_nom($e),
+            implode(' + ', array_map(fn($p) => POSTES[$p], emp_postes($e))),
             $e['type'] === 'fixe' ? 'Fixe' : 'Extra',
             implode(' + ', array_map(fn($k) => ETABS[$k], emp_etabs($e))),
             fmt_min($r['minutes']),
@@ -37,15 +38,16 @@ if ($type === 'resume') {
 } else {
     $a = $ym . '-01 00:00:00';
     $b = date('Y-m-d H:i:s', strtotime($a . ' +1 month'));
-    $sql = 'SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? AND p.debut < ?'
-        . ($etabF ? ' AND p.etab = ?' : '') . ' ORDER BY e.prenom COLLATE NOCASE, p.debut';
+    $sql = 'SELECT p.*, e.prenom, e.nom, e.postes FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? AND p.debut < ?'
+        . ($etabF ? ' AND p.etab = ?' : '') . ' ORDER BY e.prenom COLLATE NOCASE, e.nom COLLATE NOCASE, p.debut';
     $st = db()->prepare($sql);
     $st->execute($etabF ? [$a, $b, $etabF] : [$a, $b]);
-    $put(['Nom', 'Restaurant', 'Date', 'Arrivée', 'Départ', 'Durée', 'Durée (décimal)', 'Modifié à la main']);
+    $put(['Nom', 'Poste', 'Restaurant', 'Date', 'Arrivée', 'Départ', 'Durée', 'Durée (décimal)', 'Modifié à la main']);
     foreach ($st->fetchAll() as $p) {
         $m = $p['fin'] ? minutes_between($p['debut'], $p['fin']) : null;
         $put([
             trim($p['prenom'] . ' ' . $p['nom']),
+            implode(' + ', array_map(fn($x) => POSTES[$x], emp_postes($p))),
             ETABS[$p['etab']],
             date('d/m/Y', strtotime($p['debut'])),
             date('H:i', strtotime($p['debut'])),

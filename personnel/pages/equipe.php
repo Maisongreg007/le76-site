@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nom = trim((string)($_POST['nom'] ?? ''));
         $type = ($_POST['type'] ?? '') === 'fixe' ? 'fixe' : 'extra';
         $etabs = array_values(array_filter((array)($_POST['etabs'] ?? []), 'valid_etab'));
+        $postes = array_values(array_filter((array)($_POST['postes'] ?? []), fn($p) => isset(POSTES[$p])));
         $pin = trim((string)($_POST['pin'] ?? ''));
         $taux = (float)str_replace(',', '.', (string)($_POST['taux'] ?? '12'));
         $salaire = (float)str_replace(',', '.', (string)($_POST['salaire'] ?? '1800'));
@@ -20,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sortie = valid_date($_POST['sortie'] ?? null) ? $_POST['sortie'] : null;
 
         $retour = 'admin.php?p=equipe&e=' . ($id ?: 'new');
-        if ($prenom === '') back($retour, '', 'Il faut au moins un prénom.');
+        if ($prenom === '' || $nom === '') back($retour, '', 'Il faut le prénom et le nom.');
+        if (!$postes) back($retour, '', 'Choisis au moins un poste.');
         if (!$etabs) back($retour, '', 'Choisis au moins un restaurant.');
         if (!preg_match('/^\d{4}$/', $pin)) back($retour, '', 'Le code doit faire 4 chiffres.');
         $st = db()->prepare('SELECT id FROM employes WHERE pin = ? AND id <> ?');
@@ -28,14 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($st->fetchColumn()) back($retour, '', 'Ce code est déjà pris par quelqu\'un d\'autre.');
 
         if ($id) {
-            db()->prepare('UPDATE employes SET prenom=?, nom=?, type=?, etabs=?, pin=?, taux=?, salaire=?, heures_hebdo=?, entree=?, sortie=? WHERE id=?')
-                ->execute([$prenom, $nom, $type, implode(',', $etabs), $pin, $taux, $salaire, $hh, $entree, $sortie, $id]);
+            db()->prepare('UPDATE employes SET prenom=?, nom=?, postes=?, type=?, etabs=?, pin=?, taux=?, salaire=?, heures_hebdo=?, entree=?, sortie=? WHERE id=?')
+                ->execute([$prenom, $nom, implode(',', $postes), $type, implode(',', $etabs), $pin, $taux, $salaire, $hh, $entree, $sortie, $id]);
         } else {
-            db()->prepare('INSERT INTO employes (prenom, nom, type, etabs, pin, taux, salaire, heures_hebdo, entree, sortie, token, actif, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,1,?)')
-                ->execute([$prenom, $nom, $type, implode(',', $etabs), $pin, $taux, $salaire, $hh, $entree, $sortie, bin2hex(random_bytes(12)), date('Y-m-d H:i:s')]);
+            db()->prepare('INSERT INTO employes (prenom, nom, postes, type, etabs, pin, taux, salaire, heures_hebdo, entree, sortie, token, actif, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1,?)')
+                ->execute([$prenom, $nom, implode(',', $postes), $type, implode(',', $etabs), $pin, $taux, $salaire, $hh, $entree, $sortie, bin2hex(random_bytes(12)), date('Y-m-d H:i:s')]);
             $id = (int)db()->lastInsertId();
         }
-        back('admin.php?p=equipe', $prenom . ' est enregistré(e).');
+        back('admin.php?p=equipe', $prenom . ' ' . $nom . ' est enregistré(e).');
     }
 
     if ($act === 'archive' || $act === 'restore') {
@@ -62,7 +64,7 @@ if ($e !== null) {
     if ($e !== 'new' && !$emp) {
         back('admin.php?p=equipe', '', 'Employé introuvable.');
     }
-    $v = $emp ?? ['id' => 0, 'prenom' => '', 'nom' => '', 'type' => 'extra', 'etabs' => 'le76', 'pin' => pin_libre(), 'taux' => 12, 'salaire' => 1800, 'heures_hebdo' => null, 'entree' => '', 'sortie' => '', 'token' => '', 'actif' => 1];
+    $v = $emp ?? ['id' => 0, 'prenom' => '', 'nom' => '', 'postes' => '', 'type' => 'extra', 'etabs' => 'le76', 'pin' => pin_libre(), 'taux' => 12, 'salaire' => 1800, 'heures_hebdo' => null, 'entree' => '', 'sortie' => '', 'token' => '', 'actif' => 1];
     $etabsV = explode(',', (string)$v['etabs']);
     $num = static fn($x) => rtrim(rtrim(number_format((float)$x, 2, '.', ''), '0'), '.');
 
@@ -70,7 +72,14 @@ if ($e !== null) {
     echo '<form method="post" class="card" style="max-width:560px">' . csrf_field()
         . '<input type="hidden" name="action" value="save"><input type="hidden" name="id" value="' . (int)$v['id'] . '">';
     echo '<div class="row"><div class="field" style="flex:1;min-width:140px"><label>Prénom</label><input name="prenom" value="' . h($v['prenom']) . '" required style="width:100%"></div>'
-        . '<div class="field" style="flex:1;min-width:140px"><label>Nom (facultatif)</label><input name="nom" value="' . h($v['nom']) . '" style="width:100%"></div></div>';
+        . '<div class="field" style="flex:1;min-width:140px"><label>Nom</label><input name="nom" value="' . h($v['nom']) . '" required style="width:100%"></div></div>';
+
+    $postesV = explode(',', (string)$v['postes']);
+    echo '<div class="field"><label>Poste(s)</label>';
+    foreach (POSTES as $k => $l) {
+        echo '<label class="inline-check"><input type="checkbox" name="postes[]" value="' . h($k) . '" ' . (in_array($k, $postesV, true) ? 'checked' : '') . '> ' . h($l) . '</label>';
+    }
+    echo '</div>';
 
     echo '<div class="field"><label>Contrat</label>'
         . '<label class="inline-check"><input type="radio" name="type" value="extra" ' . ($v['type'] === 'extra' ? 'checked' : '') . ' onchange="sw()"> Extra (payé à l\'heure)</label>'
@@ -111,15 +120,17 @@ if ($e !== null) {
 echo '<div class="row between"><h1>Équipe</h1><a class="btn primary" href="admin.php?p=equipe&e=new">+ Ajouter</a></div>';
 $tous = employes(false);
 $actifs = array_filter($tous, fn($x) => (int)$x['actif'] === 1);
+usort($actifs, fn($a, $b) => [poste_rang($a), $a['prenom'], $a['nom']] <=> [poste_rang($b), $b['prenom'], $b['nom']]);
 $archives = array_filter($tous, fn($x) => (int)$x['actif'] === 0);
 
 if (!$actifs) {
     echo '<div class="card"><p class="muted">Personne pour le moment.</p></div>';
 } else {
-    echo '<div class="card scroll"><table><thead><tr><th>Nom</th><th>Contrat</th><th class="hide-m">Restaurant</th><th class="num">Paie</th><th class="num hide-m">Code</th></tr></thead><tbody>';
+    echo '<div class="card scroll"><table><thead><tr><th>Nom</th><th>Poste</th><th>Contrat</th><th class="hide-m">Restaurant</th><th class="num">Paie</th><th class="num hide-m">Code</th></tr></thead><tbody>';
     foreach ($actifs as $x) {
         $noms = implode(' + ', array_map(fn($k) => ETABS[$k], emp_etabs($x)));
         echo '<tr onclick="location=\'admin.php?p=equipe&e=' . (int)$x['id'] . '\'" style="cursor:pointer"><td><a href="admin.php?p=equipe&e=' . (int)$x['id'] . '"><b>' . h(emp_nom($x)) . '</b></a></td>'
+            . '<td>' . (postes_html($x) ?: '<span class="pill warn">à choisir</span>') . '</td>'
             . '<td><span class="pill ' . h($x['type']) . '">' . ($x['type'] === 'fixe' ? 'Fixe' : 'Extra') . '</span></td>'
             . '<td class="hide-m">' . h($noms) . '</td>'
             . '<td class="num">' . ($x['type'] === 'fixe' ? eur((float)$x['salaire']) . ' /mois' : eur((float)$x['taux']) . ' /h') . '</td>'

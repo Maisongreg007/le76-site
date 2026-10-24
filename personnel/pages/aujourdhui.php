@@ -17,7 +17,7 @@ if ($oublies) {
     echo '<div class="card" style="border-color:#f0c9c6"><h3>À corriger</h3><p class="muted small">Ces personnes ont pointé leur arrivée mais pas leur départ.</p><ul class="list">';
     foreach ($oublies as $o) {
         $ym = substr($o['debut'], 0, 7);
-        echo '<li><span><b>' . h($o['prenom']) . '</b> — arrivée le ' . h(date('d/m à H:i', strtotime($o['debut']))) . ' (' . h(ETABS[$o['etab']]) . ')</span>'
+        echo '<li><span><b>' . h(trim($o['prenom'] . ' ' . $o['nom'])) . '</b> — arrivée le ' . h(date('d/m à H:i', strtotime($o['debut']))) . ' (' . h(ETABS[$o['etab']]) . ')</span>'
             . '<a class="btn small" href="admin.php?p=heures&m=' . h($ym) . '&e=' . (int)$o['employe_id'] . '">Corriger</a></li>';
     }
     echo '</ul></div>';
@@ -27,14 +27,14 @@ if ($oublies) {
 echo '<div class="grid two">';
 foreach (ETABS as $key => $label) {
     // En service
-    $st = db()->prepare('SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id
+    $st = db()->prepare('SELECT p.*, e.prenom, e.nom, e.postes FROM pointages p JOIN employes e ON e.id = p.employe_id
         WHERE p.etab = ? AND p.fin IS NULL AND p.debut >= ? ORDER BY p.debut');
     $st->execute([$key, $seuil]);
     $enService = $st->fetchAll();
     $idsEnService = array_map(fn($r) => (int)$r['employe_id'], $enService);
 
     // Prévus aujourd'hui
-    $st = db()->prepare('SELECT pl.*, e.prenom, e.nom FROM planning pl JOIN employes e ON e.id = pl.employe_id
+    $st = db()->prepare('SELECT pl.*, e.prenom, e.nom, e.postes FROM planning pl JOIN employes e ON e.id = pl.employe_id
         WHERE pl.etab = ? AND pl.jour = ? AND e.actif = 1 ORDER BY pl.debut, e.prenom');
     $st->execute([$key, $today]);
     $prevus = $st->fetchAll();
@@ -51,7 +51,7 @@ foreach (ETABS as $key => $label) {
     if ($enService) {
         echo '<ul class="list">';
         foreach ($enService as $r) {
-            echo '<li><b>' . h($r['prenom']) . '</b><span class="muted">depuis ' . h(date('H:i', strtotime($r['debut'])))
+            echo '<li><span><b>' . h(trim($r['prenom'] . ' ' . $r['nom'])) . '</b> ' . postes_html($r) . '</span><span class="muted">depuis ' . h(date('H:i', strtotime($r['debut'])))
                 . ' · ' . h(fmt_min(minutes_between($r['debut'], $nowSql))) . '</span></li>';
         }
         echo '</ul>';
@@ -67,7 +67,7 @@ foreach (ETABS as $key => $label) {
             $etat = in_array($id, $idsEnService, true) ? '<span class="pill ok">Là</span>'
                 : (in_array($id, $dejaPointes, true) ? '<span class="pill">Passé</span>'
                     : (date('H:i') > $r['debut'] ? '<span class="pill warn">Pas encore pointé</span>' : ''));
-            echo '<li><span><b>' . h($r['prenom']) . '</b> <span class="muted">' . h($r['debut']) . '–' . h($r['fin']) . '</span></span>' . $etat . '</li>';
+            echo '<li><span><b>' . h(trim($r['prenom'] . ' ' . $r['nom'])) . '</b> ' . postes_html($r) . ' <span class="muted">' . h($r['debut']) . '–' . h($r['fin']) . '</span></span>' . $etat . '</li>';
         }
         echo '</ul>';
     } else {
