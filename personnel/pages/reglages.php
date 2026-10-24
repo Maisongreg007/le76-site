@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach (presets() as [$n, $a, $b]) $avant[mb_strtolower($n)] = [$a, $b];
         set_setting('presets', implode("\n", $ok));
         $maj = 0;
-        if (isset($_POST['appliquer'])) {
+        if (true) {
             // Un horaire rapide a changé d'heures : on met à jour les horaires déjà prévus qui l'utilisent (à partir d'aujourd'hui)
             foreach ($ok as $line) {
                 [$n, $a, $b] = explode(';', $line);
@@ -165,8 +165,7 @@ echo '</select><button class="primary">Enregistrer</button></form></div>';
 echo '<div class="card" style="max-width:640px"><h3>Horaires rapides du planning</h3><p class="muted small">Un par ligne : <code>Nom;début;fin</code>. Ils apparaissent comme boutons quand tu ajoutes un horaire.</p>'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="presets"><textarea name="presets" rows="5" style="width:100%">'
     . h(implode("\n", array_map(fn($p) => implode(';', $p), presets()))) . '</textarea>'
-    . '<label class="inline-check" style="margin-top:10px"><input type="checkbox" name="appliquer" checked> Si je change les heures d\'un horaire rapide, mettre aussi à jour les horaires déjà prévus avec (à partir d\'aujourd\'hui)</label>'
-    . '<p><button class="primary">Enregistrer</button></p><p class="muted small" style="margin-bottom:0">Pour changer des horaires posés à la main, utilise « Changer un horaire » dans le Planning.</p></form></div>';
+    . '<p><button class="primary">Enregistrer</button></p><p class="muted small" style="margin-bottom:0">Si tu changes les heures d\'un horaire rapide, ceux déjà prévus avec lui sont mis à jour aussi.</p></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Lien du planning d\'équipe</h3><p class="muted small">Si le lien partagé a circulé là où il ne fallait pas (ancien employé…), crée-en un nouveau. L\'ancien cessera de marcher.</p>'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="share_renew"><button data-confirm="Sûr ? L\'ancien lien ne marchera plus">Créer un nouveau lien d\'équipe</button></form></div>';
