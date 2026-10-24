@@ -31,6 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         set_setting('admin_hash', password_hash($new, PASSWORD_DEFAULT));
         back('admin.php?p=reglages', 'Mot de passe changé.');
     }
+    if ($act === 'tolerance') {
+        set_setting('tolerance', (string)max(0, min(120, (int)($_POST['tolerance'] ?? 15))));
+        back('admin.php?p=reglages', 'Tolérance enregistrée.');
+    }
     if ($act === 'presets') {
         $txt = (string)($_POST['presets'] ?? '');
         $ok = [];
@@ -91,6 +95,13 @@ if ($ke) {
     echo '</div>';
 }
 echo '<p class="muted small" style="margin-bottom:0">Astuce iPad : une fois la pointeuse ouverte, « Partager » puis « Sur l\'écran d\'accueil » pour l\'avoir en plein écran comme une appli.</p></div>';
+
+echo '<div class="card" style="max-width:640px"><h3>Tolérance prévu / réel</h3><p class="muted small" style="margin-top:0">En dessous de cet écart, on considère que l\'horaire est respecté (pas d\'alerte).</p>'
+    . '<form method="post" class="row">' . csrf_field() . '<input type="hidden" name="action" value="tolerance"><select name="tolerance">';
+foreach ([0, 5, 10, 15, 20, 30, 45, 60] as $t) {
+    echo '<option value="' . $t . '"' . ($t === tolerance() ? ' selected' : '') . '>' . ($t ? $t . ' minutes' : 'aucune') . '</option>';
+}
+echo '</select><button class="primary">Enregistrer</button></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Horaires rapides du planning</h3><p class="muted small">Un par ligne : <code>Nom;début;fin</code>. Ils apparaissent comme boutons quand tu ajoutes un horaire.</p>'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="presets"><textarea name="presets" rows="5" style="width:100%">'

@@ -17,6 +17,66 @@ if ($frag) {
         . '<span class="live-dot" id="live-state"><i></i> En direct</span></div><div id="live">';
 }
 
+/* À surveiller : écarts entre le planning du jour et les pointages */
+$hier = date('Y-m-d', strtotime($today . ' -1 day'));
+$cmpJour = comparer($hier, $today);
+$alertes = [];
+$nowT = time();
+$tolM = tolerance();
+foreach ($cmpJour['shifts'] as $r) {
+    $s = $r['shift'];
+    if ($s['jour'] === $hier && $r['sb'] < strtotime($today . ' 04:00:00')) {
+        continue; // créneaux d'hier déjà terminés avant la nuit : on ne les rappelle pas
+    }
+    $e = emp_get((int)$s['employe_id']);
+    if (!$e || !(int)$e['actif']) {
+        continue;
+    }
+    $nom = emp_nom($e);
+    $prev = $s['debut'] . '–' . $s['fin'];
+    $lieu = ETABS[$s['etab']];
+    $hr = static fn(?int $t) => $t ? date('H:i', $t) : '';
+    switch ($r['statut']) {
+        case 'attendu':
+            $alertes[] = ['err', $nom, 'pas encore arrivé·e', 'prévu ' . $prev . ' · ' . $lieu . ' · ' . fmt_min((int)round(($nowT - $r['sa']) / 60)) . ' de retard'];
+            break;
+        case 'absent':
+            $alertes[] = ['err', $nom, 'pas venu·e', 'prévu ' . $prev . ' · ' . $lieu];
+            break;
+        case 'encours':
+            if ($nowT > $r['sb'] + $tolM * 60) {
+                $alertes[] = ['warn', $nom, 'dépasse son horaire', 'prévu jusqu\'à ' . $s['fin'] . ' · encore là (+' . fmt_min((int)round(($nowT - $r['sb']) / 60)) . ') · ' . $lieu];
+            } elseif ($r['retard'] > $tolM) {
+                $alertes[] = ['warn', $nom, 'arrivé·e en retard', 'à ' . $hr($r['debut_reel']) . ' au lieu de ' . $s['debut'] . ' (+' . fmt_min($r['retard']) . ') · ' . $lieu];
+            }
+            break;
+        case 'moins':
+            $why = [];
+            if ($r['retard'] > $tolM) $why[] = 'arrivé·e à ' . $hr($r['debut_reel']) . ' au lieu de ' . $s['debut'];
+            if ($r['tot'] > $tolM) $why[] = 'parti·e à ' . $hr($r['fin_reel']) . ' au lieu de ' . $s['fin'];
+            $alertes[] = ['warn', $nom, 'a fait moins que prévu (' . fmt_ecart($r['ecart']) . ')', implode(' · ', $why ?: ['prévu ' . $prev]) . ' · ' . $lieu];
+            break;
+        case 'plus':
+            $alertes[] = ['warn', $nom, 'a fait plus que prévu (' . fmt_ecart($r['ecart']) . ')', $hr($r['debut_reel']) . '–' . $hr($r['fin_reel']) . ' au lieu de ' . $prev . ' · ' . $lieu];
+            break;
+    }
+}
+foreach ($cmpJour['np'] as $p) {
+    if (substr($p['debut'], 0, 10) !== $today) continue;
+    $e = emp_get((int)$p['employe_id']);
+    $alertes[] = ['info', $e ? emp_nom($e) : '?', 'a pointé sans être au planning', 'depuis ' . date('H:i', strtotime($p['debut'])) . ($p['fin'] ? ' jusqu\'à ' . date('H:i', strtotime($p['fin'])) : '') . ' · ' . ETABS[$p['etab']]];
+}
+usort($alertes, fn($a, $b) => ['err' => 0, 'warn' => 1, 'info' => 2][$a[0]] <=> ['err' => 0, 'warn' => 1, 'info' => 2][$b[0]]);
+if ($alertes) {
+    $nbErr = count(array_filter($alertes, fn($a) => $a[0] === 'err'));
+    echo '<div class="card' . ($nbErr ? ' alert-card' : '') . '"><div class="row between"><h3 style="margin:0">À surveiller</h3><span class="muted small">tolérance ' . $tolM . ' min</span></div><ul class="list">';
+    foreach ($alertes as [$niv, $nom, $quoi, $detail]) {
+        $pill = ['err' => 'err', 'warn' => 'warn', 'info' => ''][$niv];
+        echo '<li class="alert-item"><span><b>' . h($nom) . '</b> <span class="pill ' . $pill . '">' . h($quoi) . '</span><br><span class="muted why">' . h($detail) . '</span></span></li>';
+    }
+    echo '</ul></div>';
+}
+
 /* Fil des pointages : derniers mouvements des 24 dernières heures */
 $depuis = date('Y-m-d H:i:s', time() - 86400);
 $st = db()->prepare('SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? OR p.fin >= ? ORDER BY p.id DESC LIMIT 60');
@@ -104,7 +164,7 @@ foreach (ETABS as $key => $label) {
             $id = (int)$r['employe_id'];
             $etat = in_array($id, $idsEnService, true) ? '<span class="pill ok">Là</span>'
                 : (in_array($id, $dejaPointes, true) ? '<span class="pill">Passé</span>'
-                    : (date('H:i') > $r['debut'] ? '<span class="pill warn">Pas encore pointé</span>' : ''));
+                    : (time() > strtotime($today . ' ' . $r['debut']) + tolerance() * 60 ? '<span class="pill err">Pas encore arrivé·e</span>' : ''));
             echo '<li><span><b>' . h(trim($r['prenom'] . ' ' . $r['nom'])) . '</b> ' . postes_html($r) . ' <span class="muted">' . h($r['debut']) . '–' . h($r['fin']) . '</span></span>' . $etat . '</li>';
         }
         echo '</ul>';

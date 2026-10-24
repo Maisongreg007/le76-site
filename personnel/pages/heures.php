@@ -217,6 +217,27 @@ if ($empId) {
         . '<div class="row no-print"><a class="btn round" href="admin.php?p=heures&e=' . $empId . '&m=' . h($prevM) . '">‹</a><b>' . h(mois_fr($ym)) . '</b><a class="btn round" href="admin.php?p=heures&e=' . $empId . '&m=' . h($nextM) . '">›</a></div>'
         . boutons_partage('admin.php?p=export&t=detail&m=' . $ym . '&e=' . $empId, 'heures-' . preg_replace('/[^a-z0-9]+/i', '-', emp_nom($emp)) . '-' . $ym . '.csv') . '</div><br>';
 
+    $cmpE = comparer($ym . '-01', date('Y-m-t', strtotime($ym . '-01')), null, $empId);
+    $lignes = array_filter($cmpE['shifts'], fn($c) => $c['statut'] !== 'avenir');
+    if ($lignes || $cmpE['np']) {
+        $hr = static fn(?int $t) => $t ? date('H:i', $t) : '…';
+        $lib = ['ok' => ['ok', 'comme prévu'], 'plus' => ['warn', 'plus que prévu'], 'moins' => ['warn', 'moins que prévu'], 'absent' => ['err', 'pas venu·e'], 'attendu' => ['err', 'pas encore arrivé·e'], 'encours' => ['', 'en cours']];
+        echo '<h2>Prévu / réel</h2><div class="card scroll"><table><thead><tr><th>Jour</th><th>Prévu</th><th>Réel</th><th class="num">Écart</th><th></th></tr></thead><tbody>';
+        foreach ($lignes as $c) {
+            $s = $c['shift'];
+            [$pc, $pl] = $lib[$c['statut']];
+            echo '<tr><td class="nowrap">' . h(ucfirst(date_fr($s['jour']))) . '</td><td class="nowrap">' . h($s['debut'] . '–' . $s['fin']) . '</td>'
+                . '<td class="nowrap">' . ($c['debut_reel'] ? h($hr($c['debut_reel']) . '–' . $hr($c['fin_reel'])) : '–') . '</td>'
+                . '<td class="num nowrap ' . (in_array($c['statut'], ['plus', 'moins'], true) ? 'ecart-' . $c['statut'] : 'ecart-ok') . '">' . ($c['statut'] === 'encours' ? '' : h(fmt_ecart($c['ecart']))) . '</td>'
+                . '<td><span class="pill ' . $pc . '">' . h($pl) . '</span></td></tr>';
+        }
+        foreach ($cmpE['np'] as $p) {
+            echo '<tr><td class="nowrap">' . h(ucfirst(date_fr(substr($p['debut'], 0, 10)))) . '</td><td class="muted">–</td><td class="nowrap">' . h(date('H:i', strtotime($p['debut']))) . '–' . ($p['fin'] ? h(date('H:i', strtotime($p['fin']))) : '…') . '</td>'
+                . '<td class="num">' . ($p['fin'] ? h(fmt_ecart(minutes_between($p['debut'], $p['fin']))) : '') . '</td><td><span class="pill">non prévu</span></td></tr>';
+        }
+        echo '</tbody></table></div><h2>Pointages</h2>';
+    }
+
     echo '<div class="card"><p class="muted small no-print" style="margin-top:0">Corrige une heure puis « OK ». Les lignes en orange sont sans départ.</p>';
     if (!$liste) {
         echo '<p class="muted">Aucun pointage ce mois-ci.</p>';
@@ -230,6 +251,16 @@ if ($empId) {
 
 /* ---------- Synthèse du mois ---------- */
 $rows = rapport_mois($ym, $etabF);
+// Prévu au planning (créneaux déjà terminés) par personne, pour comparer avec le pointé
+$finMois = date('Y-m-t', strtotime($ym . '-01'));
+$cmpMois = comparer($ym . '-01', min($finMois, date('Y-m-d')), $etabF);
+$prevuPasse = [];
+foreach ($cmpMois['shifts'] as $c) {
+    if (in_array($c['statut'], ['ok', 'plus', 'moins', 'absent'], true)) {
+        $prevuPasse[(int)$c['shift']['employe_id']] = ($prevuPasse[(int)$c['shift']['employe_id']] ?? 0) + $c['prevu'];
+    }
+}
+$totPrevu = array_sum($prevuPasse);
 $totMin = 0;
 $totExtras = 0.0;
 $totFixes = 0.0;
@@ -266,7 +297,7 @@ echo '<div class="stats">'
 if (!$rows) {
     echo '<div class="card"><p class="muted">Aucune heure ni salaire ce mois-ci.</p></div>';
 } else {
-    echo '<div class="card scroll"><table><thead><tr><th>Nom</th><th>Contrat</th><th class="num">Heures</th><th class="num">À payer (net)</th></tr></thead><tbody>';
+    echo '<div class="card scroll"><table><thead><tr><th>Nom</th><th class="hide-m">Contrat</th><th class="num">Prévu</th><th class="num">Pointé</th><th class="num">Écart</th><th class="num">À payer (net)</th></tr></thead><tbody>';
     foreach ($rows as $r) {
         $e = $r['e'];
         $lien = 'admin.php?p=heures&m=' . h($ym) . '&e=' . (int)$e['id'] . $qEtab;
@@ -287,12 +318,21 @@ if (!$rows) {
             . (!(int)$e['actif'] ? ' <span class="pill">archivé</span>' : '')
             . ($r['ouverts'] ? ' <a href="' . $lien . '" class="pill warn">' . $r['ouverts'] . ' sans départ</a>' : '')
             . '<div class="muted small">' . postes_html($e) . ' ' . h(implode(' · ', $detail)) . '</div></td>'
-            . '<td><span class="pill ' . h($e['type']) . '">' . ($e['type'] === 'fixe' ? 'Fixe' : 'Extra') . '</span></td>'
+            . '<td class="hide-m"><span class="pill ' . h($e['type']) . '">' . ($e['type'] === 'fixe' ? 'Fixe' : 'Extra') . '</span></td>'
+            . '<td class="num nowrap muted">' . (isset($prevuPasse[(int)$e['id']]) ? h(fmt_min($prevuPasse[(int)$e['id']])) : ($r['minutes'] ? '0h00' : '–')) . '</td>'
             . '<td class="num nowrap">' . h(fmt_min($r['minutes'])) . '</td>'
+            . (static function () use ($r, $e, $prevuPasse) {
+                $pv = $prevuPasse[(int)$e['id']] ?? null;
+                if ($pv === null && $r['minutes'] === 0) return '<td class="num muted">–</td>';
+                $pv ??= 0;
+                $d = $r['minutes'] - $pv;
+                $cl = abs($d) <= tolerance() ? 'ecart-ok' : ($d > 0 ? 'ecart-plus' : 'ecart-moins');
+                return '<td class="num nowrap ' . $cl . '">' . h(fmt_ecart($d)) . '</td>';
+            })()
             . '<td class="num nowrap"><b>' . h(eur($r['cout'])) . '</b></td></tr>';
     }
-    echo '<tr class="total"><td colspan="2">Total</td><td class="num">' . h(fmt_min($totMin)) . '</td><td class="num">' . h(eur($totExtras + $totFixes)) . '</td></tr>';
+    echo '<tr class="total"><td>Total</td><td class="hide-m"></td><td class="num">' . h(fmt_min($totPrevu)) . '</td><td class="num">' . h(fmt_min($totMin)) . '</td><td class="num">' . h(fmt_ecart($totMin - $totPrevu)) . '</td><td class="num">' . h(eur($totExtras + $totFixes)) . '</td></tr>';
     echo '</tbody></table></div>';
-    echo '<p class="muted small">Extras : heures pointées × taux horaire net. Fixes : salaire mensuel net (heures affichées à titre indicatif). Les heures sont arrondies à la minute.</p>';
+    echo '<p class="muted small">Prévu = heures du planning des services terminés ce mois-ci. Écart = pointé − prévu. Extras : heures pointées × taux horaire net. Fixes : salaire mensuel net (heures affichées à titre indicatif). Les heures sont arrondies à la minute.</p>';
 }
 admin_end();

@@ -485,6 +485,127 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
     return $rows;
 }
 
+/* ---------- Prévu (planning) / réel (pointages) ---------- */
+
+function tolerance(): int
+{
+    return max(0, min(120, (int)setting('tolerance', '15')));
+}
+
+/** Début/fin d'un créneau planifié en timestamps (gère le passage de minuit). */
+function shift_bounds(array $s): array
+{
+    $a = strtotime($s['jour'] . ' ' . $s['debut']);
+    $b = strtotime($s['jour'] . ' ' . $s['fin']);
+    if ($b <= $a) {
+        $b += 86400;
+    }
+    return [$a, $b];
+}
+
+/**
+ * Compare le planning et les pointages entre deux dates (incluses).
+ * Retour : ['shifts' => [id => résultat], 'np' => [pointages non prévus]]
+ * Statuts : avenir, attendu (pas encore arrivé, en retard), absent, encours, ok, plus (a fait plus), moins (a fait moins).
+ */
+function comparer(string $du, string $au, ?string $etab = null, ?int $empId = null): array
+{
+    $now = time();
+    $tol = tolerance() * 60;
+
+    $sql = 'SELECT * FROM planning WHERE jour BETWEEN ? AND ?';
+    $par = [$du, $au];
+    if ($etab) { $sql .= ' AND etab = ?'; $par[] = $etab; }
+    if ($empId) { $sql .= ' AND employe_id = ?'; $par[] = $empId; }
+    $st = db()->prepare($sql . ' ORDER BY jour, debut');
+    $st->execute($par);
+    $shifts = $st->fetchAll();
+
+    $sql = 'SELECT * FROM pointages WHERE debut >= ? AND debut < ?';
+    $par = [date('Y-m-d H:i:s', strtotime($du . ' 00:00:00') - 4 * 3600), date('Y-m-d H:i:s', strtotime($au . ' 00:00:00') + 86400 + 6 * 3600)];
+    if ($etab) { $sql .= ' AND etab = ?'; $par[] = $etab; }
+    if ($empId) { $sql .= ' AND employe_id = ?'; $par[] = $empId; }
+    $st = db()->prepare($sql . ' ORDER BY debut');
+    $st->execute($par);
+    $punches = $st->fetchAll();
+
+    // Rattache chaque pointage au créneau du même employé/lieu qui le recouvre le plus (ou le plus proche à moins de 3 h)
+    $parShift = [];
+    $np = [];
+    foreach ($punches as $p) {
+        $pa = strtotime($p['debut']);
+        $pb = $p['fin'] !== null ? strtotime($p['fin']) : max($pa, $now);
+        $best = null;
+        $bestScore = -INF;
+        foreach ($shifts as $s) {
+            if ((int)$s['employe_id'] !== (int)$p['employe_id'] || $s['etab'] !== $p['etab']) {
+                continue;
+            }
+            [$sa, $sb] = shift_bounds($s);
+            $overlap = min($pb, $sb) - max($pa, $sa);
+            $score = $overlap > 0 ? $overlap : -min(abs($pa - $sb), abs($sa - $pb), abs($pa - $sa));
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = $s;
+            }
+        }
+        if ($best !== null && $bestScore > -3 * 3600) {
+            $parShift[(int)$best['id']][] = $p;
+        } elseif (substr($p['debut'], 0, 10) >= $du && substr($p['debut'], 0, 10) <= $au) {
+            $np[] = $p;
+        }
+    }
+
+    $out = [];
+    foreach ($shifts as $s) {
+        [$sa, $sb] = shift_bounds($s);
+        $prevu = (int)round(($sb - $sa) / 60);
+        $ps = $parShift[(int)$s['id']] ?? [];
+        $r = ['shift' => $s, 'prevu' => $prevu, 'reel' => 0, 'ecart' => 0, 'debut_reel' => null, 'fin_reel' => null,
+              'retard' => 0, 'tot' => 0, 'ouvert' => false, 'statut' => 'avenir', 'sa' => $sa, 'sb' => $sb];
+        if ($ps) {
+            $first = min(array_map(fn($p) => strtotime($p['debut']), $ps));
+            $last = 0;
+            foreach ($ps as $p) {
+                if ($p['fin'] === null) {
+                    $r['ouvert'] = true;
+                    $r['reel'] += (int)round((max($now, strtotime($p['debut'])) - strtotime($p['debut'])) / 60);
+                } else {
+                    $r['reel'] += minutes_between($p['debut'], $p['fin']);
+                    $last = max($last, strtotime($p['fin']));
+                }
+            }
+            $r['debut_reel'] = $first;
+            $r['fin_reel'] = $r['ouvert'] ? null : $last;
+            $r['retard'] = (int)round(($first - $sa) / 60);              // + = arrivé en retard
+            $r['tot'] = $r['ouvert'] ? 0 : (int)round(($sb - $last) / 60); // + = parti plus tôt
+            $r['ecart'] = $r['reel'] - $prevu;
+            if ($r['ouvert']) {
+                $r['statut'] = 'encours';
+            } elseif ($r['ecart'] > tolerance()) {
+                $r['statut'] = 'plus';
+            } elseif ($r['ecart'] < -tolerance()) {
+                $r['statut'] = 'moins';
+            } else {
+                $r['statut'] = 'ok';
+            }
+        } elseif ($now > $sb) {
+            $r['statut'] = 'absent';
+            $r['ecart'] = -$prevu;
+        } elseif ($now > $sa + $tol) {
+            $r['statut'] = 'attendu';
+        }
+        $out[(int)$s['id']] = $r;
+    }
+    return ['shifts' => $out, 'np' => $np];
+}
+
+/** « +0h40 » / « −1h05 » */
+function fmt_ecart(int $m): string
+{
+    return ($m >= 0 ? '+' : '−') . fmt_min(abs($m));
+}
+
 /** Pointages ouverts depuis plus de OUBLI_HEURES (départ oublié). */
 function pointages_oublies(): array
 {

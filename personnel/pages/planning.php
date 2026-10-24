@@ -89,6 +89,12 @@ $shifts = [];
 foreach ($st->fetchAll() as $r) {
     $shifts[(int)$r['employe_id']][$r['jour']][] = $r;
 }
+// Prévu / réel pour la semaine affichée
+$cmp = comparer($lundi, $fin, $etab);
+$npParCase = [];
+foreach ($cmp['np'] as $p) {
+    $npParCase[(int)$p['employe_id']][substr($p['debut'], 0, 10)][] = $p;
+}
 
 page_head('Planning');
 admin_nav('planning');
@@ -148,14 +154,34 @@ foreach ($emps as $e) {
         echo '<td class="day ' . ($j === $today ? 'today' : '') . '" data-emp="' . $id . '" data-jour="' . h($j) . '">';
         foreach ($shifts[$id][$j] ?? [] as $s) {
             $tot += shift_minutes($s['debut'], $s['fin']);
-            echo '<button type="button" class="chip" data-id="' . (int)$s['id'] . '" data-emp="' . $id . '" data-jour="' . h($j) . '" data-debut="' . h($s['debut']) . '" data-fin="' . h($s['fin']) . '" data-nom="' . h(emp_nom($e)) . '">'
-                . h($s['debut']) . '–' . h($s['fin']) . '</button>';
+            $res = $cmp['shifts'][(int)$s['id']] ?? null;
+            $st = $res['statut'] ?? 'avenir';
+            $reel = '';
+            if ($res) {
+                $hr = static fn(?int $t) => $t ? date('H:i', $t) : '…';
+                $reel = match ($st) {
+                    'ok' => '✓ ' . $hr($res['debut_reel']) . '–' . $hr($res['fin_reel']),
+                    'plus', 'moins' => $hr($res['debut_reel']) . '–' . $hr($res['fin_reel']) . ' · ' . fmt_ecart($res['ecart']),
+                    'encours' => 'arrivé·e ' . $hr($res['debut_reel']) . ($res['retard'] > tolerance() ? ' (+' . fmt_min($res['retard']) . ')' : ''),
+                    'absent' => 'pas venu·e',
+                    'attendu' => 'pas encore arrivé·e',
+                    default => '',
+                };
+            }
+            echo '<button type="button" class="chip st-' . $st . '" data-id="' . (int)$s['id'] . '" data-emp="' . $id . '" data-jour="' . h($j) . '" data-debut="' . h($s['debut']) . '" data-fin="' . h($s['fin']) . '" data-nom="' . h(emp_nom($e)) . '">'
+                . h($s['debut']) . '–' . h($s['fin']) . ($reel !== '' ? '<span class="reel">' . h($reel) . '</span>' : '') . '</button>';
+        }
+        foreach ($npParCase[$id][$j] ?? [] as $p) {
+            echo '<span class="chip st-np" title="Pointé sans être au planning">non prévu<span class="reel">' . h(date('H:i', strtotime($p['debut']))) . '–' . ($p['fin'] ? h(date('H:i', strtotime($p['fin']))) : '…') . '</span></span>';
         }
         echo '<button type="button" class="chip add" data-id="0" data-emp="' . $id . '" data-jour="' . h($j) . '" data-nom="' . h(emp_nom($e)) . '" aria-label="Ajouter">+</button></td>';
     }
     echo '<td class="tot">' . ($tot ? h(fmt_min($tot)) : '<span class="muted">–</span>') . '</td></tr>';
 }
 echo '</tbody></table></div>';
+echo '<div class="legend"><span><i style="background:var(--accent)"></i>prévu</span><span><i style="background:var(--ok)"></i>fait comme prévu</span>'
+    . '<span><i style="background:var(--warn)"></i>plus ou moins que prévu (au-delà de ' . tolerance() . ' min)</span><span><i style="background:var(--err)"></i>absent / pas encore arrivé</span>'
+    . '<span><i style="box-shadow:inset 0 0 0 1.2px var(--muted)"></i>pointé sans être prévu</span></div>';
 echo '<p class="muted small">Touche une case pour ajouter ou modifier un horaire. Pour aller vite : touche un horaire puis « Copier », ou « Copier sa semaine » sous un nom, et colle où tu veux. Une fin avant le début = le service passe minuit.</p>';
 echo '<div class="pastebar" id="pastebar" hidden><span id="paste-txt"></span><button type="button" class="small" id="paste-stop">Terminé</button></div>';
 
@@ -243,7 +269,7 @@ echo '<dialog id="dshare"><h3>Partager le planning</h3>'
   }));
   $('d-copy').addEventListener('click', () => {
     const td = document.querySelector('td.day[data-emp="' + $('d-emp').value + '"][data-jour="' + $('d-jour').value + '"]');
-    const l = [...td.querySelectorAll('.chip:not(.add)')].map(c => [0, c.dataset.debut, c.dataset.fin]);
+    const l = [...td.querySelectorAll('button.chip:not(.add)')].map(c => [0, c.dataset.debut, c.dataset.fin]);
     dlg.close();
     setClip({t: 'jour', l});
   });
@@ -258,7 +284,7 @@ echo '<dialog id="dshare"><h3>Partager le planning</h3>'
     catch (e) { const r = document.createRange(); r.selectNodeContents($('share-link')); getSelection().removeAllRanges(); getSelection().addRange(r); }
   });
 
-  document.querySelectorAll('.plan .chip').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.plan button.chip').forEach(b => b.addEventListener('click', () => {
     if (clip) return;
     const id = b.dataset.id, d = new Date(b.dataset.jour + 'T12:00:00');
     $('d-id').value = id; $('d-emp').value = b.dataset.emp; $('d-jour').value = b.dataset.jour;
