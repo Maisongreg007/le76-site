@@ -60,6 +60,46 @@ function minutes_between(string $a, string $b): int
 }
 
 /** Durée d'un créneau planifié "HH:MM" -> "HH:MM" (passe minuit si fin <= début). */
+/** Minutes couvertes par des intervalles [début, fin] (timestamps), sans compter deux fois les chevauchements. */
+function minutes_union(array $iv): int
+{
+    usort($iv, fn($x, $y) => $x[0] <=> $y[0]);
+    $tot = 0;
+    $cur = null;
+    foreach ($iv as [$a, $b]) {
+        if ($b <= $a) continue;
+        if ($cur === null || $a > $cur[1]) {
+            if ($cur) $tot += $cur[1] - $cur[0];
+            $cur = [$a, $b];
+        } else {
+            $cur[1] = max($cur[1], $b);
+        }
+    }
+    if ($cur) $tot += $cur[1] - $cur[0];
+    return (int)round($tot / 60);
+}
+
+/** Chevauchements entre pointages d'une même personne : liste de [pointage A, pointage B]. */
+function chevauchements(string $du, string $au): array
+{
+    $st = db()->prepare('SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? AND p.debut < ? ORDER BY p.employe_id, p.debut');
+    $st->execute([$du . ' 00:00:00', date('Y-m-d', strtotime($au . ' +1 day')) . ' 00:00:00']);
+    $out = [];
+    $prev = null;
+    foreach ($st->fetchAll() as $p) {
+        if ($prev && (int)$prev['employe_id'] === (int)$p['employe_id']) {
+            $finPrev = $prev['fin'] ?? date('Y-m-d H:i:s');
+            if ($p['debut'] < $finPrev) {
+                $out[] = [$prev, $p];
+            }
+        }
+        if (!$prev || (int)$prev['employe_id'] !== (int)$p['employe_id'] || ($p['fin'] ?? '9999') > ($prev['fin'] ?? '9999')) {
+            $prev = $p;
+        }
+    }
+    return $out;
+}
+
 function shift_minutes(string $debut, string $fin): int
 {
     [$h1, $m1] = array_map('intval', explode(':', $debut));
@@ -435,25 +475,32 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
     foreach (employes(false) as $e) {
         $id = (int)$e['id'];
         $min = ['le76' => 0, 'camping' => 0];
+        $iv = ['le76' => [], 'camping' => []];
         $ouverts = 0;
+        $enService = 0;
         $nb = 0;
+        $seuilOubli = date('Y-m-d H:i:s', time() - OUBLI_HEURES * 3600);
         foreach ($parEmp[$id] ?? [] as $p) {
             if ($etabFiltre !== null && $p['etab'] !== $etabFiltre) {
                 continue;
             }
             if ($p['fin'] === null) {
-                $ouverts++;
+                if ($p['debut'] >= $seuilOubli) $enService++; else $ouverts++;
                 continue;
             }
-            $min[$p['etab']] += minutes_between($p['debut'], $p['fin']);
+            $iv[$p['etab']][] = [strtotime($p['debut']), strtotime($p['fin'])];
             $nb++;
+        }
+        // Les heures qui se chevauchent (pointage en double) ne sont comptées qu'une fois
+        foreach ($iv as $k => $l) {
+            $min[$k] = minutes_union($l);
         }
         $minFiltre = $etabFiltre ? $min[$etabFiltre] : array_sum($min);
         $totalMin = array_sum($min);
 
         $salaire = 0.0;
         $note = '';
-        $concerne = $minFiltre > 0 || $ouverts > 0;
+        $concerne = $minFiltre > 0 || $ouverts > 0 || $enService > 0;
 
         if ($e['type'] === 'fixe') {
             $entree = $e['entree'] ?: substr((string)$e['created_at'], 0, 7) . '-01'; // sans date : mois complet dès le mois de création
@@ -485,8 +532,14 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
         }
 
         $cout = $e['type'] === 'extra' ? round($minFiltre / 60 * (float)$e['taux'], 2) : round($salaire, 2);
-        $contratMin = ($e['type'] === 'fixe' && $e['heures_hebdo'] !== null)
-            ? (int)round((float)$e['heures_hebdo'] * 52 / 12 * 60) : null;
+        // Contrat ramené à la période réellement suivie (du 1er pointage du mois ou de l'entrée, jusqu'à aujourd'hui)
+        $contratMin = null;
+        if ($e['type'] === 'fixe' && $e['heures_hebdo'] !== null && !empty($parEmp[$id])) {
+            $d1 = max($debutMois, substr($parEmp[$id][0]['debut'], 0, 10), (string)($e['entree'] ?: $debutMois));
+            $d2 = min($finMois, date('Y-m-d'), (string)($e['sortie'] ?: $finMois));
+            $jrs = max(0, (int)round((strtotime($d2) - strtotime($d1)) / 86400) + 1);
+            $contratMin = (int)round((float)$e['heures_hebdo'] / 7 * $jrs * 60);
+        }
 
         $rows[] = [
             'e' => $e,
@@ -495,6 +548,7 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
             'par_etab' => $min,
             'pointages' => $nb,
             'ouverts' => $ouverts,
+            'en_service' => $enService,
             'cout' => $cout,
             'note' => $note,
             'contrat_min' => $contratMin,
@@ -585,15 +639,17 @@ function comparer(string $du, string $au, ?string $etab = null, ?int $empId = nu
         if ($ps) {
             $first = min(array_map(fn($p) => strtotime($p['debut']), $ps));
             $last = 0;
+            $ivs = [];
             foreach ($ps as $p) {
                 if ($p['fin'] === null) {
                     $r['ouvert'] = true;
-                    $r['reel'] += (int)round((max($now, strtotime($p['debut'])) - strtotime($p['debut'])) / 60);
+                    $ivs[] = [strtotime($p['debut']), max($now, strtotime($p['debut']))];
                 } else {
-                    $r['reel'] += minutes_between($p['debut'], $p['fin']);
+                    $ivs[] = [strtotime($p['debut']), strtotime($p['fin'])];
                     $last = max($last, strtotime($p['fin']));
                 }
             }
+            $r['reel'] = minutes_union($ivs);
             $r['debut_reel'] = $first;
             $r['fin_reel'] = $r['ouvert'] ? null : $last;
             $r['retard'] = (int)round(($first - $sa) / 60);              // + = arrivé en retard

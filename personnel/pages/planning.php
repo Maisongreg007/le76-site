@@ -5,6 +5,21 @@ $etab = valid_etab($_GET['etab'] ?? $_POST['etab'] ?? null) ? (string)($_GET['et
 $lundi = valid_date($_GET['s'] ?? $_POST['s'] ?? null) ? monday_of((string)($_GET['s'] ?? $_POST['s'])) : monday_of(date('Y-m-d'));
 $retour = 'admin.php?p=planning&etab=' . $etab . '&s=' . $lundi;
 
+/** Un autre horaire de la même personne recouvre-t-il ce créneau ? (tous restaurants confondus) */
+function chevauche_planning(int $emp, string $jour, string $d, string $f, int $saufId = 0): ?array
+{
+    [$a, $b] = shift_bounds(['jour' => $jour, 'debut' => $d, 'fin' => $f]);
+    $st = db()->prepare('SELECT * FROM planning WHERE employe_id = ? AND jour BETWEEN ? AND ? AND id <> ?');
+    $st->execute([$emp, date('Y-m-d', strtotime($jour . ' -1 day')), date('Y-m-d', strtotime($jour . ' +1 day')), $saufId]);
+    foreach ($st->fetchAll() as $o) {
+        [$oa, $ob] = shift_bounds($o);
+        if ($a < $ob && $oa < $b) {
+            return $o;
+        }
+    }
+    return null;
+}
+
 /* ---------- Actions ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = (string)($_POST['action'] ?? '');
@@ -20,6 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if ($d === $f) {
             back($retour, '', 'Le début et la fin sont identiques.');
+        }
+        if ($o = chevauche_planning($emp, $jour, $d, $f, $id)) {
+            back($retour, '', 'Impossible : cet horaire recouvre ' . $o['debut'] . '–' . $o['fin'] . ' déjà prévu' . ($o['etab'] !== $etab ? ' au ' . ETABS[$o['etab']] : '') . '. Modifie l\'autre horaire ou choisis d\'autres heures.');
         }
         if ($id) {
             db()->prepare('UPDATE planning SET debut=?, fin=? WHERE id=?')->execute([$d, $f, $id]);
@@ -44,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
             $exists->execute([$emp, $etab, $j, $d, $f]);
-            if (!$exists->fetchColumn()) {
+            if (!$exists->fetchColumn() && !chevauche_planning($emp, $j, $d, $f)) {
                 $ins->execute([$emp, $etab, $j, $d, $f]);
             }
         }
@@ -82,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$e || !(int)$e['actif']) continue;
             $j = date('Y-m-d', strtotime($lundi . ' +' . (int)$off . ' days'));
             $exists->execute([$emp, $etab, $j, $d, $f]);
-            if (!$exists->fetchColumn()) { $ins->execute([$emp, $etab, $j, $d, $f]); $n++; }
+            if (!$exists->fetchColumn() && !chevauche_planning((int)$emp, $j, $d, $f)) { $ins->execute([$emp, $etab, $j, $d, $f]); $n++; }
         }
         back($retour, 'Modèle « ' . $m['nom'] . ' » appliqué : ' . $n . ' horaires ajoutés.');
     }
@@ -113,6 +131,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $upd = db()->prepare('UPDATE pointages SET debut = ?, fin = ?, manuel = 1 WHERE id = ?');
         $setMotif = db()->prepare('UPDATE planning SET motif = ? WHERE id = ?');
         $msg = 'Enregistré.';
+        $idsLies = array_map(fn($p) => (int)$p['id'], $ps);
+        $conflit = static function (int $a, ?int $b) use ($sh, $idsLies): ?array {
+            $st = db()->prepare('SELECT * FROM pointages WHERE employe_id = ? AND debut < ? AND (fin IS NULL OR fin > ?)');
+            $st->execute([$sh['employe_id'], date('Y-m-d H:i:s', $b ?? ($a + 60)), date('Y-m-d H:i:s', $a)]);
+            foreach ($st->fetchAll() as $p) if (!in_array((int)$p['id'], $idsLies, true)) return $p;
+            return null;
+        };
+        if (in_array($mode, ['prevu', 'arrivee', 'depart'], true) && ($cp = $conflit($sa, $sb))) {
+            back($retour, '', 'Impossible : il y a déjà un pointage ' . date('H:i', strtotime($cp['debut'])) . '–' . ($cp['fin'] ? date('H:i', strtotime($cp['fin'])) : '…') . ' qui recouvre cet horaire (deux horaires se chevauchent ?). Corrige-le d\'abord dans Heures.');
+        }
 
         if ($mode === 'prevu') {
             foreach ($ps as $p) $del->execute([$p['id']]);
@@ -185,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($st->fetchAll() as $r) {
             $nouveau = date('Y-m-d', strtotime($r['jour'] . ' +7 days'));
             $exists->execute([$r['employe_id'], $etab, $nouveau, $r['debut'], $r['fin']]);
-            if (!$exists->fetchColumn()) {
+            if (!$exists->fetchColumn() && !chevauche_planning((int)$r['employe_id'], $nouveau, $r['debut'], $r['fin'])) {
                 $ins->execute([$r['employe_id'], $etab, $nouveau, $r['debut'], $r['fin']]);
                 $n++;
             }

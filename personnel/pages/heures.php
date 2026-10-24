@@ -238,12 +238,7 @@ if ($empId) {
     $st = db()->prepare('SELECT * FROM pointages WHERE employe_id = ? AND debut >= ? AND debut < ? ORDER BY debut DESC');
     $st->execute([$empId, $a, $b]);
     $liste = $st->fetchAll();
-    $tot = 0;
-    foreach ($liste as $p) {
-        if ($p['fin'] !== null) {
-            $tot += minutes_between($p['debut'], $p['fin']);
-        }
-    }
+    $tot = minutes_union(array_map(fn($p) => [strtotime($p['debut']), strtotime($p['fin'])], array_filter($liste, fn($p) => $p['fin'] !== null)));
 
     echo '<p class="no-print"><a href="admin.php?p=heures&m=' . h($ym) . $qEtab . '">← Heures de ' . h(mois_fr($ym)) . '</a></p>';
     echo '<div class="row between"><h1 style="margin:0">' . h(emp_nom($emp)) . ' <span class="print-only">— ' . h(mois_fr($ym)) . '</span></h1>'
@@ -271,7 +266,7 @@ if ($empId) {
         echo '</tbody></table></div><h2>Pointages</h2>';
     }
 
-    echo '<div class="card"><p class="muted small no-print" style="margin-top:0">Corrige une heure puis « OK ». Les lignes en orange sont sans départ.</p>';
+    echo '<div class="card"><p class="muted small no-print" style="margin-top:0">Corrige une heure puis « OK ». Les lignes en orange n\'ont pas encore de départ.</p>';
     if (!$liste) {
         echo '<p class="muted">Aucun pointage ce mois-ci.</p>';
     }
@@ -290,8 +285,12 @@ $cmpMois = comparer($ym . '-01', min($finMois, date('Y-m-d')), $etabF);
 $prevuPasse = [];
 foreach ($cmpMois['shifts'] as $c) {
     if (in_array($c['statut'], ['ok', 'plus', 'moins', 'absent'], true)) {
-        $prevuPasse[(int)$c['shift']['employe_id']] = ($prevuPasse[(int)$c['shift']['employe_id']] ?? 0) + $c['prevu'];
+        $ivPrevu[(int)$c['shift']['employe_id']][] = [$c['sa'], $c['sb']];
     }
+}
+// Deux horaires qui se recouvrent ne comptent qu'une fois
+foreach ($ivPrevu ?? [] as $k => $l) {
+    $prevuPasse[$k] = minutes_union($l);
 }
 $totPrevu = array_sum($prevuPasse);
 $totMin = 0;
@@ -320,6 +319,17 @@ echo '<div class="row between" style="margin-bottom:12px"><div class="row no-pri
     . '<a class="btn small" href="admin.php?p=export&m=' . h($ym) . $qEtab . '&t=resume">Excel</a>'
     . boutons_partage('admin.php?p=export&t=resume&m=' . $ym . $qEtab, 'heures-' . $ym . ($etabF ? '-' . $etabF : '') . '.csv') . '</div></div>'
     . '<h2 class="print-only">Heures — ' . h(ucfirst(mois_fr($ym))) . ($etabF ? ' — ' . h(ETABS[$etabF]) : '') . '</h2>';
+
+$chev = chevauchements($ym . '-01', date('Y-m-t', strtotime($ym . '-01')));
+if ($chev) {
+    echo '<div class="card alert-card no-print"><h3>Pointages en double</h3><p class="muted small" style="margin-top:0">Ces heures se chevauchent pour une même personne (souvent deux horaires qui se recouvrent dans le planning). Elles ne sont comptées <b>qu\'une fois</b>, mais corrige-les pour que tout soit propre.</p><ul class="list">';
+    foreach ($chev as [$a, $b]) {
+        $hm = static fn($p) => date('H:i', strtotime($p['debut'])) . '–' . ($p['fin'] ? date('H:i', strtotime($p['fin'])) : '…');
+        echo '<li><span><b>' . h(trim($a['prenom'] . ' ' . $a['nom'])) . '</b> · ' . h(ucfirst(date_fr(substr($a['debut'], 0, 10)))) . ' : ' . h($hm($a)) . ' et ' . h($hm($b)) . '</span>'
+            . '<a class="btn small" href="admin.php?p=heures&v=liste&m=' . h($ym) . '&j=' . h(substr($b['debut'], 0, 10)) . '">Corriger</a></li>';
+    }
+    echo '</ul></div>';
+}
 
 $clos = mois_cloture($ym);
 $compta = (string)setting('compta_email', '');
@@ -357,12 +367,13 @@ if (!$rows) {
             }
             if ($r['contrat_min'] !== null && !$etabF) {
                 $ecart = $r['minutes'] - $r['contrat_min'];
-                $detail[] = 'contrat ≈ ' . fmt_min($r['contrat_min']) . ' (' . ($ecart >= 0 ? '+' : '−') . fmt_min(abs($ecart)) . ')';
+                $detail[] = 'contrat à date ≈ ' . fmt_min($r['contrat_min']) . ' (' . ($ecart >= 0 ? '+' : '−') . fmt_min(abs($ecart)) . ')';
             }
         }
         echo '<tr><td><a href="' . $lien . '"><b>' . h(emp_nom($e)) . '</b></a>'
             . (!(int)$e['actif'] ? ' <span class="pill">archivé</span>' : '')
-            . ($r['ouverts'] ? ' <a href="' . $lien . '" class="pill warn">' . $r['ouverts'] . ' sans départ</a>' : '')
+            . ($r['ouverts'] ? ' <a href="' . $lien . '" class="pill err">' . $r['ouverts'] . ' départ oublié</a>' : '')
+            . (!empty($r['en_service']) ? ' <span class="pill ok">en service</span>' : '')
             . '<div class="muted small">' . postes_html($e) . ' ' . h(implode(' · ', $detail)) . '</div></td>'
             . '<td class="hide-m"><span class="pill ' . h($e['type']) . '">' . ($e['type'] === 'fixe' ? 'Fixe' : 'Extra') . '</span></td>'
             . '<td class="num nowrap muted">' . (isset($prevuPasse[(int)$e['id']]) ? h(fmt_min($prevuPasse[(int)$e['id']])) : ($r['minutes'] ? '0h00' : '–')) . '</td>'
