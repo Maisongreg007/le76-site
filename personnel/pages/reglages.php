@@ -79,7 +79,7 @@ echo '<div class="card" style="max-width:640px"><h3>Horaires rapides du planning
     . h(implode("\n", array_map(fn($p) => implode(';', $p), presets()))) . '</textarea><p><button class="primary">Enregistrer</button></p></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Lien du planning d\'équipe</h3><p class="muted small">Si le lien partagé a circulé là où il ne fallait pas (ancien employé…), crée-en un nouveau. L\'ancien cessera de marcher.</p>'
-    . '<form method="post" onsubmit="return confirm(\'L\\\'ancien lien ne marchera plus. Continuer ?\')">' . csrf_field() . '<input type="hidden" name="action" value="share_renew"><button>Créer un nouveau lien d\'équipe</button></form></div>';
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="share_renew"><button data-confirm="Sûr ? L\'ancien lien ne marchera plus">Créer un nouveau lien d\'équipe</button></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Sauvegarde</h3><p class="muted small">Télécharge une copie de toutes tes données (équipe, planning, pointages). À faire de temps en temps, par exemple en fin de mois.</p>'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="backup"><button>Télécharger une sauvegarde</button></form></div>';

@@ -544,6 +544,16 @@ function admin_end(): void
 {
     // Bouton « Partager » : envoie le fichier via le menu de partage (iPad/iPhone : Mail, WhatsApp, AirDrop…), sinon le télécharge
     echo '</main><script>
+// Confirmation sans fenêtre : 1er appui = « Sûr ? », 2e appui = on valide
+document.addEventListener("click", function (ev) {
+  const b = ev.target.closest("[data-confirm]"); if (!b) return;
+  if (b.dataset.armed === "1") return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+  b.dataset.label = b.dataset.label || b.textContent;
+  b.textContent = b.dataset.confirm; b.dataset.armed = "1"; b.classList.add("armed");
+  clearTimeout(b._t);
+  b._t = setTimeout(function () { b.textContent = b.dataset.label; b.dataset.armed = ""; b.classList.remove("armed"); }, 4000);
+}, true);
 document.addEventListener("click", async function (ev) {
   const b = ev.target.closest("[data-share]"); if (!b) return;
   const old = b.textContent; b.disabled = true; b.textContent = "…";

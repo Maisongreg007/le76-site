@@ -118,3 +118,9 @@ body.pasting-week .plan tr[data-emp]:hover td{background:#eef6f0;cursor:copy}
   table.print-only{display:table;font-size:12px}
   span.print-only{display:inline!important}
 }
+button.armed,.btn.armed{background:var(--err)!important;border-color:var(--err)!important;color:#fff!important}
+.live-dot{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--ok)}
+.live-dot i{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite}
+.live-dot.off{color:var(--muted)}.live-dot.off i{background:#bbb;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,125,79,.5)}70%{box-shadow:0 0 0 8px rgba(47,125,79,0)}100%{box-shadow:0 0 0 0 rgba(47,125,79,0)}}
+.feed li.recent{background:#eef6f0;margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:8px}

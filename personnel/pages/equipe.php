@@ -45,6 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         back('admin.php?p=equipe', $act === 'restore' ? 'Remis dans l\'équipe.' : 'Archivé : il ne peut plus pointer, l\'historique reste.');
     }
 
+    if ($act === 'purge_emp') {
+        $e = emp_get($id);
+        if ($e) {
+            db()->prepare('DELETE FROM pointages WHERE employe_id = ?')->execute([$id]);
+            db()->prepare('DELETE FROM planning WHERE employe_id = ?')->execute([$id]);
+            db()->prepare('DELETE FROM employes WHERE id = ?')->execute([$id]);
+        }
+        back('admin.php?p=equipe', $e ? emp_nom($e) . ' a été supprimé(e) avec ses pointages et son planning.' : '');
+    }
+
     if ($act === 'newtoken') {
         db()->prepare('UPDATE employes SET token = ? WHERE id = ?')->execute([bin2hex(random_bytes(12)), $id]);
         back('admin.php?p=equipe&e=' . $id, 'Nouveau lien créé (l\'ancien ne marche plus).');
@@ -107,11 +117,14 @@ if ($e !== null) {
             . '<div class="linkbox">' . h($lien) . '</div>'
             . '<p class="row" style="margin:10px 0 0"><a class="btn small primary" target="_blank" rel="noopener" href="https://wa.me/?text=' . rawurlencode('Salut ' . $emp['prenom'] . ', voici ton planning : ' . $lien) . '">Envoyer sur WhatsApp</a>'
             . '<a class="btn small" href="sms:?&body=' . rawurlencode('Salut ' . $emp['prenom'] . ', voici ton planning : ' . $lien) . '">Envoyer par SMS</a></p>'
-            . '<form method="post" style="margin-top:10px" onsubmit="return confirm(\'L\\\'ancien lien ne marchera plus. Continuer ?\')">' . csrf_field()
-            . '<input type="hidden" name="action" value="newtoken"><input type="hidden" name="id" value="' . (int)$emp['id'] . '"><button class="small">Créer un nouveau lien</button></form></div>';
-        echo '<form method="post" style="max-width:560px" onsubmit="return confirm(\'Archiver ' . h(addslashes($emp['prenom'])) . ' ? Il ne pourra plus pointer, mais son historique reste.\')">' . csrf_field()
+            . '<form method="post" style="margin-top:10px">' . csrf_field()
+            . '<input type="hidden" name="action" value="newtoken"><input type="hidden" name="id" value="' . (int)$emp['id'] . '"><button class="small" data-confirm="Sûr ? L\'ancien lien ne marchera plus">Créer un nouveau lien</button></form></div>';
+        echo '<form method="post" class="row" style="max-width:560px">' . csrf_field()
             . '<input type="hidden" name="action" value="' . ($emp['actif'] ? 'archive' : 'restore') . '"><input type="hidden" name="id" value="' . (int)$emp['id'] . '">'
-            . '<button class="danger">' . ($emp['actif'] ? 'Archiver (a quitté l\'équipe)' : 'Remettre dans l\'équipe') . '</button></form>';
+            . '<button class="danger" data-confirm="Sûr ? Retouche pour archiver">' . ($emp['actif'] ? 'Archiver (a quitté l\'équipe)' : 'Remettre dans l\'équipe') . '</button></form>'
+            . '<form method="post" style="max-width:560px;margin-top:10px">' . csrf_field() . '<input type="hidden" name="action" value="purge_emp"><input type="hidden" name="id" value="' . (int)$emp['id'] . '">'
+            . '<button class="danger small" data-confirm="Sûr ? Tout sera effacé, retouche">Supprimer définitivement (fiche de test)</button>'
+            . '<p class="muted small">Efface la personne avec tous ses pointages et son planning. À utiliser pour les fiches de test ; pour quelqu\'un qui part, préfère « Archiver ».</p></form>';
     }
     echo '<script>function sw(){var f=document.querySelector("input[name=type]:checked").value;document.getElementById("f-extra").style.display=f==="extra"?"":"none";document.getElementById("f-fixe").style.display=f==="fixe"?"":"none"}sw()</script>';
     admin_end();

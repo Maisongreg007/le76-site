@@ -116,7 +116,7 @@ function liste_pointages(array $liste, bool $avecNom, array $ctx): void
         echo '</select></div><div style="min-width:70px"><label class="small">Durée</label><b>' . ($ouvert ? '<span class="pill warn">en cours</span>' : h(fmt_min(minutes_between($p['debut'], $p['fin'])))) . '</b>'
             . ($p['manuel'] ? ' <span class="pill" title="Modifié à la main">modifié</span>' : '') . '</div>'
             . '<div class="row"><button class="small primary" name="action" value="save">OK</button>'
-            . '<button class="small danger" name="action" value="delete" onclick="return confirm(\'Supprimer ce pointage ?\')">Supprimer</button></div></form>';
+            . '<button class="small danger" name="action" value="delete" formnovalidate data-confirm="Sûr ? Retouche">Supprimer</button></div></form>';
 
         $nom = '';
         if ($avecNom) {
@@ -187,9 +187,9 @@ if ($vue === 'liste') {
     echo '</div>';
 
     echo '<div class="card no-print" style="border-color:#f0c9c6"><h3>Phase de test</h3><p class="muted small">Efface tous les pointages de ' . h(mois_fr($ym)) . ' (les deux restaurants). L\'équipe, le planning et les réglages ne bougent pas. Impossible à annuler.</p>'
-        . '<form method="post" class="row" onsubmit="return confirm(\'Effacer tous les pointages de ' . h(mois_fr($ym)) . ' ?\')">' . csrf_field()
+        . '<form method="post" class="row">' . csrf_field()
         . '<input type="hidden" name="action" value="purge"><input type="hidden" name="v" value="liste"><input type="hidden" name="m" value="' . h($ym) . '">'
-        . '<input name="confirm" placeholder="Tape EFFACER" autocomplete="off" style="width:160px"><button class="danger">Effacer les pointages du mois</button></form></div>';
+        . '<input name="confirm" placeholder="Tape EFFACER" autocomplete="off" style="width:160px"><button class="danger" data-confirm="Sûr ? Retouche pour effacer">Effacer les pointages du mois</button></form></div>';
     admin_end();
     exit;
 }

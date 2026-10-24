@@ -5,11 +5,48 @@ $today = date('Y-m-d');
 $nowSql = date('Y-m-d H:i:s');
 $seuil = date('Y-m-d H:i:s', time() - OUBLI_HEURES * 3600);
 
-page_head("Aujourd'hui");
-admin_nav('aujourdhui');
-flash_show();
+$frag = isset($_GET['frag']);
+if ($frag) {
+    header('Content-Type: text/html; charset=utf-8');
+    header('Cache-Control: no-store');
+} else {
+    page_head("Aujourd'hui");
+    admin_nav('aujourdhui');
+    flash_show();
+    echo '<div class="row between"><h1>' . h(ucfirst(date_fr($today))) . '</h1><span class="live-dot" id="live-state"><i></i> En direct</span></div><div id="live">';
+}
 
-echo '<h1>' . h(ucfirst(date_fr($today))) . '</h1>';
+/* Fil des pointages : derniers mouvements des 24 dernières heures */
+$depuis = date('Y-m-d H:i:s', time() - 86400);
+$st = db()->prepare('SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? OR p.fin >= ? ORDER BY p.id DESC LIMIT 60');
+$st->execute([$depuis, $depuis]);
+$evts = [];
+foreach ($st->fetchAll() as $p) {
+    $nom = trim($p['prenom'] . ' ' . $p['nom']);
+    if ($p['debut'] >= $depuis) {
+        $evts[] = ['t' => $p['debut'], 'k' => 'in', 'nom' => $nom, 'etab' => $p['etab'], 'm' => $p['manuel']];
+    }
+    if ($p['fin'] !== null && $p['fin'] >= $depuis) {
+        $evts[] = ['t' => $p['fin'], 'k' => 'out', 'nom' => $nom, 'etab' => $p['etab'], 'm' => $p['manuel'], 'd' => minutes_between($p['debut'], $p['fin'])];
+    }
+}
+usort($evts, fn($a, $b) => strcmp($b['t'], $a['t']));
+$evts = array_slice($evts, 0, 12);
+echo '<div class="card"><h3>Derniers pointages</h3>';
+if (!$evts) {
+    echo '<p class="muted" style="margin:0">Aucun pointage depuis 24 h.</p>';
+} else {
+    echo '<ul class="list feed">';
+    foreach ($evts as $ev) {
+        $quand = substr($ev['t'], 0, 10) === $today ? date('H:i', strtotime($ev['t'])) : 'hier ' . date('H:i', strtotime($ev['t']));
+        $recent = (time() - strtotime($ev['t'])) < 600;
+        echo '<li' . ($recent ? ' class="recent"' : '') . '><span><span class="pill ' . ($ev['k'] === 'in' ? 'ok">Arrivée' : 'err">Départ') . '</span> <b>' . h($ev['nom']) . '</b>'
+            . ' <span class="muted small">' . h(ETABS[$ev['etab']]) . ($ev['k'] === 'out' ? ' · ' . h(fmt_min($ev['d'])) : '') . ($ev['m'] ? ' · modifié' : '') . '</span></span>'
+            . '<b class="nowrap">' . h($quand) . '</b></li>';
+    }
+    echo '</ul>';
+}
+echo '</div>';
 
 /* Alertes : départs oubliés */
 $oublies = pointages_oublies();
@@ -84,4 +121,30 @@ if ($nbEquipe === 0) {
         . '<a class="btn primary" href="admin.php?p=equipe&e=new">Ajouter la première personne</a></div>';
 }
 
+if ($frag) {
+    exit;
+}
+echo '</div>';
+?>
+<script>
+(function () {
+  // Actualise la page toute seule toutes les 10 secondes (pause quand l'écran est caché)
+  const box = document.getElementById('live'), state = document.getElementById('live-state');
+  let busy = false;
+  async function refresh() {
+    if (busy || document.hidden) return;
+    busy = true;
+    try {
+      const r = await fetch('admin.php?p=aujourdhui&frag=1', {cache: 'no-store'});
+      const t = r.ok ? await r.text() : '';
+      if (t && !t.includes('name="pw"')) { box.innerHTML = t; state.classList.remove('off'); }
+      else state.classList.add('off');
+    } catch (e) { state.classList.add('off'); }
+    busy = false;
+  }
+  setInterval(refresh, 10000);
+  document.addEventListener('visibilitychange', refresh);
+})();
+</script>
+<?php
 admin_end();
