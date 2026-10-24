@@ -15,32 +15,47 @@ function dt_local_to_sql(?string $v): ?string
 }
 
 /* ---------- Actions sur les pointages ---------- */
+$vue = ($_GET['v'] ?? $_POST['v'] ?? '') === 'liste' ? 'liste' : '';
+$jourF = valid_date($_GET['j'] ?? $_POST['j'] ?? null) ? (string)($_GET['j'] ?? $_POST['j']) : null;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = (string)($_POST['action'] ?? '');
-    $retour = 'admin.php?p=heures&m=' . $ym . '&e=' . $empId;
+    $retour = 'admin.php?p=heures&m=' . $ym . ($empId ? '&e=' . $empId : '') . ($vue ? '&v=liste' : '')
+        . ($jourF ? '&j=' . $jourF : '') . (valid_etab($_POST['etabf'] ?? null) ? '&etab=' . $_POST['etabf'] : '');
 
     if ($act === 'save' || $act === 'add') {
         $debut = dt_local_to_sql($_POST['debut'] ?? '');
         $fin = dt_local_to_sql($_POST['fin'] ?? '');
         $etab = (string)($_POST['etab'] ?? '');
-        if ($debut === null || !valid_etab($etab) || !emp_get($empId)) {
-            back($retour, '', 'Il manque une date ou un restaurant.');
+        $pe = (int)($_POST['pe'] ?? $empId);
+        if ($debut === null || !valid_etab($etab) || !emp_get($pe)) {
+            back($retour, '', 'Il manque la personne, une date ou un restaurant.');
         }
         if ($fin !== null && $fin <= $debut) {
             back($retour, '', 'Le départ doit être après l\'arrivée.');
         }
         if ($act === 'save') {
-            db()->prepare('UPDATE pointages SET debut=?, fin=?, etab=?, manuel=1 WHERE id=? AND employe_id=?')
-                ->execute([$debut, $fin, $etab, (int)$_POST['id'], $empId]);
+            db()->prepare('UPDATE pointages SET employe_id=?, debut=?, fin=?, etab=?, manuel=1 WHERE id=?')
+                ->execute([$pe, $debut, $fin, $etab, (int)$_POST['id']]);
         } else {
             db()->prepare('INSERT INTO pointages (employe_id, etab, debut, fin, manuel) VALUES (?,?,?,?,1)')
-                ->execute([$empId, $etab, $debut, $fin]);
+                ->execute([$pe, $etab, $debut, $fin]);
         }
         back($retour, 'Enregistré.');
     }
     if ($act === 'delete') {
-        db()->prepare('DELETE FROM pointages WHERE id=? AND employe_id=?')->execute([(int)$_POST['id'], $empId]);
+        db()->prepare('DELETE FROM pointages WHERE id=?')->execute([(int)$_POST['id']]);
         back($retour, 'Pointage supprimé.');
+    }
+    if ($act === 'purge') {
+        if (($_POST['confirm'] ?? '') !== 'EFFACER') {
+            back($retour, '', 'Tape EFFACER pour confirmer.');
+        }
+        $a = $ym . '-01 00:00:00';
+        $b = date('Y-m-d H:i:s', strtotime($a . ' +1 month'));
+        $st = db()->prepare('DELETE FROM pointages WHERE debut >= ? AND debut < ?');
+        $st->execute([$a, $b]);
+        back($retour, $st->rowCount() . ' pointages de ' . mois_fr($ym) . ' effacés.');
     }
     redirect($retour);
 }
@@ -53,6 +68,132 @@ page_head('Heures');
 admin_nav('heures');
 flash_show();
 
+/** Boutons Imprimer / Partager (le partage envoie le fichier Excel via le menu de partage de l'iPad/iPhone). */
+function boutons_partage(string $exportUrl, string $nomFichier): string
+{
+    return '<div class="row no-print"><button type="button" class="small" onclick="window.print()">Imprimer</button>'
+        . '<button type="button" class="small primary" data-share="' . h($exportUrl) . '" data-file="' . h($nomFichier) . '">Partager</button></div>';
+}
+
+/** Liste de pointages modifiables (+ tableau propre pour l'impression). */
+function liste_pointages(array $liste, bool $avecNom, array $ctx): void
+{
+    $val = static fn(?string $s) => $s ? str_replace(' ', 'T', substr($s, 0, 16)) : '';
+    $emps = $avecNom ? employes(false) : [];
+    $cache = [];
+    $hidden = csrf_field() . '<input type="hidden" name="m" value="' . h($ctx['m']) . '">'
+        . ($ctx['e'] ? '<input type="hidden" name="e" value="' . (int)$ctx['e'] . '">' : '')
+        . ($ctx['v'] ? '<input type="hidden" name="v" value="liste">' : '')
+        . ($ctx['j'] ? '<input type="hidden" name="j" value="' . h($ctx['j']) . '">' : '')
+        . ($ctx['etabf'] ? '<input type="hidden" name="etabf" value="' . h($ctx['etabf']) . '">' : '');
+
+    $print = '<table class="print-only"><thead><tr>' . ($avecNom ? '<th>Nom</th>' : '') . '<th>Date</th><th>Arrivée</th><th>Départ</th><th>Lieu</th><th class="num">Durée</th></tr></thead><tbody>';
+    $jourCourant = null;
+    echo '<div class="no-print">';
+    foreach ($liste as $p) {
+        $ouvert = $p['fin'] === null;
+        $jour = substr($p['debut'], 0, 10);
+        if ($avecNom && $jour !== $jourCourant) {
+            $jourCourant = $jour;
+            echo '<h3 style="margin:16px 0 4px">' . h(ucfirst(date_fr($jour))) . '</h3>';
+        }
+        echo '<form method="post" class="prow' . ($ouvert ? ' open' : '') . '">' . $hidden . '<input type="hidden" name="id" value="' . (int)$p['id'] . '">';
+        if ($avecNom) {
+            echo '<div><label class="small">Personne</label><select name="pe">';
+            foreach ($emps as $x) {
+                echo '<option value="' . (int)$x['id'] . '"' . ((int)$x['id'] === (int)$p['employe_id'] ? ' selected' : '') . '>' . h(emp_nom($x)) . '</option>';
+            }
+            echo '</select></div>';
+        } else {
+            echo '<input type="hidden" name="pe" value="' . (int)$p['employe_id'] . '">';
+        }
+        echo '<div><label class="small">Arrivée</label><input type="datetime-local" name="debut" value="' . h($val($p['debut'])) . '" required></div>'
+            . '<div><label class="small">Départ</label><input type="datetime-local" name="fin" value="' . h($val($p['fin'])) . '"></div>'
+            . '<div><label class="small">Lieu</label><select name="etab">';
+        foreach (ETABS as $k => $l) {
+            echo '<option value="' . h($k) . '"' . ($k === $p['etab'] ? ' selected' : '') . '>' . h($l) . '</option>';
+        }
+        echo '</select></div><div style="min-width:70px"><label class="small">Durée</label><b>' . ($ouvert ? '<span class="pill warn">en cours</span>' : h(fmt_min(minutes_between($p['debut'], $p['fin'])))) . '</b>'
+            . ($p['manuel'] ? ' <span class="pill" title="Modifié à la main">modifié</span>' : '') . '</div>'
+            . '<div class="row"><button class="small primary" name="action" value="save">OK</button>'
+            . '<button class="small danger" name="action" value="delete" onclick="return confirm(\'Supprimer ce pointage ?\')">Supprimer</button></div></form>';
+
+        $nom = '';
+        if ($avecNom) {
+            $id = (int)$p['employe_id'];
+            $cache[$id] ??= emp_get($id);
+            $nom = $cache[$id] ? emp_nom($cache[$id]) : '?';
+        }
+        $print .= '<tr>' . ($avecNom ? '<td>' . h($nom) . '</td>' : '') . '<td>' . h(date('d/m/Y', strtotime($p['debut']))) . '</td><td>' . h(date('H:i', strtotime($p['debut']))) . '</td><td>'
+            . ($ouvert ? 'sans départ' : h(date('H:i', strtotime($p['fin'])))) . '</td><td>' . h(ETABS[$p['etab']]) . '</td><td class="num">'
+            . ($ouvert ? '' : h(fmt_min(minutes_between($p['debut'], $p['fin'])))) . '</td></tr>';
+    }
+    echo '</div>';
+    echo $print . '</tbody></table>';
+
+    // Ajout
+    $defDate = ($ctx['j'] ?: date('Y-m-d'));
+    echo '<h2 class="no-print">Ajouter un pointage</h2><form method="post" class="card prow no-print">' . $hidden . '<input type="hidden" name="action" value="add">';
+    if ($avecNom) {
+        echo '<div><label class="small">Personne</label><select name="pe" required><option value="">Choisir…</option>';
+        foreach (employes() as $x) {
+            echo '<option value="' . (int)$x['id'] . '">' . h(emp_nom($x)) . '</option>';
+        }
+        echo '</select></div>';
+    } else {
+        echo '<input type="hidden" name="pe" value="' . (int)$ctx['e'] . '">';
+    }
+    echo '<div><label class="small">Arrivée</label><input type="datetime-local" name="debut" value="' . h($defDate) . 'T18:00" required></div>'
+        . '<div><label class="small">Départ</label><input type="datetime-local" name="fin" value="' . h($defDate) . 'T23:00" required></div>'
+        . '<div><label class="small">Lieu</label><select name="etab">';
+    foreach (ETABS as $k => $l) {
+        echo '<option value="' . h($k) . '"' . ($k === ($ctx['etabDef'] ?? 'le76') ? ' selected' : '') . '>' . h($l) . '</option>';
+    }
+    echo '</select></div><div class="row"><button class="primary">Ajouter</button></div></form>';
+}
+
+/* ---------- Tous les pointages (modifiables) ---------- */
+if ($vue === 'liste') {
+    $a = ($jourF ?: $ym . '-01') . ' 00:00:00';
+    $b = $jourF ? date('Y-m-d H:i:s', strtotime($a . ' +1 day')) : date('Y-m-d H:i:s', strtotime($ym . '-01 00:00:00 +1 month'));
+    $sql = 'SELECT * FROM pointages WHERE debut >= ? AND debut < ?' . ($etabF ? ' AND etab = ?' : '') . ' ORDER BY debut DESC';
+    $st = db()->prepare($sql);
+    $st->execute($etabF ? [$a, $b, $etabF] : [$a, $b]);
+    $liste = $st->fetchAll();
+
+    $base = 'admin.php?p=heures&v=liste';
+    echo '<p class="no-print"><a href="admin.php?p=heures&m=' . h($ym) . $qEtab . '">← Heures de ' . h(mois_fr($ym)) . '</a></p>';
+    echo '<div class="row between" style="margin-bottom:12px"><h1 style="margin:0">Tous les pointages</h1><div class="tabs no-print">'
+        . '<a href="' . $base . '&m=' . h($ym) . '"' . (!$etabF ? ' class="on"' : '') . '>Tout</a>';
+    foreach (ETABS as $k => $l) {
+        echo '<a href="' . $base . '&m=' . h($ym) . '&etab=' . h($k) . '"' . ($etabF === $k ? ' class="on"' : '') . '>' . h($l) . '</a>';
+    }
+    echo '</div></div>';
+    echo '<div class="row between no-print" style="margin-bottom:12px"><div class="row">'
+        . '<a class="btn" href="' . $base . '&m=' . h($prevM) . $qEtab . '">←</a><b style="min-width:130px;text-align:center">' . h(ucfirst(mois_fr($ym))) . '</b>'
+        . '<a class="btn" href="' . $base . '&m=' . h($nextM) . $qEtab . '">→</a>'
+        . '<form method="get" class="row"><input type="hidden" name="p" value="heures"><input type="hidden" name="v" value="liste"><input type="hidden" name="m" value="' . h($ym) . '">'
+        . ($etabF ? '<input type="hidden" name="etab" value="' . h($etabF) . '">' : '')
+        . '<input type="date" name="j" value="' . h((string)$jourF) . '" onchange="this.form.submit()" title="Voir un seul jour">'
+        . ($jourF ? '<a class="btn small" href="' . $base . '&m=' . h($ym) . $qEtab . '">Tout le mois</a>' : '') . '</form></div>'
+        . boutons_partage('admin.php?p=export&t=detail&m=' . $ym . $qEtab . ($jourF ? '&j=' . $jourF : ''), 'pointages-' . ($jourF ?: $ym) . '.csv') . '</div>';
+    echo '<h2 class="print-only">' . h($jourF ? ucfirst(date_fr($jourF)) : ucfirst(mois_fr($ym))) . ($etabF ? ' — ' . h(ETABS[$etabF]) : '') . '</h2>';
+
+    echo '<div class="card">';
+    if (!$liste) {
+        echo '<p class="muted">Aucun pointage' . ($jourF ? ' ce jour-là' : ' ce mois-ci') . '.</p>';
+    }
+    liste_pointages($liste, true, ['m' => $ym, 'e' => 0, 'v' => 'liste', 'j' => $jourF, 'etabf' => $etabF, 'etabDef' => $etabF ?: 'le76']);
+    echo '</div>';
+
+    echo '<div class="card no-print" style="border-color:#f0c9c6"><h3>Phase de test</h3><p class="muted small">Efface tous les pointages de ' . h(mois_fr($ym)) . ' (les deux restaurants). L\'équipe, le planning et les réglages ne bougent pas. Impossible à annuler.</p>'
+        . '<form method="post" class="row" onsubmit="return confirm(\'Effacer tous les pointages de ' . h(mois_fr($ym)) . ' ?\')">' . csrf_field()
+        . '<input type="hidden" name="action" value="purge"><input type="hidden" name="v" value="liste"><input type="hidden" name="m" value="' . h($ym) . '">'
+        . '<input name="confirm" placeholder="Tape EFFACER" autocomplete="off" style="width:160px"><button class="danger">Effacer les pointages du mois</button></form></div>';
+    admin_end();
+    exit;
+}
+
 /* ---------- Détail d'une personne ---------- */
 if ($empId) {
     $emp = emp_get($empId);
@@ -64,46 +205,25 @@ if ($empId) {
     $st = db()->prepare('SELECT * FROM pointages WHERE employe_id = ? AND debut >= ? AND debut < ? ORDER BY debut DESC');
     $st->execute([$empId, $a, $b]);
     $liste = $st->fetchAll();
-
-    echo '<p><a href="admin.php?p=heures&m=' . h($ym) . $qEtab . '">← Heures de ' . h(mois_fr($ym)) . '</a></p>';
-    echo '<div class="row between"><h1 style="margin:0">' . h(emp_nom($emp)) . '</h1><div class="row"><a class="btn" href="admin.php?p=heures&e=' . $empId . '&m=' . h($prevM) . '">←</a><b>' . h(mois_fr($ym)) . '</b><a class="btn" href="admin.php?p=heures&e=' . $empId . '&m=' . h($nextM) . '">→</a></div></div><br>';
-
     $tot = 0;
-    echo '<div class="card"><p class="muted small" style="margin-top:0">Modifie une ligne si quelqu\'un a oublié de pointer. Les lignes en orange sont sans départ.</p>';
+    foreach ($liste as $p) {
+        if ($p['fin'] !== null) {
+            $tot += minutes_between($p['debut'], $p['fin']);
+        }
+    }
+
+    echo '<p class="no-print"><a href="admin.php?p=heures&m=' . h($ym) . $qEtab . '">← Heures de ' . h(mois_fr($ym)) . '</a></p>';
+    echo '<div class="row between"><h1 style="margin:0">' . h(emp_nom($emp)) . ' <span class="print-only">— ' . h(mois_fr($ym)) . '</span></h1>'
+        . '<div class="row no-print"><a class="btn" href="admin.php?p=heures&e=' . $empId . '&m=' . h($prevM) . '">←</a><b>' . h(mois_fr($ym)) . '</b><a class="btn" href="admin.php?p=heures&e=' . $empId . '&m=' . h($nextM) . '">→</a></div>'
+        . boutons_partage('admin.php?p=export&t=detail&m=' . $ym . '&e=' . $empId, 'heures-' . preg_replace('/[^a-z0-9]+/i', '-', emp_nom($emp)) . '-' . $ym . '.csv') . '</div><br>';
+
+    echo '<div class="card"><p class="muted small no-print" style="margin-top:0">Corrige une heure puis « OK ». Les lignes en orange sont sans départ.</p>';
     if (!$liste) {
         echo '<p class="muted">Aucun pointage ce mois-ci.</p>';
     }
-    foreach ($liste as $p) {
-        $ouvert = $p['fin'] === null;
-        if (!$ouvert) {
-            $tot += minutes_between($p['debut'], $p['fin']);
-        }
-        $val = static fn(?string $s) => $s ? str_replace(' ', 'T', substr($s, 0, 16)) : '';
-        echo '<form method="post" class="row" style="padding:10px 0;border-bottom:1px solid var(--line);' . ($ouvert ? 'background:var(--warn-bg);padding:10px;border-radius:10px;' : '') . '">'
-            . csrf_field() . '<input type="hidden" name="id" value="' . (int)$p['id'] . '"><input type="hidden" name="e" value="' . $empId . '"><input type="hidden" name="m" value="' . h($ym) . '">'
-            . '<div><label class="small">Arrivée</label><input type="datetime-local" name="debut" value="' . h($val($p['debut'])) . '" required></div>'
-            . '<div><label class="small">Départ</label><input type="datetime-local" name="fin" value="' . h($val($p['fin'])) . '"></div>'
-            . '<div><label class="small">Lieu</label><select name="etab">';
-        foreach (ETABS as $k => $l) {
-            echo '<option value="' . h($k) . '"' . ($k === $p['etab'] ? ' selected' : '') . '>' . h($l) . '</option>';
-        }
-        echo '</select></div><div style="min-width:70px"><label class="small">Durée</label><b>' . ($ouvert ? '<span class="pill warn">en cours</span>' : h(fmt_min(minutes_between($p['debut'], $p['fin'])))) . '</b></div>'
-            . '<div class="row" style="margin-top:18px"><button class="small primary" name="action" value="save">OK</button>'
-            . '<button class="small danger" name="action" value="delete" onclick="return confirm(\'Supprimer ce pointage ?\')">Supprimer</button></div></form>';
-    }
+    liste_pointages($liste, false, ['m' => $ym, 'e' => $empId, 'v' => '', 'j' => null, 'etabf' => null, 'etabDef' => emp_etabs($emp)[0] ?? 'le76']);
     echo '<p style="margin:12px 0 0"><b>Total du mois : ' . h(fmt_min($tot)) . '</b>'
-        . ($emp['type'] === 'extra' ? ' · ' . h(eur(round($tot / 60 * (float)$emp['taux'], 2))) : '') . '</p></div>';
-
-    $defEtab = emp_etabs($emp)[0] ?? 'le76';
-    echo '<h2>Ajouter un pointage oublié</h2><form method="post" class="card row">' . csrf_field()
-        . '<input type="hidden" name="action" value="add"><input type="hidden" name="e" value="' . $empId . '"><input type="hidden" name="m" value="' . h($ym) . '">'
-        . '<div><label class="small">Arrivée</label><input type="datetime-local" name="debut" required></div>'
-        . '<div><label class="small">Départ</label><input type="datetime-local" name="fin" required></div>'
-        . '<div><label class="small">Lieu</label><select name="etab">';
-    foreach (ETABS as $k => $l) {
-        echo '<option value="' . h($k) . '"' . ($k === $defEtab ? ' selected' : '') . '>' . h($l) . '</option>';
-    }
-    echo '</select></div><div style="margin-top:18px"><button class="primary">Ajouter</button></div></form>';
+        . ($emp['type'] === 'extra' ? ' · ' . h(eur(round($tot / 60 * (float)$emp['taux'], 2))) : ' · salaire ' . h(eur((float)$emp['salaire']))) . '</p></div>';
     admin_end();
     exit;
 }
@@ -122,18 +242,20 @@ foreach ($rows as $r) {
     }
 }
 
-echo '<div class="row between" style="margin-bottom:12px"><h1 style="margin:0">Heures</h1><div class="tabs">'
+echo '<div class="row between no-print" style="margin-bottom:12px"><h1 style="margin:0">Heures</h1><div class="tabs">'
     . '<a href="admin.php?p=heures&m=' . h($ym) . '"' . (!$etabF ? ' class="on"' : '') . '>Tout</a>';
 foreach (ETABS as $k => $l) {
     echo '<a href="admin.php?p=heures&m=' . h($ym) . '&etab=' . h($k) . '"' . ($etabF === $k ? ' class="on"' : '') . '>' . h($l) . '</a>';
 }
 echo '</div></div>';
 
-echo '<div class="row between" style="margin-bottom:12px"><div class="row">'
+echo '<div class="row between" style="margin-bottom:12px"><div class="row no-print">'
     . '<a class="btn" href="admin.php?p=heures&m=' . h($prevM) . $qEtab . '">←</a><b style="min-width:130px;text-align:center">' . h(ucfirst(mois_fr($ym))) . '</b>'
     . '<a class="btn" href="admin.php?p=heures&m=' . h($nextM) . $qEtab . '">→</a></div>'
-    . '<div class="row"><a class="btn small" href="admin.php?p=export&m=' . h($ym) . $qEtab . '&t=resume">Exporter le résumé (Excel)</a>'
-    . '<a class="btn small" href="admin.php?p=export&m=' . h($ym) . $qEtab . '&t=detail">Exporter le détail</a></div></div>';
+    . '<div class="row no-print"><a class="btn small" href="admin.php?p=heures&v=liste&m=' . h($ym) . $qEtab . '">Modifier les pointages</a>'
+    . '<a class="btn small" href="admin.php?p=export&m=' . h($ym) . $qEtab . '&t=resume">Excel</a>'
+    . boutons_partage('admin.php?p=export&t=resume&m=' . $ym . $qEtab, 'heures-' . $ym . ($etabF ? '-' . $etabF : '') . '.csv') . '</div></div>'
+    . '<h2 class="print-only">Heures — ' . h(ucfirst(mois_fr($ym))) . ($etabF ? ' — ' . h(ETABS[$etabF]) : '') . '</h2>';
 
 echo '<div class="stats">'
     . '<div class="stat"><b>' . h(eur($totExtras + $totFixes)) . '</b><span>Coût net du mois</span></div>'

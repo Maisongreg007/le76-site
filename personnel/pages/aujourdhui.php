@@ -73,7 +73,8 @@ foreach (ETABS as $key => $label) {
     } else {
         echo '<p class="muted">Rien de planifié.</p>';
     }
-    echo '<p style="margin:12px 0 0"><a class="btn small" href="admin.php?p=planning&etab=' . h($key) . '">Voir le planning</a></p></div>';
+    echo '<p class="row" style="margin:12px 0 0"><a class="btn small" href="admin.php?p=planning&etab=' . h($key) . '">Voir le planning</a>'
+        . '<a class="btn small" href="admin.php?p=heures&v=liste&m=' . h(substr($today, 0, 7)) . '&j=' . h($today) . '&etab=' . h($key) . '">Modifier les pointages du jour</a></p></div>';
 }
 echo '</div>';
 

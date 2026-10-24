@@ -542,7 +542,25 @@ function admin_nav(string $actif): void
 
 function admin_end(): void
 {
-    echo '</main></body></html>';
+    // Bouton « Partager » : envoie le fichier via le menu de partage (iPad/iPhone : Mail, WhatsApp, AirDrop…), sinon le télécharge
+    echo '</main><script>
+document.addEventListener("click", async function (ev) {
+  const b = ev.target.closest("[data-share]"); if (!b) return;
+  const old = b.textContent; b.disabled = true; b.textContent = "…";
+  try {
+    const r = await fetch(b.dataset.share, {cache: "no-store"});
+    const blob = await r.blob();
+    const file = new File([blob], b.dataset.file, {type: "text/csv"});
+    if (navigator.canShare && navigator.canShare({files: [file]})) {
+      await navigator.share({files: [file], title: b.dataset.file});
+    } else {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = b.dataset.file;
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+  } catch (e) { /* partage annulé */ }
+  b.disabled = false; b.textContent = old;
+});
+</script></body></html>';
 }
 
 function flash_show(): void

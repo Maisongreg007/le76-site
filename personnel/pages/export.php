@@ -4,6 +4,8 @@ declare(strict_types=1);
 $ym = preg_match('/^\d{4}-\d{2}$/', (string)($_GET['m'] ?? '')) ? (string)$_GET['m'] : date('Y-m');
 $etabF = valid_etab($_GET['etab'] ?? null) ? (string)$_GET['etab'] : null;
 $type = ($_GET['t'] ?? 'resume') === 'detail' ? 'detail' : 'resume';
+$empF = (int)($_GET['e'] ?? 0);
+$jourF = valid_date($_GET['j'] ?? null) ? (string)$_GET['j'] : null;
 
 $nomFichier = 'heures-' . $ym . ($etabF ? '-' . $etabF : '') . '-' . $type . '.csv';
 header('Content-Type: text/csv; charset=utf-8');
@@ -36,12 +38,15 @@ if ($type === 'resume') {
         ]);
     }
 } else {
-    $a = $ym . '-01 00:00:00';
-    $b = date('Y-m-d H:i:s', strtotime($a . ' +1 month'));
-    $sql = 'SELECT p.*, e.prenom, e.nom, e.postes FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? AND p.debut < ?'
-        . ($etabF ? ' AND p.etab = ?' : '') . ' ORDER BY e.prenom COLLATE NOCASE, e.nom COLLATE NOCASE, p.debut';
+    $a = ($jourF ?: $ym . '-01') . ' 00:00:00';
+    $b = date('Y-m-d H:i:s', strtotime($a . ($jourF ? ' +1 day' : ' +1 month')));
+    $params = [$a, $b];
+    $sql = 'SELECT p.*, e.prenom, e.nom, e.postes FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? AND p.debut < ?';
+    if ($etabF) { $sql .= ' AND p.etab = ?'; $params[] = $etabF; }
+    if ($empF) { $sql .= ' AND p.employe_id = ?'; $params[] = $empF; }
+    $sql .= ' ORDER BY e.prenom COLLATE NOCASE, e.nom COLLATE NOCASE, p.debut';
     $st = db()->prepare($sql);
-    $st->execute($etabF ? [$a, $b, $etabF] : [$a, $b]);
+    $st->execute($params);
     $put(['Nom', 'Poste', 'Restaurant', 'Date', 'Arrivée', 'Départ', 'Durée', 'Durée (décimal)', 'Modifié à la main']);
     foreach ($st->fetchAll() as $p) {
         $m = $p['fin'] ? minutes_between($p['debut'], $p['fin']) : null;
