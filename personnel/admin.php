@@ -9,7 +9,13 @@ if (!in_array($p, $pages, true)) {
 }
 
 /* Première utilisation : choisir le mot de passe */
-if (!setting('admin_hash')) {
+if (defined('DEMO') && ($_POST['action'] ?? '') === 'demo_reset' && hash_equals(csrf_token(), (string)($_POST['csrf'] ?? ''))) {
+    require_once __DIR__ . '/demo-seed.php';
+    demo_seed(db(), true);
+    redirect('admin.php?ok=' . rawurlencode('Démo réinitialisée avec de nouvelles données d\'exemple.'));
+}
+
+if (!defined('DEMO') && !setting('admin_hash')) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pw = (string)($_POST['pw'] ?? '');
         if (mb_strlen($pw) < 8) {

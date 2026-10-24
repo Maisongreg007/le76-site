@@ -17,7 +17,9 @@ const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const JOURS_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 const OUBLI_HEURES = 16; // un pointage ouvert depuis plus longtemps = départ oublié
-define('DATA_DIR', __DIR__ . '/data');
+// Mode démo (le76.fr/demo/personnel) : base séparée, données fictives, pas de mot de passe, aucun envoi
+define('DATA_DIR', defined('DEMO') ? __DIR__ . '/data/demo' : __DIR__ . '/data');
+define('ASSETS', defined('DEMO') ? '../../personnel/assets/' : 'assets/');
 
 /* ---------- Utilitaires ---------- */
 
@@ -88,7 +90,8 @@ function chevauchements(string $du, string $au): array
     $prev = null;
     foreach ($st->fetchAll() as $p) {
         if ($prev && (int)$prev['employe_id'] === (int)$p['employe_id']) {
-            $finPrev = $prev['fin'] ?? date('Y-m-d H:i:s');
+            // Pointage sans départ : on le considère au plus long OUBLI_HEURES (sinon un oubli « chevaucherait » tous les jours suivants)
+            $finPrev = $prev['fin'] ?? date('Y-m-d H:i:s', min(time(), strtotime($prev['debut']) + OUBLI_HEURES * 3600));
             if ($p['debut'] < $finPrev) {
                 $out[] = [$prev, $p];
             }
@@ -164,6 +167,10 @@ function db(): PDO
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     $pdo->exec('PRAGMA busy_timeout = 5000');
     migrate($pdo);
+    if (defined('DEMO') && !$pdo->query('SELECT COUNT(*) FROM employes')->fetchColumn()) {
+        require_once __DIR__ . '/demo-seed.php';
+        demo_seed($pdo);
+    }
     return $pdo;
 }
 
@@ -332,7 +339,8 @@ function convenu_minutes(array $e, string $du, string $au, ?int $jusqua = null, 
     $h = emp_horaires($e);
     $now = $jusqua ?? time();
     $tot = 0;
-    for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) {
+    for ($jj = date('Y-m-d', strtotime($du)); $jj <= $au; $jj = date('Y-m-d', strtotime($jj . ' +1 day'))) {
+        $t = strtotime($jj); // jour par jour, sans se tromper au changement d'heure
         $j = date('Y-m-d', $t);
         foreach ($h[(int)date('N', $t)] as [$a, $b]) {
             [$debut, $fin] = shift_bounds(['jour' => $j, 'debut' => $a, 'fin' => $b]);
@@ -457,6 +465,7 @@ function admin_logout(): void
 
 function is_admin(): bool
 {
+    if (defined('DEMO')) return true;
     $c = (string)($_COOKIE['adm'] ?? '');
     if (!preg_match('/^(\d+)\.([a-f0-9]{64})$/', $c, $m)) {
         return false;
@@ -484,6 +493,10 @@ function csrf_check(): void
 
 function kiosk_set(string $etab): void
 {
+    if (defined('DEMO')) {
+        set_cookie_secure('kiosk_demo', $etab, time() + 86400 * 30);
+        return;
+    }
     $exp = time() + 86400 * 390;
     set_cookie_secure('kiosk', $etab . '.' . sign('kiosk|' . $etab), $exp);
 }
@@ -495,6 +508,10 @@ function kiosk_clear(): void
 
 function kiosk_etab(): ?string
 {
+    if (defined('DEMO')) {
+        $c = (string)($_COOKIE['kiosk_demo'] ?? 'le76');
+        return valid_etab($c) ? $c : 'le76';
+    }
     $c = (string)($_COOKIE['kiosk'] ?? '');
     if (!preg_match('/^([a-z0-9]+)\.([a-f0-9]{64})$/', $c, $m)) {
         return null;
@@ -726,7 +743,7 @@ function shift_bounds(array $s): array
     $a = strtotime($s['jour'] . ' ' . $s['debut']);
     $b = strtotime($s['jour'] . ' ' . $s['fin']);
     if ($b <= $a) {
-        $b += 86400;
+        $b = strtotime($s['jour'] . ' ' . $s['fin'] . ' +1 day'); // service qui passe minuit
     }
     return [$a, $b];
 }
@@ -908,7 +925,8 @@ function couts_jours(string $du, string $au, ?string $etab = null): array
     $emps = [];
     foreach (employes(false) as $e) $emps[(int)$e['id']] = $e;
     $out = [];
-    for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) {
+    for ($jj = date('Y-m-d', strtotime($du)); $jj <= $au; $jj = date('Y-m-d', strtotime($jj . ' +1 day'))) {
+        $t = strtotime($jj); // jour par jour, sans se tromper au changement d'heure
         $j = date('Y-m-d', $t);
         $out[$j] = ['source' => $j <= $today ? 'reel' : 'prevu', 'fixes_min' => 0, 'fixes_eur' => 0.0, 'extras_min' => 0, 'extras_eur' => 0.0, 'detail' => []];
     }
@@ -971,7 +989,8 @@ function decider_demande(int $id, bool $ok): ?array
     if ($ok) {
         $lib = TYPES_CONGE[$d['type']] ?? 'Congé';
         $motif = $d['type'] === 'malade' ? 'malade' : 'conge';
-        for ($t = strtotime($d['du']); $t <= strtotime($d['au']); $t += 86400) {
+        for ($jj = date('Y-m-d', strtotime($d['du'])); $jj <= $d['au']; $jj = date('Y-m-d', strtotime($jj . ' +1 day'))) {
+        $t = strtotime($jj); // jour par jour, sans se tromper au changement d'heure
             $j = date('Y-m-d', $t);
             db()->prepare('INSERT INTO indispos (employe_id, jour, note, created_at) VALUES (?,?,?,?) ON CONFLICT(employe_id, jour) DO UPDATE SET note = excluded.note')
                 ->execute([$d['employe_id'], $j, $lib, date('Y-m-d H:i:s')]);
@@ -1010,6 +1029,7 @@ function notif_topic(): string
 /** Envoie une notification. Retourne true si au moins un canal a fonctionné. */
 function envoyer_notif(string $titre, string $message, string $priorite = 'default'): bool
 {
+    if (defined('DEMO')) return false;
     $ok = false;
     if (setting('notif_ntfy', '0') === '1') {
         $ctx = stream_context_create(['http' => [
@@ -1041,6 +1061,7 @@ function expediteur(): string
 /** E-mail simple, avec pièce jointe facultative [nom, contenu, type]. */
 function envoyer_mail(string $to, string $sujet, string $texte, ?array $pj = null): bool
 {
+    if (defined('DEMO')) return false;
     $from = expediteur();
     $b = 'b' . bin2hex(random_bytes(8));
     $headers = 'From: Personnel Le 76 <' . $from . ">\r\nReply-To: " . $from . "\r\nMIME-Version: 1.0\r\n";
@@ -1062,6 +1083,7 @@ function envoyer_mail(string $to, string $sujet, string $texte, ?array $pj = nul
  */
 function verifier_alertes(): void
 {
+    if (defined('DEMO')) return;
     if (setting('notif_ntfy', '0') !== '1' && trim((string)setting('notif_email', '')) === '') {
         return;
     }
@@ -1144,11 +1166,16 @@ function page_head(string $titre, string $manifest = 'manifest-admin.json', stri
         . '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="mobile-web-app-capable" content="yes">'
         . '<meta name="apple-mobile-web-app-title" content="' . h($nomAppli) . '"><meta name="application-name" content="' . h($nomAppli) . '">'
         . '<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"><meta name="color-scheme" content="light dark">'
-        . '<link rel="manifest" href="' . h($manifest) . '">'
-        . '<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/' . $icone . '-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="assets/icons/' . $icone . '-192.png">'
-        . '<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/' . $icone . '-180.png?v=2">'
-        . '<link rel="stylesheet" href="assets/style.css?v=' . filemtime(__DIR__ . '/assets/style.css') . '">'
+        . (defined('DEMO') ? '' : '<link rel="manifest" href="' . h($manifest) . '">')
+        . '<link rel="icon" type="image/png" sizes="32x32" href="' . ASSETS . 'icons/' . $icone . '-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="' . ASSETS . 'icons/' . $icone . '-192.png">'
+        . '<link rel="apple-touch-icon" sizes="180x180" href="' . ASSETS . 'icons/' . $icone . '-180.png?v=2">'
+        . '<link rel="stylesheet" href="' . ASSETS . 'style.css?v=' . filemtime(__DIR__ . '/assets/style.css') . '">'
         . '<title>' . h($titre) . '</title></head><body class="' . h($bodyClass) . '">';
+    if (defined('DEMO')) {
+        echo '<div class="demo-bar"><span><b>Démo</b> · données fictives, rien n\'est réel · tout est cliquable</span><span class="demo-links">'
+            . '<a href="../">Accueil démo</a><a href="pointeuse.php">Pointeuse</a><a href="admin.php">Admin</a>'
+            . '<form method="post" action="admin.php"><input type="hidden" name="csrf" value="' . h(csrf_token()) . '"><input type="hidden" name="action" value="demo_reset"><button>Réinitialiser</button></form></span></div>';
+    }
 }
 
 function admin_nav(string $actif): void

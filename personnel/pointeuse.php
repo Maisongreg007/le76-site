@@ -2,6 +2,10 @@
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
 
+if (defined('DEMO') && valid_etab($_GET['site'] ?? null)) {
+    kiosk_set((string)$_GET['site']);
+    redirect('pointeuse.php');
+}
 $etab = kiosk_etab();
 
 /* ---------- Actions (JSON) ---------- */
@@ -97,6 +101,13 @@ if ($etab === null) {
     <button type="button" class="ghost" data-k="B">⌫</button>
 </div>
 <div class="msg" id="msg"></div>
+<?php if (defined('DEMO')): ?>
+<div class="demo-codes">
+  <div class="dc-switch"><?php foreach (ETABS as $k => $l): ?><a href="pointeuse.php?site=<?= h($k) ?>"<?= $k === $etab ? ' class="on"' : '' ?>><?= h($l) ?></a><?php endforeach; ?></div>
+  <b>Codes de démo</b>
+  <?php foreach (employes(true, $etab) as $x): ?><span><?= h(emp_court($x)) ?> <code><?= h($x['pin']) ?></code></span><?php endforeach; ?>
+</div>
+<?php endif; ?>
 
 <div class="result" id="result">
     <div class="big" id="r-big"></div>

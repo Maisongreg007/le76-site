@@ -246,9 +246,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             // Arrivée le jour prévu (ou le lendemain si service de nuit et heure du matin)
             $ta = strtotime($sh['jour'] . ' ' . $a);
-            if ((int)substr($sh['debut'], 0, 2) >= 12 && (int)substr($a, 0, 2) < 6) $ta += 86400;
+            if ((int)substr($sh['debut'], 0, 2) >= 12 && (int)substr($a, 0, 2) < 6) $ta = strtotime($sh['jour'] . ' ' . $a . ' +1 day');
             $tb = $b !== '' ? strtotime($sh['jour'] . ' ' . $b) : null;
-            if ($tb !== null && $tb <= $ta) $tb += 86400;
+            if ($tb !== null && $tb <= $ta) $tb = strtotime(date('Y-m-d', $ta) . ' ' . $b . ' +1 day');
             foreach ($ps as $p) $del->execute([$p['id']]);
             $ins->execute([$sh['employe_id'], $sh['etab'], $fmt($ta), $tb ? $fmt($tb) : null]);
             $setMotif->execute([null, $id]);
