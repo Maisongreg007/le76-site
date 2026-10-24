@@ -113,7 +113,7 @@ echo '<div class="toolbar"><div class="weeknav">'
     . ($lundi !== monday_of(date('Y-m-d')) ? '<a class="btn small" href="admin.php?p=planning&etab=' . h($etab) . '">Aujourd\'hui</a>' : '')
     . '</div><div class="row">'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="copy"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
-    . '<button class="small">Copier la semaine d\x27avant</button></form>'
+    . '<button class="small">Copier la semaine d\'avant</button></form>'
     . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
 if (!$emps) {
