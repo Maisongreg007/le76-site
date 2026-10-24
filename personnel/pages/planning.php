@@ -40,9 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             back($retour, '', 'Impossible : cet horaire recouvre ' . $o['debut'] . '–' . $o['fin'] . ' déjà prévu' . ($o['etab'] !== $etab ? ' au ' . ETABS[$o['etab']] : '') . '. Modifie l\'autre horaire ou choisis d\'autres heures.');
         }
         if ($id) {
-            db()->prepare('UPDATE planning SET debut=?, fin=? WHERE id=?')->execute([$d, $f, $id]);
+            db()->prepare('UPDATE planning SET debut=?, fin=?, preset=? WHERE id=?')->execute([$d, $f, preset_nom($d, $f), $id]);
         } else {
-            db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin) VALUES (?,?,?,?,?)')->execute([$emp, $etab, $jour, $d, $f]);
+            db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin, preset) VALUES (?,?,?,?,?,?)')->execute([$emp, $etab, $jour, $d, $f, preset_nom($d, $f)]);
         }
         redirect($retour);
     }
@@ -55,7 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect($retour);
         }
         $exists = db()->prepare('SELECT 1 FROM planning WHERE employe_id=? AND etab=? AND jour=? AND debut=? AND fin=?');
-        $ins = db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin) VALUES (?,?,?,?,?)');
+        $ins = new class {
+            public function execute(array $v): void
+            {
+                db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin, preset) VALUES (?,?,?,?,?,?)')->execute([...$v, preset_nom((string)$v[3], (string)$v[4])]);
+            }
+        };
         foreach (array_slice($items, 0, 50) as $it) {
             [$j, $d, $f] = array_pad(is_array($it) ? array_values($it) : [], 3, null);
             if (!valid_date($j) || !valid_time($d) || !valid_time($f) || $d === $f) {
@@ -67,6 +72,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         redirect($retour);
+    }
+
+    if ($act === 'replace') {
+        $old = explode('-', (string)($_POST['old'] ?? ''));
+        $nd = (string)($_POST['nd'] ?? '');
+        $nf = (string)($_POST['nf'] ?? '');
+        $from = valid_date($_POST['from'] ?? null) ? (string)$_POST['from'] : date('Y-m-d');
+        $jours = array_map('intval', (array)($_POST['jours'] ?? []));
+        if (count($old) !== 2 || !valid_time($old[0]) || !valid_time($old[1]) || !valid_time($nd) || !valid_time($nf) || $nd === $nf) {
+            back($retour, '', 'Choisis l\'horaire à remplacer et le nouvel horaire.');
+        }
+        $st = db()->prepare('SELECT * FROM planning WHERE etab = ? AND jour >= ? AND debut = ? AND fin = ?');
+        $st->execute([$etab, $from, $old[0], $old[1]]);
+        $n = 0; $saut = 0;
+        $upd = db()->prepare('UPDATE planning SET debut = ?, fin = ?, preset = ? WHERE id = ?');
+        foreach ($st->fetchAll() as $r) {
+            if ($jours && !in_array((int)date('N', strtotime($r['jour'])), $jours, true)) continue;
+            if (mois_cloture(substr($r['jour'], 0, 7)) || chevauche_planning((int)$r['employe_id'], $r['jour'], $nd, $nf, (int)$r['id'])) { $saut++; continue; }
+            $upd->execute([$nd, $nf, preset_nom($nd, $nf), $r['id']]);
+            $n++;
+        }
+        back($retour, $n . ' horaire(s) ' . $old[0] . '–' . $old[1] . ' remplacé(s) par ' . $nd . '–' . $nf . ' à partir du ' . date('d/m', strtotime($from)) . ($saut ? ' (' . $saut . ' laissé(s) car ils recouvraient un autre horaire)' : '') . '.');
     }
 
     if ($act === 'model_save') {
@@ -93,7 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             back($retour, 'Modèle supprimé.');
         }
         $exists = db()->prepare('SELECT 1 FROM planning WHERE employe_id=? AND etab=? AND jour=? AND debut=? AND fin=?');
-        $ins = db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin) VALUES (?,?,?,?,?)');
+        $ins = new class {
+            public function execute(array $v): void
+            {
+                db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin, preset) VALUES (?,?,?,?,?,?)')->execute([...$v, preset_nom((string)$v[3], (string)$v[4])]);
+            }
+        };
         $n = 0;
         foreach (json_decode($m['data'], true) ?: [] as [$off, $emp, $d, $f]) {
             $e = emp_get((int)$emp);
@@ -209,7 +241,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $st->execute([$etab, $prev, $prevFin]);
         $n = 0;
         $exists = db()->prepare('SELECT 1 FROM planning WHERE employe_id=? AND etab=? AND jour=? AND debut=? AND fin=?');
-        $ins = db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin) VALUES (?,?,?,?,?)');
+        $ins = new class {
+            public function execute(array $v): void
+            {
+                db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin, preset) VALUES (?,?,?,?,?,?)')->execute([...$v, preset_nom((string)$v[3], (string)$v[4])]);
+            }
+        };
         foreach ($st->fetchAll() as $r) {
             $nouveau = date('Y-m-d', strtotime($r['jour'] . ' +7 days'));
             $exists->execute([$r['employe_id'], $etab, $nouveau, $r['debut'], $r['fin']]);
@@ -265,6 +302,7 @@ echo '<div class="toolbar"><div class="weeknav">'
     . '</div><div class="row">'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="copy"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
     . '<button class="small">Copier la semaine d\'avant</button></form>'
+    . '<button type="button" class="small" id="btn-replace">Changer un horaire</button>'
     . '<button type="button" class="small" id="btn-models">Modèles</button>'
     . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
@@ -386,6 +424,29 @@ echo '</div><div class="row"><div class="field"><label>De</label><input type="ti
     . '<form method="post" id="fdel">' . csrf_field() . '<input type="hidden" name="action" value="delete"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="id" id="del-id"></form></dialog>';
 echo '<form method="post" id="fpaste" hidden>' . csrf_field() . '<input type="hidden" name="action" value="paste"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="employe_id" id="p-emp"><input type="hidden" name="items" id="p-items"></form>';
 
+// Changer un horaire en masse
+$depuis = max($lundi, date('Y-m-d'));
+$st = db()->prepare('SELECT debut, fin, COUNT(*) n FROM planning WHERE etab = ? AND jour >= ? GROUP BY debut, fin ORDER BY debut, fin');
+$st->execute([$etab, min($lundi, date('Y-m-d'))]);
+$horaires = $st->fetchAll();
+echo '<dialog id="dreplace"><h3>Changer un horaire</h3><p class="muted small" style="text-align:center;margin-top:-6px">Ex. : le service du midi passe de 09:30–14:30 à 09:30–14:00. Tous les horaires concernés du ' . h(ETABS[$etab]) . ' sont mis à jour d\'un coup.</p>'
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="replace"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
+    . '<div class="field"><label>Horaire à remplacer</label><select name="old" required style="width:100%"><option value="">Choisir…</option>';
+foreach ($horaires as $hz) {
+    echo '<option value="' . h($hz['debut'] . '-' . $hz['fin']) . '">' . h($hz['debut'] . '–' . $hz['fin']) . ' (' . (int)$hz['n'] . ' fois)</option>';
+}
+echo '</select></div><label>Nouvel horaire</label><div class="presets" id="r-presets">';
+foreach (presets() as [$n, $a, $b]) {
+    echo '<button type="button" data-a="' . h($a) . '" data-b="' . h($b) . '">' . h($n) . ' <span class="muted small">' . h($a) . '–' . h($b) . '</span></button>';
+}
+echo '</div><div class="row"><div class="field"><label>De</label><input type="time" name="nd" id="rp-d" required></div><div class="field"><label>À</label><input type="time" name="nf" id="rp-f" required></div>'
+    . '<div class="field"><label>À partir du</label><input type="date" name="from" value="' . h($depuis) . '"></div></div>'
+    . '<div class="field"><label>Jours concernés</label>';
+foreach (JOURS as $i => $jn) {
+    echo '<label class="inline-check" style="margin-right:10px"><input type="checkbox" name="jours[]" value="' . ($i + 1) . '" checked> ' . h($jn) . '</label>';
+}
+echo '</div><div class="row between"><button type="button" id="replace-close">Annuler</button><button class="primary">Remplacer</button></div></form></dialog>';
+
 $st = db()->prepare('SELECT * FROM modeles WHERE etab = ? ORDER BY nom COLLATE NOCASE');
 $st->execute([$etab]);
 $modeles = $st->fetchAll();
@@ -486,6 +547,13 @@ echo '<dialog id="dshare"><h3>Partager le planning</h3>'
 
   $('btn-share').addEventListener('click', () => $('dshare').showModal());
   $('btn-models').addEventListener('click', () => $('dmodels').showModal());
+  $('btn-replace').addEventListener('click', () => $('dreplace').showModal());
+  $('replace-close').addEventListener('click', () => $('dreplace').close());
+  $('r-presets').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    $('rp-d').value = b.dataset.a; $('rp-f').value = b.dataset.b;
+    $('r-presets').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  });
   $('models-close').addEventListener('click', () => $('dmodels').close());
   $('share-close').addEventListener('click', () => $('dshare').close());
   $('share-print').addEventListener('click', () => { $('dshare').close(); setTimeout(() => window.print(), 150); });

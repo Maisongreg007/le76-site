@@ -223,12 +223,26 @@ function migrate(PDO $pdo): void
         $pdo->exec("ALTER TABLE planning ADD COLUMN motif TEXT");
         $pdo->exec("ALTER TABLE planning ADD COLUMN note TEXT");
     }
+    if (!in_array('preset', $cols, true)) {
+        $pdo->exec("ALTER TABLE planning ADD COLUMN preset TEXT");
+        $linkPresets = true;
+    }
     $pdo->exec("
     CREATE TABLE IF NOT EXISTS indispos (id INTEGER PRIMARY KEY AUTOINCREMENT, employe_id INTEGER NOT NULL, jour TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, UNIQUE(employe_id, jour));
     CREATE TABLE IF NOT EXISTS modeles (id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, etab TEXT NOT NULL, data TEXT NOT NULL, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS clotures (ym TEXT PRIMARY KEY, at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS alertes_envoyees (cle TEXT PRIMARY KEY, at INTEGER NOT NULL);
     ");
+    if (!empty($linkPresets)) {
+        // Relie les horaires existants aux horaires rapides qui ont les mêmes heures
+        $raw = $pdo->query("SELECT v FROM settings WHERE k = 'presets'")->fetchColumn();
+        foreach (preg_split('/\R/', $raw === false ? "Midi;10:30;15:00\nSoir;17:30;23:00\nJournée;10:30;23:00" : (string)$raw) as $line) {
+            $p = array_map('trim', explode(';', $line));
+            if (count($p) === 3) {
+                $pdo->prepare('UPDATE planning SET preset = ? WHERE preset IS NULL AND debut = ? AND fin = ?')->execute([$p[0], $p[1], $p[2]]);
+            }
+        }
+    }
 }
 
 function setting(string $k, ?string $default = null): ?string
@@ -266,6 +280,15 @@ function share_token(bool $renew = false): string
         set_setting('share_token', $t);
     }
     return $t;
+}
+
+/** Nom de l'horaire rapide qui correspond exactement à ces heures (ou null). */
+function preset_nom(string $d, string $f): ?string
+{
+    foreach (presets() as [$n, $a, $b]) {
+        if ($a === $d && $b === $f) return $n;
+    }
+    return null;
 }
 
 function presets(): array
