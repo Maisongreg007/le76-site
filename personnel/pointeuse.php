@@ -18,6 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $action = (string)($_POST['action'] ?? '');
 
+    if ($action === 'ping') {
+        // L'iPad de pointage reste allumé : il sert aussi à déclencher les alertes (retards, dépassements)
+        try { verifier_alertes(); } catch (Throwable $t) { }
+        $out(['ok' => true]);
+    }
+
     if ($action === 'pin') {
         if (too_many('pin', 6, 120)) {
             $out(['ok' => false, 'error' => 'Trop d\'essais, patiente une minute.'], 429);
@@ -173,6 +179,9 @@ if ($etab === null) {
     else if (e.key === 'Backspace') { pin = pin.slice(0, -1); dots(); }
   });
 
+  // Toutes les 2 minutes : vérifie les retards / dépassements (notifications)
+  setInterval(() => { post({action: 'ping'}).catch(() => {}); }, 120000);
+  post({action: 'ping'}).catch(() => {});
   // Recharge la page chaque nuit pour rester à jour
   setTimeout(() => location.reload(), 6 * 3600 * 1000);
 })();

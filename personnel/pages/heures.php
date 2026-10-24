@@ -23,6 +23,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $retour = 'admin.php?p=heures&m=' . $ym . ($empId ? '&e=' . $empId : '') . ($vue ? '&v=liste' : '')
         . ($jourF ? '&j=' . $jourF : '') . (valid_etab($_POST['etabf'] ?? null) ? '&etab=' . $_POST['etabf'] : '');
 
+    if ($act === 'cloturer') {
+        db()->prepare('INSERT OR REPLACE INTO clotures (ym, at) VALUES (?, ?)')->execute([$ym, date('Y-m-d H:i:s')]);
+        $msg = mois_fr($ym) . ' clôturé : les heures sont verrouillées.';
+        if (isset($_POST['envoyer'])) {
+            $to = (string)setting('compta_email', '');
+            $ok = $to !== '' && envoyer_mail($to, 'Heures du personnel — ' . mois_fr($ym), "Bonjour,\n\nVous trouverez ci-joint le récapitulatif des heures et montants nets du personnel pour " . mois_fr($ym) . ".\n\nBien cordialement,\nLe 76", ['heures-' . $ym . '.csv', csv_resume($ym), 'text/csv']);
+            $msg .= $ok ? ' Fichier envoyé à ' . $to . '.' : ' (envoi au comptable impossible : vérifie son adresse dans Réglages)';
+        }
+        back($retour, $msg);
+    }
+    if ($act === 'rouvrir') {
+        db()->prepare('DELETE FROM clotures WHERE ym = ?')->execute([$ym]);
+        back($retour, mois_fr($ym) . ' rouvert : les heures sont de nouveau modifiables.');
+    }
+    if ($act === 'envoyer') {
+        $to = (string)setting('compta_email', '');
+        $ok = $to !== '' && envoyer_mail($to, 'Heures du personnel — ' . mois_fr($ym), "Bonjour,\n\nVous trouverez ci-joint le récapitulatif des heures et montants nets du personnel pour " . mois_fr($ym) . ".\n\nBien cordialement,\nLe 76", ['heures-' . $ym . '.csv', csv_resume($ym), 'text/csv']);
+        back($retour, $ok ? 'Envoyé à ' . $to . '.' : '', $ok ? '' : 'Envoi impossible : renseigne l\'e-mail du comptable dans Réglages.');
+    }
+
+    // Mois clôturé : plus de modification des pointages
+    $moisCible = $ym;
+    if (in_array($act, ['save', 'delete'], true)) {
+        $st = db()->prepare('SELECT debut FROM pointages WHERE id = ?');
+        $st->execute([(int)($_POST['id'] ?? 0)]);
+        $moisCible = substr((string)$st->fetchColumn(), 0, 7) ?: $ym;
+    } elseif ($act === 'add') {
+        $moisCible = substr((string)dt_local_to_sql($_POST['debut'] ?? ''), 0, 7) ?: $ym;
+    }
+    if (in_array($act, ['save', 'add', 'delete', 'purge'], true) && mois_cloture($moisCible)) {
+        back($retour, '', mois_fr($moisCible) . ' est clôturé. Rouvre-le (page Heures) pour modifier.');
+    }
+
     if ($act === 'save' || $act === 'add') {
         $debut = dt_local_to_sql($_POST['debut'] ?? '');
         $fin = dt_local_to_sql($_POST['fin'] ?? '');
@@ -287,6 +320,19 @@ echo '<div class="row between" style="margin-bottom:12px"><div class="row no-pri
     . '<a class="btn small" href="admin.php?p=export&m=' . h($ym) . $qEtab . '&t=resume">Excel</a>'
     . boutons_partage('admin.php?p=export&t=resume&m=' . $ym . $qEtab, 'heures-' . $ym . ($etabF ? '-' . $etabF : '') . '.csv') . '</div></div>'
     . '<h2 class="print-only">Heures — ' . h(ucfirst(mois_fr($ym))) . ($etabF ? ' — ' . h(ETABS[$etabF]) : '') . '</h2>';
+
+$clos = mois_cloture($ym);
+$compta = (string)setting('compta_email', '');
+$hidC = csrf_field() . '<input type="hidden" name="m" value="' . h($ym) . '">';
+if ($clos) {
+    echo '<div class="card closebar no-print"><span><span class="pill ok">Clôturé</span> le ' . h(date('d/m/Y à H:i', strtotime($clos))) . ' — heures verrouillées.</span><span class="row">'
+        . ($compta ? '<form method="post">' . $hidC . '<input type="hidden" name="action" value="envoyer"><button class="small">Renvoyer au comptable</button></form>' : '')
+        . '<form method="post">' . $hidC . '<input type="hidden" name="action" value="rouvrir"><button class="small" data-confirm="Sûr ? Retouche pour rouvrir">Rouvrir</button></form></span></div>';
+} else {
+    echo '<div class="card closebar no-print"><span>Mois terminé ? Vérifie les écarts puis <b>clôture</b> : les heures sont verrouillées' . ($compta ? ' et le fichier part à <b>' . h($compta) . '</b>' : '') . '.</span>'
+        . '<form method="post" class="row">' . $hidC . '<input type="hidden" name="action" value="cloturer">' . ($compta ? '<input type="hidden" name="envoyer" value="1">' : '')
+        . '<button class="small primary" data-confirm="Sûr ? Retouche pour clôturer">Clôturer ' . h(mois_fr($ym)) . ($compta ? ' et envoyer' : '') . '</button></form></div>';
+}
 
 echo '<div class="stats">'
     . '<div class="stat"><b>' . h(eur($totExtras + $totFixes)) . '</b><span>Coût net du mois</span></div>'

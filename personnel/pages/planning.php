@@ -51,6 +51,123 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect($retour);
     }
 
+    if ($act === 'model_save') {
+        $nom = trim((string)($_POST['nom'] ?? ''));
+        if ($nom === '') back($retour, '', 'Donne un nom au modèle.');
+        $fin = date('Y-m-d', strtotime($lundi . ' +6 days'));
+        $st = db()->prepare('SELECT * FROM planning WHERE etab = ? AND jour BETWEEN ? AND ?');
+        $st->execute([$etab, $lundi, $fin]);
+        $data = [];
+        foreach ($st->fetchAll() as $r) {
+            $data[] = [(int)round((strtotime($r['jour']) - strtotime($lundi)) / 86400), (int)$r['employe_id'], $r['debut'], $r['fin']];
+        }
+        if (!$data) back($retour, '', 'Cette semaine est vide, rien à enregistrer.');
+        db()->prepare('INSERT INTO modeles (nom, etab, data, created_at) VALUES (?,?,?,?)')->execute([mb_substr($nom, 0, 60), $etab, json_encode($data), date('Y-m-d H:i:s')]);
+        back($retour, 'Modèle « ' . $nom . ' » enregistré (' . count($data) . ' horaires).');
+    }
+    if ($act === 'model_apply' || $act === 'model_delete') {
+        $st = db()->prepare('SELECT * FROM modeles WHERE id = ?');
+        $st->execute([(int)($_POST['mid'] ?? 0)]);
+        $m = $st->fetch();
+        if (!$m) redirect($retour);
+        if ($act === 'model_delete') {
+            db()->prepare('DELETE FROM modeles WHERE id = ?')->execute([$m['id']]);
+            back($retour, 'Modèle supprimé.');
+        }
+        $exists = db()->prepare('SELECT 1 FROM planning WHERE employe_id=? AND etab=? AND jour=? AND debut=? AND fin=?');
+        $ins = db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin) VALUES (?,?,?,?,?)');
+        $n = 0;
+        foreach (json_decode($m['data'], true) ?: [] as [$off, $emp, $d, $f]) {
+            $e = emp_get((int)$emp);
+            if (!$e || !(int)$e['actif']) continue;
+            $j = date('Y-m-d', strtotime($lundi . ' +' . (int)$off . ' days'));
+            $exists->execute([$emp, $etab, $j, $d, $f]);
+            if (!$exists->fetchColumn()) { $ins->execute([$emp, $etab, $j, $d, $f]); $n++; }
+        }
+        back($retour, 'Modèle « ' . $m['nom'] . ' » appliqué : ' . $n . ' horaires ajoutés.');
+    }
+
+    if ($act === 'reel') {
+        // Ce qui s'est réellement passé sur un service
+        $id = (int)($_POST['id'] ?? 0);
+        $st = db()->prepare('SELECT * FROM planning WHERE id = ?');
+        $st->execute([$id]);
+        $sh = $st->fetch();
+        if (!$sh) {
+            redirect($retour);
+        }
+        if (mois_cloture(substr($sh['jour'], 0, 7))) {
+            back($retour, '', 'Ce mois est clôturé : rouvre-le dans Heures pour modifier.');
+        }
+        $mode = (string)($_POST['mode'] ?? '');
+        $j0 = date('Y-m-d', strtotime($sh['jour'] . ' -1 day'));
+        $j1 = date('Y-m-d', strtotime($sh['jour'] . ' +1 day'));
+        $c = comparer($j0, $j1, $sh['etab'], (int)$sh['employe_id'])['shifts'][$id] ?? null;
+        $ps = $c['punches'] ?? [];
+        [$sa, $sb] = shift_bounds($sh);
+        $fmt = static fn(int $t) => date('Y-m-d H:i:s', $t);
+        $now = time();
+        $nom = ($e = emp_get((int)$sh['employe_id'])) ? $e['prenom'] : '';
+        $del = db()->prepare('DELETE FROM pointages WHERE id = ?');
+        $ins = db()->prepare('INSERT INTO pointages (employe_id, etab, debut, fin, manuel) VALUES (?,?,?,?,1)');
+        $upd = db()->prepare('UPDATE pointages SET debut = ?, fin = ?, manuel = 1 WHERE id = ?');
+        $setMotif = db()->prepare('UPDATE planning SET motif = ? WHERE id = ?');
+        $msg = 'Enregistré.';
+
+        if ($mode === 'prevu') {
+            foreach ($ps as $p) $del->execute([$p['id']]);
+            $ins->execute([$sh['employe_id'], $sh['etab'], $fmt($sa), $sb <= $now ? $fmt($sb) : null]);
+            $setMotif->execute([null, $id]);
+            $msg = $nom . ' : présent·e comme prévu (' . $sh['debut'] . '–' . $sh['fin'] . ').';
+        } elseif ($mode === 'arrivee') {
+            if ($ps) {
+                $first = $ps[0];
+                foreach ($ps as $p) if ($p['debut'] < $first['debut']) $first = $p;
+                $upd->execute([$fmt($sa), $first['fin'], $first['id']]);
+            } else {
+                $ins->execute([$sh['employe_id'], $sh['etab'], $fmt($sa), $sb <= $now ? $fmt($sb) : null]);
+            }
+            $msg = $nom . ' : arrivée corrigée à ' . $sh['debut'] . '.';
+        } elseif ($mode === 'depart') {
+            if ($ps) {
+                $last = $ps[0];
+                foreach ($ps as $p) if ($p['debut'] > $last['debut']) $last = $p;
+                $upd->execute([$last['debut'], $fmt($sb), $last['id']]);
+            } else {
+                $ins->execute([$sh['employe_id'], $sh['etab'], $fmt($sa), $fmt($sb)]);
+            }
+            $msg = $nom . ' : départ corrigé à ' . $sh['fin'] . '.';
+        } elseif ($mode === 'heures') {
+            $a = (string)($_POST['ra'] ?? '');
+            $b = (string)($_POST['rb'] ?? '');
+            if (!valid_time($a) || ($b !== '' && !valid_time($b))) {
+                back($retour, '', 'Heures invalides.');
+            }
+            // Arrivée le jour prévu (ou le lendemain si service de nuit et heure du matin)
+            $ta = strtotime($sh['jour'] . ' ' . $a);
+            if ((int)substr($sh['debut'], 0, 2) >= 12 && (int)substr($a, 0, 2) < 6) $ta += 86400;
+            $tb = $b !== '' ? strtotime($sh['jour'] . ' ' . $b) : null;
+            if ($tb !== null && $tb <= $ta) $tb += 86400;
+            foreach ($ps as $p) $del->execute([$p['id']]);
+            $ins->execute([$sh['employe_id'], $sh['etab'], $fmt($ta), $tb ? $fmt($tb) : null]);
+            $setMotif->execute([null, $id]);
+            $msg = $nom . ' : heures réelles ' . $a . '–' . ($b ?: '…') . ' enregistrées.';
+        } elseif (isset(MOTIFS[$mode])) {
+            if (in_array($mode, ['malade', 'conge', 'absent'], true)) {
+                foreach ($ps as $p) $del->execute([$p['id']]);
+            }
+            $setMotif->execute([$mode, $id]);
+            $msg = $nom . ' : ' . mb_strtolower(MOTIFS[$mode]) . '.';
+        } elseif ($mode === 'reset') {
+            $setMotif->execute([null, $id]);
+            $msg = 'Motif effacé.';
+        }
+        if (isset($_POST['note'])) {
+            db()->prepare('UPDATE planning SET note = ? WHERE id = ?')->execute([mb_substr(trim((string)$_POST['note']), 0, 200) ?: null, $id]);
+        }
+        back($retour, $msg);
+    }
+
     if ($act === 'delete') {
         db()->prepare('DELETE FROM planning WHERE id = ?')->execute([(int)($_POST['id'] ?? 0)]);
         redirect($retour);
@@ -120,6 +237,7 @@ echo '<div class="toolbar"><div class="weeknav">'
     . '</div><div class="row">'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="copy"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
     . '<button class="small">Copier la semaine d\'avant</button></form>'
+    . '<button type="button" class="small" id="btn-models">Modèles</button>'
     . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
 if (!$emps) {
@@ -129,6 +247,20 @@ if (!$emps) {
 }
 
 $today = date('Y-m-d');
+$indispos = indispos_entre($lundi, $fin);
+// Coût prévu de la semaine
+$hPrevu = 0; $hExtras = 0; $coutExtras = 0.0; $hFixes = 0;
+foreach ($emps as $e) {
+    $m = 0;
+    foreach ($shifts[(int)$e['id']] ?? [] as $liste) foreach ($liste as $sh) $m += shift_minutes($sh['debut'], $sh['fin']);
+    $hPrevu += $m;
+    if ($e['type'] === 'extra') { $hExtras += $m; $coutExtras += $m / 60 * (float)$e['taux']; } else { $hFixes += $m; }
+}
+echo '<div class="stats week-stats">'
+    . '<div class="stat"><b>' . h(fmt_min($hPrevu)) . '</b><span>Heures prévues</span></div>'
+    . '<div class="stat"><b>' . h(eur(round($coutExtras, 2))) . '</b><span>Coût prévu des extras (' . h(fmt_min($hExtras)) . ')</span></div>'
+    . '<div class="stat"><b>' . h(fmt_min($hFixes)) . '</b><span>Heures des fixes (salaire mensuel)</span></div></div>';
+
 echo '<div class="card scroll" style="padding:8px"><table class="plan"><thead><tr><th class="emp">&nbsp;</th>';
 for ($i = 0; $i < 7; $i++) {
     $j = date('Y-m-d', strtotime($lundi . " +$i days"));
@@ -151,7 +283,11 @@ foreach ($emps as $e) {
         . '</td>';
     for ($i = 0; $i < 7; $i++) {
         $j = date('Y-m-d', strtotime($lundi . " +$i days"));
-        echo '<td class="day ' . ($j === $today ? 'today' : '') . '" data-emp="' . $id . '" data-jour="' . h($j) . '">';
+        $ind = $indispos[$id][$j] ?? null;
+        echo '<td class="day ' . ($j === $today ? 'today' : '') . ($ind !== null ? ' indispo' : '') . '" data-emp="' . $id . '" data-jour="' . h($j) . '">';
+        if ($ind !== null) {
+            echo '<span class="indispo-tag" title="' . h($ind !== '' ? $ind : 'Pas disponible') . '">pas dispo' . ($ind !== '' ? ' · ' . h(mb_strimwidth($ind, 0, 18, '…')) : '') . '</span>';
+        }
         foreach ($shifts[$id][$j] ?? [] as $s) {
             $tot += shift_minutes($s['debut'], $s['fin']);
             $res = $cmp['shifts'][(int)$s['id']] ?? null;
@@ -163,12 +299,18 @@ foreach ($emps as $e) {
                     'ok' => '✓ ' . $hr($res['debut_reel']) . '–' . $hr($res['fin_reel']),
                     'plus', 'moins' => $hr($res['debut_reel']) . '–' . $hr($res['fin_reel']) . ' · ' . fmt_ecart($res['ecart']),
                     'encours' => 'arrivé·e ' . $hr($res['debut_reel']) . ($res['retard'] > tolerance() ? ' (+' . fmt_min($res['retard']) . ')' : ''),
-                    'absent' => 'pas venu·e',
+                    'absent' => $res['motif'] === 'absent' ? 'absent·e sans prévenir' : 'pas venu·e',
                     'attendu' => 'pas encore arrivé·e',
+                    'excuse' => mb_strtolower(explode(' /', MOTIFS[$res['motif']] ?? 'excusé')[0]),
                     default => '',
                 };
             }
-            echo '<button type="button" class="chip st-' . $st . '" data-id="' . (int)$s['id'] . '" data-emp="' . $id . '" data-jour="' . h($j) . '" data-debut="' . h($s['debut']) . '" data-fin="' . h($s['fin']) . '" data-nom="' . h(emp_nom($e)) . '">'
+            $etatTxt = $res ? (['avenir' => 'à venir', 'attendu' => 'pas encore arrivé·e', 'absent' => 'absent·e', 'encours' => 'en service', 'ok' => 'fait comme prévu', 'plus' => 'a fait plus', 'moins' => 'a fait moins', 'excuse' => MOTIFS[$res['motif']] ?? ''][$st] ?? '') : '';
+            if ($res && $res['motif'] && isset(MOTIFS[$res['motif']]) && $st !== 'excuse') $etatTxt .= ' · ' . MOTIFS[$res['motif']];
+            echo '<button type="button" class="chip st-' . $st . '" data-id="' . (int)$s['id'] . '" data-emp="' . $id . '" data-jour="' . h($j) . '" data-debut="' . h($s['debut']) . '" data-fin="' . h($s['fin']) . '" data-nom="' . h(emp_nom($e)) . '"'
+                . ' data-started="' . ($res && time() >= $res['sa'] - 3600 ? '1' : '') . '" data-etat="' . h($etatTxt) . '" data-motif="' . h((string)($res['motif'] ?? '')) . '" data-note="' . h((string)($s['note'] ?? '')) . '"'
+                . ' data-ra="' . h($res && $res['debut_reel'] ? date('H:i', $res['debut_reel']) : '') . '" data-rb="' . h($res && $res['fin_reel'] ? date('H:i', $res['fin_reel']) : '') . '"'
+                . ($s['note'] ? ' title="' . h($s['note']) . '"' : '') . '>'
                 . h($s['debut']) . '–' . h($s['fin']) . ($reel !== '' ? '<span class="reel">' . h($reel) . '</span>' : '') . '</button>';
         }
         foreach ($npParCase[$id][$j] ?? [] as $p) {
@@ -176,7 +318,7 @@ foreach ($emps as $e) {
         }
         echo '<button type="button" class="chip add" data-id="0" data-emp="' . $id . '" data-jour="' . h($j) . '" data-nom="' . h(emp_nom($e)) . '" aria-label="Ajouter">+</button></td>';
     }
-    echo '<td class="tot">' . ($tot ? h(fmt_min($tot)) : '<span class="muted">–</span>') . '</td></tr>';
+    echo '<td class="tot">' . ($tot ? h(fmt_min($tot)) . ($e['type'] === 'extra' ? '<div class="muted small" style="font-weight:500">' . h(eur(round($tot / 60 * (float)$e['taux'], 2))) . '</div>' : '') : '<span class="muted">–</span>') . '</td></tr>';
 }
 echo '</tbody></table></div>';
 echo '<div class="legend"><span><i style="background:var(--accent)"></i>prévu</span><span><i style="background:var(--ok)"></i>fait comme prévu</span>'
@@ -196,9 +338,48 @@ foreach (presets() as [$n, $a, $b]) {
 echo '</div><div class="row"><div class="field"><label>De</label><input type="time" name="debut" id="d-debut" required></div>'
     . '<div class="field"><label>À</label><input type="time" name="fin" id="d-fin" required></div></div>'
     . '<div class="row between"><div class="row"><button class="primary">Enregistrer</button><button type="button" id="d-annuler">Annuler</button></div>'
-    . '<div class="row"><button type="button" id="d-copy">Copier</button><button type="button" class="danger" id="d-suppr">Supprimer</button></div></div></form>'
+    . '<div class="row"><button type="button" id="d-copy">Copier</button><button type="button" class="danger" id="d-suppr" data-confirm="Sûr ?">Supprimer</button></div></div></form>'
+    . '<form method="post" id="freel" class="reel-box">' . csrf_field() . '<input type="hidden" name="action" value="reel"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="id" id="r-id">'
+    . '<div class="reel-head"><b>Ce qui s\'est passé</b><span class="muted small" id="r-etat"></span></div>'
+    . '<div class="actgrid">'
+    . '<button name="mode" value="prevu" class="act ok"><span>✓</span>Présent·e comme prévu<small>oubli de pointage</small></button>'
+    . '<button name="mode" value="arrivee" class="act"><span>→</span>Arrivé·e à l\'heure</button>'
+    . '<button name="mode" value="depart" class="act"><span>←</span>Parti·e à l\'heure</button>'
+    . '<button name="mode" value="retard_ok" class="act"><span>⏱</span>Retard justifié</button>'
+    . '<button name="mode" value="malade" class="act warn"><span>✚</span>Malade</button>'
+    . '<button name="mode" value="conge" class="act warn"><span>☀</span>Congé / justifié</button>'
+    . '<button name="mode" value="absent" class="act err"><span>✕</span>Absent·e sans prévenir</button>'
+    . '<button name="mode" value="reset" class="act ghost" id="r-reset"><span>↺</span>Effacer le motif</button>'
+    . '</div>'
+    . '<div class="reel-hours"><div><label>Arrivée réelle</label><input type="time" name="ra" id="r-a"></div><div><label>Départ réel</label><input type="time" name="rb" id="r-b"></div>'
+    . '<button name="mode" value="heures" class="primary small">Enregistrer ces heures</button></div>'
+    . '<div class="field" style="margin:10px 0 0"><label>Note (facultatif)</label><input name="note" id="r-note" maxlength="200" placeholder="ex. prévenu par SMS, échange avec Paul…" style="width:100%"></div>'
+    . '</form>'
     . '<form method="post" id="fdel">' . csrf_field() . '<input type="hidden" name="action" value="delete"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="id" id="del-id"></form></dialog>';
 echo '<form method="post" id="fpaste" hidden>' . csrf_field() . '<input type="hidden" name="action" value="paste"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="employe_id" id="p-emp"><input type="hidden" name="items" id="p-items"></form>';
+
+$st = db()->prepare('SELECT * FROM modeles WHERE etab = ? ORDER BY nom COLLATE NOCASE');
+$st->execute([$etab]);
+$modeles = $st->fetchAll();
+$hid = csrf_field() . '<input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">';
+echo '<dialog id="dmodels"><h3>Plannings types · ' . h(ETABS[$etab]) . '</h3>'
+    . '<p class="muted small" style="text-align:center;margin-top:-6px">Enregistre une semaine type (été, hiver, soirée à thème…) et applique-la en un clic sur n\'importe quelle semaine.</p>';
+if ($modeles) {
+    echo '<ul class="list">';
+    foreach ($modeles as $m) {
+        $nb = count(json_decode($m['data'], true) ?: []);
+        echo '<li><span><b>' . h($m['nom']) . '</b> <span class="muted small">' . $nb . ' horaires</span></span><span class="row">'
+            . '<form method="post">' . $hid . '<input type="hidden" name="action" value="model_apply"><input type="hidden" name="mid" value="' . (int)$m['id'] . '"><button class="small primary">Appliquer</button></form>'
+            . '<form method="post">' . $hid . '<input type="hidden" name="action" value="model_delete"><input type="hidden" name="mid" value="' . (int)$m['id'] . '"><button class="small danger" data-confirm="Sûr ?">Supprimer</button></form>'
+            . '</span></li>';
+    }
+    echo '</ul>';
+} else {
+    echo '<p class="muted" style="text-align:center">Aucun modèle pour l\'instant.</p>';
+}
+echo '<form method="post" class="row" style="margin-top:12px">' . $hid . '<input type="hidden" name="action" value="model_save">'
+    . '<input name="nom" placeholder="Nom (ex. Semaine été)" maxlength="60" required style="flex:1;min-width:160px"><button class="small">Enregistrer cette semaine</button></form>'
+    . '<p style="margin:14px 0 0;text-align:center"><button type="button" id="models-close">Fermer</button></p></dialog>';
 
 $lienEquipe = base_url() . 'planning-equipe.php?t=' . share_token() . '&etab=' . $etab;
 $msgEquipe = 'Le planning du ' . ETABS[$etab] . ' : ' . $lienEquipe;
@@ -276,6 +457,8 @@ echo '<dialog id="dshare"><h3>Partager le planning</h3>'
   showBar();
 
   $('btn-share').addEventListener('click', () => $('dshare').showModal());
+  $('btn-models').addEventListener('click', () => $('dmodels').showModal());
+  $('models-close').addEventListener('click', () => $('dmodels').close());
   $('share-close').addEventListener('click', () => $('dshare').close());
   $('share-print').addEventListener('click', () => { $('dshare').close(); setTimeout(() => window.print(), 150); });
   $('share-copy').addEventListener('click', async () => {
@@ -293,6 +476,17 @@ echo '<dialog id="dshare"><h3>Partager le planning</h3>'
     $('d-fin').value = id !== '0' ? b.dataset.fin : '';
     $('d-suppr').style.display = id !== '0' ? '' : 'none';
     $('d-copy').style.display = id !== '0' ? '' : 'none';
+    const started = id !== '0' && b.dataset.started === '1';
+    $('freel').style.display = started ? '' : 'none';
+    if (started) {
+      $('r-id').value = id;
+      $('r-etat').textContent = b.dataset.etat || '';
+      $('r-a').value = b.dataset.ra || b.dataset.debut;
+      $('r-b').value = b.dataset.rb || (b.dataset.ra ? '' : b.dataset.fin);
+      $('r-note').value = b.dataset.note || '';
+      $('r-reset').style.display = b.dataset.motif ? '' : 'none';
+      $('freel').querySelectorAll('button[name=mode]').forEach(x => x.classList.toggle('on', x.value === b.dataset.motif));
+    }
     $('d-presets').style.display = id !== '0' ? 'none' : '';
     $('del-id').value = id;
     dlg.showModal();

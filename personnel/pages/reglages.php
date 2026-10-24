@@ -31,6 +31,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         set_setting('admin_hash', password_hash($new, PASSWORD_DEFAULT));
         back('admin.php?p=reglages', 'Mot de passe changé.');
     }
+    if ($act === 'notifs') {
+        set_setting('notif_ntfy', isset($_POST['ntfy']) ? '1' : '0');
+        $mail = trim((string)($_POST['email'] ?? ''));
+        set_setting('notif_email', filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : '');
+        set_setting('notif_retard', (string)max(5, min(120, (int)($_POST['retard'] ?? 15))));
+        set_setting('notif_depasse', (string)max(5, min(240, (int)($_POST['depasse'] ?? 30))));
+        back('admin.php?p=reglages#notifs', 'Notifications enregistrées.');
+    }
+    if ($act === 'notif_test') {
+        $ok = envoyer_notif('Test Le 76', 'Les notifications du personnel fonctionnent. 👍');
+        back('admin.php?p=reglages#notifs', $ok ? 'Notification de test envoyée.' : '', $ok ? '' : 'Envoi impossible : active au moins un canal (ntfy ou e-mail) et enregistre.');
+    }
+    if ($act === 'compta') {
+        $mail = trim((string)($_POST['compta'] ?? ''));
+        set_setting('compta_email', filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : '');
+        $from = trim((string)($_POST['from'] ?? ''));
+        set_setting('mail_from', filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : '');
+        back('admin.php?p=reglages#compta', 'Enregistré.');
+    }
     if ($act === 'tolerance') {
         set_setting('tolerance', (string)max(0, min(120, (int)($_POST['tolerance'] ?? 15))));
         back('admin.php?p=reglages', 'Tolérance enregistrée.');
@@ -95,6 +114,28 @@ if ($ke) {
     echo '</div>';
 }
 echo '<p class="muted small" style="margin-bottom:0">Astuce iPad : une fois la pointeuse ouverte, « Partager » puis « Sur l\'écran d\'accueil » pour l\'avoir en plein écran comme une appli.</p></div>';
+
+$topic = notif_topic();
+echo '<div class="card" style="max-width:640px" id="notifs"><h3>Notifications sur ton téléphone</h3>'
+    . '<p class="muted small" style="margin-top:0">Tu es prévenu quand quelqu\'un n\'est pas arrivé à l\'heure ou dépasse son horaire. Les vérifications sont faites par l\'iPad de pointage (qui reste allumé) et quand l\'administration est ouverte.</p>'
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="notifs">'
+    . '<label class="inline-check" style="margin-bottom:8px"><input type="checkbox" name="ntfy"' . (setting('notif_ntfy', '0') === '1' ? ' checked' : '') . '> Notification instantanée avec l\'appli gratuite <b>ntfy</b></label>'
+    . '<ol class="small muted" style="margin:0 0 12px;padding-left:20px;line-height:1.6"><li>Installe <b>ntfy</b> depuis l\'App Store (ou Google Play).</li><li>Dans l\'appli : « + » puis « S\'abonner », et colle ce nom de canal :</li></ol>'
+    . '<div class="linkbox" style="margin-bottom:14px">' . h($topic) . '</div>'
+    . '<div class="field"><label>Et/ou par e-mail</label><input type="email" name="email" value="' . h((string)setting('notif_email', '')) . '" placeholder="ton@email.fr" style="width:100%"></div>'
+    . '<div class="row"><div class="field"><label>Prévenir si pas arrivé après</label><select name="retard">';
+foreach ([5, 10, 15, 20, 30, 45, 60] as $m) echo '<option value="' . $m . '"' . ((int)setting('notif_retard', '15') === $m ? ' selected' : '') . '>' . $m . ' min</option>';
+echo '</select></div><div class="field"><label>Prévenir si dépasse de plus de</label><select name="depasse">';
+foreach ([15, 30, 45, 60, 90, 120] as $m) echo '<option value="' . $m . '"' . ((int)setting('notif_depasse', '30') === $m ? ' selected' : '') . '>' . $m . ' min</option>';
+echo '</select></div></div><div class="row"><button class="primary">Enregistrer</button></div></form>'
+    . '<form method="post" style="margin-top:10px">' . csrf_field() . '<input type="hidden" name="action" value="notif_test"><button class="small">Envoyer une notification de test</button></form>'
+    . '<p class="muted small" style="margin-bottom:0">Le nom du canal est secret : ne le partage pas. Les messages passent par le service ntfy.sh (prénom + heure).</p></div>';
+
+echo '<div class="card" style="max-width:640px" id="compta"><h3>Comptable</h3><p class="muted small" style="margin-top:0">Quand tu clôtures un mois (page Heures), le fichier des heures peut partir directement à cette adresse.</p>'
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="compta">'
+    . '<div class="field"><label>E-mail du comptable</label><input type="email" name="compta" value="' . h((string)setting('compta_email', '')) . '" placeholder="cabinet@exemple.fr" style="width:100%"></div>'
+    . '<div class="field"><label>Adresse d\'envoi (une boîte de ton domaine)</label><input type="email" name="from" value="' . h((string)setting('mail_from', '')) . '" placeholder="' . h(expediteur()) . '" style="width:100%"></div>'
+    . '<button class="primary">Enregistrer</button></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Tolérance prévu / réel</h3><p class="muted small" style="margin-top:0">En dessous de cet écart, on considère que l\'horaire est respecté (pas d\'alerte).</p>'
     . '<form method="post" class="row">' . csrf_field() . '<input type="hidden" name="action" value="tolerance"><select name="tolerance">';

@@ -6,6 +6,13 @@ mb_internal_encoding('UTF-8');
 
 const ETABS = ['le76' => 'Le 76', 'camping' => 'Camping'];
 const POSTES = ['salle' => 'Salle', 'bar' => 'Bar', 'runner' => 'Runner', 'cuisine' => 'Cuisine', 'plonge' => 'Plonge'];
+/** Ce qui s'est passé sur un service (choisi dans le planning). */
+const MOTIFS = [
+    'malade' => 'Malade',
+    'conge' => 'Congé / absence justifiée',
+    'absent' => 'Absent·e sans prévenir',
+    'retard_ok' => 'Retard justifié',
+];
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const JOURS_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -171,6 +178,17 @@ function migrate(PDO $pdo): void
     if (!in_array('postes', $cols, true)) {
         $pdo->exec("ALTER TABLE employes ADD COLUMN postes TEXT NOT NULL DEFAULT ''");
     }
+    $cols = array_column($pdo->query('PRAGMA table_info(planning)')->fetchAll(), 'name');
+    if (!in_array('motif', $cols, true)) {
+        $pdo->exec("ALTER TABLE planning ADD COLUMN motif TEXT");
+        $pdo->exec("ALTER TABLE planning ADD COLUMN note TEXT");
+    }
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS indispos (id INTEGER PRIMARY KEY AUTOINCREMENT, employe_id INTEGER NOT NULL, jour TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, UNIQUE(employe_id, jour));
+    CREATE TABLE IF NOT EXISTS modeles (id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, etab TEXT NOT NULL, data TEXT NOT NULL, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS clotures (ym TEXT PRIMARY KEY, at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS alertes_envoyees (cle TEXT PRIMARY KEY, at INTEGER NOT NULL);
+    ");
 }
 
 function setting(string $k, ?string $default = null): ?string
@@ -562,7 +580,8 @@ function comparer(string $du, string $au, ?string $etab = null, ?int $empId = nu
         $prevu = (int)round(($sb - $sa) / 60);
         $ps = $parShift[(int)$s['id']] ?? [];
         $r = ['shift' => $s, 'prevu' => $prevu, 'reel' => 0, 'ecart' => 0, 'debut_reel' => null, 'fin_reel' => null,
-              'retard' => 0, 'tot' => 0, 'ouvert' => false, 'statut' => 'avenir', 'sa' => $sa, 'sb' => $sb];
+              'retard' => 0, 'tot' => 0, 'ouvert' => false, 'statut' => 'avenir', 'sa' => $sa, 'sb' => $sb,
+              'punches' => $ps, 'motif' => $s['motif'] ?? null];
         if ($ps) {
             $first = min(array_map(fn($p) => strtotime($p['debut']), $ps));
             $last = 0;
@@ -595,9 +614,187 @@ function comparer(string $du, string $au, ?string $etab = null, ?int $empId = nu
         } elseif ($now > $sa + $tol) {
             $r['statut'] = 'attendu';
         }
+        // Motif saisi à la main
+        $motif = $s['motif'] ?? null;
+        if (in_array($motif, ['malade', 'conge'], true) && !$ps) {
+            $r['statut'] = 'excuse';
+            $r['prevu'] = 0;
+            $r['ecart'] = 0;
+        } elseif ($motif === 'absent' && !$ps) {
+            $r['statut'] = 'absent';
+        } elseif ($motif === 'retard_ok' && in_array($r['statut'], ['moins', 'attendu'], true)) {
+            $r['statut'] = $r['statut'] === 'attendu' ? 'avenir' : 'ok';
+        }
         $out[(int)$s['id']] = $r;
     }
     return ['shifts' => $out, 'np' => $np];
+}
+
+/* ---------- Clôture du mois ---------- */
+
+function mois_cloture(string $ym): ?string
+{
+    $st = db()->prepare('SELECT at FROM clotures WHERE ym = ?');
+    $st->execute([$ym]);
+    $v = $st->fetchColumn();
+    return $v === false ? null : (string)$v;
+}
+
+/** Résumé du mois au format CSV (Excel), pour l'export et l'envoi au comptable. */
+function csv_resume(string $ym, ?string $etabF = null): string
+{
+    $f = fopen('php://temp', 'w+');
+    fwrite($f, "\xEF\xBB\xBF");
+    $num = static fn(float $x) => number_format($x, 2, ',', '');
+    $put = static function (array $row) use ($f): void {
+        $row = array_map(static fn($c) => is_string($c) && preg_match('/^[=+\-@]/', $c) ? "'" . $c : $c, $row);
+        fputcsv($f, $row, ';', '"', '\\');
+    };
+    $put(['Nom', 'Poste', 'Contrat', 'Restaurant(s)', 'Heures', 'Heures (décimal)', 'Taux horaire net', 'À payer (net)', 'Remarque']);
+    $total = 0.0;
+    foreach (rapport_mois($ym, $etabF) as $r) {
+        $e = $r['e'];
+        $total += $r['cout'];
+        $put([
+            emp_nom($e),
+            implode(' + ', array_map(fn($p) => POSTES[$p], emp_postes($e))),
+            $e['type'] === 'fixe' ? 'Fixe' : 'Extra',
+            implode(' + ', array_map(fn($k) => ETABS[$k], emp_etabs($e))),
+            fmt_min($r['minutes']),
+            $num($r['minutes'] / 60),
+            $e['type'] === 'extra' ? $num((float)$e['taux']) : '',
+            $num($r['cout']),
+            trim($r['note'] . ($r['ouverts'] ? ' ' . $r['ouverts'] . ' pointage(s) sans départ' : '')),
+        ]);
+    }
+    $put(['TOTAL', '', '', '', '', '', '', $num($total), '']);
+    rewind($f);
+    $csv = stream_get_contents($f);
+    fclose($f);
+    return (string)$csv;
+}
+
+/* ---------- Indisponibilités ---------- */
+
+/** [employe_id][jour] => note */
+function indispos_entre(string $du, string $au): array
+{
+    $st = db()->prepare('SELECT * FROM indispos WHERE jour BETWEEN ? AND ?');
+    $st->execute([$du, $au]);
+    $out = [];
+    foreach ($st->fetchAll() as $r) {
+        $out[(int)$r['employe_id']][$r['jour']] = (string)$r['note'];
+    }
+    return $out;
+}
+
+/* ---------- Notifications (téléphone via ntfy + e-mail) ---------- */
+
+function notif_topic(): string
+{
+    $t = setting('ntfy_topic');
+    if (!$t) {
+        $t = 'le76-' . bin2hex(random_bytes(10));
+        set_setting('ntfy_topic', $t);
+    }
+    return $t;
+}
+
+/** Envoie une notification. Retourne true si au moins un canal a fonctionné. */
+function envoyer_notif(string $titre, string $message, string $priorite = 'default'): bool
+{
+    $ok = false;
+    if (setting('notif_ntfy', '0') === '1') {
+        $ctx = stream_context_create(['http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: text/plain; charset=utf-8\r\nTitle: =?UTF-8?B?" . base64_encode($titre) . "?=\r\nPriority: " . $priorite . "\r\nTags: clock\r\n",
+            'content' => $message,
+            'timeout' => 5,
+            'ignore_errors' => true,
+        ]]);
+        $r = @file_get_contents('https://ntfy.sh/' . rawurlencode(notif_topic()), false, $ctx);
+        $ok = $r !== false || $ok;
+    }
+    $mail = trim((string)setting('notif_email', ''));
+    if ($mail !== '' && filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+        $ok = envoyer_mail($mail, '[Personnel] ' . $titre, $message) || $ok;
+    }
+    return $ok;
+}
+
+function expediteur(): string
+{
+    $from = trim((string)setting('mail_from', ''));
+    if (!filter_var($from, FILTER_VALIDATE_EMAIL)) {
+        $from = 'reservation@' . preg_replace('/^www\./', '', (string)($_SERVER['HTTP_HOST'] ?? 'le76.fr'));
+    }
+    return $from;
+}
+
+/** E-mail simple, avec pièce jointe facultative [nom, contenu, type]. */
+function envoyer_mail(string $to, string $sujet, string $texte, ?array $pj = null): bool
+{
+    $from = expediteur();
+    $b = 'b' . bin2hex(random_bytes(8));
+    $headers = 'From: Personnel Le 76 <' . $from . ">\r\nReply-To: " . $from . "\r\nMIME-Version: 1.0\r\n";
+    if ($pj) {
+        $headers .= 'Content-Type: multipart/mixed; boundary="' . $b . '"';
+        $body = "--$b\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($texte))
+            . "--$b\r\nContent-Type: " . $pj[2] . '; name="' . $pj[0] . "\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"" . $pj[0] . "\"\r\n\r\n"
+            . chunk_split(base64_encode($pj[1])) . "--$b--";
+    } else {
+        $headers .= "Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64";
+        $body = chunk_split(base64_encode($texte));
+    }
+    return @mail($to, '=?UTF-8?B?' . base64_encode($sujet) . '?=', $body, $headers, '-f' . $from);
+}
+
+/**
+ * Vérifie les retards / dépassements du jour et prévient (une seule fois par cas).
+ * Appelée régulièrement par la pointeuse (iPad allumé) et par la page Aujourd'hui.
+ */
+function verifier_alertes(): void
+{
+    if (setting('notif_ntfy', '0') !== '1' && trim((string)setting('notif_email', '')) === '') {
+        return;
+    }
+    $last = (int)setting('alertes_last', '0');
+    if (time() - $last < 60) {
+        return;
+    }
+    set_setting('alertes_last', (string)time());
+    $retardMin = max(5, (int)setting('notif_retard', '15'));
+    $depasseMin = max(5, (int)setting('notif_depasse', '30'));
+    $today = date('Y-m-d');
+    $cmp = comparer(date('Y-m-d', strtotime('-1 day')), $today);
+    $now = time();
+    $deja = db()->prepare('SELECT 1 FROM alertes_envoyees WHERE cle = ?');
+    $note = db()->prepare('INSERT OR IGNORE INTO alertes_envoyees (cle, at) VALUES (?, ?)');
+    db()->prepare('DELETE FROM alertes_envoyees WHERE at < ?')->execute([$now - 7 * 86400]);
+    foreach ($cmp['shifts'] as $r) {
+        $s = $r['shift'];
+        $e = emp_get((int)$s['employe_id']);
+        if (!$e || !(int)$e['actif']) {
+            continue;
+        }
+        $lieu = ETABS[$s['etab']];
+        $cle = null;
+        $msg = null;
+        if ($r['statut'] === 'attendu' && $now > $r['sa'] + $retardMin * 60 && $now < $r['sb']) {
+            $cle = 'retard-' . $s['id'];
+            $msg = [emp_nom($e) . ' pas encore arrivé·e', 'Prévu à ' . $s['debut'] . ' (' . $lieu . '). Retard : ' . fmt_min((int)round(($now - $r['sa']) / 60)) . '.', 'high'];
+        } elseif ($r['statut'] === 'encours' && $now > $r['sb'] + $depasseMin * 60 && $now - $r['sb'] < 6 * 3600) {
+            $cle = 'depasse-' . $s['id'];
+            $msg = [emp_nom($e) . ' dépasse son horaire', 'Prévu jusqu\'à ' . $s['fin'] . ' (' . $lieu . '), toujours pointé·e. Dépassement : ' . fmt_min((int)round(($now - $r['sb']) / 60)) . '.', 'default'];
+        }
+        if ($cle) {
+            $deja->execute([$cle]);
+            if (!$deja->fetchColumn()) {
+                $note->execute([$cle, $now]);
+                envoyer_notif($msg[0], $msg[1], $msg[2]);
+            }
+        }
+    }
 }
 
 /** « +0h40 » / « −1h05 » */

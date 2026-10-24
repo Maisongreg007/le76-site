@@ -6,6 +6,7 @@ $nowSql = date('Y-m-d H:i:s');
 $seuil = date('Y-m-d H:i:s', time() - OUBLI_HEURES * 3600);
 
 $frag = isset($_GET['frag']);
+try { verifier_alertes(); } catch (Throwable $t) { }
 if ($frag) {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
