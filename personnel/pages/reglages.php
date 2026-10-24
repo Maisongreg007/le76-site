@@ -15,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         kiosk_clear();
         back('admin.php?p=reglages', 'Cet appareil n\'est plus une pointeuse.');
     }
+    if ($act === 'share_renew') {
+        share_token(true);
+        back('admin.php?p=reglages', 'Nouveau lien d\'équipe créé. L\'ancien ne marche plus : renvoie le nouveau à l\'équipe.');
+    }
     if ($act === 'password') {
         $old = (string)($_POST['old'] ?? '');
         $new = (string)($_POST['new'] ?? '');
@@ -73,6 +77,9 @@ echo '<p class="muted small" style="margin-bottom:0">Astuce iPad : une fois la p
 echo '<div class="card" style="max-width:640px"><h3>Horaires rapides du planning</h3><p class="muted small">Un par ligne : <code>Nom;début;fin</code>. Ils apparaissent comme boutons quand tu ajoutes un horaire.</p>'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="presets"><textarea name="presets" rows="5" style="width:100%">'
     . h(implode("\n", array_map(fn($p) => implode(';', $p), presets()))) . '</textarea><p><button class="primary">Enregistrer</button></p></form></div>';
+
+echo '<div class="card" style="max-width:640px"><h3>Lien du planning d\'équipe</h3><p class="muted small">Si le lien partagé a circulé là où il ne fallait pas (ancien employé…), crée-en un nouveau. L\'ancien cessera de marcher.</p>'
+    . '<form method="post" onsubmit="return confirm(\'L\\\'ancien lien ne marchera plus. Continuer ?\')">' . csrf_field() . '<input type="hidden" name="action" value="share_renew"><button>Créer un nouveau lien d\'équipe</button></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Sauvegarde</h3><p class="muted small">Télécharge une copie de toutes tes données (équipe, planning, pointages). À faire de temps en temps, par exemple en fin de mois.</p>'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="backup"><button>Télécharger une sauvegarde</button></form></div>';

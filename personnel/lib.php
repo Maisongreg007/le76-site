@@ -200,6 +200,16 @@ function secret(): string
     return $s;
 }
 
+function share_token(bool $renew = false): string
+{
+    $t = setting('share_token');
+    if ($renew || !$t) {
+        $t = bin2hex(random_bytes(12));
+        set_setting('share_token', $t);
+    }
+    return $t;
+}
+
 function presets(): array
 {
     $raw = setting('presets');

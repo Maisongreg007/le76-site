@@ -105,6 +105,8 @@ if ($e !== null) {
         $lien = base_url() . 'mon-planning.php?t=' . $emp['token'];
         echo '<div class="card" style="max-width:560px"><h3>Lien de son planning</h3><p class="muted small">À envoyer par SMS ou WhatsApp. Il voit seulement ses horaires, sans rien pouvoir modifier.</p>'
             . '<div class="linkbox">' . h($lien) . '</div>'
+            . '<p class="row" style="margin:10px 0 0"><a class="btn small primary" target="_blank" rel="noopener" href="https://wa.me/?text=' . rawurlencode('Salut ' . $emp['prenom'] . ', voici ton planning : ' . $lien) . '">Envoyer sur WhatsApp</a>'
+            . '<a class="btn small" href="sms:?&body=' . rawurlencode('Salut ' . $emp['prenom'] . ', voici ton planning : ' . $lien) . '">Envoyer par SMS</a></p>'
             . '<form method="post" style="margin-top:10px" onsubmit="return confirm(\'L\\\'ancien lien ne marchera plus. Continuer ?\')">' . csrf_field()
             . '<input type="hidden" name="action" value="newtoken"><input type="hidden" name="id" value="' . (int)$emp['id'] . '"><button class="small">Créer un nouveau lien</button></form></div>';
         echo '<form method="post" style="max-width:560px" onsubmit="return confirm(\'Archiver ' . h(addslashes($emp['prenom'])) . ' ? Il ne pourra plus pointer, mais son historique reste.\')">' . csrf_field()

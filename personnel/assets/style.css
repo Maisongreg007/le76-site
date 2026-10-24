@@ -91,3 +91,20 @@ body.kiosk{background:#14110f;color:#f6f1e8;min-height:100vh;min-height:100dvh;d
 @media (max-width:640px){.hide-m{display:none}h1{font-size:1.3rem}}
 @media print{.top,.btn,button,.tabs{display:none!important}body{background:#fff}}
 .pill.poste{background:#efe6f7;color:#5b3a86}
+.copy-week{display:block;margin-top:6px;padding:3px 8px;min-height:28px;font-size:.75rem;font-weight:700;border-radius:8px;color:var(--muted)}
+.pastebar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;background:#1f1d1a;color:#fff;border-radius:14px;padding:10px 10px 10px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25);width:max-content;max-width:calc(100% - 28px);font-weight:600;font-size:.95rem}
+.pastebar[hidden]{display:none}
+body.pasting .plan td.day{cursor:copy}
+body.pasting .plan td.day:hover{background:#eef6f0}
+body.pasting .plan .chip.add{border-color:var(--ok);color:var(--ok)}
+body.pasting-week .plan tr[data-emp]:hover td{background:#eef6f0;cursor:copy}
+.dayblock{margin-bottom:12px}
+.dayblock h3{display:flex;justify-content:space-between;margin:0 0 6px}
+@media print{
+  @page{size:landscape;margin:10mm}
+  .chip.add,.copy-week,.pastebar,dialog,.flash,p.muted.small{display:none!important}
+  .card{box-shadow:none;border:0;padding:0}
+  .plan{min-width:0;font-size:11px}
+  .chip{background:#eee!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:none;padding:0}
+}
