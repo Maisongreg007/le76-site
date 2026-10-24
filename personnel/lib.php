@@ -1145,8 +1145,8 @@ function page_head(string $titre, string $manifest = 'manifest-admin.json', stri
         . '<meta name="apple-mobile-web-app-title" content="' . h($nomAppli) . '"><meta name="application-name" content="' . h($nomAppli) . '">'
         . '<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"><meta name="color-scheme" content="light dark">'
         . '<link rel="manifest" href="' . h($manifest) . '">'
-        . '<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/' . $icone . '-32.png"><link rel="icon" type="image/png" sizes="192x192" href="assets/icons/' . $icone . '-192.png">'
-        . '<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/' . $icone . '-180.png">'
+        . '<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/' . $icone . '-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="assets/icons/' . $icone . '-192.png">'
+        . '<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/' . $icone . '-180.png?v=2">'
         . '<link rel="stylesheet" href="assets/style.css?v=' . filemtime(__DIR__ . '/assets/style.css') . '">'
         . '<title>' . h($titre) . '</title></head><body class="' . h($bodyClass) . '">';
 }
