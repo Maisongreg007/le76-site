@@ -17,6 +17,7 @@ header('X-Robots-Tag: noindex, nofollow');
 .app{display:flex;gap:14px;align-items:flex-start;background:var(--card);border-radius:18px;padding:18px;color:var(--ink);text-decoration:none;transition:transform .15s}
 .app:hover{transform:translateY(-2px);opacity:1}
 .app img{width:58px;height:58px;border-radius:14px;flex:none}
+.ico-cm{width:58px;height:58px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#34a0ff,#0a6bd6);color:#fff;font-size:30px;font-weight:700}
 .app b{display:block;font-size:1.1rem;margin-bottom:3px}.app span{color:var(--muted);font-size:.9rem;line-height:1.4}
 .codes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
 .codes a{display:flex;justify-content:space-between;background:var(--card2);border-radius:10px;padding:8px 12px;color:var(--ink);text-decoration:none;font-size:.92rem}
@@ -24,13 +25,16 @@ ol li{margin-bottom:6px}
 </style></head><body>
 <div class="demo-bar"><span><b>Démo</b> · données fictives, tout est cliquable, rien n'est réel</span></div>
 <main class="wrap" style="max-width:960px">
-<div class="hero"><h1>Gestion du restaurant</h1><p>Outil maison d'un restaurant (Le 76) et d'un restaurant de camping : planning, pointeuse, heures, coûts, congés et registre hygiène (HACCP). Version de démonstration avec une équipe fictive.</p></div>
+<div class="hero"><h1>Gestion du restaurant</h1><p>Outils maison d'un restaurant (Le 76) et d'un restaurant de camping : réservations, planning, pointeuse, heures, coûts du personnel, congés, coût matière et registre hygiène (HACCP). Version de démonstration avec une équipe fictive.</p></div>
 
 <div class="apps">
   <a class="app" href="personnel/admin.php"><img src="../personnel/assets/icons/admin-192.png?v=2" alt=""><span><b>Personnel · admin</b>Planning, heures (convenu / prévu / effectué), coûts jour·semaine·mois, équipe, congés, réglages.</span></a>
   <a class="app" href="personnel/pointeuse.php?site=le76"><img src="../personnel/assets/icons/pointeuse-le76-192.png?v=2" alt=""><span><b>Pointeuse · Le 76</b>Écran iPad : code à 4 chiffres pour l'arrivée et le départ. Les codes sont affichés à droite.</span></a>
   <a class="app" href="personnel/pointeuse.php?site=camping"><img src="../personnel/assets/icons/pointeuse-camping-192.png?v=2" alt=""><span><b>Pointeuse · Camping</b>Même chose pour le second établissement.</span></a>
   <a class="app" href="hygiene/"><img src="/hygiene/icone-192.png" alt=""><span><b>Registre hygiène</b>Températures, ménage, réceptions, étiquettes DLC, huiles, refroidissement, documents.</span></a>
+  <a class="app" href="reserver/"><img src="/equipe/icone-192.png" alt=""><span><b>Réservation · page client</b>Ce que voit le client sur le site : jours, créneaux, places restantes, demande en ligne (FR / DE).</span></a>
+  <a class="app" href="equipe/"><img src="/equipe/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Réservations · appli équipe</b>Carnet du jour, demandes à valider, couverts, arrivées, soirées, réglages. Connecté d'office.</span></a>
+  <a class="app" href="cout-matiere/"><span class="ico-cm" aria-hidden="true">€</span><span><b>Coût matière</b>Carte, fiches techniques, mercuriale, food cost et coefficient, boissons, allergènes, écran service.</span></a>
 </div>
 
 <div class="card"><h3>Espace employé (lien perso, sans mot de passe)</h3><p class="muted small" style="margin-top:0">Chaque employé reçoit un lien : ses horaires, ses jours « pas dispo », ses demandes de congé.</p>
@@ -45,6 +49,8 @@ ol li{margin-bottom:6px}
 <li><b>Coûts</b> : jour par jour, par semaine, par mois, extras compris.</li>
 <li><b>Espace employé</b> : demande un congé avec Emma, puis accepte-la dans Aujourd'hui.</li>
 <li><b>Registre hygiène</b> : relève une température hors plage, coche le ménage, imprime une étiquette.</li>
+<li><b>Réservation</b> : fais une demande sur la page client, puis valide-la dans l'appli équipe (onglet des demandes).</li>
+<li><b>Coût matière</b> : ouvre la tarte flambée, change le prix du fromage blanc dans la mercuriale et regarde le food cost bouger.</li>
 </ol>
 <p class="muted small" style="margin-bottom:0">Le bouton « Réinitialiser » (bandeau violet) remet des données d'exemple propres. Les notifications et e-mails sont désactivés dans la démo.</p></div>
 </main></body></html>

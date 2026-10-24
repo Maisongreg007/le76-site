@@ -8,7 +8,7 @@ declare(strict_types=1);
 require __DIR__ . '/lib/base.php';
 require __DIR__ . '/lib/messages.php';
 
-const COOKIE = 'le76_equipe';
+define('COOKIE', defined('DEMO') ? 'le76_equipe_demo' : 'le76_equipe');
 const DUREE_SESSION = 400 * 86400;
 
 rappels_en_arriere_plan();
@@ -123,6 +123,10 @@ function utilisateur(): ?array
     }
     $u = null;
     $j = (string) ($_COOKIE[COOKIE] ?? '');
+    if (defined('DEMO') && !preg_match('/^[a-f0-9]{64}$/', $j)) {
+        // Démo : connecté d'office avec le compte d'exemple
+        return $u = db()->query('SELECT * FROM utilisateurs WHERE admin = 1 AND actif = 1 ORDER BY id LIMIT 1')->fetch() ?: null;
+    }
     if (!preg_match('/^[a-f0-9]{64}$/', $j)) {
         return null;
     }

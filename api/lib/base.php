@@ -25,6 +25,14 @@ function dossier_donnees(): string
     if ($dossier !== null) {
         return $dossier;
     }
+    if (defined('DEMO')) {
+        // Démo (le76.fr/demo) : base séparée et fictive, dans api/donnees (protégé)
+        $c = dirname(__DIR__) . '/donnees/demo';
+        if (!is_dir($c)) {
+            @mkdir($c, 0750, true);
+        }
+        return $dossier = $c;
+    }
     $env = getenv('RESA_DONNEES');
     $candidats = $env ? [$env] : [
         dirname(__DIR__, 3) . '/le76-reservations', // à côté de public_html
@@ -58,6 +66,10 @@ function db(): PDO
     $pdo->exec('PRAGMA journal_mode = WAL');
     $pdo->exec('PRAGMA foreign_keys = ON');
     creer_tables($pdo);
+    if (defined('DEMO') && !$pdo->query('SELECT COUNT(*) FROM utilisateurs')->fetchColumn()) {
+        require_once __DIR__ . '/demo-resa.php';
+        demo_resa_seed($pdo);
+    }
     return $pdo;
 }
 

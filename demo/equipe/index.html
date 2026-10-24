@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Résas du 76</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2b1d16">
+
+<link rel="apple-touch-icon" href="/equipe/icone-180.png">
+<link rel="icon" href="/equipe/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Résas 76">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  /* Style « façon Apple » : fond gris clair, listes groupées blanches, police système, grands titres */
+  :root {
+    --cream: #fbf5ec; --paper: #fffbf5; --sand: #f3e7d6; --fill: rgba(122,90,60,.10);
+    --ink: #2b1d16; --brown: #4a2c1d; --muted: #7a6a5c; --faint: #b3a596;
+    --rust: #b7372a; --rust-dark: #8e2a20; --gold: #c98a3a; --orange: #d9762b;
+    --line: #e8d9c3; --green: #2f7a46; --green-bg: #e3efe1; --amber: #a86412; --amber-bg: #fdf0d9;
+    --serif: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Inter", system-ui, sans-serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", system-ui, sans-serif;
+    --logo: "Playfair Display", Georgia, serif;
+    --top: env(safe-area-inset-top, 0px); --bot: env(safe-area-inset-bottom, 0px);
+    --r: 14px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--cream); color: var(--ink); font: 400 17px/1.4 var(--sans); -webkit-font-smoothing: antialiased; letter-spacing: -.01em; }
+  body { padding-bottom: calc(96px + var(--bot)); }
+  button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+  button { cursor: pointer; }
+  a { color: var(--rust); text-decoration: none; }
+  h1, h2, h3 { margin: 0; }
+  [hidden] { display: none !important; }
+  ::selection { background: rgba(183,55,42,.18); }
+
+  /* Barre du haut (translucide) */
+  .top { position: sticky; top: 0; z-index: 20; color: #f6e9d6; background: rgba(43,29,22,.96); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); padding: calc(10px + var(--top)) 20px 12px; border-bottom: .5px solid var(--line); }
+  .top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 760px; margin: 0 auto; }
+  .logo { font: 800 1.2rem/1 var(--logo); color: #fff; white-space: nowrap; letter-spacing: 0; }
+  .logo span { color: var(--gold); }
+  .top h1 { font: 700 2.05rem/1.1 var(--serif); letter-spacing: -.025em; color: #fff; max-width: 760px; margin: 10px auto 0; }
+  .datenav { display: flex; align-items: center; gap: 8px; margin: 12px auto 0; max-width: 760px; }
+  .datenav button.nav { width: 44px; height: 44px; flex: none; border-radius: 12px; border: 0; background: rgba(255,255,255,.1); color: #fff; font-size: 1.5rem; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .datebox { flex: 1; position: relative; height: 44px; border-radius: 12px; background: rgba(255,255,255,.1); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 1rem; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .datebox .dc { display: none; }
+  .datebox span { white-space: nowrap; }
+  @media (max-width: 520px) { .datebox .dl { display: none; } .datebox .dc { display: inline; } }
+  .datebox input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; }
+  .datebox small { font-weight: 600; font-size: .78rem; color: var(--ink); background: var(--gold); padding: 3px 8px; border-radius: 999px; }
+  .today-btn { height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--gold); color: var(--ink); font-weight: 600; font-size: .95rem; }
+
+  main { padding: 20px 20px 32px; max-width: 760px; margin: 0 auto; }
+  @media (max-width: 420px) { main { padding: 16px 14px 28px; } .top { padding-left: 16px; padding-right: 16px; } }
+
+  /* Barre d'onglets (translucide) */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255,251,245,.94); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: .5px solid var(--line); padding-bottom: var(--bot); }
+  nav.tabs button { border: 0; background: transparent; padding: 8px 0 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .68rem; font-weight: 500; color: var(--muted); position: relative; letter-spacing: 0; }
+  nav.tabs button svg { width: 27px; height: 27px; }
+  nav.tabs button.on { color: var(--rust); }
+  .badge { position: absolute; top: 3px; left: calc(50% + 7px); min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: var(--rust); color: #fff; font: 600 .7rem/19px var(--sans); }
+
+  /* Services du carnet */
+  .svc { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); margin-bottom: 22px; overflow: hidden; }
+  .svc-head { padding: 16px 18px 14px; }
+  .svc-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .svc-title h2 { font: 700 1.35rem/1.15 var(--serif); letter-spacing: -.02em; color: var(--ink); }
+  .svc-title .count { font-weight: 700; font-size: 1.35rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .svc-title .count small { color: var(--muted); font-weight: 500; font-size: .9rem; letter-spacing: 0; }
+  .bar { height: 6px; border-radius: 3px; background: var(--fill); margin-top: 12px; overflow: hidden; display: flex; }
+  .bar i { display: block; height: 100%; background: var(--green); }
+  .bar i.att { background: var(--orange); opacity: .75; }
+  .bar.over i { background: var(--rust); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 12px; font-size: .8rem; font-weight: 600; border: 0; background: var(--fill); color: var(--ink); letter-spacing: 0; }
+  button.chip { cursor: pointer; }
+  .chip.ok { background: var(--green-bg); color: var(--green); }
+  .chip.off { background: #f8e3df; color: var(--rust-dark); }
+  .chip.soir { background: var(--ink); color: #fff; }
+
+  .resa { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 0; border-top: .5px solid var(--line); cursor: pointer; background: transparent; width: 100%; text-align: left; min-height: 64px; }
+  .resa:active { background: var(--sand); }
+  .resa .h { font-weight: 600; width: 50px; flex: none; font-variant-numeric: tabular-nums; color: var(--muted); font-size: .95rem; }
+  .resa .who { flex: 1; min-width: 0; }
+  .resa .who b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .resa .who span { display: block; font-size: .85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+  .resa .pers { flex: none; min-width: 38px; height: 38px; border-radius: 19px; background: var(--sand); display: grid; place-items: center; font-weight: 700; padding: 0 10px; font-variant-numeric: tabular-nums; }
+  .resa.attente { background: var(--amber-bg); }
+  .resa.attente .pers { background: #f6d9a8; color: var(--amber); }
+  .resa.arrive .h, .resa.arrive .who b { color: var(--green); }
+  .resa.arrive .pers { background: var(--green-bg); color: var(--green); }
+  .resa.annulee, .resa.refusee { opacity: .45; }
+  .resa.annulee .who b, .resa.refusee .who b { text-decoration: line-through; }
+  .tag { display: inline-block; font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border-radius: 5px; padding: 2px 6px; margin-left: 6px; vertical-align: 2px; }
+  .tag.att { background: var(--orange); color: #fff; }
+  .tag.web { background: var(--fill); color: var(--muted); }
+  .more { width: 100%; border: 0; border-top: .5px solid var(--line); background: transparent; padding: 14px; color: var(--rust); font-size: .9rem; font-weight: 500; }
+  .empty { padding: 16px 18px; color: var(--muted); font-size: .95rem; border-top: .5px solid var(--line); }
+
+  /* 7 prochains jours */
+  .semaine { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+  .sj { border: 1px solid var(--line); background: var(--paper); border-radius: 14px; padding: 9px 2px 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; transition: transform .12s; }
+  .sj:active { transform: scale(.96); }
+  .sj .sn { font-size: .66rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .sj .sd { font: 700 1.3rem/1.15 var(--serif); letter-spacing: -.02em; }
+  .sj .ss { display: flex; gap: 3px; margin-top: 4px; }
+  .sj.auj .sd { color: var(--rust); }
+  .sj.on { box-shadow: 0 0 0 2px var(--rust); }
+  .sv { min-width: 22px; padding: 2px 3px; border-radius: 6px; font-size: .7rem; font-weight: 700; background: var(--fill); color: var(--faint); text-align: center; font-variant-numeric: tabular-nums; }
+  .sv.x { background: transparent; color: #cdbfb0; }
+  .sv.pris { background: var(--green-bg); color: var(--green); }
+  .sv.attente { background: var(--amber-bg); color: var(--amber); }
+  .sv.presque { background: #fde3c8; color: #a2500f; }
+  .sv.complet { background: #f8dcd6; color: var(--rust-dark); }
+  .sem-leg { text-align: right; font-size: .72rem; color: var(--muted); margin: 0 4px 22px; }
+  @media (max-width: 400px) { .sv { min-width: 17px; font-size: .64rem; padding: 2px 2px; } .semaine { gap: 4px; } }
+  .fab { position: fixed; right: 20px; bottom: calc(92px + var(--bot)); z-index: 25; width: 58px; height: 58px; border-radius: 50%; border: 0; background: var(--rust); color: #fff; font-size: 2rem; font-weight: 300; line-height: 1; box-shadow: 0 8px 24px rgba(183,55,42,.35), 0 2px 6px rgba(0,0,0,.12); transition: transform .12s; }
+  .fab:active { transform: scale(.94); }
+
+  /* Demandes */
+  .dem { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 16px; position: relative; }
+  .dem::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 4px; border-radius: 0 3px 3px 0; background: var(--orange); }
+  .dem .quand { font: 700 1.15rem/1.25 var(--serif); letter-spacing: -.015em; }
+  .dem .qui { margin-top: 6px; }
+  .dem .qui b { font-size: 1.05rem; }
+  .dem .meta { font-size: .88rem; color: var(--muted); margin-top: 4px; }
+  .dem .msg { background: var(--sand); border-radius: 10px; padding: 10px 12px; margin-top: 10px; font-size: .93rem; }
+  .dem .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .h2 { font: 700 1.4rem/1.2 var(--serif); margin: 4px 2px 12px; }
+  .sub { font-size: .92rem; color: var(--muted); margin: -4px 4px 16px; }
+
+  /* À venir */
+  .search { width: 100%; height: 40px; padding: 0 14px 0 36px; border: 0; border-radius: 11px; background: var(--fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center; margin-bottom: 14px; font-size: 1rem; outline: none; }
+  .day-row { display: grid; grid-template-columns: 88px 1fr 1fr; gap: 10px; align-items: stretch; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; margin-bottom: 10px; cursor: pointer; width: 100%; text-align: left; transition: transform .12s; }
+  .day-row:active { transform: scale(.985); }
+  .day-row.closed { opacity: .5; }
+  .day-row .d { font-weight: 600; font-size: .95rem; line-height: 1.25; padding: 5px 4px; }
+  .day-row .d small { display: block; color: var(--rust); font-weight: 600; font-size: .78rem; margin-top: 2px; }
+  .mini { border-radius: 10px; background: var(--sand); border: 0; padding: 7px 10px 9px; font-size: .85rem; line-height: 1.3; position: relative; overflow: hidden; color: var(--faint); }
+  .mini b { color: inherit; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+  .mini.pris { background: var(--green-bg); color: var(--green); }
+  .mini.attente { background: var(--amber-bg); color: var(--amber); }
+  .mini.presque { background: #fde3c8; color: #a2500f; }
+  .mini.complet { background: #f8dcd6; color: var(--rust-dark); }
+  .mini .jauge { position: absolute; left: 0; bottom: 0; height: 3px; background: currentColor; opacity: .5; }
+  .legende { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .76rem; color: var(--muted); margin: 0 4px 16px; }
+  .legende i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; border: 0 !important; }
+  .mini .l { font-size: .66rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .mini.x { background: transparent; color: #b9a898; display: flex; align-items: center; padding-left: 4px; }
+  .mini .wait { color: var(--amber); font-weight: 600; }
+  .mini .st { color: var(--gold); }
+
+  /* Listes groupées (Plus / réglages) */
+  .group { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); margin-bottom: 26px; overflow: hidden; }
+  .group > h3 { font: 600 .74rem/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); padding: 16px 18px 4px; }
+  .group > h3 + .row, .group > h3 + div > .row:first-child { border-top: 0; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; min-height: 52px; border-top: .5px solid var(--line); }
+  .group > .row:first-child, .group > div:first-child > .row:first-child { border-top: 0; }
+  .row .grow { flex: 1; min-width: 0; }
+  .row .grow small { display: block; color: var(--muted); font-size: .82rem; margin-top: 2px; }
+  .row input[type=number] { width: 84px; text-align: center; }
+  .row input, .row select, .field input, .field select, .field textarea { padding: 11px 12px; border: 0; border-radius: 10px; background: var(--fill); min-width: 0; outline: none; }
+  .row input:focus, .row select:focus, .field input:focus, .field select:focus, .field textarea:focus, .search:focus { box-shadow: 0 0 0 3px rgba(183,55,42,.22); }
+  .row input[type=time] { width: 112px; }
+  .link-row { width: 100%; border: 0; background: transparent; text-align: left; justify-content: space-between; font-size: 1rem; }
+  .link-row:active { background: var(--sand); }
+  .link-row > span:last-child { color: var(--faint); font-size: 1.3rem; }
+  .wk { display: grid; grid-template-columns: 46px 1fr 1fr; gap: 6px 8px; align-items: center; padding: 11px 18px; border-top: .5px solid var(--line); }
+  .wk .n { font-weight: 600; }
+  .wk label { display: flex; align-items: center; gap: 6px; font-size: .9rem; }
+  .wk input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--rust); }
+  .wk input[type=time] { width: 96px; padding: 7px 8px; border: 0; border-radius: 8px; background: var(--fill); }
+
+  /* Interrupteur iOS */
+  .sw { position: relative; width: 51px; height: 31px; flex: none; }
+  .sw input { opacity: 0; width: 100%; height: 100%; position: absolute; margin: 0; z-index: 1; cursor: pointer; }
+  .sw i { position: absolute; inset: 0; border-radius: 99px; background: #d6c8b6; transition: background .2s; pointer-events: none; }
+  .sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.16); transition: transform .2s; }
+  .sw input:checked + i { background: var(--green); }
+  .sw input:checked + i::after { transform: translateX(20px); }
+
+  /* Boutons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; min-height: 50px; padding: 12px 18px; font-weight: 600; font-size: 1rem; background: var(--rust); color: #fff; text-decoration: none; transition: opacity .12s, transform .12s; }
+  .btn:active { transform: scale(.98); opacity: .85; }
+  .btn.block { width: 100%; }
+  .btn.green { background: var(--green); }
+  .btn.ghost { background: var(--fill); color: var(--rust); border: 0; }
+  .btn.dark { background: var(--ink); }
+  .btn.small { min-height: 34px; padding: 7px 13px; font-size: .88rem; border-radius: 9px; }
+  .btn:disabled { opacity: .45; }
+
+  /* Feuille (fenêtre du bas) */
+  .veil { position: fixed; inset: 0; z-index: 50; background: rgba(43,29,22,.45); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+  .sheet { background: var(--cream); width: 100%; max-width: 640px; max-height: 92vh; overflow: auto; border-radius: 14px 14px 0 0; padding: 8px 20px calc(24px + var(--bot)); animation: up .32s cubic-bezier(.2,.9,.3,1); box-shadow: 0 -10px 40px rgba(0,0,0,.12); }
+  @media (min-width: 700px) { .veil { align-items: center; } .sheet { border-radius: 16px; max-height: 86vh; } }
+  .sheet .grip { width: 36px; height: 5px; border-radius: 3px; background: var(--line); margin: 2px auto 16px; }
+  .sheet h2 { font: 700 1.6rem/1.2 var(--serif); letter-spacing: -.02em; margin-bottom: 18px; }
+  @keyframes up { from { transform: translateY(60px); opacity: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  .field { display: block; margin-bottom: 16px; font-size: .8rem; font-weight: 500; color: var(--muted); }
+  .field small { font-weight: 400; color: var(--faint); }
+  .field input, .field select, .field textarea { display: block; width: 100%; margin-top: 6px; font-size: 17px; color: var(--ink); }
+  .sheet .field input, .sheet .field select, .sheet .field textarea, .login .field input { background: #fff; border: 1px solid var(--line); }
+  .field textarea { min-height: 76px; resize: vertical; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .seg { display: flex; background: var(--fill); border-radius: 9px; padding: 2px; margin-top: 6px; }
+  .seg button { flex: 1; border: 0; background: transparent; border-radius: 7px; padding: 8px 4px; font-weight: 500; font-size: .9rem; color: var(--ink); }
+  .seg button.on { background: #fff; box-shadow: 0 2px 6px rgba(74,44,29,.12); font-weight: 600; color: var(--rust); }
+  .num { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .num button { width: 50px; height: 50px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--rust); font-size: 1.5rem; flex: none; }
+  .num input { text-align: center; font-weight: 700; font-size: 1.3rem !important; margin: 0 !important; height: 50px; }
+  .checkline { display: flex; align-items: center; gap: 12px; margin: 4px 0 18px; font-size: .95rem; color: var(--ink); }
+  .checkline input { width: 22px; height: 22px; accent-color: var(--rust); flex: none; }
+  .det { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 0 18px; margin-bottom: 20px; }
+  .det div { display: flex; gap: 12px; padding: 13px 0; border-bottom: .5px solid var(--line); font-size: 1rem; }
+  .det div:last-child { border-bottom: 0; }
+  .det span { color: var(--muted); width: 96px; flex: none; font-size: .9rem; padding-top: 1px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .actions .full { grid-column: 1 / -1; }
+  .warn { background: #fbe5e1; color: var(--rust-dark); border-radius: 12px; padding: 12px 14px; font-size: .92rem; margin-bottom: 16px; }
+  .tip { background: var(--sand); border-radius: 12px; padding: 12px 14px; font-size: .9rem; color: var(--brown); margin-bottom: 18px; }
+  .tip b { color: var(--ink); }
+
+  /* Connexion */
+  .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 20px calc(24px + var(--bot)); background: var(--ink); }
+  .login .box { width: 100%; max-width: 380px; background: var(--cream); border-radius: 22px; padding: 28px 22px; }
+  .login .big { font: 800 3rem/1 var(--logo); text-align: center; letter-spacing: 0; }
+  .login .big span { color: var(--gold); font-family: "Caveat", cursive; font-size: 3.8rem; }
+  .login p.lead { text-align: center; color: var(--muted); margin: 10px 0 28px; }
+  .toast { position: fixed; left: 50%; bottom: calc(100px + var(--bot)); transform: translateX(-50%); z-index: 80; background: rgba(43,29,22,.92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: .93rem; font-weight: 500; max-width: calc(100% - 40px); box-shadow: 0 10px 30px rgba(0,0,0,.2); animation: up .25s; text-align: center; }
+  .toast.err { background: rgba(183,55,42,.95); }
+  .loading { text-align: center; color: var(--muted); padding: 60px 0; }
+
+  /* Grandes alertes */
+  .alertes { position: fixed; inset: 0; z-index: 90; background: rgba(43,29,22,.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 18px calc(24px + var(--bot)); overflow: auto; animation: fade .2s; }
+  .alerte { width: 100%; max-width: 440px; border-radius: 24px; padding: 26px 24px 22px; color: #fff; box-shadow: 0 30px 70px rgba(0,0,0,.35); animation: pop .4s cubic-bezier(.2,1.3,.4,1); }
+  .alerte.nouvelle { background: #2f7a46; }
+  .alerte.annulee { background: #b7372a; }
+  .alerte .ico { font-size: 2.6rem; line-height: 1; }
+  .alerte .k { font: 600 .74rem/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; opacity: .85; margin-top: 14px; }
+  .alerte h3 { font: 700 1.75rem/1.15 var(--serif); letter-spacing: -.02em; margin: 8px 0 6px; }
+  .alerte p { margin: 3px 0; font-size: 1.05rem; opacity: .95; }
+  .alerte .msg { background: rgba(255,255,255,.18); border-radius: 12px; padding: 10px 12px; margin-top: 10px; font-size: .95rem; }
+  .alerte .actions { margin-top: 18px; }
+  .alerte .btn { background: #fff; color: var(--ink); }
+  .alerte .btn.ghost { background: rgba(255,255,255,.2); color: #fff; }
+  @keyframes pop { from { transform: scale(.88); opacity: 0; } }
+</style>
+</head>
+<body><div style="position:sticky;top:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:#5a4fcf;color:#fff;font:600 13px/1.3 -apple-system,BlinkMacSystemFont,sans-serif"><span>Démo · carnet de réservations de l'équipe · données fictives</span><span style="display:flex;gap:6px;flex-wrap:wrap"><a href="../" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Accueil démo</a><a href="../reserver/" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Page client</a><form method="post" action="/demo/api/reinitialiser.php" style="margin:0"><button style="color:#fff;background:rgba(255,255,255,.18);border:0;border-radius:99px;padding:4px 11px;font:inherit;cursor:pointer">Réinitialiser</button></form></span></div>
+<div id="root"><div class="loading">Chargement…</div></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+</svg>
+
+<script>
+(() => {
+'use strict';
+const API = '/demo/api/equipe.php';
+const root = document.getElementById('root');
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const MOIS_C = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const JOURS_C = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+const SOURCES = { site: 'Site', telephone: 'Téléphone', sur_place: 'Sur place', autre: 'Autre' };
+const STATUTS = { attente: 'En attente', confirmee: 'Confirmée', refusee: 'Refusée', annulee: 'Annulée' };
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const drap = r => r && r.langue === 'de' ? ' 🇩🇪' : '';
+const parse = d => { const [y, m, j] = d.split('-').map(Number); return new Date(y, m - 1, j); };
+const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+const today = () => iso(new Date());
+const addDays = (d, n) => { const x = parse(d); x.setDate(x.getDate() + n); return iso(x); };
+const dateLong = d => { const x = parse(d), j = x.getDate(); const t = `${JOURS[x.getDay()]} ${j === 1 ? '1er' : j} ${MOIS[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
+const dateCourt = d => { const x = parse(d); const t = `${JOURS_C[x.getDay()]} ${x.getDate()} ${MOIS_C[x.getMonth()]}`; return t[0].toUpperCase() + t.slice(1); };
+const hFr = h => h.replace(':', 'h');
+const telHref = t => 'tel:' + String(t).replace(/[^\d+]/g, '');
+const pers = n => `${n} pers.`;
+const relatif = d => d === today() ? "aujourd'hui" : d === addDays(today(), 1) ? 'demain' : d === addDays(today(), -1) ? 'hier' : '';
+
+const S = { moi: null, vapid: null, vue: 'carnet', date: today(), jour: null, demandes: 0, voirAnnulees: {} };
+
+/* ---------- Outils ---------- */
+async function api(action, data = {}) {
+  let r, d;
+  try {
+    r = await fetch(API, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ...data }) });
+    d = await r.json();
+  } catch { d = { ok: false, erreur: 'Pas de connexion au serveur. Vérifie internet.' }; }
+  if (r && r.status === 401 && !['connexion', 'installer', 'etat'].includes(action)) { S.moi = null; ecranConnexion(); }
+  return d;
+}
+let toastT;
+function toast(msg, err) {
+  document.querySelector('.toast')?.remove();
+  const t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : ''); t.textContent = msg;
+  document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), err ? 4500 : 2600);
+}
+function sheet(html, monter) {
+  const v = document.createElement('div'); v.className = 'veil';
+  v.innerHTML = `<div class="sheet" role="dialog"><div class="grip"></div>${html}</div>`;
+  const fermer = () => { v.remove(); document.body.style.overflow = ''; };
+  v.addEventListener('click', e => { if (e.target === v || e.target.closest('[data-fermer]')) fermer(); });
+  document.body.appendChild(v); document.body.style.overflow = 'hidden';
+  monter && monter(v.querySelector('.sheet'), fermer);
+  return fermer;
+}
+function sw(nom, on, attrs = '') { return `<span class="sw"><input type="checkbox" ${nom ? `name="${nom}"` : ''} ${on ? 'checked' : ''} ${attrs}><i></i></span>`; }
+function slotsHeures(debut = '11:00', fin = '14:30', debut2 = '17:30', fin2 = '22:30') {
+  const o = [];
+  for (const [a, b] of [[debut, fin], [debut2, fin2]]) {
+    let [h, m] = a.split(':').map(Number); const [hf, mf] = b.split(':').map(Number);
+    while (h * 60 + m <= hf * 60 + mf) { o.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`); m += 15; if (m >= 60) { m -= 60; h++; } }
+  }
+  return o;
+}
+
+/* ---------- Connexion / installation ---------- */
+async function demarrer() {
+  const e = await api('etat');
+  if (!e.ok) { root.innerHTML = `<div class="login"><div class="box"><div class="big">Le <span>76</span></div><p class="lead">${esc(e.erreur)}</p><button class="btn block" onclick="location.reload()">Réessayer</button></div></div>`; return; }
+  S.vapid = e.vapid;
+  if (!e.installe) return ecranInstallation();
+  if (location.hash.startsWith('#reinit=')) return ecranReinit(location.hash.slice(8));
+  if (!e.moi) return ecranConnexion();
+  S.moi = e.moi;
+  coque();
+  lireHash();
+  enregistrerSW();
+  if (!lireDepuis()) { const t = await api('evenements', {}); t.ok && ecrireDepuis(t.maintenant); }
+  else verifierEvenements();
+}
+
+function ecranInstallation() {
+  root.innerHTML = `<div class="login"><form class="box" id="inst">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Bienvenue ! Crée ton compte de responsable. Tu pourras ensuite ajouter l'équipe.</p>
+    <label class="field">Ton prénom<input name="nom" required autocomplete="given-name"></label>
+    <label class="field">Identifiant <small>(sans espace, ex. greg)</small><input name="identifiant" required autocapitalize="none" autocomplete="username"></label>
+    <label class="field">Mot de passe <small>(6 caractères minimum)</small><input name="mdp" type="password" required autocomplete="new-password"></label>
+    <button class="btn block">Créer mon compte</button></form></div>`;
+  document.getElementById('inst').onsubmit = async ev => {
+    ev.preventDefault(); const f = ev.target;
+    const r = await api('installer', { nom: f.nom.value, identifiant: f.identifiant.value, mdp: f.mdp.value });
+    r.ok ? demarrer() : toast(r.erreur, true);
+  };
+}
+
+function ecranConnexion() {
+  root.innerHTML = `<div class="login"><form class="box" id="cnx">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Carnet de réservations</p>
+    <label class="field">Identifiant<input name="identifiant" required autocapitalize="none" autocomplete="username"></label>
+    <label class="field">Mot de passe<input name="mdp" type="password" required autocomplete="current-password"></label>
+    <button class="btn block">Se connecter</button>
+    <p style="text-align:center;margin:16px 0 0"><a href="#" id="oubli">Mot de passe oublié ?</a></p></form></div>`;
+  document.getElementById('oubli').onclick = async ev => {
+    ev.preventDefault();
+    const id = document.querySelector('#cnx [name=identifiant]').value.trim();
+    if (!id) return toast('Écris d’abord ton identifiant, puis appuie sur « Mot de passe oublié ».', true);
+    const r = await api('mdp_oublie', { identifiant: id });
+    if (!r.ok) return toast(r.erreur, true);
+    document.querySelector('#cnx .lead').innerHTML = esc(r.message);
+  };
+  document.getElementById('cnx').onsubmit = async ev => {
+    ev.preventDefault(); const f = ev.target;
+    const r = await api('connexion', { identifiant: f.identifiant.value.trim(), mdp: f.mdp.value });
+    r.ok ? demarrer() : toast(r.erreur, true);
+  };
+}
+
+function ecranReinit(jeton) {
+  root.innerHTML = `<div class="login"><form class="box" id="rei">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Choisis ton nouveau mot de passe</p>
+    <label class="field">Nouveau mot de passe <small>(6 caractères minimum)</small><input name="mdp" type="password" required autocomplete="new-password"></label>
+    <button class="btn block">Enregistrer et me connecter</button></form></div>`;
+  document.getElementById('rei').onsubmit = async ev => {
+    ev.preventDefault();
+    const r = await api('mdp_reinit', { jeton, mdp: ev.target.mdp.value });
+    if (!r.ok) return toast(r.erreur, true);
+    history.replaceState(null, '', '/equipe/');
+    toast('Mot de passe changé');
+    demarrer();
+  };
+}
+
+/* ---------- Coque de l'appli ---------- */
+function coque() {
+  root.innerHTML = `<header class="top" id="top"></header><main id="main"></main>
+    <button class="fab" id="fab" aria-label="Nouvelle réservation">+</button>
+    <nav class="tabs">
+      <button data-vue="carnet"><svg><use href="#i-book"/></svg>Carnet</button>
+      <button data-vue="demandes"><svg><use href="#i-bell"/></svg>Demandes<span class="badge" id="badge" hidden></span></button>
+      <button data-vue="avenir"><svg><use href="#i-cal"/></svg>À venir</button>
+      <button data-vue="plus"><svg><use href="#i-more"/></svg>Plus</button>
+    </nav>`;
+  root.querySelector('nav.tabs').onclick = e => { const b = e.target.closest('button'); if (b) aller(b.dataset.vue); };
+  document.getElementById('fab').onclick = () => formulaireResa(null, S.vue === 'carnet' ? S.date : today());
+}
+function majBadge(n) {
+  if (n !== undefined) {
+    S.demandes = n;
+  }
+  const b = document.getElementById('badge'); if (!b) return;
+  b.hidden = !S.demandes; b.textContent = S.demandes;
+  if ('setAppBadge' in navigator) { try { S.demandes ? navigator.setAppBadge(S.demandes) : navigator.clearAppBadge(); } catch {} }
+}
+function aller(vue, date) {
+  if (date) S.date = date;
+  const h = vue === 'carnet' ? `#jour=${S.date}` : `#${vue}`;
+  if (location.hash !== h) history.replaceState(null, '', h);
+  afficher(vue);
+}
+function lireHash() {
+  const h = location.hash.slice(1);
+  if (h.startsWith('jour=')) { S.date = h.slice(5); afficher('carnet'); }
+  else afficher(['demandes', 'avenir', 'plus'].includes(h) ? h : 'carnet');
+}
+window.addEventListener('hashchange', () => S.moi && lireHash());
+
+function afficher(vue) {
+  S.vue = vue;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.vue === vue));
+  document.getElementById('fab').hidden = vue === 'plus';
+  ({ carnet: vueCarnet, demandes: vueDemandes, avenir: vueAvenir, plus: vuePlus })[vue]();
+  window.scrollTo(0, 0);
+}
+function enTete(titre, avecDate) {
+  const r = relatif(S.date);
+  document.getElementById('top').innerHTML = `<div class="top-row"><div class="logo">Le <span>76</span></div>${S.moi ? `<span style="font-size:.85rem;color:#d8c6ad">${esc(S.moi.nom)}</span>` : ''}</div><h1>${esc(titre)}</h1>
+    ${avecDate ? `<div class="datenav"><button class="nav" data-j="-1" aria-label="Jour précédent">‹</button>
+      <label class="datebox"><span class="dl">${dateLong(S.date)}</span><span class="dc">${dateCourt(S.date)}</span>${r ? `<small>${r}</small>` : ''}<input type="date" id="pick" value="${S.date}"></label>
+      <button class="nav" data-j="1" aria-label="Jour suivant">›</button>${S.date !== today() ? '<button class="today-btn" data-j="0">Auj.</button>' : ''}</div>` : ''}`;
+  if (avecDate) {
+    document.getElementById('top').onclick = e => { const b = e.target.closest('[data-j]'); if (b) aller('carnet', b.dataset.j === '0' ? today() : addDays(S.date, +b.dataset.j)); };
+    document.getElementById('pick').onchange = e => e.target.value && aller('carnet', e.target.value);
+  }
+}
+
+/* ---------- Carnet du jour ---------- */
+async function vueCarnet(silencieux) {
+  enTete('Carnet', true);
+  const main = document.getElementById('main');
+  if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
+  // 7 prochains jours à partir d'aujourd'hui (ou du jour affiché s'il est en dehors)
+  const auj = today(), debut = (S.date >= auj && S.date < addDays(auj, 7)) ? auj : S.date;
+  const [d, sem] = await Promise.all([api('jour', { date: S.date }), api('avenir', { debut, jours: 7 })]);
+  if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  if (S.vue !== 'carnet' || d.date !== S.date) return;
+  S.jour = d; majBadge(d.demandes);
+  let h = sem.ok ? semaine(sem.jours) : '';
+  for (const s of ['midi', 'soir']) {
+    const e = d.services[s];
+    const resas = d.reservations.filter(r => r.service === s);
+    const actives = resas.filter(r => r.statut === 'confirmee' || r.statut === 'attente');
+    const inactives = resas.filter(r => r.statut === 'annulee' || r.statut === 'refusee');
+    if (!e.ouvert && !actives.length && !inactives.length) {
+      h += `<div class="svc"><div class="svc-head"><div class="svc-title"><h2>${s === 'midi' ? 'Midi' : 'Soir'}</h2><span class="count"><small>${esc(e.raison || 'Fermé')}</small></span></div>
+        <div class="chips"><button class="chip" data-reglage="${s}">⚙︎ Ouvrir exceptionnellement…</button></div></div></div>`;
+      continue;
+    }
+    const conf = actives.filter(r => r.statut === 'confirmee').reduce((a, r) => a + r.couverts, 0);
+    const att = actives.filter(r => r.statut === 'attente').reduce((a, r) => a + r.couverts, 0);
+    const tot = conf + att, cap = e.capacite || 1;
+    const over = tot > e.capacite;
+    h += `<div class="svc"><div class="svc-head">
+      <div class="svc-title"><h2>${s === 'midi' ? 'Midi' : 'Soir'}</h2><span class="count">${tot} <small>/ ${e.capacite} couverts</small></span></div>
+      <div class="bar${over ? ' over' : ''}"><i style="width:${Math.min(100, conf / cap * 100)}%"></i><i class="att" style="width:${Math.min(100 - Math.min(100, conf / cap * 100), att / cap * 100)}%"></i></div>
+      <div class="chips">
+        ${e.soiree ? `<span class="chip soir">✦ ${esc(e.soiree.titre)}</span>` : ''}
+        ${!e.ouvert ? `<span class="chip off">${esc(e.raison || 'Fermé')}</span>` : `<button class="chip ${e.en_ligne ? 'ok' : 'off'}" data-enligne="${s}">${e.en_ligne ? '● Résa en ligne ouverte' : '○ Résa en ligne fermée'}</button>`}
+        ${att ? `<span class="chip" style="color:var(--amber)">${att} en attente</span>` : ''}
+        ${e.menu_impose ? '<span class="chip">Menu imposé</span>' : ''}
+        <button class="chip" data-reglage="${s}">⚙︎ Réglages</button>
+      </div></div>`;
+    if (!actives.length) h += `<div class="empty">Aucune réservation pour l'instant.</div>`;
+    h += actives.map(ligneResa).join('');
+    if (inactives.length) {
+      h += S.voirAnnulees[s] ? inactives.map(ligneResa).join('') + `<button class="more" data-annul="${s}">Masquer les annulées</button>`
+        : `<button class="more" data-annul="${s}">${inactives.length} annulée${inactives.length > 1 ? 's' : ''} / refusée${inactives.length > 1 ? 's' : ''} · afficher</button>`;
+    }
+    h += '</div>';
+  }
+  const main2 = document.getElementById('main');
+  main2.innerHTML = h;
+  main2.onclick = async ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.jour) return aller('carnet', b.dataset.jour);
+    if (b.dataset.id) return ficheResa(S.jour.reservations.find(r => r.id === +b.dataset.id));
+    if (b.dataset.annul) { S.voirAnnulees[b.dataset.annul] = !S.voirAnnulees[b.dataset.annul]; return vueCarnet(true); }
+    if (b.dataset.reglage) return reglageService(b.dataset.reglage);
+    if (b.dataset.enligne) {
+      const e = S.jour.services[b.dataset.enligne];
+      const r = await api('jour_reglage', { date: S.date, service: b.dataset.enligne, ferme_en_ligne: e.en_ligne });
+      if (r.ok) { toast(e.en_ligne ? 'Résa en ligne fermée pour ce service' : 'Résa en ligne rouverte'); vueCarnet(true); } else toast(r.erreur, true);
+    }
+  };
+}
+/* Bande des 7 prochains jours en haut du carnet */
+function semaine(jours) {
+  const cel = v => {
+    if (!v.ouvert && !v.occupe) return '<span class="sv x">–</span>';
+    const t = v.capacite ? v.occupe / v.capacite : 0;
+    const c = v.occupe >= v.capacite && v.capacite ? 'complet' : v.attente.resas ? 'attente' : t >= .85 ? 'presque' : v.occupe ? 'pris' : '';
+    return `<span class="sv ${c}">${v.occupe}</span>`;
+  };
+  return `<div class="semaine">${jours.map(j => {
+    const x = parse(j.date);
+    return `<button class="sj${j.date === S.date ? ' on' : ''}${j.date === today() ? ' auj' : ''}" data-jour="${j.date}">
+      <span class="sn">${JOURS_C[x.getDay()].replace('.', '')}</span><span class="sd">${x.getDate()}</span>
+      <span class="ss">${cel(j.services.midi)}${cel(j.services.soir)}</span></button>`;
+  }).join('')}</div><div class="sem-leg">Couverts midi · soir</div>`;
+}
+
+function ligneResa(r) {
+  const infos = [r.telephone, r.remarque ? `« ${r.remarque} »` : '', r.note_interne ? `📝 ${r.note_interne}` : ''].filter(Boolean).join(' · ');
+  return `<button class="resa ${r.statut}${r.arrive ? ' arrive' : ''}" data-id="${r.id}">
+    <span class="h">${hFr(r.heure)}</span>
+    <span class="who"><b>${r.arrive ? '✓ ' : ''}${esc(r.nom)}${drap(r)}${r.statut === 'attente' ? '<span class="tag att">à valider</span>' : ''}${r.source === 'site' && r.statut !== 'attente' ? '<span class="tag web">site</span>' : ''}</b>
+    <span>${esc(infos) || '&nbsp;'}</span></span>
+    <span class="pers">${r.couverts}</span></button>`;
+}
+
+/* Réglages d'un service précis (capacité du jour, fermeture, menu…) */
+function reglageService(s) {
+  const e = S.jour.services[s];
+  sheet(`<h2>${s === 'midi' ? 'Midi' : 'Soir'} · ${dateCourt(S.date)}</h2>
+    ${e.soiree ? `<div class="tip">✦ <b>${esc(e.soiree.titre)}</b>${e.soiree.details ? '<br>' + esc(e.soiree.details) : ''}</div>` : ''}
+    <label class="field">Ouverture
+      <select name="ouvert"><option value="auto">Horaires habituels</option><option value="1">Ouvert exceptionnellement</option><option value="0">Fermé exceptionnellement</option></select></label>
+    <div class="row" style="padding:6px 0 12px;border:0"><div class="grow">Réservation en ligne<small>Fermer si complet ou par téléphone seulement</small></div>${sw('en_ligne', !e.ferme_en_ligne)}</div>
+    <label class="field">Capacité ce ${s === 'midi' ? 'midi' : 'soir'} <small>(vide = capacité habituelle)</small><input name="capacite" type="number" inputmode="numeric" min="0" placeholder="${e.capacite_auto ? e.capacite : ''}" value="${e.capacite_auto ? '' : e.capacite}"></label>
+    <label class="field">Menu imposé <small>(le client doit cocher qu'il l'a bien noté)</small>
+      <select name="menu"><option value="auto">Automatique (oui si une soirée avec prix est prévue)</option><option value="1">Oui</option><option value="0">Non</option></select></label>
+    <label class="field">Message affiché aux clients <small>(facultatif)</small><textarea name="note" maxlength="300" placeholder="Ex. : terrasse fermée ce soir">${esc(e.note)}</textarea></label>
+    <div class="actions"><button class="btn ghost" data-fermer>Annuler</button><button class="btn" id="ok">Enregistrer</button></div>`, (el, fermer) => {
+    el.querySelector('[name=ouvert]').value = e.ouverture_forcee === null ? 'auto' : String(e.ouverture_forcee);
+    el.querySelector('[name=menu]').value = e.menu_impose_auto ? 'auto' : (e.menu_impose ? '1' : '0');
+    el.querySelector('#ok').onclick = async () => {
+      const ouvertSel = el.querySelector('[name=ouvert]').value;
+      const r = await api('jour_reglage', {
+        date: S.date, service: s,
+        ...(ouvertSel === 'auto' ? { ouvert: 'auto' } : { ouvert: ouvertSel === '1' }),
+        ferme_en_ligne: !el.querySelector('[name=en_ligne]').checked,
+        capacite: el.querySelector('[name=capacite]').value,
+        menu_impose: el.querySelector('[name=menu]').value === 'auto' ? 'auto' : el.querySelector('[name=menu]').value === '1',
+        note: el.querySelector('[name=note]').value,
+      });
+      if (r.ok) { fermer(); toast('Enregistré'); vueCarnet(true); } else toast(r.erreur, true);
+    };
+  });
+}
+
+/* Fiche d'une réservation */
+function ficheResa(r) {
+  if (!r) return;
+  const ligne = (l, v) => v ? `<div><span>${l}</span><b style="font-weight:500">${v}</b></div>` : '';
+  const actif = r.statut === 'confirmee' || r.statut === 'attente';
+  sheet(`<h2>${esc(r.nom)}${drap(r)} · ${r.couverts} pers.</h2>${r.langue === 'de' ? '<p style="margin:-6px 0 10px;color:var(--muted);font-size:.9rem">🇩🇪 Client allemand : ses e-mails partent en allemand</p>' : ''}
+    <div class="det">
+      ${ligne('Quand', `${dateLong(r.date)} à ${hFr(r.heure)}`)}
+      ${ligne('Statut', STATUTS[r.statut] + (r.traite_par ? ` <small style="color:var(--muted)">· ${esc(r.traite_par)}</small>` : ''))}
+      ${ligne('Téléphone', r.telephone ? `<a href="${telHref(r.telephone)}">${esc(r.telephone)}</a>` : '')}
+      ${ligne('E-mail', r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : '')}
+      ${ligne('Message', esc(r.remarque))}
+      ${ligne('Note interne', esc(r.note_interne))}
+      ${ligne('Origine', SOURCES[r.source] + (r.cree_par ? ` · ${esc(r.cree_par)}` : ''))}
+    </div>
+    <div class="actions">
+      ${r.statut === 'attente' ? `<button class="btn green" data-a="accepter">✓ Accepter</button><button class="btn" data-a="refuser">✕ Refuser</button>` : ''}
+      ${r.statut === 'confirmee' ? `<button class="btn ${r.arrive ? 'ghost' : 'green'} full" data-a="arrive">${r.arrive ? 'Annuler « arrivé »' : '✓ Client arrivé'}</button>` : ''}
+      ${r.telephone ? `<a class="btn ghost" href="${telHref(r.telephone)}">📞 Appeler</a>` : ''}
+      <button class="btn ghost" data-a="modifier">Modifier</button>
+      ${actif ? `<button class="btn ghost full" data-a="annuler" style="color:var(--rust)">Annuler la réservation</button>` : `<button class="btn ghost full" data-a="retablir">Remettre en confirmée</button>`}
+    </div>`, (el, fermer) => {
+    el.onclick = async e => {
+      const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+      if (a === 'accepter') { fermer(); accepter(r); }
+      else if (a === 'refuser') { fermer(); refuser(r, 'refusee'); }
+      else if (a === 'annuler') { fermer(); refuser(r, 'annulee'); }
+      else if (a === 'modifier') { fermer(); formulaireResa(r); }
+      else if (a === 'arrive') { const x = await api('arrive', { id: r.id, arrive: !r.arrive }); fermer(); x.ok ? rafraichir() : toast(x.erreur, true); }
+      else if (a === 'retablir') { const x = await api('statut', { id: r.id, statut: 'confirmee', prevenir: false }); fermer(); x.ok ? (toast('Réservation rétablie'), rafraichir()) : toast(x.erreur, true); }
+    };
+  });
+}
+
+async function accepter(r) {
+  const x = await api('statut', { id: r.id, statut: 'confirmee', prevenir: true });
+  if (!x.ok) return toast(x.erreur, true);
+  majBadge(x.demandes);
+  toast(r.email ? 'Acceptée · e-mail de confirmation envoyé' : 'Acceptée');
+  rafraichir();
+}
+function refuser(r, statut) {
+  const refus = statut === 'refusee';
+  sheet(`<h2>${refus ? 'Refuser la demande' : 'Annuler la réservation'}</h2>
+    <p style="margin:-4px 0 12px;color:var(--muted)">${esc(r.nom)}${drap(r)} · ${r.couverts} pers. · ${dateCourt(r.date)} à ${hFr(r.heure)}</p>
+    ${r.email ? `<label class="checkline"><input type="checkbox" name="prevenir" checked>Prévenir le client par e-mail</label>
+    <label class="field">Petit mot pour le client <small>(facultatif)</small><textarea name="message" placeholder="${refus ? 'Ex. : nous sommes complets à 19h, mais il reste de la place à 20h30.' : ''}"></textarea></label>` : `<div class="tip">Pas d'e-mail pour ce client${r.telephone ? ` : pense à l'appeler au <a href="${telHref(r.telephone)}">${esc(r.telephone)}</a>` : ''}.</div>`}
+    <div class="actions"><button class="btn ghost" data-fermer>Retour</button><button class="btn" id="ok">${refus ? 'Refuser' : 'Annuler la résa'}</button></div>`, (el, fermer) => {
+    el.querySelector('#ok').onclick = async () => {
+      const x = await api('statut', { id: r.id, statut, prevenir: !!el.querySelector('[name=prevenir]')?.checked, message: el.querySelector('[name=message]')?.value || '' });
+      if (!x.ok) return toast(x.erreur, true);
+      fermer(); majBadge(x.demandes); toast(refus ? 'Demande refusée' : 'Réservation annulée'); rafraichir();
+    };
+  });
+}
+
+/* Nouvelle réservation / modification */
+function formulaireResa(r, date) {
+  const nouveau = !r;
+  r = r || { date: date || today(), heure: '', couverts: 2, nom: '', telephone: '', email: '', remarque: '', note_interne: '', source: 'telephone' };
+  const heures = slotsHeures();
+  if (r.heure && !heures.includes(r.heure)) heures.push(r.heure), heures.sort();
+  sheet(`<h2>${nouveau ? 'Nouvelle réservation' : 'Modifier la réservation'}</h2>
+    <form id="fr">
+      <div class="cols"><label class="field">Date<input type="date" name="date" value="${r.date}" required></label>
+        <label class="field">Heure<select name="heure" required><option value="">—</option>${heures.map(h => `<option value="${h}" ${h === r.heure ? 'selected' : ''}>${hFr(h)}</option>`).join('')}</select></label></div>
+      <label class="field">Personnes<div class="num"><button type="button" data-n="-1">−</button><input name="couverts" type="number" inputmode="numeric" min="1" max="500" value="${r.couverts}"><button type="button" data-n="1">+</button></div></label>
+      <label class="field">Nom<input name="nom" value="${esc(r.nom)}" required autocomplete="off" autocapitalize="words"></label>
+      <label class="field">Téléphone<input name="telephone" type="tel" inputmode="tel" value="${esc(r.telephone)}" autocomplete="off"></label>
+      <label class="field">E-mail <small>(facultatif)</small><input name="email" type="email" value="${esc(r.email)}" autocomplete="off" autocapitalize="none"></label>
+      <label class="field">Message du client <small>(anniversaire, allergie…)</small><textarea name="remarque">${esc(r.remarque)}</textarea></label>
+      <label class="field">Note interne <small>(visible seulement par l'équipe)</small><input name="note_interne" value="${esc(r.note_interne)}" placeholder="Ex. : table près de la fenêtre"></label>
+      ${nouveau ? `<div class="field">Prise par<div class="seg" id="src">${['telephone', 'sur_place', 'autre'].map(s => `<button type="button" data-s="${s}" class="${r.source === s ? 'on' : ''}">${SOURCES[s]}</button>`).join('')}</div></div>` : ''}
+      <div class="field">Langue des e-mails<div class="seg" id="lng"><button type="button" data-l="fr" class="${r.langue !== 'de' ? 'on' : ''}">🇫🇷 Français</button><button type="button" data-l="de" class="${r.langue === 'de' ? 'on' : ''}">🇩🇪 Deutsch</button></div></div>
+      <label class="checkline"><input type="checkbox" name="envoyer_email" ${nouveau ? '' : 'checked'}>${nouveau ? 'Envoyer une confirmation par e-mail au client' : 'Prévenir le client par e-mail si la date, l\'heure ou le nombre change'}</label>
+      <div class="actions"><button type="button" class="btn ghost" data-fermer>Annuler</button><button class="btn">${nouveau ? 'Ajouter' : 'Enregistrer'}</button></div>
+    </form>`, (el, fermer) => {
+    const f = el.querySelector('#fr');
+    let source = r.source, langue = r.langue === 'de' ? 'de' : 'fr';
+    el.querySelector('#lng').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (!b) return; langue = b.dataset.l; el.querySelectorAll('#lng button').forEach(x => x.classList.toggle('on', x === b)); });
+    el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { f.couverts.value = Math.max(1, (+f.couverts.value || 0) + +b.dataset.n); });
+    el.querySelector('#src')?.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; source = b.dataset.s; el.querySelectorAll('#src button').forEach(x => x.classList.toggle('on', x === b)); });
+    const majMail = () => { const c = f.envoyer_email; c.disabled = !f.email.value.trim(); if (c.disabled) c.checked = false; };
+    f.email.addEventListener('input', () => { majMail(); if (nouveau && f.email.value.trim()) f.envoyer_email.checked = true; }); majMail();
+    if (nouveau) setTimeout(() => f.heure.focus(), 250);
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      const x = await api('enregistrer', { id: nouveau ? 0 : r.id, date: f.date.value, heure: f.heure.value, couverts: +f.couverts.value, nom: f.nom.value,
+        telephone: f.telephone.value, email: f.email.value, remarque: f.remarque.value, note_interne: f.note_interne.value, source, langue, envoyer_email: f.envoyer_email.checked });
+      if (!x.ok) return toast(x.erreur, true);
+      fermer();
+      toast(x.depasse ? `Enregistré · attention : ${x.depasse} couvert(s) au-dessus de la capacité` : 'Enregistré', !!x.depasse);
+      aller('carnet', x.reservation.date);
+    };
+  });
+}
+
+/* ---------- Demandes ---------- */
+async function vueDemandes(silencieux) {
+  enTete('Demandes à valider');
+  const main = document.getElementById('main');
+  if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
+  const d = await api('demandes');
+  if (S.vue !== 'demandes') return;
+  if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  majBadge(d.demandes.length);
+  if (!d.demandes.length) { main.innerHTML = `<div class="loading" style="padding-top:60px">✓ Aucune demande en attente.<br><small>Les nouvelles demandes du site arrivent ici.</small></div>`; return; }
+  main.innerHTML = `<p class="sub" style="margin-top:2px">${d.demandes.length} demande${d.demandes.length > 1 ? 's' : ''} venant du site</p>` + d.demandes.map(r => {
+    const e = r.etat, apres = e.occupe;
+    return `<div class="dem" data-id="${r.id}">
+      <div class="quand">${dateLong(r.date)} · ${hFr(r.heure)}</div>
+      <div class="qui"><b>${esc(r.nom)}</b>${drap(r)} · ${pers(r.couverts)}</div>
+      <div class="meta"><a href="${telHref(r.telephone)}">${esc(r.telephone)}</a> · ${esc(r.email)}</div>
+      <div class="meta">${r.service === 'midi' ? 'Midi' : 'Soir'} : ${apres} / ${e.capacite} couverts avec cette demande${apres > e.capacite ? ' <b style="color:var(--rust)">· au-dessus de la capacité</b>' : ''}${e.soiree ? ` · ✦ ${esc(e.soiree.titre)}` : ''}</div>
+      ${r.remarque ? `<div class="msg">« ${esc(r.remarque)} »</div>` : ''}
+      <div class="actions"><button class="btn green" data-a="ok">✓ Accepter</button><button class="btn ghost" data-a="non">✕ Refuser</button></div>
+    </div>`;
+  }).join('');
+  main.onclick = e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const r = d.demandes.find(x => x.id === +a.closest('.dem').dataset.id);
+    a.dataset.a === 'ok' ? accepter(r) : refuser(r, 'refusee');
+  };
+}
+
+/* ---------- À venir + recherche ---------- */
+async function vueAvenir(silencieux) {
+  enTete('À venir');
+  const main = document.getElementById('main');
+  if (!silencieux) main.innerHTML = '<div class="loading">Chargement…</div>';
+  const d = await api('avenir', { debut: today(), jours: 28 });
+  if (S.vue !== 'avenir') return;
+  if (!d.ok) { main.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  const cel = (v, s) => {
+    if (!v.ouvert && !v.confirmees.resas && !v.attente.resas) return `<div class="mini x">${s === 'midi' ? 'Midi' : 'Soir'} · fermé</div>`;
+    const taux = v.capacite ? v.occupe / v.capacite : 0;
+    const etat = v.occupe >= v.capacite && v.capacite > 0 ? 'complet' : v.attente.resas ? 'attente' : taux >= 0.85 ? 'presque' : v.occupe > 0 ? 'pris' : '';
+    const nb = v.confirmees.resas + v.attente.resas;
+    return `<div class="mini ${etat}"><div class="l" style="color:inherit;opacity:.8">${s === 'midi' ? 'Midi' : 'Soir'}${v.soiree ? ' <span class="st">✦</span>' : ''}${v.ouvert && !v.en_ligne ? ' · tél.' : ''}</div><b>${v.occupe}</b> / ${v.capacite}${nb ? ` <small>· ${nb} résa${nb > 1 ? 's' : ''}</small>` : ''}${v.attente.resas ? `<br><span class="wait">${v.attente.resas} à valider</span>` : ''}<span class="jauge" style="width:${Math.min(100, taux * 100)}%"></span></div>`;
+  };
+  main.innerHTML = `<input class="search" id="q" type="search" placeholder="Chercher un nom, un téléphone…" autocomplete="off">
+    <div class="legende"><span><i style="background:#f7f1e8;border-color:#e8d9c3"></i>Vide</span><span><i style="background:var(--green-bg);border-color:#b9d6b3"></i>Réservations</span><span><i style="background:var(--amber-bg);border-color:#efc27c"></i>À valider</span><span><i style="background:#fde3c8;border-color:#f0a560"></i>Presque plein</span><span><i style="background:#f8dcd6;border-color:#e69a8d"></i>Complet</span></div><div id="res"></div>
+    <div id="liste">${d.jours.map(j => {
+      const ferme = !j.services.midi.ouvert && !j.services.soir.ouvert && !j.services.midi.occupe && !j.services.soir.occupe;
+      return `<button class="day-row${ferme ? ' closed' : ''}" data-d="${j.date}"><div class="d">${dateCourt(j.date)}<small>${relatif(j.date)}</small></div>${cel(j.services.midi, 'midi')}${cel(j.services.soir, 'soir')}</button>`;
+    }).join('')}</div>`;
+  main.onclick = e => {
+    const b = e.target.closest('[data-d]'); if (b) return aller('carnet', b.dataset.d);
+    const x = e.target.closest('[data-id]'); if (x) { const r = (S.resultats || []).find(r => r.id === +x.dataset.id); r && ficheResa(r); }
+  };
+  let t;
+  document.getElementById('q').oninput = e => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const v = e.target.value.trim(), res = document.getElementById('res'), liste = document.getElementById('liste');
+      if (v.length < 2) { res.innerHTML = ''; liste.hidden = false; return; }
+      const x = await api('chercher', { q: v });
+      if (!x.ok) return;
+      S.resultats = x.resultats; liste.hidden = true;
+      res.innerHTML = x.resultats.length ? `<div class="svc">${x.resultats.map(r => ligneResa(r).replace('<span class="h">', `<span class="h" style="width:auto;min-width:48px;font-size:.85rem;line-height:1.2">${dateCourt(r.date)}<br>`)).join('')}</div>` : '<div class="loading">Aucun résultat.</div>';
+    }, 250);
+  };
+}
+
+/* ---------- Plus : compte, notifications, réglages, équipe ---------- */
+async function vuePlus() {
+  enTete('Plus');
+  const main = document.getElementById('main');
+  const notif = await etatNotif();
+  const iOSnonInstalle = /iphone|ipad/i.test(navigator.userAgent) && !navigator.standalone;
+  main.innerHTML = `
+    <div class="group"><h3>Mon compte</h3>
+      <div class="row"><div class="grow"><b>${esc(S.moi.nom)}</b><small>Identifiant : ${esc(S.moi.identifiant)}${S.moi.admin ? ' · responsable' : ''}</small></div></div>
+      <button class="row link-row" data-a="mdp"><span>Changer mon mot de passe</span><span>›</span></button>
+      <button class="row link-row" data-a="deco"><span style="color:var(--rust)">Se déconnecter</span><span>›</span></button>
+    </div>
+    <div class="group"><h3>Notifications sur ce téléphone</h3>
+      ${iOSnonInstalle ? `<div class="row"><div class="grow">Sur iPhone, installe d'abord l'appli : bouton <b>Partager</b> <span style="font-size:1.1em">⎋</span> de Safari puis <b>« Sur l'écran d'accueil »</b>. Ouvre ensuite « Résas 76 » depuis l'écran d'accueil pour activer les notifications.</div></div>`
+        : notif === 'non-supporte' ? `<div class="row"><div class="grow">Ce navigateur ne gère pas les notifications. Sur Android, utilise Chrome ; sur iPhone, installe l'appli sur l'écran d'accueil.</div></div>`
+        : `<div class="row"><div class="grow">Prévenir sur ce téléphone<small>${notif === 'bloque' ? 'Bloquées dans les réglages du téléphone : autorise-les pour « Résas 76 ».' : 'À chaque nouvelle demande ou annulation du site'}</small></div>${sw('', notif === 'actif', `id="notif" ${notif === 'bloque' ? 'disabled' : ''}`)}</div>
+          ${notif === 'actif' ? '<button class="row link-row" data-a="testpush"><span>Envoyer une notification de test</span><span>›</span></button>' : ''}`}    </div>
+    ${S.moi.admin ? `<div class="group"><h3>Responsable</h3>
+      <button class="row link-row" data-a="reglages"><span>Réglages des réservations<small style="display:block;color:var(--muted);font-size:.82rem">Capacité, horaires, délais, e-mails…</small></span><span>›</span></button>
+      <button class="row link-row" data-a="soirees"><span>Soirées à venir<small style="display:block;color:var(--muted);font-size:.82rem">Menu imposé, résa en ligne par soirée</small></span><span>›</span></button>
+      <button class="row link-row" data-a="equipe"><span>L'équipe<small style="display:block;color:var(--muted);font-size:.82rem">Ajouter les accès des serveuses</small></span><span>›</span></button>
+      <button class="row link-row" data-a="abonnes"><span>Clients pour les infos des soirées<small style="display:block;color:var(--muted);font-size:.82rem">Ceux qui ont accepté de recevoir tes annonces</small></span><span>›</span></button>
+      <button class="row link-row" data-a="journal"><span>Journal des e-mails<small style="display:block;color:var(--muted);font-size:.82rem">Ce qui est parti, à qui, et si l'hébergement l'a accepté</small></span><span>›</span></button>
+      <a class="row link-row" href="${API}?action=export" style="text-decoration:none;color:inherit"><span>Télécharger toutes les réservations (Excel)</span><span>›</span></a>
+    </div>` : ''}
+    <p style="text-align:center;color:var(--muted);font-size:.8rem">Page client : <a href="/demo/reserver/" target="_blank">le76.fr/reserver</a></p>`;
+  main.onclick = async e => {
+    const a = e.target.closest('[data-a]')?.dataset.a;
+    if (a === 'deco') { await api('deconnexion'); S.moi = null; ecranConnexion(); }
+    else if (a === 'mdp') changerMdp();
+    else if (a === 'reglages') ecranReglages();
+    else if (a === 'soirees') ecranSoirees();
+    else if (a === 'equipe') ecranEquipe();
+    else if (a === 'journal') ecranJournal();
+    else if (a === 'abonnes') ecranAbonnes();
+    else if (a === 'testpush') { const x = await api('push_test'); x.ok && x.envoyes ? toast('Notification envoyée') : toast("La notification n'est pas partie. Désactive puis réactive.", true); }
+  };
+  document.getElementById('notif')?.addEventListener('change', async e => {
+    e.target.disabled = true;
+    const ok = e.target.checked ? await activerNotif() : await desactiverNotif();
+    if (!ok) e.target.checked = !e.target.checked;
+    vuePlus();
+  });
+}
+
+function changerMdp() {
+  sheet(`<h2>Changer mon mot de passe</h2>
+    <label class="field">Mot de passe actuel<input type="password" name="a" autocomplete="current-password"></label>
+    <label class="field">Nouveau mot de passe<input type="password" name="n" autocomplete="new-password"></label>
+    <div class="actions"><button class="btn ghost" data-fermer>Annuler</button><button class="btn" id="ok">Changer</button></div>`, (el, fermer) => {
+    el.querySelector('#ok').onclick = async () => {
+      const x = await api('mdp_changer', { ancien: el.querySelector('[name=a]').value, nouveau: el.querySelector('[name=n]').value });
+      x.ok ? (fermer(), toast('Mot de passe changé')) : toast(x.erreur, true);
+    };
+  });
+}
+
+/* Réglages généraux */
+async function ecranReglages() {
+  const x = await api('reglages'); if (!x.ok) return toast(x.erreur, true);
+  const r = x.reglages, sm = x.smtp;
+  const NJ = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 7: 'Dim' };
+  const opts = (n, v) => Array.from({ length: n }, (_, i) => i + 1).map(i => `<option value="${String(i).padStart(2, '0')}" ${+v === i ? 'selected' : ''}>${i}</option>`).join('');
+  const saisonHtml = (s = { nom: 'Été', debut: '06-01', fin: '09-15', midi: 250, soir: 250 }) => `<div class="saison" style="border-top:1px solid var(--line);padding:10px 14px">
+      <div class="cols" style="grid-template-columns:1fr auto"><input class="sn" value="${esc(s.nom)}" placeholder="Nom" style="padding:9px;border:1.5px solid var(--line);border-radius:10px"><button type="button" class="btn ghost small" data-suppr>Supprimer</button></div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:.88rem">Du <select class="dj">${opts(31, s.debut.slice(3))}</select><select class="dm">${MOIS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}" ${+s.debut.slice(0, 2) === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select>
+        au <select class="fj">${opts(31, s.fin.slice(3))}</select><select class="fm">${MOIS.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}" ${+s.fin.slice(0, 2) === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:.88rem">Midi <input class="sm" type="number" value="${s.midi}" style="width:76px;padding:7px;border:1.5px solid var(--line);border-radius:8px"> Soir <input class="ss" type="number" value="${s.soir}" style="width:76px;padding:7px;border:1.5px solid var(--line);border-radius:8px"> couverts</div></div>`;
+  sheet(`<h2>Réglages des réservations</h2>
+    <div class="group"><div class="row"><div class="grow"><b>Réservation en ligne</b><small>Interrupteur général de la page client</small></div>${sw('resa_en_ligne', r.resa_en_ligne)}</div></div>
+
+    <div class="group"><h3>Capacité habituelle (couverts)</h3>
+      <div class="row"><div class="grow">Midi</div><input name="cap_midi" type="number" inputmode="numeric" value="${r.capacite.midi}"></div>
+      <div class="row"><div class="grow">Soir</div><input name="cap_soir" type="number" inputmode="numeric" value="${r.capacite.soir}"></div>
+    </div>
+
+    <div class="group"><h3>Saisons (reviennent chaque année)</h3>
+      <div class="row" style="border:0;padding-top:0"><div class="grow"><small>Ex. : l'été avec la terrasse, capacité plus grande.</small></div></div>
+      <div id="saisons">${r.saisons.map(saisonHtml).join('')}</div>
+      <div class="row"><button type="button" class="btn ghost small" id="addSaison">+ Ajouter une saison</button></div>
+    </div>
+
+    <div class="group"><h3>Jours d'ouverture et dernier créneau</h3>
+      ${Object.entries(r.semaine).map(([j, v]) => `<div class="wk" data-j="${j}"><span class="n">${NJ[j]}</span>
+        <label><input type="checkbox" class="m" ${v.midi ? 'checked' : ''}>Midi <input type="time" class="mf" value="${v.midi_fin}" step="900"></label>
+        <label><input type="checkbox" class="s" ${v.soir ? 'checked' : ''}>Soir <input type="time" class="sf" value="${v.soir_fin}" step="900"></label></div>`).join('')}
+      <div class="row"><div class="grow">Premier créneau du midi</div><input name="midi_debut" type="time" step="900" value="${r.midi_debut}"></div>
+      <div class="row"><div class="grow">Premier créneau du soir</div><input name="soir_debut" type="time" step="900" value="${r.soir_debut}"></div>
+      <div class="row"><div class="grow">Créneaux toutes les</div><select name="pas">${[10, 15, 20, 30, 60].map(p => `<option ${p === r.pas ? 'selected' : ''} value="${p}">${p} min</option>`).join('')}</select></div>
+    </div>
+
+    <div class="group"><h3>Règles de la réservation en ligne</h3>
+      <div class="row"><div class="grow">Les clients peuvent demander</div><select name="delai_mode"><option value="heures" ${r.delai_mode === 'heures' ? 'selected' : ''}>jusqu'à … h avant</option><option value="veille" ${r.delai_mode === 'veille' ? 'selected' : ''}>jusqu'à la veille</option></select></div>
+      <div class="row" id="rowHeures" ${r.delai_mode === 'veille' ? 'hidden' : ''}><div class="grow">Nombre d'heures avant</div><input name="delai_heures" type="number" min="0" value="${r.delai_heures}"></div>
+      <div class="row"><div class="grow">Fermer la résa en ligne dès le début du service<small>Aujourd'hui : plus de demande pour le midi dès ${esc(r.midi_debut.replace(':', 'h'))}, pour le soir dès ${esc(r.soir_debut.replace(':', 'h'))}</small></div>${sw('fermer_pendant_service', r.fermer_pendant_service)}</div>
+      <div class="row"><div class="grow">Maximum de personnes en ligne<small>Au-delà : « appelez-nous »</small></div><input name="max_en_ligne" type="number" min="1" value="${r.max_en_ligne}"></div>
+      <div class="row"><div class="grow">Maximum de couverts par créneau<small>0 = pas de limite (utile pour étaler l'arrivée en cuisine)</small></div><input name="max_par_creneau" type="number" min="0" value="${r.max_par_creneau}"></div>
+      <div class="row"><div class="grow">Réservable jusqu'à … jours à l'avance</div><input name="jours_avance" type="number" min="1" value="${r.jours_avance}"></div>
+    </div>
+
+    <div class="group"><h3>E-mails</h3>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Adresses qui reçoivent les alertes <small>(une ou plusieurs, séparées par une virgule)</small><input name="alertes_email" value="${esc(r.alertes_email.join(', '))}" placeholder="ex. le76@email.fr" autocapitalize="none"></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Adresse d'envoi <small>(doit être une adresse @le76.fr)</small><input name="expediteur" value="${esc(r.expediteur)}" autocapitalize="none"></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Petit mot ajouté aux confirmations <small>(facultatif)</small><textarea name="mot_client" placeholder="Ex. : Parking gratuit derrière le restaurant.">${esc(r.mot_client)}</textarea></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">🇩🇪 Le même mot en allemand <small>(pour les clients allemands, facultatif)</small><textarea name="mot_client_de" placeholder="Z. B.: Kostenlose Parkplätze hinter dem Restaurant.">${esc(r.mot_client_de || '')}</textarea></label></div>
+      <div class="row"><div class="grow">Rappel par e-mail la veille<small>Envoyé aux réservations confirmées, à partir de l'heure choisie</small></div><input name="rappel_heure" type="time" step="900" value="${r.rappel_heure}" style="width:100px">${sw('rappel_veille', r.rappel_veille)}</div>
+      <div class="row"><button type="button" class="btn ghost small" id="mailtest">Envoyer un e-mail de test</button></div>
+    </div>
+
+    <div class="group"><h3>Anti-spam : envoyer par la messagerie Hostinger</h3>
+      <div class="row" style="border:0;padding-top:0"><div class="grow"><small>Les e-mails partent de la vraie boîte @le76.fr au lieu du serveur du site : ils arrivent beaucoup moins dans les spams.</small></div></div>
+      <div class="row"><div class="grow"><b>Utiliser la messagerie</b></div>${sw('smtp_actif', sm.actif)}</div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Boîte mail <small>(la vraie boîte, pas un alias)</small><input name="smtp_utilisateur" value="${esc(sm.utilisateur || r.expediteur)}" autocapitalize="none" autocomplete="off"></label></div>
+      <div class="row" style="display:block"><label class="field" style="margin:0">Mot de passe de cette boîte <small>${sm.mdp_enregistre ? '(déjà enregistré : laisse vide pour le garder)' : '(celui de la boîte chez Hostinger)'}</small><input name="smtp_mdp" type="password" autocomplete="new-password" placeholder="${sm.mdp_enregistre ? '••••••••' : ''}"></label></div>
+      <div class="row"><div class="grow">Serveur</div><input name="smtp_hote" value="${esc(sm.hote)}" style="width:170px"><select name="smtp_port"><option ${sm.port === 465 ? 'selected' : ''}>465</option><option ${sm.port === 587 ? 'selected' : ''}>587</option></select></div>
+      ${sm.derniere_erreur ? `<div class="row"><div class="grow" style="color:var(--rust-dark);font-size:.88rem">Dernier problème : ${esc(sm.derniere_erreur)}</div></div>` : ''}
+    </div>
+    <div class="actions" style="position:sticky;bottom:0;background:var(--cream);padding:10px 0"><button class="btn ghost" data-fermer>Fermer</button><button class="btn" id="ok">Enregistrer</button></div>`, (el, fermer) => {
+    const v = n => el.querySelector(`[name=${n}]`);
+    el.querySelector('#addSaison').onclick = () => el.querySelector('#saisons').insertAdjacentHTML('beforeend', saisonHtml());
+    el.querySelector('#saisons').onclick = e => { if (e.target.closest('[data-suppr]')) e.target.closest('.saison').remove(); };
+    v('delai_mode').onchange = e => el.querySelector('#rowHeures').hidden = e.target.value === 'veille';
+    const collecter = () => ({
+      resa_en_ligne: v('resa_en_ligne').checked,
+      capacite: { midi: +v('cap_midi').value, soir: +v('cap_soir').value },
+      saisons: [...el.querySelectorAll('.saison')].map(s => ({ nom: s.querySelector('.sn').value, debut: s.querySelector('.dm').value + '-' + s.querySelector('.dj').value, fin: s.querySelector('.fm').value + '-' + s.querySelector('.fj').value, midi: +s.querySelector('.sm').value, soir: +s.querySelector('.ss').value })),
+      semaine: Object.fromEntries([...el.querySelectorAll('.wk')].map(w => [w.dataset.j, { midi: w.querySelector('.m').checked, soir: w.querySelector('.s').checked, midi_fin: w.querySelector('.mf').value, soir_fin: w.querySelector('.sf').value }])),
+      midi_debut: v('midi_debut').value, soir_debut: v('soir_debut').value, pas: +v('pas').value,
+      delai_mode: v('delai_mode').value, delai_heures: +v('delai_heures').value, max_en_ligne: +v('max_en_ligne').value,
+      fermer_pendant_service: v('fermer_pendant_service').checked,
+      rappel_veille: v('rappel_veille').checked, rappel_heure: v('rappel_heure').value,
+      max_par_creneau: +v('max_par_creneau').value, jours_avance: +v('jours_avance').value,
+      alertes_email: v('alertes_email').value, expediteur: v('expediteur').value, mot_client: v('mot_client').value, mot_client_de: v('mot_client_de').value,
+    });
+    const sauver = async () => {
+      const x = await api('reglages_ecrire', { reglages: collecter() }); if (!x.ok) { toast(x.erreur, true); return false; }
+      const y = await api('smtp_ecrire', { smtp: { actif: v('smtp_actif').checked, utilisateur: v('smtp_utilisateur').value.trim(), mdp: v('smtp_mdp').value, hote: v('smtp_hote').value.trim(), port: +v('smtp_port').value } });
+      if (!y.ok) { toast(y.erreur, true); return false; }
+      v('smtp_mdp').value = '';
+      return true;
+    };
+    el.querySelector('#ok').onclick = async () => { if (await sauver()) { fermer(); toast('Réglages enregistrés'); } };
+    el.querySelector('#mailtest').onclick = async () => { if (!(await sauver())) return; const x = await api('mail_test'); x.ok ? toast(x.via === 'smtp' ? 'E-mail de test envoyé par la messagerie Hostinger : regarde ta boîte' : 'E-mail de test envoyé : regarde ta boîte (et les spams)') : toast(x.erreur, true); };
+  });
+}
+
+/* Soirées à venir (lues dans le programme du site) */
+async function ecranSoirees() {
+  const x = await api('reglages'); if (!x.ok) return toast(x.erreur, true);
+  const liste = x.soirees;
+  sheet(`<h2>Soirées à venir</h2>
+    <div class="tip">Ces soirées viennent du programme du site (la liste « prochaines dates »). Une soirée avec un prix est en « menu imposé » automatiquement : le client doit cocher qu'il l'a bien noté.</div>
+    ${liste.length ? liste.map((s, i) => s.fermeture
+      ? `<div class="group"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small>${dateCourt(s.date)}${s.date_fin !== s.date ? ' → ' + dateCourt(s.date_fin) : ''} · résa en ligne fermée automatiquement</small></div></div></div>`
+      : `<div class="group" data-i="${i}"><div class="row"><div class="grow"><b>${esc(s.titre)}</b><small>${dateLong(s.date)}${s.heure ? ' · ' + esc(s.heure) : ''}</small>${s.details ? `<small>${esc(s.details)}</small>` : ''}<small>${s.etat.occupe} / ${s.etat.capacite} couverts</small></div></div>
+        <div class="row"><div class="grow">Menu imposé</div>${sw('', s.etat.menu_impose, 'data-k="menu"')}</div>
+        <div class="row"><div class="grow">Réservation en ligne</div>${sw('', !s.etat.ferme_en_ligne, 'data-k="en_ligne"')}</div></div>`).join('') : '<p>Aucune soirée au programme.</p>'}
+    <button class="btn ghost block" data-fermer>Fermer</button>`, el => {
+    el.addEventListener('change', async e => {
+      const k = e.target.dataset.k; if (!k) return;
+      const s = liste[+e.target.closest('[data-i]').dataset.i];
+      const x = await api('jour_reglage', { date: s.date, service: 'soir', ...(k === 'menu' ? { menu_impose: e.target.checked } : { ferme_en_ligne: !e.target.checked }) });
+      x.ok ? toast('Enregistré') : (toast(x.erreur, true), e.target.checked = !e.target.checked);
+    });
+  });
+}
+
+/* Clients inscrits aux infos */
+async function ecranAbonnes() {
+  const x = await api('abonnes'); if (!x.ok) return toast(x.erreur, true);
+  sheet(`<h2>Clients pour les infos</h2>
+    <div class="tip"><b>${x.abonnes.length} client${x.abonnes.length > 1 ? 's' : ''}</b> ont coché « Je souhaite recevoir les infos des soirées » en réservant${x.desinscrits ? ` · ${x.desinscrits} désinscrit${x.desinscrits > 1 ? 's' : ''}` : ''}. Seuls eux peuvent recevoir tes annonces. Le fichier contient pour chacun son lien de désinscription, à mettre dans chaque envoi.</div>
+    <a class="btn block" href="${API}?action=export_abonnes" style="margin-bottom:18px">Télécharger le fichier (Excel)</a>
+    <div class="group">${x.abonnes.length ? x.abonnes.map(a => `<div class="row"><div class="grow"><b style="font-weight:600">${esc(a.nom)}</b><small>${esc(a.email)}${a.telephone ? ' · ' + esc(a.telephone) : ''}</small></div><small style="color:var(--muted)">${esc(a.inscrit_le.slice(8, 10) + '/' + a.inscrit_le.slice(5, 7))}</small></div>`).join('') : '<div class="row">Personne pour l\'instant : la liste se remplit au fil des réservations.</div>'}</div>
+    <button class="btn ghost block" data-fermer>Fermer</button>`);
+}
+
+/* Journal des e-mails */
+async function ecranJournal() {
+  const x = await api('journal_mails'); if (!x.ok) return toast(x.erreur, true);
+  sheet(`<h2>Journal des e-mails</h2>
+    <div class="tip">Alertes envoyées à : <b>${x.alertes.length ? x.alertes.map(esc).join(', ') : 'aucune adresse réglée'}</b></div>
+    <div class="group">${x.journal.length ? x.journal.map(m => `<div class="row"><div class="grow"><b style="font-weight:500">${esc(m.sujet)}</b><small>${esc(m.quand.slice(8, 10) + '/' + m.quand.slice(5, 7) + ' ' + m.quand.slice(11, 16))} · ${esc(m.a)}</small></div><span class="chip ${+m.ok ? 'ok' : 'off'}">${+m.ok ? 'Parti' : 'Refusé'}</span></div>`).join('') : '<div class="row">Aucun e-mail envoyé depuis la mise en place du journal.</div>'}</div>
+    <p style="font-size:.85rem;color:var(--muted)">« Parti » veut dire que l'hébergement l'a accepté. S'il n'arrive pas, regarde dans les indésirables (spam).</p>
+    <button class="btn ghost block" data-fermer>Fermer</button>`);
+}
+
+/* Équipe */
+async function ecranEquipe() {
+  const x = await api('equipe'); if (!x.ok) return toast(x.erreur, true);
+  const fermer = sheet(`<h2>L'équipe</h2><div id="eq"></div>
+    <div class="group"><h3>Ajouter quelqu'un</h3><div style="padding:6px 14px 12px">
+      <label class="field">Prénom<input name="nom" autocomplete="off"></label>
+      <label class="field">Identifiant <small>(sans espace ni accent, ex. lea)</small><input name="identifiant" autocapitalize="none" autocomplete="off"></label>
+      <label class="field">Mot de passe <small>(6 caractères minimum, à lui/lui donner)</small><input name="mdp" autocomplete="off"></label>
+      <label class="checkline"><input type="checkbox" name="admin">Responsable (accès aux réglages et à l'équipe)</label>
+      <button class="btn block" id="add">Ajouter</button></div></div>
+    <button class="btn ghost block" data-fermer>Fermer</button>`, el => {
+    let eq = x.equipe, ouvert = null, confirmeSuppr = false;
+    const dessiner = () => el.querySelector('#eq').innerHTML = `<div class="group">${eq.map(u => {
+      const moi = u.id === S.moi.id;
+      const tete = `<div class="row" data-u="${u.id}" style="${u.actif ? '' : 'opacity:.55'}"><div class="grow"><b>${esc(u.nom)}</b>${u.admin ? ' <span class="tag web">resp.</span>' : ''}${u.actif ? '' : ' <span class="tag" style="background:#f8dcd6;color:var(--rust-dark)">désactivé</span>'}<small>${esc(u.identifiant)} · ${u.telephones ? u.telephones + ' appareil(s) notifié(s)' : 'pas de notification'}</small></div>
+        ${moi ? '<small style="color:var(--muted)">toi</small>' : `<button class="btn ghost small" data-act="gerer">${ouvert === u.id ? 'Fermer' : 'Gérer ›'}</button>`}</div>`;
+      if (moi || ouvert !== u.id) return tete;
+      return tete + `<div style="padding:4px 14px 14px;background:var(--sand)">
+        <label class="field" style="margin-top:10px">Nouveau mot de passe <small>(6 caractères minimum)</small>
+          <div style="display:flex;gap:8px;margin-top:5px"><input data-mdp style="margin:0" autocomplete="off"><button class="btn small" data-act="mdp">Changer</button></div></label>
+        <div class="row" style="padding:8px 0;border:0;background:transparent"><div class="grow">Responsable<small>Accès aux réglages et à l'équipe</small></div>${sw('', u.admin, 'data-act="admin"')}</div>
+        <div class="actions" style="margin-top:6px">
+          <button class="btn ghost small" data-act="actif">${u.actif ? 'Désactiver' : 'Réactiver'}</button>
+          <button class="btn small" data-act="suppr" style="background:${confirmeSuppr ? 'var(--rust-dark)' : 'var(--rust)'}">${confirmeSuppr ? 'Confirmer : supprimer' : 'Supprimer'}</button>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin:8px 0 0">« Désactiver » coupe l'accès mais garde le compte. « Supprimer » l'efface (les réservations déjà notées restent).</p>
+      </div>`;
+    }).join('')}</div>`;
+    dessiner();
+    const maj = (y, msg) => { if (!y.ok) return toast(y.erreur, true); eq = y.equipe; confirmeSuppr = false; dessiner(); toast(msg); };
+    el.querySelector('#eq').addEventListener('click', async e => {
+      const b = e.target.closest('[data-act]'); if (!b || b.dataset.act === 'admin') return;
+      const u = eq.find(u => u.id === +b.closest('[data-u]')?.dataset.u) || eq.find(u => u.id === ouvert);
+      if (!u) return;
+      const a = b.dataset.act;
+      if (a === 'gerer') { ouvert = ouvert === u.id ? null : u.id; confirmeSuppr = false; return dessiner(); }
+      if (a === 'mdp') {
+        const m = el.querySelector('[data-mdp]').value;
+        if (m.length < 6) return toast('6 caractères minimum.', true);
+        return maj(await api('equipe_modifier', { id: u.id, mdp: m }), `Mot de passe de ${u.nom} changé`);
+      }
+      if (a === 'actif') return maj(await api('equipe_modifier', { id: u.id, actif: !u.actif }), u.actif ? `${u.nom} désactivé(e)` : `${u.nom} réactivé(e)`);
+      if (a === 'suppr') {
+        if (!confirmeSuppr) { confirmeSuppr = true; return dessiner(); }
+        ouvert = null;
+        return maj(await api('equipe_supprimer', { id: u.id }), `${u.nom} supprimé(e)`);
+      }
+    });
+    el.querySelector('#eq').addEventListener('change', async e => {
+      if (e.target.dataset.act !== 'admin') return;
+      const u = eq.find(u => u.id === ouvert);
+      maj(await api('equipe_modifier', { id: u.id, admin: e.target.checked }), e.target.checked ? `${u.nom} est responsable` : `${u.nom} n'est plus responsable`);
+    });
+    el.querySelector('#add').onclick = async () => {
+      const g = n => el.querySelector(`[name=${n}]`);
+      const y = await api('equipe_ajouter', { nom: g('nom').value, identifiant: g('identifiant').value.trim(), mdp: g('mdp').value, admin: g('admin').checked });
+      if (!y.ok) return toast(y.erreur, true);
+      eq = y.equipe; dessiner();
+      toast(`${g('nom').value} ajouté(e) : identifiant « ${g('identifiant').value.trim()} »`);
+      ['nom', 'identifiant', 'mdp'].forEach(n => g(n).value = ''); g('admin').checked = false;
+    };
+  });
+}
+
+/* ---------- Notifications ---------- */
+let swReg = null;
+async function enregistrerSW() {
+  if (!(false)) return;
+  try { swReg = await navigator.serviceWorker.register('/equipe/sw.js', { scope: '/equipe/' }); } catch {}
+}
+async function etatNotif() {
+  if (!(false) || !('PushManager' in window) || !('Notification' in window)) return 'non-supporte';
+  if (Notification.permission === 'denied') return 'bloque';
+  const reg = swReg || await navigator.serviceWorker.getRegistration('/equipe/');
+  const sub = reg && await reg.pushManager.getSubscription();
+  return sub ? 'actif' : 'inactif';
+}
+const b64 = s => { const p = '='.repeat((4 - s.length % 4) % 4); const r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...r].map(c => c.charCodeAt(0))); };
+async function activerNotif() {
+  try {
+    if (await Notification.requestPermission() !== 'granted') { toast('Notifications refusées sur ce téléphone.', true); return false; }
+    const reg = swReg || await navigator.serviceWorker.register('/equipe/sw.js', { scope: '/equipe/' });
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(S.vapid) });
+    const x = await api('push_abonner', { abonnement: sub.toJSON() });
+    if (!x.ok) { toast(x.erreur, true); return false; }
+    toast('Notifications activées sur ce téléphone');
+    return true;
+  } catch (e) { toast("Impossible d'activer les notifications : " + e.message, true); return false; }
+}
+async function desactiverNotif() {
+  const reg = swReg || await navigator.serviceWorker.getRegistration('/equipe/');
+  const sub = reg && await reg.pushManager.getSubscription();
+  if (sub) { await api('push_desabonner', { endpoint: sub.endpoint }); await sub.unsubscribe(); }
+  toast('Notifications coupées sur ce téléphone');
+  return true;
+}
+
+/* ---------- Grandes alertes à l'écran (nouvelle réservation / annulation) ---------- */
+let audioCtx = null;
+document.addEventListener('pointerdown', () => { try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch {} }, { passive: true });
+function sonner(type) {
+  try {
+    if (!audioCtx) return;
+    const notes = type === 'annulee' ? [660, 440, 330] : [523, 659, 784, 1047];
+    notes.forEach((f, i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime + i * 0.16;
+      o.type = 'sine'; o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.start(t); o.stop(t + 0.32);
+    });
+  } catch {}
+  try { navigator.vibrate && navigator.vibrate(type === 'annulee' ? [400, 150, 400] : [200, 100, 200, 100, 200]); } catch {}
+}
+const lireDepuis = () => { try { return localStorage.getItem('le76_depuis'); } catch { return null; } };
+const ecrireDepuis = v => { try { localStorage.setItem('le76_depuis', v); } catch {} };
+let titreBase = document.title, clignote = null;
+async function verifierEvenements() {
+  if (!S.moi) return;
+  const d = await api('evenements', { depuis: lireDepuis() || '' });
+  if (!d.ok) return;
+  ecrireDepuis(d.maintenant);
+  if (d.evenements.length) montrerAlertes(d.evenements);
+}
+function montrerAlertes(evts) {
+  let box = document.querySelector('.alertes');
+  if (!box) { box = document.createElement('div'); box.className = 'alertes'; document.body.appendChild(box); }
+  for (const e of evts) {
+    const r = e.reservation, nouv = e.type === 'nouvelle';
+    const el = document.createElement('div');
+    el.className = 'alerte ' + e.type;
+    el.innerHTML = `<div class="ico">${nouv ? '🔔' : '❌'}</div>
+      <div class="k">${nouv ? 'Nouvelle réservation' : 'Réservation annulée'}</div>
+      <h3>${esc(r.nom)}${drap(r)} · ${r.couverts} pers.</h3>
+      <p>${dateLong(r.date)} à ${hFr(r.heure)}</p>
+      ${nouv ? `<p>${esc(r.telephone)}</p>${r.remarque ? `<div class="msg">« ${esc(r.remarque)} »</div>` : ''}` : '<p>Annulée par le client : les places sont libérées.</p>'}
+      <div class="actions">${nouv && r.statut === 'attente'
+        ? '<button class="btn" data-x="ok">✓ Accepter</button><button class="btn ghost" data-x="voir">Plus tard</button>'
+        : '<button class="btn" data-x="carnet">Voir le carnet</button><button class="btn ghost" data-x="fermer">OK, vu</button>'}</div>`;
+    el.onclick = async ev => {
+      const x = ev.target.closest('[data-x]')?.dataset.x; if (!x) return;
+      el.remove(); if (!box.children.length) { box.remove(); arreterClignote(); }
+      if (x === 'ok') accepter(r);
+      else if (x === 'voir') aller('demandes');
+      else if (x === 'carnet') aller('carnet', r.date);
+      else rafraichir();
+    };
+    box.appendChild(el);
+    sonner(e.type);
+  }
+  if (!clignote) {
+    let a = false;
+    clignote = setInterval(() => { a = !a; document.title = a ? '🔔 Réservation !' : titreBase; }, 1000);
+  }
+  rafraichir(true);
+}
+function arreterClignote() { clearInterval(clignote); clignote = null; document.title = titreBase; }
+
+/* ---------- Rafraîchissement ---------- */
+function rafraichir(force) {
+  if (!S.moi) return;
+  if (document.querySelector('.veil')) return; // ne pas déranger une saisie en cours
+  if (S.vue === 'carnet') vueCarnet(true);
+  else if (S.vue === 'demandes') vueDemandes(true);
+  else if (S.vue === 'avenir' && !document.getElementById('q')?.value) vueAvenir(true);
+  else api('demandes').then(d => d.ok && majBadge(d.demandes.length));
+}
+setInterval(() => document.visibilityState === 'visible' && rafraichir(), 45000);
+setInterval(verifierEvenements, 20000); // même si l'onglet est en arrière-plan sur l'ordinateur
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { rafraichir(); verifierEvenements(); } });
+void 0&&navigator.serviceWorker?.addEventListener('message', e => { if (e.data?.type === 'push') { verifierEvenements(); rafraichir(); } });
+
+demarrer();
+})();
+</script>
+</body>
+</html>

@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?string $repondre_a = null): bool
 {
+    if (defined('DEMO')) {
+        return true; // démo : aucun e-mail n'est réellement envoyé
+    }
     $r = reglages();
     if (!filter_var($a, FILTER_VALIDATE_EMAIL)) {
         return false;
@@ -496,6 +499,9 @@ function chiffrer_push(string $message, string $p256dh, string $auth): string
 /** Renvoie le code HTTP du service de notification (201 = envoyé). */
 function push_envoyer(array $abo, array $contenu): int
 {
+    if (defined('DEMO')) {
+        return 0;
+    }
     if (!function_exists('curl_init')) {
         return 0;
     }
@@ -560,6 +566,9 @@ function push_tous(string $titre, string $corps, string $url, string $tag = '', 
  */
 function envoyer_rappels(bool $forcer = false): int
 {
+    if (defined('DEMO')) {
+        return 0;
+    }
     $r = reglages();
     if (!$r['rappel_veille'] || date('H:i') < $r['rappel_heure']) {
         return 0;
