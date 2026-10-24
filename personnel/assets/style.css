@@ -331,3 +331,20 @@ dialog#dlg{max-width:520px;max-height:calc(100dvh - 40px);overflow:auto}
 .dday-leg{display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--warn-bg);box-shadow:inset 0 0 0 1.5px var(--warn);vertical-align:-1px}
 .closebar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:.92rem}
 .presets button.on{box-shadow:inset 0 0 0 2px var(--accent)}
+/* ---------- Grille des horaires habituels ---------- */
+.hgrid{background:var(--card2);border-radius:12px;padding:8px 10px}
+.hg-head,.hg-row{display:grid;grid-template-columns:92px 1fr 1fr;gap:8px;align-items:center}
+.hg-head{font-size:.72rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.02em;padding:2px 0 6px}
+.hg-row{padding:5px 0;border-top:.5px solid var(--line)}
+.hg-row b{font-weight:600;font-size:.92rem}
+.hg-slot{display:flex;align-items:center;gap:5px;transition:opacity .15s}
+.hg-slot input[type=time]{min-height:36px;padding:5px 6px;font-size:.9rem;width:100%;min-width:0;background:var(--card)}
+.hg-slot span{color:var(--muted)}
+.hg-slot.off input[type=time],.hg-slot.off span{opacity:.3}
+.hg-total{padding:8px 0 2px;text-align:right}
+@media (max-width:560px){.hg-head,.hg-row{grid-template-columns:1fr}.hg-head span:not(:first-child){display:none}.hg-row b{margin-top:4px}}
+.hg-head,.hg-row{grid-template-columns:84px minmax(0,1fr) minmax(0,1fr)}
+.hg-slot{min-width:0}
+.hg-slot input[type=time]{flex:1 1 0;width:0}
+.hg-slot input[type=checkbox]{flex:none}
+.hg-slot input[type=time]::-webkit-calendar-picker-indicator{display:none}.hg-slot input[type=time]{padding:5px 4px;text-align:center}

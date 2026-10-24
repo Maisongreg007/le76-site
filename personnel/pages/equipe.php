@@ -37,6 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([$prenom, $nom, implode(',', $postes), $type, implode(',', $etabs), $pin, $taux, $salaire, $hh, $entree, $sortie, bin2hex(random_bytes(12)), date('Y-m-d H:i:s')]);
             $id = (int)db()->lastInsertId();
         }
+        if ($type === 'fixe' && isset($_POST['h'])) {
+            $hor = isset($_POST['h_resto']) ? null : json_encode(horaires_depuis_post((array)$_POST['h']));
+            db()->prepare('UPDATE employes SET horaires = ? WHERE id = ?')->execute([$hor, $id]);
+        }
         back('admin.php?p=equipe', $prenom . ' ' . $nom . ' est enregistré(e).');
     }
 
@@ -108,6 +112,15 @@ if ($e !== null) {
     }
     echo '</div>';
 
+    if (true) {
+        $hEmp = $emp ? emp_horaires($emp) : horaires_resto();
+        echo '<div class="field" id="f-horaires"><label>Ses horaires habituels</label>'
+            . '<p class="muted small" style="margin:0 0 8px 2px">Coche les services qu\'il fait et ajuste ses heures. Le bouton « Remplir avec les horaires habituels » du planning s\'en sert.</p>'
+            . horaires_grille($hEmp)
+            . '<label class="inline-check" style="margin-top:8px"><input type="checkbox" name="h_resto" value="1"' . ($emp && empty($emp['horaires']) ? ' checked' : '') . '> Utiliser simplement les horaires du restaurant</label></div>'
+            . '<script>(function(){var w=document.getElementById("f-horaires");w.querySelector("[data-grid]").addEventListener("change",function(){w.querySelector("input[name=h_resto]").checked=false;});})();</script>';
+    }
+
     echo '<div class="field"><label>Code de pointage (4 chiffres)</label><input name="pin" value="' . h($v['pin']) . '" inputmode="numeric" pattern="\d{4}" maxlength="4" required style="width:120px;font-size:1.3rem;letter-spacing:.2em;text-align:center"></div>';
     echo '<div class="row"><button class="primary">Enregistrer</button><a class="btn" href="admin.php?p=equipe">Annuler</a></div></form>';
 
@@ -126,7 +139,7 @@ if ($e !== null) {
             . '<button class="danger small" data-confirm="Sûr ? Tout sera effacé, retouche">Supprimer définitivement (fiche de test)</button>'
             . '<p class="muted small">Efface la personne avec tous ses pointages et son planning. À utiliser pour les fiches de test ; pour quelqu\'un qui part, préfère « Archiver ».</p></form>';
     }
-    echo '<script>function sw(){var f=document.querySelector("input[name=type]:checked").value;document.getElementById("f-extra").style.display=f==="extra"?"":"none";document.getElementById("f-fixe").style.display=f==="fixe"?"":"none"}sw()</script>';
+    echo '<script>function sw(){var f=document.querySelector("input[name=type]:checked").value;document.getElementById("f-extra").style.display=f==="extra"?"":"none";document.getElementById("f-fixe").style.display=f==="fixe"?"":"none";var hz=document.getElementById("f-horaires");if(hz)hz.style.display=f==="fixe"?"":"none"}sw()</script>';
     admin_end();
     exit;
 }

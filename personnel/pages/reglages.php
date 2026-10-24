@@ -50,6 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         set_setting('mail_from', filter_var($from, FILTER_VALIDATE_EMAIL) ? $from : '');
         back('admin.php?p=reglages#compta', 'Enregistré.');
     }
+    if ($act === 'horaires_resto') {
+        set_setting('horaires_resto', json_encode(horaires_depuis_post((array)($_POST['h'] ?? []))));
+        back('admin.php?p=reglages#horaires', 'Horaires du restaurant enregistrés.');
+    }
     if ($act === 'tolerance') {
         set_setting('tolerance', (string)max(0, min(120, (int)($_POST['tolerance'] ?? 15))));
         back('admin.php?p=reglages', 'Tolérance enregistrée.');
@@ -154,6 +158,9 @@ echo '<div class="card" style="max-width:640px" id="compta"><h3>Comptable</h3><p
     . '<div class="field"><label>E-mail du comptable</label><input type="email" name="compta" value="' . h((string)setting('compta_email', '')) . '" placeholder="cabinet@exemple.fr" style="width:100%"></div>'
     . '<div class="field"><label>Adresse d\'envoi (une boîte de ton domaine)</label><input type="email" name="from" value="' . h((string)setting('mail_from', '')) . '" placeholder="' . h(expediteur()) . '" style="width:100%"></div>'
     . '<button class="primary">Enregistrer</button></form></div>';
+
+echo '<div class="card" style="max-width:640px" id="horaires"><h3>Horaires du restaurant</h3><p class="muted small" style="margin-top:0">Les services habituels. Ce sont les horaires par défaut de chaque fixe (tu peux ensuite les personnaliser dans sa fiche Équipe).</p>'
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="horaires_resto">' . horaires_grille(horaires_resto()) . '<p><button class="primary">Enregistrer</button></p></form></div>';
 
 echo '<div class="card" style="max-width:640px"><h3>Tolérance prévu / réel</h3><p class="muted small" style="margin-top:0">En dessous de cet écart, on considère que l\'horaire est respecté (pas d\'alerte).</p>'
     . '<form method="post" class="row">' . csrf_field() . '<input type="hidden" name="action" value="tolerance"><select name="tolerance">';

@@ -223,6 +223,10 @@ function migrate(PDO $pdo): void
         $pdo->exec("ALTER TABLE planning ADD COLUMN motif TEXT");
         $pdo->exec("ALTER TABLE planning ADD COLUMN note TEXT");
     }
+    $colsE = array_column($pdo->query('PRAGMA table_info(employes)')->fetchAll(), 'name');
+    if (!in_array('horaires', $colsE, true)) {
+        $pdo->exec("ALTER TABLE employes ADD COLUMN horaires TEXT");
+    }
     if (!in_array('preset', $cols, true)) {
         $pdo->exec("ALTER TABLE planning ADD COLUMN preset TEXT");
         $linkPresets = true;
@@ -233,6 +237,12 @@ function migrate(PDO $pdo): void
     CREATE TABLE IF NOT EXISTS clotures (ym TEXT PRIMARY KEY, at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS alertes_envoyees (cle TEXT PRIMARY KEY, at INTEGER NOT NULL);
     ");
+    // Horaires des services du 76 (donnés par le patron) : deviennent les horaires rapides
+    if ($pdo->query("SELECT v FROM settings WHERE k = 'services_v1'")->fetchColumn() === false) {
+        $pdo->prepare("INSERT OR REPLACE INTO settings (k, v) VALUES ('presets', ?)")->execute(["Midi;09:30;14:00\nSoir;18:00;21:00\nSamedi;17:30;01:00\nDimanche midi;11:00;14:00\nDimanche soir;18:00;21:00"]);
+        $pdo->exec("INSERT OR REPLACE INTO settings (k, v) VALUES ('services_v1', '1')");
+        $linkPresets = true;
+    }
     if (!empty($linkPresets)) {
         // Relie les horaires existants aux horaires rapides qui ont les mêmes heures
         $raw = $pdo->query("SELECT v FROM settings WHERE k = 'presets'")->fetchColumn();
@@ -280,6 +290,88 @@ function share_token(bool $renew = false): string
         set_setting('share_token', $t);
     }
     return $t;
+}
+
+/* ---------- Horaires habituels (semaine type) ---------- */
+
+/** Horaires du restaurant par jour (1 = lundi … 7 = dimanche), 2 créneaux max : [[début, fin], …] */
+function horaires_resto(): array
+{
+    $raw = setting('horaires_resto');
+    $h = $raw ? json_decode($raw, true) : null;
+    if (!is_array($h)) {
+        $m = ['09:30', '14:00'];
+        $soir = ['18:00', '21:00'];
+        $h = [1 => [$m], 2 => [$m], 3 => [$m], 4 => [$m, $soir], 5 => [$m, $soir], 6 => [['17:30', '01:00']], 7 => [['11:00', '14:00'], $soir]];
+    }
+    $out = [];
+    for ($d = 1; $d <= 7; $d++) {
+        $out[$d] = array_values(array_filter((array)($h[$d] ?? $h[(string)$d] ?? []), fn($x) => is_array($x) && count($x) === 2 && valid_time($x[0]) && valid_time($x[1])));
+    }
+    return $out;
+}
+
+/** Horaires habituels d'un employé (les siens s'il en a, sinon ceux du restaurant). */
+function emp_horaires(array $e): array
+{
+    $h = !empty($e['horaires']) ? json_decode((string)$e['horaires'], true) : null;
+    if (!is_array($h)) {
+        return horaires_resto();
+    }
+    $out = [];
+    for ($d = 1; $d <= 7; $d++) {
+        $out[$d] = array_values(array_filter((array)($h[$d] ?? $h[(string)$d] ?? []), fn($x) => is_array($x) && count($x) === 2 && valid_time($x[0]) && valid_time($x[1])));
+    }
+    return $out;
+}
+
+/** Lit la grille envoyée par le formulaire (h[jour][créneau][on|d|f]). */
+function horaires_depuis_post(array $p): array
+{
+    $out = [];
+    for ($d = 1; $d <= 7; $d++) {
+        $out[$d] = [];
+        foreach ([0, 1] as $k) {
+            $x = $p[$d][$k] ?? [];
+            if (!empty($x['on']) && valid_time($x['d'] ?? null) && valid_time($x['f'] ?? null) && $x['d'] !== $x['f']) {
+                $out[$d][] = [$x['d'], $x['f']];
+            }
+        }
+    }
+    return $out;
+}
+
+/** Total hebdo d'une grille, en minutes. */
+function horaires_minutes(array $h): int
+{
+    $m = 0;
+    foreach ($h as $l) foreach ($l as [$a, $b]) $m += shift_minutes($a, $b);
+    return $m;
+}
+
+/** Grille modifiable (jours × 2 créneaux). */
+function horaires_grille(array $h, string $name = 'h'): string
+{
+    $html = '<div class="hgrid" data-grid><div class="hg-head"><span></span><span>1<sup>er</sup> service</span><span>2<sup>e</sup> service</span></div>';
+    for ($d = 1; $d <= 7; $d++) {
+        $html .= '<div class="hg-row"><b>' . h(ucfirst(JOURS_LONG[$d - 1])) . '</b>';
+        // Place chaque créneau dans sa colonne : avant 16 h = 1er service, après = 2e service
+        $cols = [null, null];
+        foreach ($h[$d] ?? [] as $sl) {
+            $k = (int)substr($sl[0], 0, 2) < 16 ? 0 : 1;
+            if ($cols[$k] !== null) $k = 1 - $k;
+            if ($cols[$k] === null) $cols[$k] = $sl;
+        }
+        foreach ([0, 1] as $k) {
+            $x = $cols[$k];
+            $n = $name . '[' . $d . '][' . $k . ']';
+            $html .= '<div class="hg-slot' . ($x ? '' : ' off') . '"><input type="checkbox" name="' . $n . '[on]" value="1"' . ($x ? ' checked' : '') . ' aria-label="Travaille">'
+                . '<input type="time" name="' . $n . '[d]" value="' . h($x[0] ?? ($k ? '18:00' : '09:30')) . '">'
+                . '<span>–</span><input type="time" name="' . $n . '[f]" value="' . h($x[1] ?? ($k ? '21:00' : '14:00')) . '"></div>';
+        }
+        $html .= '</div>';
+    }
+    return $html . '<div class="hg-total muted small">Total : <b data-total>' . h(fmt_min(horaires_minutes($h))) . '</b> par semaine</div></div>';
 }
 
 /** Nom de l'horaire rapide qui correspond exactement à ces heures (ou null). */
@@ -952,6 +1044,21 @@ function admin_end(): void
 {
     // Bouton « Partager » : envoie le fichier via le menu de partage (iPad/iPhone : Mail, WhatsApp, AirDrop…), sinon le télécharge
     echo '</main><script>
+// Grille des horaires : grise un créneau décoché et recalcule le total
+document.querySelectorAll("[data-grid]").forEach(function (g) {
+  function upd() {
+    let m = 0;
+    g.querySelectorAll(".hg-slot").forEach(function (s) {
+      const on = s.querySelector("input[type=checkbox]").checked; s.classList.toggle("off", !on);
+      if (!on) return;
+      const t = s.querySelectorAll("input[type=time]"); if (!t[0].value || !t[1].value) return;
+      const a = +t[0].value.slice(0,2)*60 + +t[0].value.slice(3), b = +t[1].value.slice(0,2)*60 + +t[1].value.slice(3);
+      m += b > a ? b - a : b - a + 1440;
+    });
+    const tt = g.querySelector("[data-total]"); if (tt) tt.textContent = Math.floor(m/60) + "h" + String(m%60).padStart(2,"0");
+  }
+  g.addEventListener("input", upd); g.addEventListener("change", upd);
+});
 // Confirmation sans fenêtre : 1er appui = « Sûr ? », 2e appui = on valide
 document.addEventListener("click", function (ev) {
   const b = ev.target.closest("[data-confirm]"); if (!b) return;

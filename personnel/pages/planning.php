@@ -89,6 +89,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect($retour);
     }
 
+    if ($act === 'fill_fixes') {
+        // Remplit la semaine avec les horaires habituels des fixes (sans écraser, sans les jours « pas dispo »)
+        $fin = date('Y-m-d', strtotime($lundi . ' +6 days'));
+        $ind = indispos_entre($lundi, $fin);
+        $exists = db()->prepare('SELECT 1 FROM planning WHERE employe_id=? AND etab=? AND jour=? AND debut=? AND fin=?');
+        $n = 0; $saut = 0;
+        foreach (employes(true, $etab) as $e) {
+            if ($e['type'] !== 'fixe') continue;
+            foreach (emp_horaires($e) as $dow => $slots) {
+                $j = date('Y-m-d', strtotime($lundi . ' +' . ($dow - 1) . ' days'));
+                if (isset($ind[(int)$e['id']][$j])) { if ($slots) $saut++; continue; }
+                foreach ($slots as [$d, $f]) {
+                    $exists->execute([$e['id'], $etab, $j, $d, $f]);
+                    if ($exists->fetchColumn()) continue;
+                    if (chevauche_planning((int)$e['id'], $j, $d, $f)) { $saut++; continue; }
+                    db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin, preset) VALUES (?,?,?,?,?,?)')->execute([$e['id'], $etab, $j, $d, $f, preset_nom($d, $f)]);
+                    $n++;
+                }
+            }
+        }
+        back($retour, $n . ' horaire(s) ajouté(s) pour les fixes.' . ($saut ? ' ' . $saut . ' laissé(s) de côté (jour pas dispo ou horaire déjà pris).' : ''));
+    }
+
     if ($act === 'model_save') {
         $nom = trim((string)($_POST['nom'] ?? ''));
         if ($nom === '') back($retour, '', 'Donne un nom au modèle.');
@@ -295,6 +318,7 @@ echo '<div class="toolbar"><div class="weeknav">'
     . '</div><div class="row">'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="copy"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
     . '<button class="small">Copier la semaine d\'avant</button></form>'
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="fill_fixes"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><button class="small" title="Ajoute les horaires habituels de chaque fixe pour cette semaine">Remplir les fixes</button></form>'
     . '<button type="button" class="small" id="btn-models">Modèles</button>'
     . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
