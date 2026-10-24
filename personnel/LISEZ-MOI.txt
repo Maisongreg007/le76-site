@@ -1,0 +1,14 @@
+PERSONNEL — pointeuse, planning et heures (Le 76 + Camping)
+
+MISE EN LIGNE (Hostinger)
+1. Dans hPanel > Fichiers > Gestionnaire de fichiers, ouvre public_html.
+2. Cree un dossier (ex. "personnel"), puis envoie dedans tout le contenu de ce dossier
+   (ou envoie le .zip et fais "Extraire").
+3. Ouvre https://le76.fr/personnel/ : choisis ton mot de passe, c'est pret.
+
+SUR L'IPAD DE POINTAGE
+Reglages > "Pointeuse du Le 76" (ou du Camping), une seule fois. Seul un appareil active
+de cette facon peut pointer.
+
+Les donnees sont dans le dossier "data" (ne pas le supprimer).
+Reglages > Sauvegarde pour en telecharger une copie.
