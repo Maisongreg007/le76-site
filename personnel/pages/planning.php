@@ -105,14 +105,16 @@ foreach (ETABS as $k => $l) {
 }
 echo '</div></div>';
 
-echo '<div class="row between" style="margin-bottom:12px"><div class="row">'
-    . '<a class="btn" href="admin.php?p=planning&etab=' . h($etab) . '&s=' . h($prevS) . '">←</a>'
-    . '<b>' . h($titre) . '</b>'
-    . '<a class="btn" href="admin.php?p=planning&etab=' . h($etab) . '&s=' . h($nextS) . '">→</a>'
-    . '<a class="btn small" href="admin.php?p=planning&etab=' . h($etab) . '">Cette semaine</a></div>'
+$titreCourt = (int)date('j', strtotime($lundi)) . ' – ' . (int)date('j', strtotime($fin)) . ' ' . MOIS[(int)date('n', strtotime($fin)) - 1];
+echo '<div class="toolbar"><div class="weeknav">'
+    . '<a class="btn round" aria-label="Semaine précédente" href="admin.php?p=planning&etab=' . h($etab) . '&s=' . h($prevS) . '">‹</a>'
+    . '<b><span class="hide-m">' . h($titre) . '</span><span class="show-m">' . h($titreCourt) . '</span></b>'
+    . '<a class="btn round" aria-label="Semaine suivante" href="admin.php?p=planning&etab=' . h($etab) . '&s=' . h($nextS) . '">›</a>'
+    . ($lundi !== monday_of(date('Y-m-d')) ? '<a class="btn small" href="admin.php?p=planning&etab=' . h($etab) . '">Aujourd\'hui</a>' : '')
+    . '</div><div class="row">'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="copy"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
-    . '<button class="small">Copier la semaine précédente</button></form>'
-    . '<button type="button" class="small primary" id="btn-share">Partager le planning</button></div>';
+    . '<button class="small">Copier la semaine d\x27avant</button></form>'
+    . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
 if (!$emps) {
     echo '<div class="card"><p class="muted">Personne n\'est rattaché à ' . h(ETABS[$etab]) . ' pour l\'instant.</p><a class="btn primary" href="admin.php?p=equipe&e=new">Ajouter quelqu\'un</a></div>';

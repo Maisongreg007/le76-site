@@ -515,9 +515,9 @@ function page_head(string $titre, string $manifest = 'manifest-admin.json', stri
     echo '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
         . '<meta name="robots" content="noindex, nofollow">'
-        . '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
+        . '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="mobile-web-app-capable" content="yes">'
         . '<meta name="apple-mobile-web-app-title" content="Personnel">'
-        . '<meta name="theme-color" content="#fbf8f3">'
+        . '<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"><meta name="color-scheme" content="light dark">'
         . '<link rel="manifest" href="' . h($manifest) . '">'
         . '<link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="assets/icon.svg">'
         . '<link rel="stylesheet" href="assets/style.css?v=' . filemtime(__DIR__ . '/assets/style.css') . '">'
@@ -526,6 +526,14 @@ function page_head(string $titre, string $manifest = 'manifest-admin.json', stri
 
 function admin_nav(string $actif): void
 {
+    // Icônes style SF Symbols (traits simples)
+    $ic = [
+        'aujourdhui' => '<path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/>',
+        'planning' => '<rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
+        'heures' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+        'equipe' => '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M16.5 14.6c2.4.1 4 1.5 4.5 4"/>',
+        'reglages' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+    ];
     $items = [
         'aujourdhui' => "Aujourd'hui",
         'planning' => 'Planning',
@@ -533,9 +541,11 @@ function admin_nav(string $actif): void
         'equipe' => 'Équipe',
         'reglages' => 'Réglages',
     ];
-    echo '<header class="top"><div class="brand">Personnel</div><nav>';
+    echo '<header class="top"><div class="brand"><span class="brand-ico"></span>Personnel</div><nav class="tabbar">';
     foreach ($items as $k => $label) {
-        echo '<a href="admin.php?p=' . $k . '"' . ($k === $actif ? ' class="on"' : '') . '>' . h($label) . '</a>';
+        echo '<a href="admin.php?p=' . $k . '"' . ($k === $actif ? ' class="on" aria-current="page"' : '') . '>'
+            . '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $ic[$k] . '</svg>'
+            . '<span>' . h($label) . '</span></a>';
     }
     echo '</nav></header><main class="wrap">';
 }

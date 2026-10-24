@@ -170,8 +170,8 @@ if ($vue === 'liste') {
     }
     echo '</div></div>';
     echo '<div class="row between no-print" style="margin-bottom:12px"><div class="row">'
-        . '<a class="btn" href="' . $base . '&m=' . h($prevM) . $qEtab . '">←</a><b style="min-width:130px;text-align:center">' . h(ucfirst(mois_fr($ym))) . '</b>'
-        . '<a class="btn" href="' . $base . '&m=' . h($nextM) . $qEtab . '">→</a>'
+        . '<a class="btn round" href="' . $base . '&m=' . h($prevM) . $qEtab . '">‹</a><b style="min-width:130px;text-align:center">' . h(ucfirst(mois_fr($ym))) . '</b>'
+        . '<a class="btn round" href="' . $base . '&m=' . h($nextM) . $qEtab . '">›</a>'
         . '<form method="get" class="row"><input type="hidden" name="p" value="heures"><input type="hidden" name="v" value="liste"><input type="hidden" name="m" value="' . h($ym) . '">'
         . ($etabF ? '<input type="hidden" name="etab" value="' . h($etabF) . '">' : '')
         . '<input type="date" name="j" value="' . h((string)$jourF) . '" onchange="this.form.submit()" title="Voir un seul jour">'
@@ -186,7 +186,7 @@ if ($vue === 'liste') {
     liste_pointages($liste, true, ['m' => $ym, 'e' => 0, 'v' => 'liste', 'j' => $jourF, 'etabf' => $etabF, 'etabDef' => $etabF ?: 'le76']);
     echo '</div>';
 
-    echo '<div class="card no-print" style="border-color:#f0c9c6"><h3>Phase de test</h3><p class="muted small">Efface tous les pointages de ' . h(mois_fr($ym)) . ' (les deux restaurants). L\'équipe, le planning et les réglages ne bougent pas. Impossible à annuler.</p>'
+    echo '<div class="card no-print" style="box-shadow:inset 0 0 0 1.5px var(--err-bg)"><h3>Phase de test</h3><p class="muted small">Efface tous les pointages de ' . h(mois_fr($ym)) . ' (les deux restaurants). L\'équipe, le planning et les réglages ne bougent pas. Impossible à annuler.</p>'
         . '<form method="post" class="row">' . csrf_field()
         . '<input type="hidden" name="action" value="purge"><input type="hidden" name="v" value="liste"><input type="hidden" name="m" value="' . h($ym) . '">'
         . '<input name="confirm" placeholder="Tape EFFACER" autocomplete="off" style="width:160px"><button class="danger" data-confirm="Sûr ? Retouche pour effacer">Effacer les pointages du mois</button></form></div>';
@@ -214,7 +214,7 @@ if ($empId) {
 
     echo '<p class="no-print"><a href="admin.php?p=heures&m=' . h($ym) . $qEtab . '">← Heures de ' . h(mois_fr($ym)) . '</a></p>';
     echo '<div class="row between"><h1 style="margin:0">' . h(emp_nom($emp)) . ' <span class="print-only">— ' . h(mois_fr($ym)) . '</span></h1>'
-        . '<div class="row no-print"><a class="btn" href="admin.php?p=heures&e=' . $empId . '&m=' . h($prevM) . '">←</a><b>' . h(mois_fr($ym)) . '</b><a class="btn" href="admin.php?p=heures&e=' . $empId . '&m=' . h($nextM) . '">→</a></div>'
+        . '<div class="row no-print"><a class="btn round" href="admin.php?p=heures&e=' . $empId . '&m=' . h($prevM) . '">‹</a><b>' . h(mois_fr($ym)) . '</b><a class="btn round" href="admin.php?p=heures&e=' . $empId . '&m=' . h($nextM) . '">›</a></div>'
         . boutons_partage('admin.php?p=export&t=detail&m=' . $ym . '&e=' . $empId, 'heures-' . preg_replace('/[^a-z0-9]+/i', '-', emp_nom($emp)) . '-' . $ym . '.csv') . '</div><br>';
 
     echo '<div class="card"><p class="muted small no-print" style="margin-top:0">Corrige une heure puis « OK ». Les lignes en orange sont sans départ.</p>';
@@ -250,8 +250,8 @@ foreach (ETABS as $k => $l) {
 echo '</div></div>';
 
 echo '<div class="row between" style="margin-bottom:12px"><div class="row no-print">'
-    . '<a class="btn" href="admin.php?p=heures&m=' . h($prevM) . $qEtab . '">←</a><b style="min-width:130px;text-align:center">' . h(ucfirst(mois_fr($ym))) . '</b>'
-    . '<a class="btn" href="admin.php?p=heures&m=' . h($nextM) . $qEtab . '">→</a></div>'
+    . '<a class="btn round" href="admin.php?p=heures&m=' . h($prevM) . $qEtab . '">‹</a><b style="min-width:130px;text-align:center">' . h(ucfirst(mois_fr($ym))) . '</b>'
+    . '<a class="btn round" href="admin.php?p=heures&m=' . h($nextM) . $qEtab . '">›</a></div>'
     . '<div class="row no-print"><a class="btn small" href="admin.php?p=heures&v=liste&m=' . h($ym) . $qEtab . '">Modifier les pointages</a>'
     . '<a class="btn small" href="admin.php?p=export&m=' . h($ym) . $qEtab . '&t=resume">Excel</a>'
     . boutons_partage('admin.php?p=export&t=resume&m=' . $ym . $qEtab, 'heures-' . $ym . ($etabF ? '-' . $etabF : '') . '.csv') . '</div></div>'

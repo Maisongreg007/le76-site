@@ -51,7 +51,7 @@ echo '</div>';
 /* Alertes : départs oubliés */
 $oublies = pointages_oublies();
 if ($oublies) {
-    echo '<div class="card" style="border-color:#f0c9c6"><h3>À corriger</h3><p class="muted small">Ces personnes ont pointé leur arrivée mais pas leur départ.</p><ul class="list">';
+    echo '<div class="card" style="box-shadow:inset 0 0 0 1.5px var(--err-bg)"><h3>À corriger</h3><p class="muted small">Ces personnes ont pointé leur arrivée mais pas leur départ.</p><ul class="list">';
     foreach ($oublies as $o) {
         $ym = substr($o['debut'], 0, 7);
         echo '<li><span><b>' . h(trim($o['prenom'] . ' ' . $o['nom'])) . '</b> — arrivée le ' . h(date('d/m à H:i', strtotime($o['debut']))) . ' (' . h(ETABS[$o['etab']]) . ')</span>'
@@ -84,7 +84,7 @@ foreach (ETABS as $key => $label) {
     echo '<div class="card"><div class="row between"><h3 style="margin:0">' . h($label) . '</h3>'
         . '<span class="pill ' . ($enService ? 'ok' : '') . '">' . count($enService) . ' en service</span></div>';
 
-    echo '<h2 style="font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">En service</h2>';
+    echo '<h2>En service</h2>';
     if ($enService) {
         echo '<ul class="list">';
         foreach ($enService as $r) {
@@ -96,7 +96,7 @@ foreach (ETABS as $key => $label) {
         echo '<p class="muted">Personne pour le moment.</p>';
     }
 
-    echo '<h2 style="font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Prévus aujourd\'hui</h2>';
+    echo '<h2>Prévus aujourd\'hui</h2>';
     if ($prevus) {
         echo '<ul class="list">';
         foreach ($prevus as $r) {

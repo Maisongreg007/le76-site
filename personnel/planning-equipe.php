@@ -38,9 +38,9 @@ echo '</div></div>';
 $prev = date('Y-m-d', strtotime($lundi . ' -7 days'));
 $next = date('Y-m-d', strtotime($lundi . ' +7 days'));
 echo '<div class="row between" style="margin-bottom:14px">'
-    . ($lundi > $min ? '<a class="btn" href="' . h($u($etab, $prev)) . '">←</a>' : '<span style="width:44px"></span>')
+    . ($lundi > $min ? '<a class="btn round" href="' . h($u($etab, $prev)) . '">‹</a>' : '<span style="width:44px"></span>')
     . '<b>Du ' . (int)date('j', strtotime($lundi)) . ' ' . MOIS[(int)date('n', strtotime($lundi)) - 1] . ' au ' . (int)date('j', strtotime($fin)) . ' ' . MOIS[(int)date('n', strtotime($fin)) - 1] . '</b>'
-    . ($lundi < $max ? '<a class="btn" href="' . h($u($etab, $next)) . '">→</a>' : '<span style="width:44px"></span>')
+    . ($lundi < $max ? '<a class="btn round" href="' . h($u($etab, $next)) . '">›</a>' : '<span style="width:44px"></span>')
     . '</div>';
 
 $today = date('Y-m-d');
@@ -48,7 +48,7 @@ for ($i = 0; $i < 7; $i++) {
     $j = date('Y-m-d', strtotime($lundi . " +$i days"));
     $liste = $par[$j] ?? [];
     usort($liste, fn($a, $b) => [poste_rang($a), $a['debut'], $a['prenom']] <=> [poste_rang($b), $b['debut'], $b['prenom']]);
-    echo '<div class="card dayblock"' . ($j === $today ? ' style="border-color:var(--accent)"' : '') . '><h3><span>' . h(ucfirst(JOURS_LONG[$i])) . ' ' . (int)date('j', strtotime($j)) . '</span>'
+    echo '<div class="card dayblock"' . ($j === $today ? ' style="box-shadow:inset 0 0 0 2px var(--accent)"' : '') . '><h3><span>' . h(ucfirst(JOURS_LONG[$i])) . ' ' . (int)date('j', strtotime($j)) . '</span>'
         . ($j === $today ? '<span class="pill ok">aujourd\'hui</span>' : '') . '</h3>';
     if (!$liste) {
         echo '<p class="muted" style="margin:0">Personne de prévu</p>';

@@ -39,7 +39,7 @@ foreach ([0, 1] as $w) {
             $tot += shift_minutes($s['debut'], $s['fin']);
             $txt[] = h($s['debut']) . '–' . h($s['fin']) . ' <span class="muted small">' . h(ETABS[$s['etab']]) . '</span>';
         }
-        $html .= '<li' . ($j === $today ? ' style="background:#fff6ea;margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:8px"' : '') . '><span><b>' . h(ucfirst(JOURS_LONG[$i])) . '</b> ' . (int)date('j', strtotime($j)) . '</span>'
+        $html .= '<li' . ($j === $today ? ' style="background:var(--accent-soft);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:10px"' : '') . '><span><b>' . h(ucfirst(JOURS_LONG[$i])) . '</b> ' . (int)date('j', strtotime($j)) . '</span>'
             . '<span>' . ($txt ? implode('<br>', $txt) : '<span class="muted">repos</span>') . '</span></li>';
     }
     echo '<div class="card"><div class="row between"><h3 style="margin:0">' . ($w === 0 ? 'Cette semaine' : 'Semaine prochaine') . '</h3><span class="pill">' . h(fmt_min($tot)) . ' prévues</span></div><ul class="list">' . $html . '</ul></div>';
