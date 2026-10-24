@@ -46,7 +46,7 @@ if ($e && $_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('mon-planning.php?t=' . $t . '#dispos');
 }
 
-page_head('Mon planning', 'manifest-admin.json');
+page_head('Mon planning', 'manifest-admin.json', '', 'admin', 'Mon planning 76');
 echo '<main class="wrap" style="max-width:560px">';
 if (!$e) {
     http_response_code(404);

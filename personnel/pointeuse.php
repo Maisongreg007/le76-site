@@ -76,7 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* ---------- Page ---------- */
-page_head('Pointeuse', 'manifest-pointeuse.json', 'kiosk');
+$cle = $etab ?? 'le76';
+page_head('Pointeuse ' . ETABS[$cle], 'manifest-pointeuse.php?e=' . $cle, 'kiosk', 'pointeuse-' . $cle, 'Pointeuse ' . ETABS[$cle]);
 
 if ($etab === null) {
     echo '<div class="off"><h1>Appareil non activé</h1><p class="muted">Pour utiliser cet appareil comme pointeuse : connecte-toi à l\'administration, '
