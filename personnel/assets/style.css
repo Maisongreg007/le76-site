@@ -24,8 +24,10 @@
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Inter,"Segoe UI",Roboto,Arial,sans-serif;
   color-scheme:light dark;
 }
+/* Thème : Système (suit l'appareil), Clair ou Sombre — choisi dans Réglages */
 @media (prefers-color-scheme:dark){
-  :root{
+  :root:not([data-theme=light]){
+    color-scheme:dark;
     --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--ink:#f2f2f7;--muted:#8e8e93;--line:#38383a;--fill:#7676803d;
     --accent:#0a84ff;--accent-soft:#0a84ff26;
     --ok:#30d158;--ok-ink:#30d158;--ok-bg:#30d15826;
@@ -35,6 +37,17 @@
     --bar:rgba(22,22,24,.8);
   }
 }
+:root[data-theme=dark]{
+    color-scheme:dark;
+    --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--ink:#f2f2f7;--muted:#8e8e93;--line:#38383a;--fill:#7676803d;
+    --accent:#0a84ff;--accent-soft:#0a84ff26;
+    --ok:#30d158;--ok-ink:#30d158;--ok-bg:#30d15826;
+    --warn:#ff9f0a;--warn-ink:#ff9f0a;--warn-bg:#ff9f0a26;
+    --err:#ff453a;--err-ink:#ff6961;--err-bg:#ff453a26;
+    --indigo:#5e5ce6;--indigo-bg:#5e5ce633;--purple:#bf5af2;--purple-bg:#bf5af233;
+    --bar:rgba(22,22,24,.8);
+}
+:root[data-theme=light]{color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 var(--font);letter-spacing:-.011em;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
@@ -132,7 +145,8 @@ tbody tr[onclick]:hover td{background:var(--fill)}
 .tabs{display:inline-flex;background:var(--fill);border-radius:9px;padding:2px;gap:0}
 .tabs a{padding:6px 16px;border-radius:7px;color:var(--ink);font-weight:500;font-size:.88rem;transition:background .2s}
 .tabs a.on{background:var(--card);font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
-@media (prefers-color-scheme:dark){.tabs a.on{background:#636366}}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .tabs a.on{background:#636366}}
+:root[data-theme=dark] .tabs a.on{background:#636366}
 
 /* ---------- Planning ---------- */
 .plan{min-width:780px;border-collapse:separate;border-spacing:0}
@@ -255,3 +269,19 @@ body.kiosk{background:radial-gradient(120% 90% at 50% 0%,#2c2c2e 0%,#000 70%);co
   .plan th.emp,.plan td.emp{min-width:118px;font-size:.88rem}
 }
 .copy-week{white-space:nowrap;padding:4px 9px}
+
+/* ---------- Horloge (Aujourd'hui) ---------- */
+.titlebar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:.3rem 0 1rem}
+.titlebar h1{margin:0}
+.clock-sm{font-size:2.05rem;font-weight:300;letter-spacing:-.02em;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.15}
+.clock-sm .sec{font-size:.55em;margin-left:2px;opacity:.7}
+@media (max-width:640px){.clock-sm{font-size:1.75rem}}
+/* Choix du thème */
+.theme-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:460px}
+.theme-pick button{flex-direction:column;gap:8px;padding:12px 8px;border-radius:14px;min-height:0;background:var(--card2);color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 2px transparent}
+.theme-pick button.on{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent);font-weight:600}
+.theme-pick .sw{width:64px;height:42px;border-radius:9px;border:.5px solid var(--line);display:block}
+.theme-pick .sw.l{background:linear-gradient(#f2f2f7 0 30%,#fff 30%)}
+.theme-pick .sw.d{background:linear-gradient(#000 0 30%,#1c1c1e 30%)}
+.theme-pick .sw.s{background:linear-gradient(90deg,#fff 50%,#1c1c1e 50%)}
+.grid{margin-bottom:16px}

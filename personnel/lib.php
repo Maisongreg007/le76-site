@@ -512,7 +512,8 @@ function page_head(string $titre, string $manifest = 'manifest-admin.json', stri
     header('X-Robots-Tag: noindex, nofollow');
     header('X-Frame-Options: DENY');
     header('Referrer-Policy: same-origin');
-    echo '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
+    $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['theme'] : '';
+    echo '<!doctype html><html lang="fr"' . ($theme && $bodyClass !== 'kiosk' ? ' data-theme="' . $theme . '"' : '') . '><head><meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
         . '<meta name="robots" content="noindex, nofollow">'
         . '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="mobile-web-app-capable" content="yes">'

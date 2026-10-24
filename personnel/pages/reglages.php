@@ -60,6 +60,24 @@ admin_nav('reglages');
 flash_show();
 echo '<h1>Réglages</h1>';
 
+$th = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['theme'] : 'system';
+echo '<div class="card" style="max-width:640px"><h3>Apparence</h3><p class="muted small" style="margin-top:0">Pour cet appareil. « Système » suit le réglage clair/sombre de l\'iPad ou du Mac.</p><div class="theme-pick" id="theme-pick">';
+foreach (['system' => ['Système', 's'], 'light' => ['Clair', 'l'], 'dark' => ['Sombre', 'd']] as $k => [$l, $c]) {
+    echo '<button type="button" data-theme="' . $k . '"' . ($th === $k ? ' class="on"' : '') . '><span class="sw ' . $c . '"></span>' . h($l) . '</button>';
+}
+echo '</div></div>';
+?>
+<script>
+document.getElementById('theme-pick').addEventListener('click', function (e) {
+  const b = e.target.closest('button'); if (!b) return;
+  const t = b.dataset.theme;
+  const path = <?= json_encode(base_path()) ?>;
+  document.cookie = 'theme=' + (t === 'system' ? '' : t) + ';path=' + path + ';max-age=' + (t === 'system' ? 0 : 31536000) + ';samesite=lax';
+  if (t === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = t;
+  this.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+});
+</script>
+<?php
 echo '<div class="card" style="max-width:640px"><h3>Pointeuse sur cet appareil</h3>';
 if ($ke) {
     echo '<p><span class="pill ok">Activée</span> Cet appareil est la pointeuse de <b>' . h(ETABS[$ke]) . '</b>.</p>'

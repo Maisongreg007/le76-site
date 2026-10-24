@@ -13,7 +13,8 @@ if ($frag) {
     page_head("Aujourd'hui");
     admin_nav('aujourdhui');
     flash_show();
-    echo '<div class="row between"><h1>' . h(ucfirst(date_fr($today))) . '</h1><span class="live-dot" id="live-state"><i></i> En direct</span></div><div id="live">';
+    echo '<div class="row between"><div class="titlebar"><h1>' . h(ucfirst(date_fr($today))) . '</h1><span class="clock-sm" id="clk">' . date('H:i') . '</span></div>'
+        . '<span class="live-dot" id="live-state"><i></i> En direct</span></div><div id="live">';
 }
 
 /* Fil des pointages : derniers mouvements des 24 dernières heures */
@@ -143,6 +144,14 @@ echo '</div>';
     busy = false;
   }
   setInterval(refresh, 10000);
+  // Horloge
+  const clk = document.getElementById('clk');
+  function tick() {
+    const d = new Date(), o = {timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
+    const [hh, mm, ss] = d.toLocaleTimeString('fr-FR', o).split(':');
+    clk.innerHTML = hh + ':' + mm + '<span class="sec">' + ss + '</span>';
+  }
+  tick(); setInterval(tick, 1000);
   document.addEventListener('visibilitychange', refresh);
 })();
 </script>
