@@ -326,10 +326,10 @@ function emp_horaires(array $e): array
 }
 
 /** Heures convenues (horaires habituels) entre deux dates incluses, en ne comptant que les services déjà terminés. */
-function convenu_minutes(array $e, string $du, string $au): int
+function convenu_minutes(array $e, string $du, string $au, ?int $jusqua = null): int
 {
     $h = emp_horaires($e);
-    $now = time();
+    $now = $jusqua ?? time();
     $tot = 0;
     for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) {
         $j = date('Y-m-d', $t);
@@ -680,7 +680,12 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
             if ($debutSuivi !== null) {
                 $d1 = max($debutMois, $debutSuivi, (string)($e['entree'] ?: $debutMois));
                 $d2 = min($finMois, date('Y-m-d'), (string)($e['sortie'] ?: $finMois));
-                $contratMin = $d1 <= $d2 ? convenu_minutes($e, $d1, $d2) : 0;
+                // S'il est en service en ce moment, ce service n'est pas encore compté dans l'effectué : on ne le compte pas non plus dans le convenu
+                $cut = null;
+                foreach ($parEmp[$id] ?? [] as $p) {
+                    if ($p['fin'] === null && $p['debut'] >= $seuilOubli) $cut = min($cut ?? PHP_INT_MAX, strtotime($p['debut']));
+                }
+                $contratMin = $d1 <= $d2 ? convenu_minutes($e, $d1, $d2, $cut) : 0;
             }
         }
 
