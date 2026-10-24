@@ -94,7 +94,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fin = date('Y-m-d', strtotime($lundi . ' +6 days'));
         $ind = indispos_entre($lundi, $fin);
         $exists = db()->prepare('SELECT 1 FROM planning WHERE employe_id=? AND etab=? AND jour=? AND debut=? AND fin=?');
-        $n = 0; $saut = 0;
+        $n = 0; $saut = 0; $suppr = 0;
+        if (($_POST['mode'] ?? '') === 'remplacer') {
+            // On enlève d'abord les horaires des fixes pas encore commencés cette semaine (le passé ne bouge pas)
+            $st = db()->prepare('SELECT p.* FROM planning p JOIN employes e ON e.id = p.employe_id WHERE p.etab = ? AND p.jour BETWEEN ? AND ? AND e.type = \'fixe\' AND e.actif = 1');
+            $st->execute([$etab, $lundi, $fin]);
+            foreach ($st->fetchAll() as $r) {
+                [$sa] = shift_bounds($r);
+                if ($sa > time() && !mois_cloture(substr($r['jour'], 0, 7))) {
+                    db()->prepare('DELETE FROM planning WHERE id = ?')->execute([$r['id']]);
+                    $suppr++;
+                }
+            }
+        }
         foreach (employes(true, $etab) as $e) {
             if ($e['type'] !== 'fixe') continue;
             foreach (emp_horaires($e) as $dow => $slots) {
@@ -103,13 +115,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($slots as [$d, $f]) {
                     $exists->execute([$e['id'], $etab, $j, $d, $f]);
                     if ($exists->fetchColumn()) continue;
+                    [$sa0] = shift_bounds(['jour' => $j, 'debut' => $d, 'fin' => $f]);
+                    if ($sa0 <= time()) continue; // jamais dans le passé
                     if (chevauche_planning((int)$e['id'], $j, $d, $f)) { $saut++; continue; }
                     db()->prepare('INSERT INTO planning (employe_id, etab, jour, debut, fin, preset) VALUES (?,?,?,?,?,?)')->execute([$e['id'], $etab, $j, $d, $f, preset_nom($d, $f)]);
                     $n++;
                 }
             }
         }
-        back($retour, $n . ' horaire(s) ajouté(s) pour les fixes.' . ($saut ? ' ' . $saut . ' laissé(s) de côté (jour pas dispo ou horaire déjà pris).' : ''));
+        back($retour, ($suppr ? $suppr . ' horaire(s) à venir remplacé(s). ' : '') . $n . ' horaire(s) habituel(s) posé(s) pour les fixes.' . ($saut ? ' ' . $saut . ' laissé(s) de côté (jour pas dispo ou horaire déjà pris).' : ''));
     }
 
     if ($act === 'model_save') {
@@ -318,7 +332,7 @@ echo '<div class="toolbar"><div class="weeknav">'
     . '</div><div class="row">'
     . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="copy"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">'
     . '<button class="small">Copier la semaine d\'avant</button></form>'
-    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="fill_fixes"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><button class="small" title="Ajoute les horaires habituels de chaque fixe pour cette semaine">Remplir les fixes</button></form>'
+    . '<button type="button" class="small" id="btn-fill">Horaires habituels</button>'
     . '<button type="button" class="small" id="btn-models">Modèles</button>'
     . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
@@ -400,7 +414,16 @@ foreach ($emps as $e) {
         }
         echo '<button type="button" class="chip add" data-id="0" data-emp="' . $id . '" data-jour="' . h($j) . '" data-nom="' . h(emp_nom($e)) . '" aria-label="Ajouter">+</button></td>';
     }
-    echo '<td class="tot">' . ($tot ? h(fmt_min($tot)) . ($e['type'] === 'extra' ? '<div class="muted small" style="font-weight:500">' . h(eur(round($tot / 60 * (float)$e['taux'], 2))) . '</div>' : '') : '<span class="muted">–</span>') . '</td></tr>';
+    $sub = '';
+    if ($e['type'] === 'extra') {
+        $sub = $tot ? '<div class="muted small" style="font-weight:500">' . h(eur(round($tot / 60 * (float)$e['taux'], 2))) . '</div>' : '';
+    } else {
+        $conv = horaires_minutes(emp_horaires($e));
+        $dlt = $tot - $conv;
+        $cl = abs($dlt) <= tolerance() ? 'ecart-ok' : ($dlt > 0 ? 'ecart-plus' : 'ecart-moins');
+        $sub = '<div class="small" style="font-weight:500"><span class="muted">sur ' . h(fmt_min($conv)) . '</span>' . (abs($dlt) > tolerance() ? ' <span class="' . $cl . '">' . h(fmt_ecart($dlt)) . '</span>' : ' <span class="ecart-ok">✓</span>') . '</div>';
+    }
+    echo '<td class="tot">' . ($tot ? h(fmt_min($tot)) : '<span class="muted">–</span>') . $sub . '</td></tr>';
 }
 echo '</tbody></table></div>';
 echo '<div class="legend"><span><i style="background:var(--accent)"></i>prévu</span><span><i style="background:var(--ok)"></i>fait comme prévu</span>'
@@ -440,6 +463,12 @@ echo '</div><div class="row"><div class="field"><label>De</label><input type="ti
     . '</form>'
     . '<form method="post" id="fdel">' . csrf_field() . '<input type="hidden" name="action" value="delete"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="id" id="del-id"></form></dialog>';
 echo '<form method="post" id="fpaste" hidden>' . csrf_field() . '<input type="hidden" name="action" value="paste"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><input type="hidden" name="employe_id" id="p-emp"><input type="hidden" name="items" id="p-items"></form>';
+
+$hidF = csrf_field() . '<input type="hidden" name="action" value="fill_fixes"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '">';
+echo '<dialog id="dfill"><h3>Horaires habituels des fixes</h3><p class="muted small" style="text-align:center;margin-top:-6px">Pose pour cette semaine les horaires de chaque fixe (sa fiche Équipe). Les jours « pas dispo » et les services déjà passés ne sont pas touchés.</p>'
+    . '<form method="post" style="margin-bottom:8px">' . $hidF . '<input type="hidden" name="mode" value="ajouter"><button class="act" style="width:100%"><span>+</span>Compléter<small>ajoute ce qui manque, garde ce qui est déjà prévu</small></button></form>'
+    . '<form method="post">' . $hidF . '<input type="hidden" name="mode" value="remplacer"><button class="act warn" style="width:100%" data-confirm="Sûr ? Retouche pour remplacer"><span>↺</span>Remplacer<small>efface les horaires à venir des fixes et remet leurs horaires habituels</small></button></form>'
+    . '<p style="margin:14px 0 0;text-align:center"><button type="button" id="fill-close">Fermer</button></p></dialog>';
 
 $st = db()->prepare('SELECT * FROM modeles WHERE etab = ? ORDER BY nom COLLATE NOCASE');
 $st->execute([$etab]);
@@ -541,6 +570,8 @@ echo '<dialog id="dshare"><h3>Partager le planning</h3>'
 
   $('btn-share').addEventListener('click', () => $('dshare').showModal());
   $('btn-models').addEventListener('click', () => $('dmodels').showModal());
+  $('btn-fill').addEventListener('click', () => $('dfill').showModal());
+  $('fill-close').addEventListener('click', () => $('dfill').close());
 
   $('models-close').addEventListener('click', () => $('dmodels').close());
   $('share-close').addEventListener('click', () => $('dshare').close());

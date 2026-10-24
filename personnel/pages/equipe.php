@@ -38,8 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)db()->lastInsertId();
         }
         if ($type === 'fixe' && isset($_POST['h'])) {
-            $hor = isset($_POST['h_resto']) ? null : json_encode(horaires_depuis_post((array)$_POST['h']));
-            db()->prepare('UPDATE employes SET horaires = ? WHERE id = ?')->execute([$hor, $id]);
+            $grille = isset($_POST['h_resto']) ? null : horaires_depuis_post((array)$_POST['h']);
+            // Heures convenues = total de ses horaires habituels
+            $hebdo = round(horaires_minutes($grille ?? horaires_resto()) / 60, 2);
+            db()->prepare('UPDATE employes SET horaires = ?, heures_hebdo = ? WHERE id = ?')->execute([$grille ? json_encode($grille) : null, $hebdo, $id]);
         }
         back('admin.php?p=equipe', $prenom . ' ' . $nom . ' est enregistré(e).');
     }
@@ -101,7 +103,7 @@ if ($e !== null) {
 
     echo '<div class="field" id="f-extra"><label>Taux horaire net (€/h)</label><input name="taux" value="' . h($num($v['taux'])) . '" inputmode="decimal" style="width:140px"></div>';
     echo '<div id="f-fixe"><div class="row"><div class="field"><label>Salaire mensuel net (€)</label><input name="salaire" value="' . h($num($v['salaire'])) . '" inputmode="decimal" style="width:160px"></div>'
-        . '<div class="field"><label>Heures par semaine (facultatif)</label><input name="heures_hebdo" value="' . h($v['heures_hebdo'] === null ? '' : $num($v['heures_hebdo'])) . '" inputmode="decimal" style="width:160px" placeholder="ex. 39"></div></div>'
+
         . '<div class="row"><div class="field"><label>Date d\'entrée (facultatif)</label><input type="date" name="entree" value="' . h((string)$v['entree']) . '"></div>'
         . '<div class="field"><label>Date de sortie (facultatif)</label><input type="date" name="sortie" value="' . h((string)$v['sortie']) . '"></div></div>'
         . '<p class="muted small" style="margin-top:-4px">Si tu renseignes l\'entrée ou la sortie, le salaire du mois est calculé au prorata des jours présents. Sans date, c\'est le mois complet.</p></div>';
@@ -114,8 +116,8 @@ if ($e !== null) {
 
     if (true) {
         $hEmp = $emp ? emp_horaires($emp) : horaires_resto();
-        echo '<div class="field" id="f-horaires"><label>Ses horaires habituels</label>'
-            . '<p class="muted small" style="margin:0 0 8px 2px">Coche les services qu\'il fait et ajuste ses heures. Le bouton « Remplir avec les horaires habituels » du planning s\'en sert.</p>'
+        echo '<div class="field" id="f-horaires"><label>Ses horaires habituels = ses heures convenues</label>'
+            . '<p class="muted small" style="margin:0 0 8px 2px">Coche les services qu\'il fait et ajuste ses heures. Le total donne ses heures convenues par semaine. Le bouton « Horaires habituels » du planning s\'en sert.</p>'
             . horaires_grille($hEmp)
             . '<label class="inline-check" style="margin-top:8px"><input type="checkbox" name="h_resto" value="1"' . ($emp && empty($emp['horaires']) ? ' checked' : '') . '> Utiliser simplement les horaires du restaurant</label></div>'
             . '<script>(function(){var w=document.getElementById("f-horaires");w.querySelector("[data-grid]").addEventListener("change",function(){w.querySelector("input[name=h_resto]").checked=false;});})();</script>';

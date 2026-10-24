@@ -325,6 +325,22 @@ function emp_horaires(array $e): array
     return $out;
 }
 
+/** Heures convenues (horaires habituels) entre deux dates incluses, en ne comptant que les services déjà terminés. */
+function convenu_minutes(array $e, string $du, string $au): int
+{
+    $h = emp_horaires($e);
+    $now = time();
+    $tot = 0;
+    for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) {
+        $j = date('Y-m-d', $t);
+        foreach ($h[(int)date('N', $t)] as [$a, $b]) {
+            [, $fin] = shift_bounds(['jour' => $j, 'debut' => $a, 'fin' => $b]);
+            if ($fin <= $now) $tot += shift_minutes($a, $b);
+        }
+    }
+    return $tot;
+}
+
 /** Lit la grille envoyée par le formulaire (h[jour][créneau][on|d|f]). */
 function horaires_depuis_post(array $p): array
 {
@@ -586,6 +602,16 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
         $parEmp[(int)$p['employe_id']][] = $p;
     }
 
+    // Premier jour d'activité (planning ou pointage) de chacun dans le mois
+    $premierJour = [];
+    $st = db()->prepare('SELECT employe_id, MIN(jour) j FROM planning WHERE jour BETWEEN ? AND ? GROUP BY employe_id');
+    $st->execute([$debutMois, $finMois]);
+    foreach ($st->fetchAll() as $r) $premierJour[(int)$r['employe_id']] = $r['j'];
+    foreach ($parEmp as $k => $l) {
+        $j = substr($l[0]['debut'], 0, 10);
+        $premierJour[$k] = isset($premierJour[$k]) ? min($premierJour[$k], $j) : $j;
+    }
+
     $rows = [];
     foreach (employes(false) as $e) {
         $id = (int)$e['id'];
@@ -647,13 +673,15 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
         }
 
         $cout = $e['type'] === 'extra' ? round($minFiltre / 60 * (float)$e['taux'], 2) : round($salaire, 2);
-        // Contrat ramené à la période réellement suivie (du 1er pointage du mois ou de l'entrée, jusqu'à aujourd'hui)
+        // Heures convenues (ses horaires habituels) sur la période suivie : du 1er jour d'activité du mois (ou de l'entrée) jusqu'à maintenant
         $contratMin = null;
-        if ($e['type'] === 'fixe' && $e['heures_hebdo'] !== null && !empty($parEmp[$id])) {
-            $d1 = max($debutMois, substr($parEmp[$id][0]['debut'], 0, 10), (string)($e['entree'] ?: $debutMois));
-            $d2 = min($finMois, date('Y-m-d'), (string)($e['sortie'] ?: $finMois));
-            $jrs = max(0, (int)round((strtotime($d2) - strtotime($d1)) / 86400) + 1);
-            $contratMin = (int)round((float)$e['heures_hebdo'] / 7 * $jrs * 60);
+        if ($e['type'] === 'fixe') {
+            $debutSuivi = $premierJour[$id] ?? null;
+            if ($debutSuivi !== null) {
+                $d1 = max($debutMois, $debutSuivi, (string)($e['entree'] ?: $debutMois));
+                $d2 = min($finMois, date('Y-m-d'), (string)($e['sortie'] ?: $finMois));
+                $contratMin = $d1 <= $d2 ? convenu_minutes($e, $d1, $d2) : 0;
+            }
         }
 
         $rows[] = [

@@ -353,7 +353,8 @@ echo '<div class="stats">'
 if (!$rows) {
     echo '<div class="card"><p class="muted">Aucune heure ni salaire ce mois-ci.</p></div>';
 } else {
-    echo '<div class="card scroll"><table><thead><tr><th>Nom</th><th class="hide-m">Contrat</th><th class="num">Prévu</th><th class="num">Pointé</th><th class="num">Écart</th><th class="num">À payer (net)</th></tr></thead><tbody>';
+    echo '<div class="card scroll"><table><thead><tr><th>Nom</th><th class="num" title="Ses horaires habituels (fiche Équipe), sur les jours écoulés">Convenu</th><th class="num" title="Ce qui était au planning, services terminés">Prévu</th><th class="num">Effectué</th><th class="num" title="Effectué − convenu (fixes) ou − prévu (extras)">Écart</th><th class="num">À payer (net)</th></tr></thead><tbody>';
+    $totConv = 0;
     foreach ($rows as $r) {
         $e = $r['e'];
         $lien = 'admin.php?p=heures&m=' . h($ym) . '&e=' . (int)$e['id'] . $qEtab;
@@ -365,31 +366,32 @@ if (!$rows) {
             if ($r['note']) {
                 $detail[] = $r['note'];
             }
-            if ($r['contrat_min'] !== null && !$etabF) {
-                $ecart = $r['minutes'] - $r['contrat_min'];
-                $detail[] = 'contrat à date ≈ ' . fmt_min($r['contrat_min']) . ' (' . ($ecart >= 0 ? '+' : '−') . fmt_min(abs($ecart)) . ')';
-            }
+            $detail[] = 'convenu ' . fmt_min(horaires_minutes(emp_horaires($e))) . '/sem.';
         }
         echo '<tr><td><a href="' . $lien . '"><b>' . h(emp_nom($e)) . '</b></a>'
             . (!(int)$e['actif'] ? ' <span class="pill">archivé</span>' : '')
             . ($r['ouverts'] ? ' <a href="' . $lien . '" class="pill err">' . $r['ouverts'] . ' départ oublié</a>' : '')
             . (!empty($r['en_service']) ? ' <span class="pill ok">en service</span>' : '')
             . '<div class="muted small">' . postes_html($e) . ' ' . h(implode(' · ', $detail)) . '</div></td>'
-            . '<td class="hide-m"><span class="pill ' . h($e['type']) . '">' . ($e['type'] === 'fixe' ? 'Fixe' : 'Extra') . '</span></td>'
-            . '<td class="num nowrap muted">' . (isset($prevuPasse[(int)$e['id']]) ? h(fmt_min($prevuPasse[(int)$e['id']])) : ($r['minutes'] ? '0h00' : '–')) . '</td>'
-            . '<td class="num nowrap">' . h(fmt_min($r['minutes'])) . '</td>'
-            . (static function () use ($r, $e, $prevuPasse) {
+            . (static function () use ($r, $e, $prevuPasse, $etabF, &$totConv) {
                 $pv = $prevuPasse[(int)$e['id']] ?? null;
-                if ($pv === null && $r['minutes'] === 0) return '<td class="num muted">–</td>';
-                $pv ??= 0;
-                $d = $r['minutes'] - $pv;
+                $cv = ($e['type'] === 'fixe' && !$etabF) ? $r['contrat_min'] : null;
+                if ($cv !== null) $totConv += $cv;
+                $html = '<td class="num nowrap muted">' . ($cv !== null ? h(fmt_min($cv)) : '–') . '</td>'
+                    . '<td class="num nowrap muted">' . ($pv !== null ? h(fmt_min($pv)) : ($r['minutes'] ? '0h00' : '–')) . '</td>'
+                    . '<td class="num nowrap"><b>' . h(fmt_min($r['minutes'])) . '</b></td>';
+                // Écart : pour un fixe on compare à ce qui est convenu, pour un extra à ce qui était prévu
+                $ref = $cv ?? $pv;
+                if ($ref === null && $r['minutes'] === 0) return $html . '<td class="num muted">–</td>';
+                $d = $r['minutes'] - ($ref ?? 0);
                 $cl = abs($d) <= tolerance() ? 'ecart-ok' : ($d > 0 ? 'ecart-plus' : 'ecart-moins');
-                return '<td class="num nowrap ' . $cl . '">' . h(fmt_ecart($d)) . '</td>';
+                $lib = $cv !== null ? ($d > tolerance() ? 'en plus' : ($d < -tolerance() ? 'en moins' : '')) : '';
+                return $html . '<td class="num nowrap ' . $cl . '">' . h(fmt_ecart($d)) . ($lib ? '<div class="small" style="font-weight:500">' . $lib . '</div>' : '') . '</td>';
             })()
             . '<td class="num nowrap"><b>' . h(eur($r['cout'])) . '</b></td></tr>';
     }
-    echo '<tr class="total"><td>Total</td><td class="hide-m"></td><td class="num">' . h(fmt_min($totPrevu)) . '</td><td class="num">' . h(fmt_min($totMin)) . '</td><td class="num">' . h(fmt_ecart($totMin - $totPrevu)) . '</td><td class="num">' . h(eur($totExtras + $totFixes)) . '</td></tr>';
+    echo '<tr class="total"><td>Total</td><td class="num">' . ($totConv ? h(fmt_min($totConv)) : '') . '</td><td class="num">' . h(fmt_min($totPrevu)) . '</td><td class="num">' . h(fmt_min($totMin)) . '</td><td class="num"></td><td class="num">' . h(eur($totExtras + $totFixes)) . '</td></tr>';
     echo '</tbody></table></div>';
-    echo '<p class="muted small">Prévu = heures du planning des services terminés ce mois-ci. Écart = pointé − prévu. Extras : heures pointées × taux horaire net. Fixes : salaire mensuel net (heures affichées à titre indicatif). Les heures sont arrondies à la minute.</p>';
+    echo '<p class="muted small"><b>Convenu</b> = ses horaires habituels (fiche Équipe) sur les jours déjà passés · <b>Prévu</b> = le planning · <b>Effectué</b> = les pointages. Écart : effectué − convenu pour un fixe (heures en plus ou en moins), effectué − prévu pour un extra. Extras : heures pointées × taux horaire net. Fixes : salaire mensuel net (heures affichées à titre indicatif). Les heures sont arrondies à la minute.</p>';
 }
 admin_end();
