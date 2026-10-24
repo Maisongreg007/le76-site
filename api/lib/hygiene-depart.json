@@ -1,0 +1,347 @@
+[
+ {
+  "c": "equipment",
+  "id": "frigo-cuisine",
+  "data": {
+   "kind": "frigo",
+   "max": 4,
+   "min": 0,
+   "name": "Frigo cuisine",
+   "order": 1
+  }
+ },
+ {
+  "c": "equipment",
+  "id": "frigo-salle",
+  "data": {
+   "kind": "frigo",
+   "max": 4,
+   "min": 0,
+   "name": "Frigo salle",
+   "order": 2
+  }
+ },
+ {
+  "c": "equipment",
+  "id": "congelateur",
+  "data": {
+   "kind": "congelo",
+   "max": -18,
+   "min": -30,
+   "name": "Congélateur",
+   "order": 3
+  }
+ },
+ {
+  "c": "equipment",
+  "id": "936g3v80t68l6h530lwh",
+  "data": {
+   "kind": "frigo",
+   "max": 4,
+   "min": 2,
+   "name": "Frigo cuisine TF",
+   "order": 4
+  }
+ },
+ {
+  "c": "equipment",
+  "id": "uc13n25ecpiyoh0y3es7",
+  "data": {
+   "kind": "frigo",
+   "max": 4,
+   "min": 1,
+   "name": "Frigo Saladette",
+   "order": 5
+  }
+ },
+ {
+  "c": "suppliers",
+  "id": "grbqyjjlxq4pxorncryp",
+  "data": {
+   "name": "Romaf ( MIKO )",
+   "order": 1
+  }
+ },
+ {
+  "c": "suppliers",
+  "id": "0z6zdk0o6xnvr7nmw97l",
+  "data": {
+   "name": "VLG",
+   "order": 2
+  }
+ },
+ {
+  "c": "suppliers",
+  "id": "y7rg0gmc1elqmosxylnl",
+  "data": {
+   "name": "Feschter viande",
+   "order": 3
+  }
+ },
+ {
+  "c": "suppliers",
+  "id": "p3u3rvunzv9kombq5sx5",
+  "data": {
+   "name": "Metro",
+   "order": 4
+  }
+ },
+ {
+  "c": "presets",
+  "id": "creme-brulee",
+  "data": {
+   "category": "Desserts",
+   "days": 4,
+   "name": "Crème brulée",
+   "order": 1,
+   "type": "prepa"
+  }
+ },
+ {
+  "c": "presets",
+  "id": "62j25waj4om2zwo1ghxg",
+  "data": {
+   "category": "Plats",
+   "days": 3,
+   "name": "Bœuf bourguignon",
+   "order": 2,
+   "portions": null,
+   "type": "prepa"
+  }
+ },
+ {
+  "c": "fryers",
+  "id": "friteuse-1",
+  "data": {
+   "name": "Friteuse",
+   "order": 1
+  }
+ },
+ {
+  "c": "config",
+  "id": "main",
+  "data": {
+   "coolMax": 10,
+   "coolMin": 120,
+   "dlc": {
+    "congele": 90,
+    "decongele": 3,
+    "ouvert": 3,
+    "prepa": 3
+   },
+   "polarMax": 25,
+   "recFrais": 4,
+   "recSurg": -18
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d01-plans-travail",
+  "data": {
+   "freq": "daily",
+   "name": "Nettoyer et désinfecter plans de travail et planches",
+   "order": 1,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d02-decoupe",
+  "data": {
+   "freq": "daily",
+   "name": "Nettoyer le matériel de découpe (couteaux, trancheuse)",
+   "order": 2,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d03-dlc",
+  "data": {
+   "freq": "daily",
+   "name": "Contrôler les DLC et étiqueter les produits ouverts",
+   "order": 3,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d04-sol-cuisine",
+  "data": {
+   "freq": "daily",
+   "name": "Laver le sol de la cuisine",
+   "order": 4,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d05-poubelles",
+  "data": {
+   "freq": "daily",
+   "name": "Vider et nettoyer les poubelles",
+   "order": 5,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d06-tables",
+  "data": {
+   "freq": "daily",
+   "name": "Désinfecter tables, chaises et poignées de porte",
+   "order": 6,
+   "zone": "Salle"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d07-sol-salle",
+  "data": {
+   "freq": "daily",
+   "name": "Laver le sol de la salle",
+   "order": 7,
+   "zone": "Salle"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d08-sanitaires",
+  "data": {
+   "freq": "daily",
+   "name": "Nettoyer et désinfecter les sanitaires",
+   "order": 8,
+   "zone": "Sanitaires"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "d09-consommables",
+  "data": {
+   "freq": "daily",
+   "name": "Vérifier savon, papier et essuie-mains",
+   "order": 9,
+   "zone": "Sanitaires"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "m01-congelateur",
+  "data": {
+   "freq": "monthly",
+   "name": "Dégivrer et nettoyer à fond le congélateur",
+   "order": 16,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "m02-murs",
+  "data": {
+   "freq": "monthly",
+   "name": "Nettoyer murs, plafond et grilles d'aération",
+   "order": 17,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "m03-reserve",
+  "data": {
+   "freq": "monthly",
+   "name": "Nettoyer et ranger la réserve sèche",
+   "order": 18,
+   "zone": "Réserve"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "m04-nuisibles",
+  "data": {
+   "freq": "monthly",
+   "name": "Contrôler les pièges anti-nuisibles",
+   "order": 19,
+   "zone": "Général"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "m05-thermometres",
+  "data": {
+   "freq": "monthly",
+   "name": "Vérifier les thermomètres (frigos et sonde)",
+   "order": 20,
+   "zone": "Général"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "m06-trousse",
+  "data": {
+   "freq": "monthly",
+   "name": "Vérifier la trousse de premiers secours",
+   "order": 21,
+   "zone": "Général"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "w01-frigos",
+  "data": {
+   "freq": "weekly",
+   "name": "Nettoyer l'intérieur des frigos et les joints de porte",
+   "order": 10,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "w02-friteuse",
+  "data": {
+   "freq": "weekly",
+   "name": "Nettoyer friteuse, plaques de cuisson et four",
+   "order": 11,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "w03-hotte",
+  "data": {
+   "freq": "weekly",
+   "name": "Dégraisser les filtres de hotte",
+   "order": 12,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "w04-lave-vaisselle",
+  "data": {
+   "freq": "weekly",
+   "name": "Nettoyer le lave-vaisselle (filtres, bras de lavage)",
+   "order": 13,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "w05-siphons",
+  "data": {
+   "freq": "weekly",
+   "name": "Nettoyer siphons et grilles de sol",
+   "order": 14,
+   "zone": "Cuisine"
+  }
+ },
+ {
+  "c": "tasks",
+  "id": "w06-cafe",
+  "data": {
+   "freq": "weekly",
+   "name": "Nettoyer la machine à café",
+   "order": 15,
+   "zone": "Salle"
+  }
+ }
+]
