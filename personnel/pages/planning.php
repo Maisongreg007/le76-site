@@ -126,6 +126,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         back($retour, ($suppr ? $suppr . ' horaire(s) à venir remplacé(s). ' : '') . $n . ' horaire(s) habituel(s) posé(s) pour les fixes.' . ($saut ? ' ' . $saut . ' laissé(s) de côté (jour pas dispo ou horaire déjà pris).' : ''));
     }
 
+    if ($act === 'raz') {
+        // Remise à zéro de la semaine (ce restaurant) : on efface tout le planning, les pointages ne bougent pas
+        $fin = date('Y-m-d', strtotime($lundi . ' +6 days'));
+        if (mois_cloture(substr($lundi, 0, 7)) || mois_cloture(substr($fin, 0, 7))) {
+            back($retour, '', 'Cette semaine touche un mois clôturé : rouvre-le d\'abord dans Heures.');
+        }
+        $st = db()->prepare('DELETE FROM planning WHERE etab = ? AND jour BETWEEN ? AND ?');
+        $st->execute([$etab, $lundi, $fin]);
+        back($retour, 'Semaine remise à zéro : ' . $st->rowCount() . ' horaire(s) effacé(s). Les pointages sont conservés.');
+    }
+
     if ($act === 'model_save') {
         $nom = trim((string)($_POST['nom'] ?? ''));
         if ($nom === '') back($retour, '', 'Donne un nom au modèle.');
@@ -334,6 +345,7 @@ echo '<div class="toolbar"><div class="weeknav">'
     . '<button class="small">Copier la semaine d\'avant</button></form>'
     . '<button type="button" class="small" id="btn-fill">Horaires habituels</button>'
     . '<button type="button" class="small" id="btn-models">Modèles</button>'
+    . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="raz"><input type="hidden" name="etab" value="' . h($etab) . '"><input type="hidden" name="s" value="' . h($lundi) . '"><button class="small danger" data-confirm="Tout effacer ? Retouche">RAZ semaine</button></form>'
     . '<button type="button" class="small primary" id="btn-share">Partager</button></div></div>';
 
 if (!$emps) {

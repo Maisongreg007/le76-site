@@ -235,6 +235,7 @@ function migrate(PDO $pdo): void
     CREATE TABLE IF NOT EXISTS indispos (id INTEGER PRIMARY KEY AUTOINCREMENT, employe_id INTEGER NOT NULL, jour TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, UNIQUE(employe_id, jour));
     CREATE TABLE IF NOT EXISTS modeles (id INTEGER PRIMARY KEY AUTOINCREMENT, nom TEXT NOT NULL, etab TEXT NOT NULL, data TEXT NOT NULL, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS clotures (ym TEXT PRIMARY KEY, at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS demandes (id INTEGER PRIMARY KEY AUTOINCREMENT, employe_id INTEGER NOT NULL, du TEXT NOT NULL, au TEXT NOT NULL, type TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', statut TEXT NOT NULL DEFAULT 'attente', created_at TEXT NOT NULL, decided_at TEXT);
     CREATE TABLE IF NOT EXISTS alertes_envoyees (cle TEXT PRIMARY KEY, at INTEGER NOT NULL);
     ");
     // Horaires des services du 76 (donnés par le patron) : deviennent les horaires rapides
@@ -326,7 +327,7 @@ function emp_horaires(array $e): array
 }
 
 /** Heures convenues (horaires habituels) entre deux dates incluses, en ne comptant que les services déjà terminés. */
-function convenu_minutes(array $e, string $du, string $au, ?int $jusqua = null): int
+function convenu_minutes(array $e, string $du, string $au, ?int $jusqua = null, array $pointages = []): int
 {
     $h = emp_horaires($e);
     $now = $jusqua ?? time();
@@ -334,8 +335,15 @@ function convenu_minutes(array $e, string $du, string $au, ?int $jusqua = null):
     for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) {
         $j = date('Y-m-d', $t);
         foreach ($h[(int)date('N', $t)] as [$a, $b]) {
-            [, $fin] = shift_bounds(['jour' => $j, 'debut' => $a, 'fin' => $b]);
-            if ($fin <= $now) $tot += shift_minutes($a, $b);
+            [$debut, $fin] = shift_bounds(['jour' => $j, 'debut' => $a, 'fin' => $b]);
+            $compte = $fin <= $now;
+            if (!$compte && $debut <= $now) {
+                // Service pas encore fini sur le papier, mais la personne a déjà dépointé : on le compte (sinon l'écart serait faussé)
+                foreach ($pointages as $p) {
+                    if ($p['fin'] !== null && strtotime($p['debut']) < $fin && strtotime($p['fin']) > $debut) { $compte = true; break; }
+                }
+            }
+            if ($compte) $tot += shift_minutes($a, $b);
         }
     }
     return $tot;
@@ -685,7 +693,7 @@ function rapport_mois(string $ym, ?string $etabFiltre): array
                 foreach ($parEmp[$id] ?? [] as $p) {
                     if ($p['fin'] === null && $p['debut'] >= $seuilOubli) $cut = min($cut ?? PHP_INT_MAX, strtotime($p['debut']));
                 }
-                $contratMin = $d1 <= $d2 ? convenu_minutes($e, $d1, $d2, $cut) : 0;
+                $contratMin = $d1 <= $d2 ? convenu_minutes($e, $d1, $d2, $cut, $parEmp[$id] ?? []) : 0;
             }
         }
 
@@ -878,6 +886,101 @@ function csv_resume(string $ym, ?string $etabF = null): string
     return (string)$csv;
 }
 
+/* ---------- Coûts du personnel ---------- */
+
+/** Taux horaire équivalent d'un fixe : salaire mensuel ÷ heures convenues du mois. */
+function taux_horaire_fixe(array $e): float
+{
+    $hebdo = horaires_minutes(emp_horaires($e)) / 60;
+    if ($hebdo <= 0) $hebdo = 35;
+    return (float)$e['salaire'] / ($hebdo * 52 / 12);
+}
+
+/**
+ * Coût jour par jour entre deux dates.
+ * Jours passés et aujourd'hui : heures réellement pointées. Jours à venir : planning.
+ * Retour : [jour => ['source' => reel|prevu, 'fixes_min', 'fixes_eur', 'extras_min', 'extras_eur', 'detail' => [emp_id => [min, eur]]]]
+ */
+function couts_jours(string $du, string $au, ?string $etab = null): array
+{
+    $today = date('Y-m-d');
+    $now = time();
+    $emps = [];
+    foreach (employes(false) as $e) $emps[(int)$e['id']] = $e;
+    $out = [];
+    for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) {
+        $j = date('Y-m-d', $t);
+        $out[$j] = ['source' => $j <= $today ? 'reel' : 'prevu', 'fixes_min' => 0, 'fixes_eur' => 0.0, 'extras_min' => 0, 'extras_eur' => 0.0, 'detail' => []];
+    }
+    $iv = []; // [jour][emp] => intervalles
+    // Réel : pointages (rattachés au jour d'arrivée)
+    $sql = 'SELECT * FROM pointages WHERE debut >= ? AND debut < ?' . ($etab ? ' AND etab = ?' : '');
+    $st = db()->prepare($sql);
+    $par = [$du . ' 00:00:00', date('Y-m-d', strtotime($au . ' +1 day')) . ' 00:00:00'];
+    if ($etab) $par[] = $etab;
+    $st->execute($par);
+    foreach ($st->fetchAll() as $p) {
+        $j = substr($p['debut'], 0, 10);
+        if (!isset($out[$j]) || $out[$j]['source'] !== 'reel') continue;
+        $a = strtotime($p['debut']);
+        $b = $p['fin'] !== null ? strtotime($p['fin']) : ($a > $now - OUBLI_HEURES * 3600 ? $now : $a);
+        $iv[$j][(int)$p['employe_id']][] = [$a, $b];
+    }
+    // Prévu : planning des jours à venir (hors congés / maladie)
+    $sql = 'SELECT * FROM planning WHERE jour BETWEEN ? AND ?' . ($etab ? ' AND etab = ?' : '');
+    $st = db()->prepare($sql);
+    $par = [max($du, date('Y-m-d', strtotime($today . ' +1 day'))), $au];
+    if ($etab) $par[] = $etab;
+    $st->execute($par);
+    foreach ($st->fetchAll() as $s) {
+        if (in_array($s['motif'], ['malade', 'conge'], true) || !isset($out[$s['jour']])) continue;
+        $iv[$s['jour']][(int)$s['employe_id']][] = shift_bounds($s);
+    }
+    foreach ($iv as $j => $parEmp) {
+        foreach ($parEmp as $id => $l) {
+            $e = $emps[$id] ?? null;
+            if (!$e) continue;
+            $m = minutes_union($l);
+            $eur = $e['type'] === 'extra' ? $m / 60 * (float)$e['taux'] : $m / 60 * taux_horaire_fixe($e);
+            $k = $e['type'] === 'extra' ? 'extras' : 'fixes';
+            $out[$j][$k . '_min'] += $m;
+            $out[$j][$k . '_eur'] += $eur;
+            $out[$j]['detail'][$id] = [$m, $eur];
+        }
+    }
+    return $out;
+}
+
+/* ---------- Demandes de congé ---------- */
+
+const TYPES_CONGE = ['conge' => 'Congé payé', 'sans_solde' => 'Congé sans solde', 'absence' => 'Absence / rendez-vous', 'malade' => 'Arrêt maladie'];
+
+function demandes_en_attente(): array
+{
+    return db()->query("SELECT d.*, e.prenom, e.nom FROM demandes d JOIN employes e ON e.id = d.employe_id WHERE d.statut = 'attente' AND e.actif = 1 ORDER BY d.du")->fetchAll();
+}
+
+/** Accepte ou refuse une demande. Acceptée : jours marqués « pas dispo » et services prévus passés en congé/malade. */
+function decider_demande(int $id, bool $ok): ?array
+{
+    $st = db()->prepare('SELECT * FROM demandes WHERE id = ?');
+    $st->execute([$id]);
+    $d = $st->fetch();
+    if (!$d || $d['statut'] !== 'attente') return null;
+    db()->prepare('UPDATE demandes SET statut = ?, decided_at = ? WHERE id = ?')->execute([$ok ? 'accepte' : 'refuse', date('Y-m-d H:i:s'), $id]);
+    if ($ok) {
+        $lib = TYPES_CONGE[$d['type']] ?? 'Congé';
+        $motif = $d['type'] === 'malade' ? 'malade' : 'conge';
+        for ($t = strtotime($d['du']); $t <= strtotime($d['au']); $t += 86400) {
+            $j = date('Y-m-d', $t);
+            db()->prepare('INSERT INTO indispos (employe_id, jour, note, created_at) VALUES (?,?,?,?) ON CONFLICT(employe_id, jour) DO UPDATE SET note = excluded.note')
+                ->execute([$d['employe_id'], $j, $lib, date('Y-m-d H:i:s')]);
+        }
+        db()->prepare('UPDATE planning SET motif = ? WHERE employe_id = ? AND jour BETWEEN ? AND ?')->execute([$motif, $d['employe_id'], $d['du'], $d['au']]);
+    }
+    return $d;
+}
+
 /* ---------- Indisponibilités ---------- */
 
 /** [employe_id][jour] => note */
@@ -1054,6 +1157,7 @@ function admin_nav(string $actif): void
         'aujourdhui' => '<path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/>',
         'planning' => '<rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
         'heures' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+        'couts' => '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4.5 4.5 0 1 0 0 7M7 10.7h6M7 13.3h6"/>',
         'equipe' => '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M16.5 14.6c2.4.1 4 1.5 4.5 4"/>',
         'reglages' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
     ];
@@ -1061,6 +1165,7 @@ function admin_nav(string $actif): void
         'aujourdhui' => "Aujourd'hui",
         'planning' => 'Planning',
         'heures' => 'Heures',
+        'couts' => 'Coûts',
         'equipe' => 'Équipe',
         'reglages' => 'Réglages',
     ];

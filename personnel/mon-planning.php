@@ -16,6 +16,24 @@ if ($e && $_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code(403);
         exit;
     }
+    if (($_POST['action'] ?? '') === 'conge') {
+        $du = (string)($_POST['du'] ?? '');
+        $au = (string)($_POST['au'] ?? '') ?: $du;
+        $type = isset(TYPES_CONGE[$_POST['type'] ?? '']) ? (string)$_POST['type'] : 'conge';
+        if (valid_date($du) && valid_date($au) && $au >= $du && (strtotime($au) - strtotime($du)) <= 60 * 86400 && ($du >= date('Y-m-d', strtotime('-7 days')))) {
+            db()->prepare('INSERT INTO demandes (employe_id, du, au, type, note, created_at) VALUES (?,?,?,?,?,?)')
+                ->execute([$e['id'], $du, $au, $type, mb_substr(trim((string)($_POST['note'] ?? '')), 0, 200), date('Y-m-d H:i:s')]);
+            try {
+                envoyer_notif('Demande de congé : ' . emp_nom($e), TYPES_CONGE[$type] . ' du ' . date('d/m', strtotime($du)) . ($au !== $du ? ' au ' . date('d/m', strtotime($au)) : '') . '. À valider dans Aujourd\'hui.');
+            } catch (Throwable $ex) { }
+            redirect('mon-planning.php?t=' . $t . '&ok=1#conges');
+        }
+        redirect('mon-planning.php?t=' . $t . '&err=1#conges');
+    }
+    if (($_POST['action'] ?? '') === 'annuler') {
+        db()->prepare("DELETE FROM demandes WHERE id = ? AND employe_id = ? AND statut = 'attente'")->execute([(int)($_POST['id'] ?? 0), $e['id']]);
+        redirect('mon-planning.php?t=' . $t . '#conges');
+    }
     $j = (string)($_POST['jour'] ?? '');
     if (valid_date($j) && $j >= date('Y-m-d')) {
         if (($_POST['action'] ?? '') === 'off') {
@@ -63,6 +81,33 @@ foreach ([0, 1] as $w) {
     }
     echo '<div class="card"><div class="row between"><h3 style="margin:0">' . ($w === 0 ? 'Cette semaine' : 'Semaine prochaine') . '</h3><span class="pill">' . h(fmt_min($tot)) . ' prévues</span></div><ul class="list">' . $html . '</ul></div>';
 }
+// Demandes de congé
+$st = db()->prepare('SELECT * FROM demandes WHERE employe_id = ? AND au >= ? ORDER BY du');
+$st->execute([$e['id'], date('Y-m-d', strtotime('-30 days'))]);
+$mesDemandes = $st->fetchAll();
+echo '<h2 id="conges">Demander un congé</h2><div class="card">';
+if (isset($_GET['ok'])) echo '<div class="flash ok">Demande envoyée. Tu verras ici quand elle sera acceptée.</div>';
+if (isset($_GET['err'])) echo '<div class="flash err">Vérifie les dates (60 jours maximum).</div>';
+echo '<form method="post"><input type="hidden" name="action" value="conge">'
+    . '<div class="row"><div class="field" style="flex:1"><label>Du</label><input type="date" name="du" required min="' . date('Y-m-d') . '" style="width:100%"></div>'
+    . '<div class="field" style="flex:1"><label>Au (inclus)</label><input type="date" name="au" min="' . date('Y-m-d') . '" style="width:100%"></div></div>'
+    . '<div class="field"><label>Type</label><select name="type" style="width:100%">';
+foreach (TYPES_CONGE as $k => $l) echo '<option value="' . h($k) . '">' . h($l) . '</option>';
+echo '</select></div><div class="field"><label>Message (facultatif)</label><input name="note" maxlength="200" placeholder="ex. mariage de ma sœur" style="width:100%"></div>'
+    . '<button class="primary" style="width:100%">Envoyer la demande</button></form>';
+if ($mesDemandes) {
+    echo '<ul class="list" style="margin-top:12px">';
+    foreach ($mesDemandes as $d) {
+        $pill = ['attente' => ['warn', 'en attente'], 'accepte' => ['ok', 'acceptée'], 'refuse' => ['err', 'refusée']][$d['statut']] ?? ['', $d['statut']];
+        echo '<li><span><b>' . h(date('d/m', strtotime($d['du'])) . ($d['au'] !== $d['du'] ? ' → ' . date('d/m', strtotime($d['au'])) : '')) . '</b> <span class="muted small">' . h(TYPES_CONGE[$d['type']] ?? '') . '</span></span>'
+            . '<span class="row"><span class="pill ' . $pill[0] . '">' . h($pill[1]) . '</span>'
+            . ($d['statut'] === 'attente' ? '<form method="post"><input type="hidden" name="action" value="annuler"><input type="hidden" name="id" value="' . (int)$d['id'] . '"><button class="small">Annuler</button></form>' : '')
+            . '</span></li>';
+    }
+    echo '</ul>';
+}
+echo '</div>';
+
 // Mes disponibilités (6 prochaines semaines)
 $du = date('Y-m-d');
 $au = date('Y-m-d', strtotime('+41 days'));

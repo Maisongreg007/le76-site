@@ -348,3 +348,4 @@ dialog#dlg{max-width:520px;max-height:calc(100dvh - 40px);overflow:auto}
 .hg-slot input[type=time]{flex:1 1 0;width:0}
 .hg-slot input[type=checkbox]{flex:none}
 .hg-slot input[type=time]::-webkit-calendar-picker-indicator{display:none}.hg-slot input[type=time]{padding:5px 4px;text-align:center}
+.det summary{cursor:pointer;margin-top:2px}.det .list li{padding:6px 0}

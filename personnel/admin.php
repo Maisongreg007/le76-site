@@ -3,7 +3,7 @@ declare(strict_types=1);
 require __DIR__ . '/lib.php';
 
 $p = (string)($_GET['p'] ?? 'aujourdhui');
-$pages = ['aujourdhui', 'planning', 'heures', 'equipe', 'reglages', 'export'];
+$pages = ['aujourdhui', 'planning', 'heures', 'couts', 'equipe', 'reglages', 'export'];
 if (!in_array($p, $pages, true)) {
     $p = 'aujourdhui';
 }

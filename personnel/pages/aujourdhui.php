@@ -5,6 +5,15 @@ $today = date('Y-m-d');
 $nowSql = date('Y-m-d H:i:s');
 $seuil = date('Y-m-d H:i:s', time() - OUBLI_HEURES * 3600);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $act = (string)($_POST['action'] ?? '');
+    if ($act === 'conge_ok' || $act === 'conge_ko') {
+        $d = decider_demande((int)($_POST['id'] ?? 0), $act === 'conge_ok');
+        back('admin.php?p=aujourdhui', $d ? ($act === 'conge_ok' ? 'Congé accepté : les jours sont bloqués dans le planning.' : 'Demande refusée.') : '');
+    }
+    redirect('admin.php?p=aujourdhui');
+}
+
 $frag = isset($_GET['frag']);
 try { verifier_alertes(); } catch (Throwable $t) { }
 if ($frag) {
@@ -16,6 +25,24 @@ if ($frag) {
     flash_show();
     echo '<div class="row between"><div class="titlebar"><h1>' . h(ucfirst(date_fr($today))) . '</h1><span class="clock-sm" id="clk">' . date('H:i') . '</span></div>'
         . '<span class="live-dot" id="live-state"><i></i> En direct</span></div><div id="live">';
+}
+
+/* Demandes de congé à valider */
+$dem = demandes_en_attente();
+if ($dem) {
+    echo '<div class="card" style="box-shadow:inset 0 0 0 1.5px var(--warn)"><h3>Demandes de congé <span class="pill warn">' . count($dem) . '</span></h3><ul class="list">';
+    foreach ($dem as $d) {
+        $nbj = (int)round((strtotime($d['au']) - strtotime($d['du'])) / 86400) + 1;
+        $st = db()->prepare('SELECT COUNT(*) FROM planning WHERE employe_id = ? AND jour BETWEEN ? AND ?');
+        $st->execute([$d['employe_id'], $d['du'], $d['au']]);
+        $nbs = (int)$st->fetchColumn();
+        echo '<li><span><b>' . h(trim($d['prenom'] . ' ' . $d['nom'])) . '</b> · ' . h(TYPES_CONGE[$d['type']] ?? '') . '<br><span class="muted small">'
+            . h(ucfirst(date_fr($d['du']))) . ($d['au'] !== $d['du'] ? ' → ' . h(date_fr($d['au'])) : '') . ' · ' . $nbj . ' jour' . ($nbj > 1 ? 's' : '')
+            . ($nbs ? ' · <b>' . $nbs . ' service(s) prévu(s)</b> sur la période' : '') . ($d['note'] !== '' ? ' · « ' . h($d['note']) . ' »' : '') . '</span></span>'
+            . '<span class="row"><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="conge_ko"><input type="hidden" name="id" value="' . (int)$d['id'] . '"><button class="small danger">Refuser</button></form>'
+            . '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="conge_ok"><input type="hidden" name="id" value="' . (int)$d['id'] . '"><button class="small primary">Accepter</button></form></span></li>';
+    }
+    echo '</ul></div>';
 }
 
 /* À surveiller : écarts entre le planning du jour et les pointages */
