@@ -107,7 +107,7 @@ async function renderDay() {
 function orderLi(o) {
   const [lbl, cls] = ST[o.status];
   return `<div class="li ${o.status !== 'confirmed' ? 'done' : ''}" data-s="${esc((o.name + ' ' + o.pitch + ' ' + o.code + ' ' + o.phone + ' ' + o.phone.replace(/\D/g, '')).toLowerCase())}">
-    <span class="main"><div class="t">${esc(o.name)} · empl. ${esc(o.pitch)} <span class="pill ${cls}">${lbl}</span> ${o.paid ? '<span class="pill p-blue">payée</span>' : ''} ${o.origin === 'equipe' ? '<span class="pill p-gray">équipe</span>' : ''}</div>
+    <span class="main"><div class="t">${esc(o.name)} · empl. ${esc(o.pitch)} <span class="pill ${cls}">${lbl}</span> ${o.paid ? '<span class="pill p-blue">payée</span>' : ''} ${o.origin === 'equipe' ? '<span class="pill p-gray">équipe</span>' : ''}${o.example ? '<span class="pill p-warn">exemple</span>' : ''}</div>
     <div class="d">${o.items.map(i => `${i.qty} × ${esc(i.name)}`).join(' · ')} — <b>${eur(o.total)}</b> · ${esc(o.code)}${o.phone ? ' · ' + esc(o.phone) : ''}${o.note ? ' · « ' + esc(o.note) + ' »' : ''}</div></span>
     <span class="acts no-print">
       ${o.status === 'confirmed' ? `<button class="btn-ok btn-sm" data-collect="${o.id}">Retirée</button>` : ''}
@@ -180,7 +180,7 @@ function orderSheet(o, date, refresh = render) {
   openSheet(o ? 'Modifier ' + o.code : 'Nouvelle commande', `
     <label class="field"><span>Jour de retrait</span><input type="date" id="oDate" value="${o ? o.date : date}" min="${todayStr()}"></label>
     <div class="group">${prods.map(p => `<div class="li"><span class="emoji">${esc(p.emoji)}</span><span class="main"><div class="t">${esc(p.name)}</div><div class="d">${eur(p.price)}</div></span><input type="number" min="0" max="${SETTINGS?.max_per_product || 50}" inputmode="numeric" data-q="${p.id}" value="${cart[p.id] || ''}" placeholder="0" style="width:80px;text-align:center"></div>`).join('')}</div>
-    <div class="fields2" style="margin-top:12px"><label class="field"><span>Nom</span><input id="oName" maxlength="60" value="${esc(o?.name || '')}"></label><label class="field"><span>Emplacement</span><input id="oPitch" maxlength="30" value="${esc(o?.pitch || '')}"></label></div>
+    <div class="fields3" style="margin-top:12px"><label class="field"><span>Prénom</span><input id="oFirst" maxlength="40" value="${esc(o?.firstName || '')}"></label><label class="field"><span>Nom</span><input id="oName" maxlength="60" value="${esc(o?.lastName || '')}"></label><label class="field"><span>Emplacement</span><input id="oPitch" maxlength="30" value="${esc(o?.pitch || '')}"></label></div>
     <div class="fields2"><label class="field"><span>Téléphone</span><input id="oPhone" type="tel" maxlength="30" value="${esc(o?.phone || '')}"></label><label class="field"><span>Remarque</span><input id="oNote" maxlength="200" value="${esc(o?.note || '')}"></label></div>
     <div class="total"><span>Total</span><b id="oTotal">${eur(0)}</b></div>
     <button class="btn-main" id="oSave">${o ? 'Enregistrer' : 'Créer la commande'}</button>`);
@@ -191,7 +191,7 @@ function orderSheet(o, date, refresh = render) {
   $('oSave').onclick = async () => {
     if (busy) return; busy = true;
     try {
-      const body = { date: $('oDate').value, name: $('oName').value, pitch: $('oPitch').value, phone: $('oPhone').value, note: $('oNote').value, items: items() };
+      const body = { date: $('oDate').value, firstName: $('oFirst').value, lastName: $('oName').value, pitch: $('oPitch').value, phone: $('oPhone').value, note: $('oNote').value, items: items() };
       if (o) await api('modifier_equipe', { id: o.id, ...body }); else await api('creer', { key, ...body });
       closeSheet(); toast(o ? 'Commande modifiée.' : 'Commande créée.'); if (!o) DAY = body.date; refresh();
     } catch (e) { toast(e.message, true); } finally { busy = false; }
@@ -327,6 +327,9 @@ async function renderSettings() {
         <div class="group pad small">${j.dates.length ? j.dates.map(d => `${cap(dfr(d.date, { weekday: 'long', day: 'numeric', month: 'short' }))} <span class="mute">(jusqu’au ${dfr(d.limit.slice(0, 10), { day: 'numeric', month: 'short' })} ${d.limit.slice(11)})</span>`).join('<br>') : '<span class="mute">Aucun pour le moment.</span>'}</div>
         <div class="group-title">Affiche pour l’accueil</div>
         <div class="group pad"><p class="small mute">Une affiche A4 avec le QR code de la page de commande, à imprimer pour l’accueil, le snack ou les sanitaires.</p><button class="btn-plain btn-sm" id="sPoster">Ouvrir l’affiche</button> <a class="link small" href="${esc(publicUrl)}" target="_blank" rel="noopener">${esc(publicUrl.replace(/^https?:\/\//, ''))}</a></div>
+        <div class="group-title">Ventes d’exemple</div>
+        <div class="group pad"><p class="small mute">Des commandes fictives sur 3 semaines pour voir l’outil « en vrai » (préparation, retraits, chiffres). Elles sont marquées « exemple » et se suppriment d’un clic avant l’ouverture.</p>
+          <div class="row-btns"><button class="btn-plain btn-sm" id="exAdd">Ajouter des ventes d’exemple</button><button class="btn-danger btn-sm" id="exDel">Supprimer les exemples</button></div><p class="small mute" id="exCount" style="margin-top:8px"></p></div>
         <div class="group-title">Code de l’équipe</div>
         <div class="group pad"><div class="fields2"><input id="cOld" type="password" inputmode="numeric" placeholder="Code actuel"><input id="cNew" type="password" inputmode="numeric" placeholder="Nouveau code (4 à 8 chiffres)"></div><button class="btn-plain btn-sm" id="cSave" style="margin-top:10px">Changer le code</button> <button class="btn-plain btn-sm" id="cOut" style="margin-top:10px">Se déconnecter</button></div>
       </div>
@@ -344,6 +347,10 @@ async function renderSettings() {
     try { const r = await api('reglages_enregistrer', { settings }); SETTINGS = r.settings; toast('Réglages enregistrés.'); renderSettings(); } catch (e) { toast(e.message, true); }
   };
   $('sPoster').onclick = () => poster(publicUrl, s);
+  const exCount = async () => { try { const n = (await api('nb_exemples')).count; $('exCount').textContent = n ? n + ' commande(s) d’exemple en place.' : 'Aucune commande d’exemple.'; $('exDel').disabled = !n; $('exAdd').disabled = !!n; } catch { } };
+  exCount();
+  $('exAdd').onclick = async () => { try { const r = await api('exemples'); toast(r.created + ' commandes d’exemple ajoutées.'); exCount(); } catch (e) { toast(e.message, true); } };
+  $('exDel').onclick = async () => { if (!confirm('Supprimer toutes les commandes d’exemple ? Les vraies commandes ne sont pas touchées.')) return; try { const r = await api('supprimer_exemples'); toast(r.deleted + ' commandes d’exemple supprimées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('cSave').onclick = async () => { try { await api('code', { old: $('cOld').value, new: $('cNew').value }); toast('Code changé. Les autres appareils devront le saisir.'); $('cOld').value = $('cNew').value = ''; } catch (e) { toast(e.message, true); } };
   $('cOut').onclick = async () => { try { await api('deconnexion'); } catch { } showLogin(); };
 }

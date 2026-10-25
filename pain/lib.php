@@ -99,6 +99,10 @@ function db(): PDO
         total INTEGER NOT NULL, cout INTEGER NOT NULL, origine TEXT NOT NULL DEFAULT \'client\',
         cree_le TEXT NOT NULL, modifie_le TEXT NOT NULL, retire_le TEXT, annule_le TEXT)');
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commandes_jour ON commandes(jour, statut)');
+    $cols = array_column($pdo->query('PRAGMA table_info(commandes)')->fetchAll(), 'name');
+    if (!in_array('prenom', $cols, true)) {
+        $pdo->exec("ALTER TABLE commandes ADD COLUMN prenom TEXT NOT NULL DEFAULT ''");
+    }
     $pdo->exec('CREATE TABLE IF NOT EXISTS lignes (
         commande_id INTEGER NOT NULL REFERENCES commandes(id) ON DELETE CASCADE,
         produit_id INTEGER NOT NULL, nom TEXT NOT NULL, emoji TEXT NOT NULL DEFAULT \'\',
@@ -417,7 +421,8 @@ function lignes_de(int $id): array
 function vue_commande(array $c, bool $equipe): array
 {
     $v = [
-        'token' => $c['jeton'], 'code' => $c['code'], 'name' => $c['nom'], 'pitch' => $c['emplacement'], 'phone' => $c['telephone'],
+        'token' => $c['jeton'], 'code' => $c['code'], 'name' => trim(($c['prenom'] ?? '') . ' ' . $c['nom']), 'firstName' => $c['prenom'] ?? '', 'lastName' => $c['nom'],
+        'pitch' => $c['emplacement'], 'phone' => $c['telephone'], 'example' => ($c['origine'] ?? '') === 'exemple',
         'note' => $c['remarque'], 'lang' => $c['langue'], 'date' => $c['jour'], 'status' => $c['statut'], 'paid' => (bool) $c['paye'],
         'total' => (int) $c['total'], 'items' => lignes_de((int) $c['id']), 'createdAt' => $c['cree_le'],
         'collectedAt' => $c['retire_le'], 'cancelledAt' => $c['annule_le'],
@@ -473,8 +478,10 @@ function chiffres_tel(string $t): string
 function champs_client(array $q, bool $equipe = false): array
 {
     $r = reglages();
-    $nom = texte($q['name'] ?? '', 60, true, 'Le nom');
-    $empl = texte($q['pitch'] ?? '', 30, true, 'L’emplacement');
+    // Prénom + nom obligatoires (anciennes versions : un seul champ « name » accepté comme nom)
+    $prenom = texte($q['firstName'] ?? '', 40, true, 'Le prénom');
+    $nom = texte($q['lastName'] ?? ($q['name'] ?? ''), 60, true, 'Le nom');
+    $empl = texte($q['pitch'] ?? '', 30, true, 'Le numéro d’emplacement');
     // Téléphone obligatoire pour les campeurs (pour les joindre et retrouver leur bon) ; facultatif pour l'équipe
     $tel = texte($q['phone'] ?? '', 30, !$equipe, 'Le numéro de téléphone');
     if ($tel !== '' && (!preg_match('/^[0-9 +().\/\-]{6,30}$/', $tel) || strlen(chiffres_tel($tel)) < 8)) {
@@ -482,7 +489,7 @@ function champs_client(array $q, bool $equipe = false): array
     }
     $rem = texte($q['note'] ?? '', 200, false, 'La remarque');
     $langue = in_array($q['lang'] ?? 'fr', P_LANGS, true) ? ($q['lang'] ?? 'fr') : 'fr';
-    return [$nom, $empl, $tel, $rem, $langue];
+    return [$nom, $empl, $tel, $rem, $langue, $prenom];
 }
 
 /* ------------------------------------------------------------------ */

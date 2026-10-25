@@ -93,6 +93,14 @@ try {
             repondre(['ok' => true, 'log' => $st->fetchAll()]);
         case 'code':
             changer_code((string) ($q['old'] ?? ''), (string) ($q['new'] ?? ''));
+        case 'exemples':
+            creer_exemples();
+        case 'supprimer_exemples':
+            $n = db()->exec("DELETE FROM commandes WHERE origine = 'exemple'");
+            journaliser('équipe', 'Commandes d’exemple supprimées', null, (string) $n);
+            repondre(['ok' => true, 'deleted' => $n]);
+        case 'nb_exemples':
+            repondre(['ok' => true, 'count' => (int) db()->query("SELECT COUNT(*) FROM commandes WHERE origine = 'exemple'")->fetchColumn()]);
     }
     erreur('Action inconnue.', 404);
 } catch (Throwable $e) {
@@ -143,18 +151,18 @@ function commander(array $q, bool $equipe): never
     if ($equipe && $jour < date('Y-m-d')) {
         erreur('Ce jour est déjà passé.');
     }
-    [$nom, $empl, $tel, $rem, $langue] = champs_client($q, $equipe);
+    [$nom, $empl, $tel, $rem, $langue, $prenom] = champs_client($q, $equipe);
     $pdo = db();
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, 0, $equipe);
     $now = maintenant();
-    $pdo->prepare('INSERT INTO commandes (jeton, code, cle, nom, emplacement, telephone, remarque, langue, jour, statut, paye, total, cout, origine, cree_le, modifie_le)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)')
-        ->execute([jeton(), nouveau_code(), $cle, $nom, $empl, $tel, $rem, $langue, $jour, 'confirmed', $equipe ? 'equipe' : 'client', $now, $now]);
+    $pdo->prepare('INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, total, cout, origine, cree_le, modifie_le)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)')
+        ->execute([jeton(), nouveau_code(), $cle, $prenom, $nom, $empl, $tel, $rem, $langue, $jour, 'confirmed', $equipe ? 'equipe' : 'client', $now, $now]);
     $id = (int) $pdo->lastInsertId();
     [$total, $cout] = enregistrer_lignes($id, $lignes);
     $pdo->prepare('UPDATE commandes SET total = ?, cout = ? WHERE id = ?')->execute([$total, $cout, $id]);
-    journaliser($equipe ? 'équipe' : 'client', 'Commande créée', $id, $nom . ' · empl. ' . $empl . ' · ' . $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
+    journaliser($equipe ? 'équipe' : 'client', 'Commande créée', $id, $prenom . ' ' . $nom . ' · empl. ' . $empl . ' · ' . $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), $equipe)]);
 }
@@ -194,13 +202,13 @@ function modifier_client(array $q): never
     if (!jour_commandable($jour)) {
         erreur('Ce jour n’est pas disponible à la commande.', 409);
     }
-    [$nom, $empl, $tel, $rem, $langue] = champs_client($q);
+    [$nom, $empl, $tel, $rem, $langue, $prenom] = champs_client($q);
     $pdo = db();
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, (int) $c['id']);
     [$total, $cout] = enregistrer_lignes((int) $c['id'], $lignes);
-    $pdo->prepare('UPDATE commandes SET nom = ?, emplacement = ?, telephone = ?, remarque = ?, langue = ?, jour = ?, total = ?, cout = ?, modifie_le = ? WHERE id = ? AND statut = ?')
-        ->execute([$nom, $empl, $tel, $rem, $langue, $jour, $total, $cout, maintenant(), $c['id'], 'confirmed']);
+    $pdo->prepare('UPDATE commandes SET prenom = ?, nom = ?, emplacement = ?, telephone = ?, remarque = ?, langue = ?, jour = ?, total = ?, cout = ?, modifie_le = ? WHERE id = ? AND statut = ?')
+        ->execute([$prenom, $nom, $empl, $tel, $rem, $langue, $jour, $total, $cout, maintenant(), $c['id'], 'confirmed']);
     journaliser('client', 'Commande modifiée', (int) $c['id'], $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', (int) $c['id']), false)]);
@@ -286,7 +294,7 @@ function liste_equipe(array $q): never
     $s = trim((string) ($q['q'] ?? ''));
     if ($s !== '') {
         $chiffres = chiffres_tel($s);
-        $where[] = "(nom LIKE ? OR emplacement LIKE ? OR code LIKE ? OR telephone LIKE ?" . (strlen($chiffres) >= 4 ? " OR REPLACE(REPLACE(REPLACE(REPLACE(telephone,' ',''),'.',''),'-',''),'/','') LIKE ?" : '') . ')';
+        $where[] = "((prenom || ' ' || nom) LIKE ? OR emplacement LIKE ? OR code LIKE ? OR telephone LIKE ?" . (strlen($chiffres) >= 4 ? " OR REPLACE(REPLACE(REPLACE(REPLACE(telephone,' ',''),'.',''),'-',''),'/','') LIKE ?" : '') . ')';
         array_push($args, "%$s%", "%$s%", "%$s%", "%$s%");
         if (strlen($chiffres) >= 4) {
             $args[] = '%' . $chiffres . '%';
@@ -349,13 +357,13 @@ function modifier_equipe(array $q): never
     if (!date_valide($jour)) {
         erreur('Date invalide.');
     }
-    [$nom, $empl, $tel, $rem, $langue] = champs_client($q + ['lang' => $c['langue']], true);
+    [$nom, $empl, $tel, $rem, $langue, $prenom] = champs_client($q + ['lang' => $c['langue']], true);
     $pdo = db();
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, (int) $c['id'], true);
     [$total, $cout] = enregistrer_lignes((int) $c['id'], $lignes);
-    $pdo->prepare('UPDATE commandes SET nom = ?, emplacement = ?, telephone = ?, remarque = ?, jour = ?, total = ?, cout = ?, modifie_le = ? WHERE id = ?')
-        ->execute([$nom, $empl, $tel, $rem, $jour, $total, $cout, maintenant(), $c['id']]);
+    $pdo->prepare('UPDATE commandes SET prenom = ?, nom = ?, emplacement = ?, telephone = ?, remarque = ?, jour = ?, total = ?, cout = ?, modifie_le = ? WHERE id = ?')
+        ->execute([$prenom, $nom, $empl, $tel, $rem, $jour, $total, $cout, maintenant(), $c['id']]);
     journaliser('équipe', 'Commande modifiée', (int) $c['id'], $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', (int) $c['id']), true)]);
@@ -489,13 +497,71 @@ function exporter(string $from, string $to): never
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
     $statuts = ['confirmed' => 'À retirer', 'collected' => 'Retirée', 'cancelled' => 'Annulée'];
-    fputcsv($out, ['Jour', 'Code', 'Nom', 'Emplacement', 'Téléphone', 'Détail', 'Total (€)', 'Coût d’achat (€)', 'Statut', 'Payée', 'Créée le', 'Retirée le', 'Remarque'], ';', '"', '');
+    fputcsv($out, ['Jour', 'Code', 'Prénom', 'Nom', 'Emplacement', 'Téléphone', 'Détail', 'Total (€)', 'Coût d’achat (€)', 'Statut', 'Payée', 'Créée le', 'Retirée le', 'Remarque'], ';', '"', '');
     foreach ($st->fetchAll() as $c) {
-        fputcsv($out, [$c['jour'], $c['code'], $c['nom'], $c['emplacement'], $c['telephone'], resume_lignes(lignes_de((int) $c['id'])),
+        fputcsv($out, [$c['jour'], $c['code'], $c['prenom'], $c['nom'], $c['emplacement'], $c['telephone'], resume_lignes(lignes_de((int) $c['id'])),
             number_format($c['total'] / 100, 2, ',', ''), number_format($c['cout'] / 100, 2, ',', ''), $statuts[$c['statut']] ?? $c['statut'],
             $c['paye'] ? 'oui' : 'non', $c['cree_le'], $c['retire_le'] ?? '', $c['remarque']], ';', '"', '');
     }
     exit;
+}
+
+/** Ventes d'exemple sur 3 semaines (marquées « exemple », supprimables d'un clic dans les réglages). */
+function creer_exemples(): never
+{
+    $pdo = db();
+    if ((int) $pdo->query("SELECT COUNT(*) FROM commandes WHERE origine = 'exemple'")->fetchColumn() > 0) {
+        erreur('Les commandes d’exemple existent déjà. Supprime-les d’abord pour en recréer.', 409);
+    }
+    $prenoms = ['Lukas', 'Anna', 'Jan', 'Sophie', 'Thomas', 'Emma', 'Pieter', 'Julia', 'Marc', 'Léa', 'Stefan', 'Claire', 'Daan', 'Laura', 'Hugo', 'Mia', 'Paul', 'Lotte', 'Nicolas', 'Hannah'];
+    $noms = ['Müller', 'Schmidt', 'De Vries', 'Bakker', 'Martin', 'Bernard', 'Weber', 'Janssen', 'Dubois', 'Fischer', 'Peeters', 'Meyer', 'Lefèvre', 'Wagner', 'Visser', 'Roux', 'Becker', 'Smit', 'Girard', 'Hoffmann'];
+    $langues = ['de', 'de', 'nl', 'nl', 'fr', 'fr', 'en'];
+    $produits = array_values(array_filter(produits(false), fn($p) => $p['active']));
+    if (!$produits) {
+        erreur('Aucun produit en vente.');
+    }
+    mt_srand(76);
+    $aujourdhui = date('Y-m-d');
+    $nb = 0;
+    $pdo->exec('BEGIN IMMEDIATE');
+    for ($d = -20; $d <= 3; $d++) {
+        $jour = date('Y-m-d', strtotime("$d day"));
+        $combien = mt_rand(6, 16) + (in_array((int) date('N', strtotime($jour)), [6, 7], true) ? 6 : 0);
+        for ($k = 0; $k < $combien; $k++) {
+            $lignes = [];
+            foreach ($produits as $p) {
+                if (mt_rand(0, 100) < ($p['name'] === 'Baguette' ? 85 : 55)) {
+                    $q = mt_rand(1, $p['name'] === 'Baguette' ? 3 : 4);
+                    $lignes[] = ['produit_id' => $p['id'], 'nom' => $p['name'], 'emoji' => $p['emoji'], 'prix' => $p['price'], 'cout' => $p['cost'], 'quantite' => $q];
+                }
+            }
+            if (!$lignes) {
+                $p = $produits[0];
+                $lignes[] = ['produit_id' => $p['id'], 'nom' => $p['name'], 'emoji' => $p['emoji'], 'prix' => $p['price'], 'cout' => $p['cost'], 'quantite' => 2];
+            }
+            $r = mt_rand(1, 100);
+            if ($jour < $aujourdhui) {
+                [$statut, $paye] = $r <= 4 ? ['cancelled', 0] : ($r <= 8 ? ['confirmed', 0] : ['collected', 1]);
+            } elseif ($jour === $aujourdhui) {
+                [$statut, $paye] = $r <= 50 ? ['collected', 1] : ['confirmed', 0];
+            } else {
+                [$statut, $paye] = ['confirmed', 0];
+            }
+            $cree = date('Y-m-d H:i:s', strtotime($jour . ' -1 day ' . mt_rand(9, 19) . ':' . sprintf('%02d', mt_rand(0, 59))));
+            $retire = $statut === 'collected' ? $jour . ' ' . sprintf('%02d:%02d:00', mt_rand(8, 11), mt_rand(0, 59)) : null;
+            $tel = '+' . ['49 17', '31 6', '33 6'][mt_rand(0, 2)] . mt_rand(1000000, 9999999);
+            $pdo->prepare("INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, total, cout, origine, cree_le, modifie_le, retire_le, annule_le)
+                VALUES (?, ?, NULL, ?, ?, ?, ?, '', ?, ?, ?, ?, 0, 0, 'exemple', ?, ?, ?, ?)")
+                ->execute([jeton(), nouveau_code(), $prenoms[mt_rand(0, 19)], $noms[mt_rand(0, 19)], (string) mt_rand(1, 240), $tel, $langues[mt_rand(0, 6)], $jour, $statut, $paye, $cree, $cree, $retire, $statut === 'cancelled' ? $cree : null]);
+            $id = (int) $pdo->lastInsertId();
+            [$total, $cout] = enregistrer_lignes($id, $lignes);
+            $pdo->prepare('UPDATE commandes SET total = ?, cout = ? WHERE id = ?')->execute([$total, $cout, $id]);
+            $nb++;
+        }
+    }
+    $pdo->exec('COMMIT');
+    journaliser('équipe', 'Commandes d’exemple créées', null, (string) $nb);
+    repondre(['ok' => true, 'created' => $nb]);
 }
 
 function eur(int $c): string

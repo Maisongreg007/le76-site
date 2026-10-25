@@ -3,7 +3,7 @@
 
 const T = {
   fr: {
-    lang: 'Français', pickupWord: 'Retrait', saveImg: 'Enregistrer le bon (image)', saveHelp: 'L’image s’enregistre dans vos photos ou téléchargements. Vous pouvez aussi la montrer hors connexion.', find: 'Vous avez perdu votre bon ?', findBtn: 'Retrouver mon bon', findHelp: 'Indiquez le téléphone et l’emplacement donnés à la commande.', none: 'Aucune commande trouvée avec ce téléphone et cet emplacement.', phoneHelp: 'Pour vous joindre et retrouver votre bon si besoin.', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
+    lang: 'Français', pickupWord: 'Retrait', required: 'Prénom, nom, n° d’emplacement et téléphone sont obligatoires.', firstName: 'Prénom', lastName: 'Nom', saveImg: 'Enregistrer le bon (image)', saveHelp: 'L’image s’enregistre dans vos photos ou téléchargements. Vous pouvez aussi la montrer hors connexion.', find: 'Vous avez perdu votre bon ?', findBtn: 'Retrouver mon bon', findHelp: 'Indiquez le téléphone et l’emplacement donnés à la commande.', none: 'Aucune commande trouvée avec ce téléphone et cet emplacement.', phoneHelp: 'Pour vous joindre et retrouver votre bon si besoin.', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
     name: 'Nom', pitch: 'N° d’emplacement', phone: 'Téléphone', phoneOpt: 'Téléphone (facultatif)', note: 'Remarque (facultatif)',
     total: 'Total', confirm: 'Valider la commande', update: 'Enregistrer les modifications', payOnSite: 'Paiement sur place au retrait.',
     until: 'Commande possible jusqu’au', at: 'à', pickup: 'Retrait le', from: 'de', to: 'à', closed: 'Les commandes en ligne sont fermées pour le moment.',
@@ -16,7 +16,7 @@ const T = {
     qty: 'Qté', product: 'Produit', amount: 'Montant',
   },
   de: {
-    lang: 'Deutsch', pickupWord: 'Abholung', saveImg: 'Abholschein speichern (Bild)', saveHelp: 'Das Bild wird in Ihren Fotos oder Downloads gespeichert und funktioniert auch offline.', find: 'Abholschein verloren?', findBtn: 'Abholschein finden', findHelp: 'Telefon und Stellplatz wie bei der Bestellung angeben.', none: 'Keine Bestellung mit diesem Telefon und Stellplatz gefunden.', phoneHelp: 'Um Sie zu erreichen und Ihren Schein wiederzufinden.', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
+    lang: 'Deutsch', pickupWord: 'Abholung', required: 'Vorname, Nachname, Stellplatz und Telefon sind Pflichtfelder.', firstName: 'Vorname', lastName: 'Nachname', saveImg: 'Abholschein speichern (Bild)', saveHelp: 'Das Bild wird in Ihren Fotos oder Downloads gespeichert und funktioniert auch offline.', find: 'Abholschein verloren?', findBtn: 'Abholschein finden', findHelp: 'Telefon und Stellplatz wie bei der Bestellung angeben.', none: 'Keine Bestellung mit diesem Telefon und Stellplatz gefunden.', phoneHelp: 'Um Sie zu erreichen und Ihren Schein wiederzufinden.', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
     name: 'Name', pitch: 'Stellplatz-Nr.', phone: 'Telefon', phoneOpt: 'Telefon (optional)', note: 'Bemerkung (optional)',
     total: 'Summe', confirm: 'Bestellung absenden', update: 'Änderungen speichern', payOnSite: 'Bezahlung vor Ort bei der Abholung.',
     until: 'Bestellbar bis', at: 'um', pickup: 'Abholung am', from: 'von', to: 'bis', closed: 'Online-Bestellungen sind derzeit geschlossen.',
@@ -29,7 +29,7 @@ const T = {
     qty: 'Anz.', product: 'Produkt', amount: 'Betrag',
   },
   en: {
-    lang: 'English', pickupWord: 'Pick-up', saveImg: 'Save voucher (image)', saveHelp: 'The image is saved to your photos or downloads and also works offline.', find: 'Lost your voucher?', findBtn: 'Find my voucher', findHelp: 'Enter the phone number and pitch used for the order.', none: 'No order found with this phone number and pitch.', phoneHelp: 'So we can reach you and find your voucher if needed.', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
+    lang: 'English', pickupWord: 'Pick-up', required: 'First name, last name, pitch number and phone are required.', firstName: 'First name', lastName: 'Last name', saveImg: 'Save voucher (image)', saveHelp: 'The image is saved to your photos or downloads and also works offline.', find: 'Lost your voucher?', findBtn: 'Find my voucher', findHelp: 'Enter the phone number and pitch used for the order.', none: 'No order found with this phone number and pitch.', phoneHelp: 'So we can reach you and find your voucher if needed.', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
     name: 'Name', pitch: 'Pitch number', phone: 'Phone', phoneOpt: 'Phone (optional)', note: 'Note (optional)',
     total: 'Total', confirm: 'Place order', update: 'Save changes', payOnSite: 'Pay on site when you collect.',
     until: 'Order until', at: 'at', pickup: 'Pick-up on', from: 'from', to: 'to', closed: 'Online ordering is closed for now.',
@@ -42,7 +42,7 @@ const T = {
     qty: 'Qty', product: 'Product', amount: 'Amount',
   },
   nl: {
-    lang: 'Nederlands', pickupWord: 'Ophalen', saveImg: 'Bon opslaan (afbeelding)', saveHelp: 'De afbeelding wordt in uw foto’s of downloads bewaard en werkt ook offline.', find: 'Bon kwijt?', findBtn: 'Mijn bon zoeken', findHelp: 'Vul het telefoonnummer en de plaats van de bestelling in.', none: 'Geen bestelling gevonden met dit telefoonnummer en deze plaats.', phoneHelp: 'Om u te bereiken en uw bon terug te vinden.', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
+    lang: 'Nederlands', pickupWord: 'Ophalen', required: 'Voornaam, achternaam, plaatsnummer en telefoon zijn verplicht.', firstName: 'Voornaam', lastName: 'Achternaam', saveImg: 'Bon opslaan (afbeelding)', saveHelp: 'De afbeelding wordt in uw foto’s of downloads bewaard en werkt ook offline.', find: 'Bon kwijt?', findBtn: 'Mijn bon zoeken', findHelp: 'Vul het telefoonnummer en de plaats van de bestelling in.', none: 'Geen bestelling gevonden met dit telefoonnummer en deze plaats.', phoneHelp: 'Om u te bereiken en uw bon terug te vinden.', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
     name: 'Naam', pitch: 'Plaatsnummer', phone: 'Telefoon', phoneOpt: 'Telefoon (optioneel)', note: 'Opmerking (optioneel)',
     total: 'Totaal', confirm: 'Bestelling plaatsen', update: 'Wijzigingen opslaan', payOnSite: 'Betalen ter plaatse bij het ophalen.',
     until: 'Bestellen kan tot', at: 'om', pickup: 'Ophalen op', from: 'van', to: 'tot', closed: 'Online bestellen is momenteel gesloten.',
@@ -135,7 +135,8 @@ function renderOrder() {
       <span class="stepper ${q ? 'has' : ''}"><button data-minus="${p.id}" aria-label="−" ${q ? '' : 'disabled'}>−</button><b>${q}</b><button data-plus="${p.id}" aria-label="+" ${q >= s.max_per_product ? 'disabled' : ''}>+</button></span></div>`; }).join('')}</div>
     <div class="group-title">${t('you')}</div>
     <div class="group">
-      <label class="row"><span>${t('name')}</span><input id="fName" maxlength="60" autocomplete="family-name" value="${esc(EDIT?.name ?? stored('name'))}"></label>
+      <label class="row"><span>${t('firstName')}</span><input id="fFirst" maxlength="40" autocomplete="given-name" value="${esc(EDIT?.firstName ?? stored('first'))}"></label>
+      <label class="row"><span>${t('lastName')}</span><input id="fName" maxlength="60" autocomplete="family-name" value="${esc(EDIT?.lastName ?? stored('name'))}"></label>
       <label class="row"><span>${t('pitch')}</span><input id="fPitch" maxlength="30" value="${esc(EDIT?.pitch ?? stored('pitch'))}"></label>
       <label class="row"><span>${t('phone')}</span><input id="fPhone" type="tel" maxlength="30" autocomplete="tel" placeholder="+33 6 …" value="${esc(EDIT?.phone ?? stored('phone'))}"></label>
       <label class="row"><span>${t('note')}</span><input id="fNote" maxlength="200" value="${esc(EDIT?.note ?? '')}"></label>
@@ -166,17 +167,18 @@ function renderOrder() {
 }
 let FIELDS = {};
 function stored(k) { if (FIELDS[k] !== undefined) return FIELDS[k]; try { return JSON.parse(localStorage.getItem('pain-me') || '{}')[k] || ''; } catch { return ''; } }
-function keepFields() { if ($('fName')) { FIELDS = { name: $('fName').value, pitch: $('fPitch').value, phone: $('fPhone').value }; if (EDIT) Object.assign(EDIT, { name: FIELDS.name, pitch: FIELDS.pitch, phone: FIELDS.phone, note: $('fNote').value }); } }
+function keepFields() { if ($('fName')) { FIELDS = { first: $('fFirst').value, name: $('fName').value, pitch: $('fPitch').value, phone: $('fPhone').value }; if (EDIT) Object.assign(EDIT, { firstName: FIELDS.first, lastName: FIELDS.name, pitch: FIELDS.pitch, phone: FIELDS.phone, note: $('fNote').value }); } }
 async function submitOrder() {
   if (busy) return;
   const err = $('fErr'); err.textContent = '';
   const items = Object.entries(CART).filter(([, q]) => q > 0).map(([id, qty]) => ({ id: +id, qty }));
   if (!items.length) { err.textContent = t('empty'); return; }
-  const body = { date: DAY, name: $('fName').value.trim(), pitch: $('fPitch').value.trim(), phone: $('fPhone').value.trim(), note: $('fNote').value.trim(), items, lang: L };
+  for (const id of ['fFirst', 'fName', 'fPitch', 'fPhone']) if (!$(id).value.trim()) { err.textContent = t('required'); $(id).focus(); return; }
+  const body = { date: DAY, firstName: $('fFirst').value.trim(), lastName: $('fName').value.trim(), pitch: $('fPitch').value.trim(), phone: $('fPhone').value.trim(), note: $('fNote').value.trim(), items, lang: L };
   busy = true; $('fGo').disabled = true;
   try {
     const j = EDIT ? await api('modifier', { token: EDIT.token, ...body }) : await api('commander', { key: KEY, ...body });
-    try { localStorage.setItem('pain-me', JSON.stringify({ name: body.name, pitch: body.pitch, phone: body.phone })); } catch { }
+    try { localStorage.setItem('pain-me', JSON.stringify({ first: body.firstName, name: body.lastName, pitch: body.pitch, phone: body.phone })); } catch { }
     remember(j.order);
     toast(EDIT ? t('saved') : t('thanks'));
     if (!EDIT) { KEY = uid(); CART = {}; }
