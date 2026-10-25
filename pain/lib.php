@@ -35,7 +35,6 @@ const P_REGLAGES_DEFAUT = [
     'season_end' => '',
     'closed_dates' => [],                       // fermetures exceptionnelles AAAA-MM-JJ
     'max_per_product' => 20,
-    'phone_required' => false,
 ];
 
 const P_PRODUITS_DEFAUT = [
@@ -175,7 +174,6 @@ function valider_reglages(array $in): array
     $out['place'] = texte($in['place'] ?? $r['place'], 80, false, 'Le lieu');
     $out['message'] = texte($in['message'] ?? $r['message'], 400, false, 'Le message');
     $out['ordering_open'] = (bool) ($in['ordering_open'] ?? $r['ordering_open']);
-    $out['phone_required'] = (bool) ($in['phone_required'] ?? $r['phone_required']);
     $jours = $in['open_days'] ?? $r['open_days'];
     if (!is_array($jours)) {
         erreur('Jours d’ouverture invalides.');
@@ -458,13 +456,28 @@ function resume_lignes(array $lignes): string
 }
 
 /** Champs saisis par le client ou l'équipe. */
-function champs_client(array $q): array
+/** Chiffres seuls d'un numéro, sans indicatif ni 0 de tête (0612… et +33612… donnent 612…). */
+function chiffres_tel(string $t): string
+{
+    $d = preg_replace('/\D/', '', $t) ?? '';
+    $d = preg_replace('/^00/', '', $d) ?? $d;
+    foreach (['33', '49', '31', '32', '41', '44', '352', '43', '39', '34'] as $ind) {
+        if (str_starts_with($d, $ind) && strlen($d) >= strlen($ind) + 9) {
+            $d = substr($d, strlen($ind));
+            break;
+        }
+    }
+    return ltrim($d, '0');
+}
+
+function champs_client(array $q, bool $equipe = false): array
 {
     $r = reglages();
     $nom = texte($q['name'] ?? '', 60, true, 'Le nom');
     $empl = texte($q['pitch'] ?? '', 30, true, 'L’emplacement');
-    $tel = texte($q['phone'] ?? '', 30, $r['phone_required'], 'Le téléphone');
-    if ($tel !== '' && !preg_match('/^[0-9 +().\-]{6,30}$/', $tel)) {
+    // Téléphone obligatoire pour les campeurs (pour les joindre et retrouver leur bon) ; facultatif pour l'équipe
+    $tel = texte($q['phone'] ?? '', 30, !$equipe, 'Le numéro de téléphone');
+    if ($tel !== '' && (!preg_match('/^[0-9 +().\/\-]{6,30}$/', $tel) || strlen(chiffres_tel($tel)) < 8)) {
         erreur('Numéro de téléphone invalide.');
     }
     $rem = texte($q['note'] ?? '', 200, false, 'La remarque');

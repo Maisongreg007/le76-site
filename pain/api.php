@@ -26,7 +26,7 @@ try {
         case 'catalogue':
             $r = reglages();
             repondre(['ok' => true, 'products' => array_map(fn($p) => array_diff_key($p, ['cost' => 1]), produits(true)),
-                'settings' => array_intersect_key($r, array_flip(['title', 'place', 'message', 'ordering_open', 'pickup_from', 'pickup_to', 'cutoff_days', 'cutoff_time', 'max_per_product', 'phone_required'])),
+                'settings' => array_intersect_key($r, array_flip(['title', 'place', 'message', 'ordering_open', 'pickup_from', 'pickup_to', 'cutoff_days', 'cutoff_time', 'max_per_product'])),
                 'dates' => jours_commandables(), 'today' => date('Y-m-d'), 'now' => date('Y-m-d H:i'), 'staff' => connecte()]);
         case 'commander':
             commander($q, false);
@@ -37,6 +37,8 @@ try {
             modifier_client($q);
         case 'annuler':
             annuler_client($q);
+        case 'retrouver':
+            retrouver($q);
         case 'etat':
             repondre(['ok' => true, 'installe' => code_hache() !== null, 'connecte' => connecte()]);
         case 'installer':
@@ -141,7 +143,7 @@ function commander(array $q, bool $equipe): never
     if ($equipe && $jour < date('Y-m-d')) {
         erreur('Ce jour est déjà passé.');
     }
-    [$nom, $empl, $tel, $rem, $langue] = champs_client($q);
+    [$nom, $empl, $tel, $rem, $langue] = champs_client($q, $equipe);
     $pdo = db();
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, 0, $equipe);
@@ -155,6 +157,28 @@ function commander(array $q, bool $equipe): never
     journaliser($equipe ? 'équipe' : 'client', 'Commande créée', $id, $nom . ' · empl. ' . $empl . ' · ' . $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), $equipe)]);
+}
+
+/** Le campeur a perdu son bon : téléphone + emplacement → ses commandes récentes et à venir. */
+function retrouver(array $q): never
+{
+    if (!limiter('retrouver:' . ip(), 30, 3600)) {
+        erreur('Trop de recherches. Réessaie plus tard ou passe au comptoir.', 429);
+    }
+    $tel = chiffres_tel((string) ($q['phone'] ?? ''));
+    $empl = mb_strtolower(trim((string) ($q['pitch'] ?? '')));
+    if (strlen($tel) < 8 || $empl === '') {
+        erreur('Indique ton numéro de téléphone et ton emplacement.');
+    }
+    $st = db()->prepare("SELECT * FROM commandes WHERE jour >= ? AND LOWER(TRIM(emplacement)) = ? ORDER BY jour, id");
+    $st->execute([date('Y-m-d', strtotime('-1 day')), $empl]);
+    $out = [];
+    foreach ($st->fetchAll() as $c) {
+        if (chiffres_tel($c['telephone']) === $tel) {
+            $out[] = ['token' => $c['jeton'], 'code' => $c['code'], 'date' => $c['jour'], 'status' => $c['statut'], 'total' => (int) $c['total']];
+        }
+    }
+    repondre(['ok' => true, 'orders' => $out]);
 }
 
 function modifier_client(array $q): never
@@ -261,8 +285,12 @@ function liste_equipe(array $q): never
     }
     $s = trim((string) ($q['q'] ?? ''));
     if ($s !== '') {
-        $where[] = '(nom LIKE ? OR emplacement LIKE ? OR code LIKE ? OR telephone LIKE ?)';
+        $chiffres = chiffres_tel($s);
+        $where[] = "(nom LIKE ? OR emplacement LIKE ? OR code LIKE ? OR telephone LIKE ?" . (strlen($chiffres) >= 4 ? " OR REPLACE(REPLACE(REPLACE(REPLACE(telephone,' ',''),'.',''),'-',''),'/','') LIKE ?" : '') . ')';
         array_push($args, "%$s%", "%$s%", "%$s%", "%$s%");
+        if (strlen($chiffres) >= 4) {
+            $args[] = '%' . $chiffres . '%';
+        }
     }
     $st = db()->prepare('SELECT * FROM commandes' . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY jour DESC, id DESC LIMIT 500');
     $st->execute($args);
@@ -321,7 +349,7 @@ function modifier_equipe(array $q): never
     if (!date_valide($jour)) {
         erreur('Date invalide.');
     }
-    [$nom, $empl, $tel, $rem, $langue] = champs_client($q + ['lang' => $c['langue']]);
+    [$nom, $empl, $tel, $rem, $langue] = champs_client($q + ['lang' => $c['langue']], true);
     $pdo = db();
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, (int) $c['id'], true);

@@ -3,7 +3,7 @@
 
 const T = {
   fr: {
-    lang: 'Français', pickupWord: 'Retrait', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
+    lang: 'Français', pickupWord: 'Retrait', saveImg: 'Enregistrer le bon (image)', saveHelp: 'L’image s’enregistre dans vos photos ou téléchargements. Vous pouvez aussi la montrer hors connexion.', find: 'Vous avez perdu votre bon ?', findBtn: 'Retrouver mon bon', findHelp: 'Indiquez le téléphone et l’emplacement donnés à la commande.', none: 'Aucune commande trouvée avec ce téléphone et cet emplacement.', phoneHelp: 'Pour vous joindre et retrouver votre bon si besoin.', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
     name: 'Nom', pitch: 'N° d’emplacement', phone: 'Téléphone', phoneOpt: 'Téléphone (facultatif)', note: 'Remarque (facultatif)',
     total: 'Total', confirm: 'Valider la commande', update: 'Enregistrer les modifications', payOnSite: 'Paiement sur place au retrait.',
     until: 'Commande possible jusqu’au', at: 'à', pickup: 'Retrait le', from: 'de', to: 'à', closed: 'Les commandes en ligne sont fermées pour le moment.',
@@ -16,7 +16,7 @@ const T = {
     qty: 'Qté', product: 'Produit', amount: 'Montant',
   },
   de: {
-    lang: 'Deutsch', pickupWord: 'Abholung', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
+    lang: 'Deutsch', pickupWord: 'Abholung', saveImg: 'Abholschein speichern (Bild)', saveHelp: 'Das Bild wird in Ihren Fotos oder Downloads gespeichert und funktioniert auch offline.', find: 'Abholschein verloren?', findBtn: 'Abholschein finden', findHelp: 'Telefon und Stellplatz wie bei der Bestellung angeben.', none: 'Keine Bestellung mit diesem Telefon und Stellplatz gefunden.', phoneHelp: 'Um Sie zu erreichen und Ihren Schein wiederzufinden.', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
     name: 'Name', pitch: 'Stellplatz-Nr.', phone: 'Telefon', phoneOpt: 'Telefon (optional)', note: 'Bemerkung (optional)',
     total: 'Summe', confirm: 'Bestellung absenden', update: 'Änderungen speichern', payOnSite: 'Bezahlung vor Ort bei der Abholung.',
     until: 'Bestellbar bis', at: 'um', pickup: 'Abholung am', from: 'von', to: 'bis', closed: 'Online-Bestellungen sind derzeit geschlossen.',
@@ -29,7 +29,7 @@ const T = {
     qty: 'Anz.', product: 'Produkt', amount: 'Betrag',
   },
   en: {
-    lang: 'English', pickupWord: 'Pick-up', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
+    lang: 'English', pickupWord: 'Pick-up', saveImg: 'Save voucher (image)', saveHelp: 'The image is saved to your photos or downloads and also works offline.', find: 'Lost your voucher?', findBtn: 'Find my voucher', findHelp: 'Enter the phone number and pitch used for the order.', none: 'No order found with this phone number and pitch.', phoneHelp: 'So we can reach you and find your voucher if needed.', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
     name: 'Name', pitch: 'Pitch number', phone: 'Phone', phoneOpt: 'Phone (optional)', note: 'Note (optional)',
     total: 'Total', confirm: 'Place order', update: 'Save changes', payOnSite: 'Pay on site when you collect.',
     until: 'Order until', at: 'at', pickup: 'Pick-up on', from: 'from', to: 'to', closed: 'Online ordering is closed for now.',
@@ -42,7 +42,7 @@ const T = {
     qty: 'Qty', product: 'Product', amount: 'Amount',
   },
   nl: {
-    lang: 'Nederlands', pickupWord: 'Ophalen', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
+    lang: 'Nederlands', pickupWord: 'Ophalen', saveImg: 'Bon opslaan (afbeelding)', saveHelp: 'De afbeelding wordt in uw foto’s of downloads bewaard en werkt ook offline.', find: 'Bon kwijt?', findBtn: 'Mijn bon zoeken', findHelp: 'Vul het telefoonnummer en de plaats van de bestelling in.', none: 'Geen bestelling gevonden met dit telefoonnummer en deze plaats.', phoneHelp: 'Om u te bereiken en uw bon terug te vinden.', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
     name: 'Naam', pitch: 'Plaatsnummer', phone: 'Telefoon', phoneOpt: 'Telefoon (optioneel)', note: 'Opmerking (optioneel)',
     total: 'Totaal', confirm: 'Bestelling plaatsen', update: 'Wijzigingen opslaan', payOnSite: 'Betalen ter plaatse bij het ophalen.',
     until: 'Bestellen kan tot', at: 'om', pickup: 'Ophalen op', from: 'van', to: 'tot', closed: 'Online bestellen is momenteel gesloten.',
@@ -137,21 +137,31 @@ function renderOrder() {
     <div class="group">
       <label class="row"><span>${t('name')}</span><input id="fName" maxlength="60" autocomplete="family-name" value="${esc(EDIT?.name ?? stored('name'))}"></label>
       <label class="row"><span>${t('pitch')}</span><input id="fPitch" maxlength="30" value="${esc(EDIT?.pitch ?? stored('pitch'))}"></label>
-      <label class="row"><span>${s.phone_required ? t('phone') : t('phoneOpt')}</span><input id="fPhone" type="tel" maxlength="30" autocomplete="tel" value="${esc(EDIT?.phone ?? stored('phone'))}"></label>
+      <label class="row"><span>${t('phone')}</span><input id="fPhone" type="tel" maxlength="30" autocomplete="tel" placeholder="+33 6 …" value="${esc(EDIT?.phone ?? stored('phone'))}"></label>
       <label class="row"><span>${t('note')}</span><input id="fNote" maxlength="200" value="${esc(EDIT?.note ?? '')}"></label>
     </div>
+    <p class="small mute" style="margin:6px 6px 0">${t('phoneHelp')}</p>
     <div class="basket">
       <div class="total"><span>${t('total')} <span class="small mute">· ${t('payOnSite')}</span></span><b class="num">${eur(totalCents)}</b></div>
       <button class="btn-main" id="fGo" ${totalCents ? '' : 'disabled'}>${EDIT ? t('update') : t('confirm')}</button>
       ${EDIT ? `<button class="btn-plain" style="width:100%;margin-top:8px" id="fBack">${t('back')}</button>` : ''}
       <p class="error" id="fErr"></p>
     </div>`}
+    ${!EDIT ? `<div class="group-title">${t('find')}</div><div class="group pad"><p class="small mute">${t('findHelp')}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="rPhone" type="tel" placeholder="${t('phone')}" autocomplete="tel"><input id="rPitch" placeholder="${t('pitch')}"></div>
+      <button class="btn-soft" style="width:100%;margin-top:8px" id="rGo">${t('findBtn')}</button><div id="rOut"></div></div>` : ''}
     ${!EDIT && mine.length ? `<div class="group-title">${t('myOrders')}</div><div class="group">${mine.map(o => `<a class="li" style="color:inherit;text-decoration:none" href="?c=${encodeURIComponent(o.token)}"><span class="main"><div class="t">${esc(o.code)}</div><div class="d">${day(o.date)}</div></span><span class="mute">›</span></a>`).join('')}</div>` : ''}`;
   wireLang(renderOrder);
   document.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { keepFields(); DAY = b.dataset.day; renderOrder(); });
   document.querySelectorAll('[data-plus]').forEach(b => b.onclick = () => { keepFields(); CART[b.dataset.plus] = Math.min(s.max_per_product, (CART[b.dataset.plus] || 0) + 1); renderOrder(); });
   document.querySelectorAll('[data-minus]').forEach(b => b.onclick = () => { keepFields(); CART[b.dataset.minus] = Math.max(0, (CART[b.dataset.minus] || 0) - 1); renderOrder(); });
   if ($('fGo')) $('fGo').onclick = submitOrder;
+  if ($('rGo')) $('rGo').onclick = async () => {
+    try {
+      const j = await api('retrouver', { phone: $('rPhone').value, pitch: $('rPitch').value });
+      $('rOut').innerHTML = j.orders.length ? `<div class="group" style="margin-top:10px">${j.orders.map(o => `<a class="li" style="color:inherit;text-decoration:none" href="?c=${encodeURIComponent(o.token)}"><span class="main"><div class="t">${esc(o.code)} · ${eur(o.total)}</div><div class="d">${day(o.date)}</div></span><span class="mute">›</span></a>`).join('')}</div>` : `<p class="error">${t('none')}</p>`;
+    } catch (e) { $('rOut').innerHTML = `<p class="error">${esc(e.message)}</p>`; }
+  };
   if ($('fBack')) $('fBack').onclick = () => showTicket(EDIT.token);
 }
 let FIELDS = {};
@@ -204,17 +214,54 @@ function renderTicket(o, staff) {
     ${o.status === 'confirmed' ? `<p class="small mute" style="margin:12px 6px">${t('showTicket')} ${t('saveTicket')}</p>` : ''}
     <div class="row-btns no-print" style="margin-top:10px">
       ${o.editable ? `<button class="btn-soft" id="tEdit">${t('edit')}</button><button class="btn-danger" id="tCancel">${t('cancel')}</button>` : ''}
+      ${o.status !== 'cancelled' ? `<button class="btn-main" style="width:auto" id="tSave">${t('saveImg')}</button>` : ''}
       <button class="btn-plain" onclick="window.print()">${t('print')}</button>
       <a class="btn-plain" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit" href="./">${t('newOrder')}</a>
     </div>
     ${o.status === 'confirmed' ? `<p class="small mute" style="margin:12px 6px">${o.editable ? `${t('editUntil')} ${day(o.limit.slice(0, 10))} ${t('at')} ${hm(o.limit)}.` : t('noEdit')}</p>` : ''}`;
   wireLang(() => renderTicket(o, staff));
   if ($('tEdit')) $('tEdit').onclick = () => showOrder(o);
+  if ($('tSave')) $('tSave').onclick = () => saveTicketImage(o, url);
   if ($('tCancel')) $('tCancel').onclick = async () => {
     if (!confirm(t('cancelAsk'))) return;
     try { const j = await api('annuler', { token: o.token }); toast(t('cancelled')); renderTicket(j.order, staff); } catch (e) { toast(e.message, true); }
   };
   if (staff) wireStaff(o);
+}
+
+/** Dessine le bon (QR, code, jour, détail) dans une image PNG à garder sur le téléphone. */
+async function saveTicketImage(o, url) {
+  try {
+    const W = 1080, pad = 70, c = document.createElement('canvas'), g = c.getContext('2d');
+    const lines = o.items.map(i => [`${i.qty} × ${i.name}`, eur(i.qty * i.price)]);
+    c.width = W; c.height = 1340 + lines.length * 64;
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, c.height);
+    g.fillStyle = '#b5651d'; g.fillRect(0, 0, W, 16);
+    const font = (w, s) => `${w} ${s}px -apple-system, "Helvetica Neue", Arial, sans-serif`;
+    g.textAlign = 'center'; g.fillStyle = '#1d1d1f';
+    g.font = font(700, 52); g.fillText(CAT?.settings?.title || document.title, W / 2, 110);
+    g.font = font(400, 34); g.fillStyle = '#6e6e73'; g.fillText(CAT?.settings?.place || '', W / 2, 160);
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(qrSvg(url));
+    await img.decode();
+    g.imageSmoothingEnabled = false; g.drawImage(img, (W - 640) / 2, 200, 640, 640);
+    g.fillStyle = '#1d1d1f'; g.font = `700 88px ui-monospace, Menlo, monospace`; g.fillText(o.code, W / 2, 950);
+    g.font = font(600, 44); g.fillText(`${t('pickup')} ${day(o.date)}`, W / 2, 1030);
+    g.font = font(400, 34); g.fillStyle = '#6e6e73'; g.fillText(`${o.name} · ${t('pitch')} ${o.pitch}`, W / 2, 1085);
+    let y = 1170; g.textAlign = 'left'; g.fillStyle = '#1d1d1f'; g.font = font(400, 40);
+    for (const [a, b] of lines) { g.fillText(a, pad, y); g.textAlign = 'right'; g.fillText(b, W - pad, y); g.textAlign = 'left'; y += 64; }
+    g.strokeStyle = '#d2d2d7'; g.lineWidth = 2; g.beginPath(); g.moveTo(pad, y - 34); g.lineTo(W - pad, y - 34); g.stroke();
+    g.font = font(700, 44); g.fillText(t('total'), pad, y + 24); g.textAlign = 'right'; g.fillText(eur(o.total), W - pad, y + 24);
+    g.textAlign = 'center'; g.font = font(400, 30); g.fillStyle = '#6e6e73'; g.fillText(t('showTicket'), W / 2, y + 110);
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    const file = new File([blob], `bon-${o.code}.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: o.code }); return; } catch (e) { if (e.name === 'AbortError') return; }
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.append(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast(t('saveHelp'));
+  } catch (e) { toast(t('print') + ' ?', true); }
 }
 
 /* L'équipe, connectée sur son téléphone, scanne le QR : le bon s'ouvre avec les boutons de retrait. */

@@ -93,7 +93,7 @@ async function renderDay() {
       <div class="stat"><div class="k">Chiffre du jour</div><div class="v">${eur(s.total)}</div></div>
       <div class="stat"><div class="k">Encaissé</div><div class="v">${eur(s.paid)}</div></div>
     </div>
-    <div class="group-title no-print" style="display:flex;gap:10px;align-items:center;justify-content:space-between"><span>À retirer (${waiting.length})</span><input id="dSearch" type="search" placeholder="Nom, emplacement ou code" style="max-width:280px;min-height:36px;padding:6px 10px;text-transform:none"></div>
+    <div class="group-title no-print" style="display:flex;gap:10px;align-items:center;justify-content:space-between"><span>À retirer (${waiting.length})</span><input id="dSearch" type="search" placeholder="Nom, emplacement, téléphone ou code" style="max-width:280px;min-height:36px;padding:6px 10px;text-transform:none"></div>
     <div class="print-only"><h2>Commandes à retirer</h2></div>
     <div class="group orders" id="dWaiting">${waiting.length ? waiting.map(orderLi).join('') : '<div class="empty">Personne n’attend de commande.</div>'}</div>
     ${others.length ? `<div class="group-title">Retirées et annulées (${others.length})</div><div class="group orders">${others.map(orderLi).join('')}</div>` : ''}`;
@@ -106,7 +106,7 @@ async function renderDay() {
 }
 function orderLi(o) {
   const [lbl, cls] = ST[o.status];
-  return `<div class="li ${o.status !== 'confirmed' ? 'done' : ''}" data-s="${esc((o.name + ' ' + o.pitch + ' ' + o.code).toLowerCase())}">
+  return `<div class="li ${o.status !== 'confirmed' ? 'done' : ''}" data-s="${esc((o.name + ' ' + o.pitch + ' ' + o.code + ' ' + o.phone + ' ' + o.phone.replace(/\D/g, '')).toLowerCase())}">
     <span class="main"><div class="t">${esc(o.name)} · empl. ${esc(o.pitch)} <span class="pill ${cls}">${lbl}</span> ${o.paid ? '<span class="pill p-blue">payée</span>' : ''} ${o.origin === 'equipe' ? '<span class="pill p-gray">équipe</span>' : ''}</div>
     <div class="d">${o.items.map(i => `${i.qty} × ${esc(i.name)}`).join(' · ')} — <b>${eur(o.total)}</b> · ${esc(o.code)}${o.phone ? ' · ' + esc(o.phone) : ''}${o.note ? ' · « ' + esc(o.note) + ' »' : ''}</div></span>
     <span class="acts no-print">
@@ -151,6 +151,8 @@ function orderMenu(o, refresh) {
       ${o.status === 'collected' ? `<button class="btn-plain" data-a="undo">Annuler le retrait</button>` : ''}
       ${o.status !== 'cancelled' ? `<button class="btn-plain" data-a="paid">${o.paid ? 'Marquer non payée' : 'Marquer payée'}</button><button class="btn-plain" data-a="edit">Modifier la commande</button><button class="btn-danger" data-a="cancel">Annuler la commande</button>` : `<button class="btn-plain" data-a="restore">Rétablir la commande</button>`}
       <a class="btn-plain" style="display:grid;place-items:center;text-decoration:none;color:inherit" href="${esc(url)}" target="_blank" rel="noopener">Voir le bon du client</a>
+      <button class="btn-plain" data-a="copy">Copier le lien du bon</button>
+      ${o.phone ? `<a class="btn-plain" style="display:grid;place-items:center;text-decoration:none;color:inherit" href="${esc(smsLink(o, url))}">Renvoyer le bon par SMS</a>` : ''}
     </div>`);
   const act = async (action, body, msg) => { try { await api(action, { id: o.id, ...body }); closeSheet(); toast(msg); refresh(); } catch (e) { toast(e.message, true); } };
   $('sheetBody').querySelectorAll('[data-a]').forEach(b => b.onclick = async () => {
@@ -160,8 +162,15 @@ function orderMenu(o, refresh) {
     if (a === 'paid') act('payer', { paid: !o.paid }, o.paid ? 'Marquée non payée.' : 'Marquée payée.');
     if (a === 'restore') act('retablir', {}, 'Commande rétablie.');
     if (a === 'edit') orderSheet(o, o.date, refresh);
+    if (a === 'copy') { try { await navigator.clipboard.writeText(url); toast('Lien copié.'); } catch { prompt('Lien du bon :', url); } }
     if (a === 'cancel') { const r = prompt('Motif de l’annulation (facultatif)', ''); if (r !== null) act('annuler_equipe', { reason: r }, 'Commande annulée.'); }
   });
+}
+
+function smsLink(o, url) {
+  const txt = { fr: 'Votre bon de commande', de: 'Ihr Abholschein', en: 'Your voucher', nl: 'Uw bon' }[o.lang] || 'Votre bon de commande';
+  const sep = /iPhone|iPad|Macintosh/.test(navigator.userAgent) ? '&' : '?';
+  return `sms:${o.phone.replace(/[^\d+]/g, '')}${sep}body=${encodeURIComponent(`${txt} ${o.code} : ${url}`)}`;
 }
 
 /** Nouvelle commande (comptoir, téléphone) ou modification par l'équipe. */
@@ -192,7 +201,7 @@ function orderSheet(o, date, refresh = render) {
 /* ================= Commandes ================= */
 async function renderOrders() {
   if (!OF.from) { OF.from = addDays(todayStr(), -7); OF.to = addDays(todayStr(), 14); }
-  let j; try { j = await api('commandes', OF); } catch (e) { $('view').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  let j; try { j = await api('commandes', OF.q.trim() ? { ...OF, from: '', to: '' } : OF); } catch (e) { $('view').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
   const total = j.orders.filter(o => o.status !== 'cancelled').reduce((a, o) => a + o.total, 0);
   $('view').innerHTML = `
     <div class="top"><div><h1>Commandes</h1><div class="sub">${j.orders.length} commande(s) · ${eur(total)} hors annulées</div></div>
@@ -200,7 +209,7 @@ async function renderOrders() {
     <div class="group pad" style="margin-top:14px"><div class="filters">
       <input type="date" id="fFrom" value="${OF.from}"><input type="date" id="fTo" value="${OF.to}">
       <select id="fSt"><option value="">Tous statuts</option><option value="confirmed">À retirer</option><option value="collected">Retirées</option><option value="cancelled">Annulées</option></select>
-      <input id="fQ" type="search" placeholder="Nom, emplacement, code…" value="${esc(OF.q)}">
+      <input id="fQ" type="search" placeholder="Nom, emplacement, téléphone, code (toutes dates)" value="${esc(OF.q)}">
     </div></div>
     <div class="group orders" style="margin-top:12px">${j.orders.length ? j.orders.map(o => orderLi(o).replace('<span class="main">', `<span class="main"><div class="small mute">${cap(dfr(o.date, { weekday: 'short', day: 'numeric', month: 'short' }))}</div>`)).join('') : '<div class="empty">Aucune commande.</div>'}</div>`;
   $('fSt').value = OF.status;
@@ -290,7 +299,6 @@ async function renderSettings() {
           <label class="field"><span>Titre de la page</span><input id="sTitle" maxlength="60" value="${esc(s.title)}"></label>
           <label class="field"><span>Lieu de retrait</span><input id="sPlace" maxlength="80" value="${esc(s.place)}"></label>
           <label class="field"><span>Message affiché aux campeurs</span><textarea id="sMsg" maxlength="400">${esc(s.message)}</textarea></label>
-          <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="sPhone" ${s.phone_required ? 'checked' : ''}> Téléphone obligatoire</label>
         </div>
         <div class="group-title">Retrait</div>
         <div class="group pad">
@@ -330,7 +338,7 @@ async function renderSettings() {
   drawClosed();
   $('sAdd').onclick = () => { const d = $('sAddDate').value; if (d && !closed.includes(d)) { closed.push(d); closed.sort(); drawClosed(); } };
   $('sSave').onclick = async () => {
-    const settings = { ...s, ordering_open: $('sOpen').checked, title: $('sTitle').value, place: $('sPlace').value, message: $('sMsg').value, phone_required: $('sPhone').checked,
+    const settings = { ...s, ordering_open: $('sOpen').checked, title: $('sTitle').value, place: $('sPlace').value, message: $('sMsg').value,
       pickup_from: $('sFrom').value, pickup_to: $('sTo').value, open_days: days, cutoff_days: +$('sCd').value, cutoff_time: $('sCt').value,
       days_ahead: +$('sAhead').value, max_per_product: +$('sMax').value, season_start: $('sSs').value, season_end: $('sSe').value, closed_dates: closed };
     try { const r = await api('reglages_enregistrer', { settings }); SETTINGS = r.settings; toast('Réglages enregistrés.'); renderSettings(); } catch (e) { toast(e.message, true); }
