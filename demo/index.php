@@ -25,7 +25,7 @@ ol li{margin-bottom:6px}
 </style></head><body>
 <div class="demo-bar"><span><b>Démo</b> · données fictives, tout est cliquable, rien n'est réel</span></div>
 <main class="wrap" style="max-width:960px">
-<div class="hero"><h1>Gestion du restaurant</h1><p>Outils maison d'un restaurant (Le 76) et d'un restaurant de camping : réservations, planning, pointeuse, heures, coûts du personnel, congés, coût matière et registre hygiène (HACCP). Version de démonstration avec une équipe fictive.</p></div>
+<div class="hero"><h1>Gestion du restaurant</h1><p>Outils maison d'un restaurant (Le 76) et d'un restaurant de camping : réservations, planning, pointeuse, heures, coûts du personnel, congés, coût matière, registre hygiène (HACCP), caisse espèces, précommande de pain du camping et scan des documents. Version de démonstration avec une équipe fictive.</p></div>
 
 <div class="apps">
   <a class="app" href="personnel/admin.php"><img src="../personnel/assets/icons/admin-192.png?v=2" alt=""><span><b>Personnel · admin</b>Planning, heures (convenu / prévu / effectué), coûts jour·semaine·mois, équipe, congés, réglages.</span></a>
@@ -35,6 +35,10 @@ ol li{margin-bottom:6px}
   <a class="app" href="reserver/"><img src="/equipe/icone-192.png" alt=""><span><b>Réservation · page client</b>Ce que voit le client sur le site : jours, créneaux, places restantes, demande en ligne (FR / DE).</span></a>
   <a class="app" href="equipe/"><img src="/equipe/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Réservations · appli équipe</b>Carnet du jour, demandes à valider, couverts, arrivées, soirées, réglages. Connecté d'office.</span></a>
   <a class="app" href="cout-matiere/"><span class="ico-cm" aria-hidden="true">€</span><span><b>Coût matière</b>Carte, fiches techniques, mercuriale, food cost et coefficient, boissons, allergènes, écran service.</span></a>
+  <a class="app" href="pain/"><img src="/pain/icone-192.png" alt=""><span><b>Pain du camping · campeurs</b>Précommande de pain et viennoiseries pour le lendemain (FR / DE / EN / NL), bon avec QR code, paiement par carte (simulé).</span></a>
+  <a class="app" href="pain/equipe/"><img src="/pain/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Pain du camping · équipe</b>Commandes du jour, encaissement, remise, chiffres, feuille de vente et bon boulanger à imprimer.</span></a>
+  <a class="app" href="caisse/"><img src="/demo/caisse/icone-192.png" alt=""><span><b>ComptaCaisse</b>Caisse espèces du 76 et du camping : entrées, sorties, dépôts en banque, comptage, monnaie, transferts, clôture du mois.</span></a>
+  <a class="app" href="scan/"><img src="/scan/icon-192.png" alt=""><span><b>Scan des documents</b>Photographier une facture, la ranger d’un clic (factures, livraisons, banque…). Le vrai outil classe tout dans Google Drive.</span></a>
 </div>
 
 <div class="card"><h3>Espace employé (lien perso, sans mot de passe)</h3><p class="muted small" style="margin-top:0">Chaque employé reçoit un lien : ses horaires, ses jours « pas dispo », ses demandes de congé.</p>
@@ -50,6 +54,9 @@ ol li{margin-bottom:6px}
 <li><b>Espace employé</b> : demande un congé avec Emma, puis accepte-la dans Aujourd'hui.</li>
 <li><b>Registre hygiène</b> : relève une température hors plage, coche le ménage, imprime une étiquette.</li>
 <li><b>Réservation</b> : fais une demande sur la page client, puis valide-la dans l'appli équipe (onglet des demandes).</li>
+<li><b>Pain du camping</b> : commande deux baguettes comme un campeur, paie « par carte », puis retrouve la commande dans l’espace équipe et imprime le bon boulanger.</li>
+<li><b>ComptaCaisse</b> : saisis une sortie d’espèces, fais un dépôt en banque, puis compte la caisse pour voir l’écart.</li>
+<li><b>Scan</b> : photographie un document et range-le dans « Factures fournisseurs », ou classe ceux qui attendent dans « À classer ».</li>
 <li><b>Coût matière</b> : ouvre la tarte flambée, change le prix du fromage blanc dans la mercuriale et regarde le food cost bouger.</li>
 </ol>
 <p class="muted small" style="margin-bottom:0">Le bouton « Réinitialiser » (bandeau violet) remet des données d'exemple propres. Les notifications et e-mails sont désactivés dans la démo.</p></div>

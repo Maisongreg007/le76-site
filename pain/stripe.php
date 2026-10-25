@@ -26,6 +26,9 @@ function stripe_config(): array
 
 function carte_active(): bool
 {
+    if (defined('PAIN_DEMO')) {
+        return true;
+    }
     $c = stripe_config();
     return $c['enabled'] && $c['key'] !== '';
 }
@@ -33,6 +36,9 @@ function carte_active(): bool
 /** Vue pour l'équipe : jamais la clé elle-même. */
 function stripe_vue(): array
 {
+    if (defined('PAIN_DEMO')) {
+        return ['enabled' => true, 'hasKey' => true, 'keyHint' => 'démo', 'test' => true, 'webhook' => url_site() . 'api.php?action=stripe'];
+    }
     $k = stripe_config();
     $cle = $k['key'];
     return [
@@ -46,6 +52,7 @@ function stripe_vue(): array
 
 function stripe_enregistrer(array $in): array
 {
+    defined('PAIN_DEMO') && erreur('Dans la démo, le paiement par carte est simulé : rien à régler ici.', 409);
     $c = stripe_config();
     $c['enabled'] = (bool) ($in['enabled'] ?? $c['enabled']);
     $k = trim((string) ($in['key'] ?? ''));
@@ -96,6 +103,9 @@ function stripe_requete(string $methode, string $chemin, ?array $corps = null, ?
 
 function stripe_tester(): array
 {
+    if (defined('PAIN_DEMO')) {
+        return ['ok' => true, 'name' => 'Démo (paiement simulé)', 'live' => false, 'charges' => true];
+    }
     if (stripe_config()['key'] === '') {
         erreur('Enregistre d’abord la clé secrète Stripe.');
     }
@@ -138,6 +148,13 @@ function payer_carte(array $q): never
     }
     if (!jour_commandable($c['jour'])) {
         erreur('L’heure limite est dépassée : cette commande ne peut plus être payée en ligne.', 409);
+    }
+    if (defined('PAIN_DEMO')) {
+        // Démo : pas de vrai paiement, la commande est marquée payée par carte en ligne.
+        db()->prepare("UPDATE commandes SET statut = 'confirmed', paye = 1, paiement = 'en_ligne', modifie_le = ? WHERE id = ? AND statut = 'pending' AND paye = 0")
+            ->execute([maintenant(), $c['id']]);
+        journaliser('système', 'Paiement encaissé (Carte en ligne · démo)', (int) $c['id'], eur((int) $c['total']));
+        repondre(['ok' => true, 'url' => url_site() . '?c=' . rawurlencode($c['jeton']) . '&paye=1']);
     }
     // La page Stripe expire au plus tard à l'heure limite (Stripe exige au moins 30 minutes).
     $limite = limite_commande($c['jour'], reglages())->getTimestamp();
@@ -183,6 +200,9 @@ function payer_carte(array $q): never
  */
 function verifier_carte(array $c): bool
 {
+    if (defined('PAIN_DEMO')) {
+        return false;
+    }
     if ($c['statut'] !== 'pending' || $c['paye'] || empty($c['checkout_id']) || stripe_config()['key'] === '') {
         return false;
     }

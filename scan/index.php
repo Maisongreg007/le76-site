@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
+$A = defined('SCAN_DEMO') ? '/scan/' : '';   // chemin des images (la démo est servie depuis /demo/scan/)
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
@@ -27,9 +28,9 @@ $cats = CATEGORIES;
 <meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
-<link rel="icon" type="image/png" href="icon-192.png?v=1">
+<?php if (!$A): ?><link rel="manifest" href="manifest.webmanifest"><?php endif; ?>
+<link rel="apple-touch-icon" href="<?= $A ?>apple-touch-icon.png?v=1">
+<link rel="icon" type="image/png" href="<?= $A ?>icon-192.png?v=1">
 <title>Scan 76</title>
 <style>
   :root {
@@ -110,10 +111,11 @@ $cats = CATEGORIES;
 </style>
 </head>
 <body>
+<?php if (defined('SCAN_DEMO')) { demo_bandeau(); } ?>
 <main>
 <?php if (!$logged): ?>
   <form class="login" method="post" autocomplete="on">
-    <img class="app-icon" src="apple-touch-icon.png?v=1" alt="">
+    <img class="app-icon" src="<?= $A ?>apple-touch-icon.png?v=1" alt="">
     <h1>Documents du 76</h1>
     <div class="sub">Entre le mot de passe commun</div>
     <div class="group">

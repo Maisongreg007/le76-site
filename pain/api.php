@@ -7,6 +7,9 @@
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
 require __DIR__ . '/stripe.php';
+if (defined('PAIN_DEMO')) {
+    require __DIR__ . '/demo.php';
+}
 
 try {
     if (($_GET['action'] ?? '') === 'stripe') {
@@ -24,6 +27,12 @@ try {
         erreur('Requête illisible.');
     }
     $action = (string) ($q['action'] ?? '');
+    if (defined('PAIN_DEMO')) {
+        demo_preparer($action === 'demo_reinitialiser');
+        if (in_array($action, ['demo_reinitialiser', 'code', 'installer', 'connexion', 'deconnexion'], true)) {
+            repondre(['ok' => true, 'demo' => true, 'installe' => true, 'connecte' => connecte()]);
+        }
+    }
     expirer_impayees();
 
     /* ---------- Public ---------- */
@@ -588,10 +597,16 @@ function exporter(string $from, string $to): never
 /** Ventes d'exemple sur 3 semaines (marquées « exemple », supprimables d'un clic dans les réglages). */
 function creer_exemples(): never
 {
-    $pdo = db();
-    if ((int) $pdo->query("SELECT COUNT(*) FROM commandes WHERE origine = 'exemple'")->fetchColumn() > 0) {
+    if ((int) db()->query("SELECT COUNT(*) FROM commandes WHERE origine = 'exemple'")->fetchColumn() > 0) {
         erreur('Les commandes d’exemple existent déjà. Supprime-les d’abord pour en recréer.', 409);
     }
+    repondre(['ok' => true, 'created' => generer_exemples()]);
+}
+
+/** Crée les commandes d'exemple et retourne leur nombre. */
+function generer_exemples(): int
+{
+    $pdo = db();
     $prenoms = ['Lukas', 'Anna', 'Jan', 'Sophie', 'Thomas', 'Emma', 'Pieter', 'Julia', 'Marc', 'Léa', 'Stefan', 'Claire', 'Daan', 'Laura', 'Hugo', 'Mia', 'Paul', 'Lotte', 'Nicolas', 'Hannah'];
     $noms = ['Müller', 'Schmidt', 'De Vries', 'Bakker', 'Martin', 'Bernard', 'Weber', 'Janssen', 'Dubois', 'Fischer', 'Peeters', 'Meyer', 'Lefèvre', 'Wagner', 'Visser', 'Roux', 'Becker', 'Smit', 'Girard', 'Hoffmann'];
     $langues = ['de', 'de', 'nl', 'nl', 'fr', 'fr', 'en'];
@@ -643,7 +658,7 @@ function creer_exemples(): never
     }
     $pdo->exec('COMMIT');
     journaliser('équipe', 'Commandes d’exemple créées', null, (string) $nb);
-    repondre(['ok' => true, 'created' => $nb]);
+    return $nb;
 }
 
 function eur(int $c): string

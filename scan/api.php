@@ -10,6 +10,9 @@ if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') !== 'scan') {
 }
 
 $action = $_GET['action'] ?? '';
+if (defined('SCAN_DEMO')) {
+    demo_api((string) $action);
+}
 
 try {
     if ($action === 'list') {

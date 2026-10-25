@@ -91,6 +91,9 @@ function auth_token(): string
 
 function is_logged(): bool
 {
+    if (defined('SCAN_DEMO')) {
+        return true;
+    }
     $c = cfg();
     return !empty($c['password_hash'])
         && isset($_COOKIE['scan_auth'])

@@ -54,8 +54,10 @@ function dossier(): string
     if ($d !== null) {
         return $d;
     }
-    $env = getenv('PAIN_DONNEES');
-    $candidats = $env ? [$env] : [dirname(__DIR__, 2) . '/le76-pain', __DIR__ . '/donnees'];
+    $env = getenv(defined('PAIN_DEMO') ? 'PAIN_DEMO_DONNEES' : 'PAIN_DONNEES');
+    $candidats = $env ? [$env] : (defined('PAIN_DEMO')
+        ? [dirname(__DIR__, 2) . '/le76-pain-demo', __DIR__ . '/donnees-demo']
+        : [dirname(__DIR__, 2) . '/le76-pain', __DIR__ . '/donnees']);
     foreach ($candidats as $c) {
         if (!is_dir($c)) {
             @mkdir($c, 0750, true);
@@ -564,6 +566,11 @@ function connecte(): bool
     static $ok = null;
     if ($ok !== null) {
         return $ok;
+    }
+    if (defined('PAIN_DEMO')) {
+        // Démo : l'espace équipe est ouvert sans code (données fictives), la boutique reste « campeur ».
+        $ref = (string) parse_url((string) ($_SERVER['HTTP_REFERER'] ?? ''), PHP_URL_PATH);
+        return $ok = str_contains($ref, '/pain/equipe/');
     }
     $j = (string) ($_COOKIE[P_COOKIE] ?? '');
     if (!preg_match('/^[a-f0-9]{64}$/', $j)) {
