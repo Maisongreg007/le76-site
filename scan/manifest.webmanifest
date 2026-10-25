@@ -1,0 +1,16 @@
+{
+  "name": "Documents du 76",
+  "short_name": "Scan 76",
+  "description": "Scanner et ranger les factures et documents du restaurant",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f2f7",
+  "theme_color": "#f2f2f7",
+  "icons": [
+    { "src": "icon-192.png?v=1", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?v=1", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
