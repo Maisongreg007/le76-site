@@ -82,7 +82,12 @@ async function renderDay() {
       <div class="row-btns no-print">
         <button class="btn-plain btn-sm" data-d="-1">‹</button><input type="date" id="dPick" value="${DAY}" style="width:auto;min-height:36px;padding:4px 10px"><button class="btn-plain btn-sm" data-d="1">›</button>
         ${isToday ? '' : '<button class="btn-plain btn-sm" data-d="0">Aujourd’hui</button>'}
-        <button class="btn-soft btn-sm" id="dNew">+ Commande</button><button class="btn-plain btn-sm" onclick="window.print()">Imprimer</button>
+        <button class="btn-soft btn-sm" id="dNew">+ Commande</button>
+      </div>
+    </div>
+    <div class="row-btns no-print" style="margin:4px 0 6px">
+      <button class="btn-plain btn-sm" id="dSheet">🧾 Feuille de vente · ${isToday ? 'aujourd’hui' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
+      <button class="btn-plain btn-sm" id="dBaker">🥖 Bon boulanger · ${isToday ? 'demain' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
       </div>
     </div>
     <div class="group-title">À préparer · ${dfr(DAY, { day: 'numeric', month: 'long' })}</div>
@@ -104,6 +109,8 @@ async function renderDay() {
   document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { DAY = +b.dataset.d === 0 ? todayStr() : addDays(DAY, +b.dataset.d); renderDay(); });
   $('dPick').onchange = e => { if (e.target.value) { DAY = e.target.value; renderDay(); } };
   $('dNew').onclick = () => orderSheet(null, DAY);
+  $('dSheet').onclick = () => printSales(DAY);
+  $('dBaker').onclick = () => printBaker(isToday ? addDays(DAY, 1) : DAY);
   $('dSearch').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('.dList .li').forEach(li => li.hidden = q && !li.dataset.s.includes(q)); };
   wireOrders(j.orders, renderDay);
   if (isToday) dayTimer = setInterval(() => { if (VIEW === 'day' && $('sheet').hidden && !document.activeElement?.matches('input')) renderDay(); }, 30000);
@@ -381,6 +388,60 @@ function poster(url, s) {
     <div class="langs">Commandez la veille, retirez le matin.<br>Am Vortag bestellen, morgens abholen.<br>Order the day before, collect in the morning.<br>De dag ervoor bestellen, 's ochtends ophalen.</div>
     <script>setTimeout(()=>print(),400)<\/script></body></html>`);
   w.document.close();
+}
+
+/* ================= Documents à imprimer ================= */
+const PRINT_CSS = `@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;color:#1d1d1f;margin:0;font-size:13px}
+  h1{font-size:24px;margin:0}h2{font-size:15px;margin:16px 0 6px}.sub{color:#555;margin:2px 0 12px}.warn{border:1.5px solid #c25e00;color:#8a4300;border-radius:8px;padding:8px 10px;margin:8px 0}
+  table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #ccc;padding:6px 6px;text-align:left;vertical-align:top}th{font-size:11px;text-transform:uppercase;color:#555;border-bottom:1.5px solid #1d1d1f}
+  .n{text-align:right;font-variant-numeric:tabular-nums}.box{width:18px;height:18px;border:1.5px solid #1d1d1f;border-radius:4px;display:inline-block}
+  .tot{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}.tot div{border:1.5px solid #1d1d1f;border-radius:10px;padding:6px 12px;font-size:15px}.tot b{font-size:20px}
+  .big td{font-size:20px;padding:12px 8px}.big .q{font-size:30px;font-weight:700}.hand{border-bottom:1.5px dotted #888;min-width:70px;display:inline-block;height:24px}
+  .pay{font-weight:600}.due{color:#b00020;font-weight:700}.foot{margin-top:14px;color:#777;font-size:11px}.bar{position:fixed;top:10px;right:10px;display:flex;gap:6px}
+  .bar button{font:inherit;font-size:14px;padding:8px 14px;border-radius:10px;border:0;background:#1d1d1f;color:#fff}@media print{.bar{display:none}}`;
+function printWin(title, body, shareText) {
+  const w = window.open('', '_blank');
+  if (!w) { toast('Autorise les fenêtres pour imprimer.', true); return; }
+  w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${PRINT_CSS}</style></head><body>
+    <div class="bar">${shareText ? '<button id="share">Envoyer</button>' : ''}<button onclick="print()">Imprimer</button></div>${body}
+    <div class="foot">Imprimé le ${new Date().toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })} · le76.fr/pain</div></body></html>`);
+  w.document.close();
+  if (shareText) w.document.getElementById('share').onclick = async () => {
+    try { if (w.navigator.share) { await w.navigator.share({ title, text: shareText }); return; } } catch { return; }
+    w.location.href = 'sms:?&body=' + encodeURIComponent(shareText);
+  };
+  setTimeout(() => { try { w.focus(); w.print(); } catch { } }, 400);
+}
+const payTxt = o => o.paid ? `<span class="pay">Payé · ${esc(PAY[o.paymentMethod] || '')}</span>` : `<span class="due">À encaisser ${eur(o.total)}</span>`;
+const itemsTxt = o => o.items.map(l => `<b>${l.qty}</b> × ${esc(l.name)}`).join('<br>');
+const prepTotals = j => j.prep.filter(p => p.total || p.pending);
+
+async function printSales(date) {
+  let j; try { j = await api('jour', { date }); } catch (e) { return toast(e.message, true); }
+  const ok = j.orders.filter(o => ['confirmed', 'collected'].includes(o.status)), pend = j.orders.filter(o => o.status === 'pending');
+  const row = o => `<tr><td><span class="box"></span></td><td><b>${esc(o.pitch)}</b></td><td>${esc(o.lastName.toUpperCase())} ${esc(o.firstName)}<br><span style="color:#777">${esc(o.code)}${o.note ? ' · ' + esc(o.note) : ''}</span></td><td>${itemsTxt(o)}</td><td>${payTxt(o)}${o.status === 'collected' ? '<br>✓ déjà retirée' : ''}</td></tr>`;
+  const head = '<tr><th style="width:30px">✓</th><th>Empl.</th><th>Client</th><th>Commande</th><th>Paiement</th></tr>';
+  printWin('Feuille de vente ' + date, `
+    <h1>🧾 Pain · feuille de vente</h1><div class="sub">${cap(dfr(date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))} · retrait ${SETTINGS?.pickup_from || ''}–${SETTINGS?.pickup_to || ''} · ${ok.length} commande(s)</div>
+    <div class="tot">${prepTotals(j).map(p => `<div>${esc(p.emoji)} <b>${p.total}</b> ${esc(p.name)}</div>`).join('') || '<div>Aucune commande</div>'}</div>
+    <h2>Commandes à remettre (par emplacement)</h2>
+    <table>${head}${ok.map(row).join('') || '<tr><td colspan="5">Aucune commande.</td></tr>'}</table>
+    ${pend.length ? `<h2>Non payées (${pend.length}) · ne pas préparer sans paiement</h2><table>${head}${pend.map(row).join('')}</table>` : ''}`);
+}
+
+async function printBaker(date) {
+  let j; try { j = await api('jour', { date }); } catch (e) { return toast(e.message, true); }
+  const cost = id => (PRODUCTS.find(p => p.id === id) || {}).cost || 0;
+  const rows = PRODUCTS.filter(p => p.active || j.prep.some(x => x.id === p.id && x.total)).map(p => ({ p, q: (j.prep.find(x => x.id === p.id) || {}).total || 0, w: (j.prep.find(x => x.id === p.id) || {}).pending || 0 }));
+  const open = new Date() < new Date(j.limit.replace(' ', 'T'));
+  const achat = rows.reduce((a, r) => a + r.q * cost(r.p.id), 0);
+  const txt = `Commande pain pour le ${dfr(date, { weekday: 'long', day: 'numeric', month: 'long' })} (Le 76 · camping) :\n` + rows.filter(r => r.q).map(r => `- ${r.q} ${r.p.name}`).join('\n') + '\nMerci !';
+  printWin('Bon boulanger ' + date, `
+    <h1>🥖 Commande boulangerie</h1><div class="sub">Pour le <b>${dfr(date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</b> · ${esc(SETTINGS?.place || '')}</div>
+    ${open ? `<div class="warn">⚠️ Les campeurs peuvent encore commander jusqu’au ${dfr(j.limit.slice(0, 10), { weekday: 'long' })} à ${j.limit.slice(11)} : chiffres provisoires. Réimprime après cette heure.</div>` : ''}
+    <table class="big"><tr><th>Produit</th><th class="n">Précommandes payées</th><th class="n">+ Vente comptoir</th><th class="n">Total à commander</th></tr>
+    ${rows.map(r => `<tr><td>${esc(r.p.emoji)} ${esc(r.p.name)}${r.w ? `<div style="font-size:12px;color:#8a4300">+ ${r.w} en attente de paiement</div>` : ''}</td><td class="n q">${r.q}</td><td class="n"><span class="hand"></span></td><td class="n"><span class="hand"></span></td></tr>`).join('')}</table>
+    <p class="sub" style="margin-top:12px">Coût d’achat estimé des précommandes : <b>${eur(achat)}</b> · ${j.summary.orders} commande(s) payée(s)</p>`, txt);
 }
 
 async function cardBox() {
