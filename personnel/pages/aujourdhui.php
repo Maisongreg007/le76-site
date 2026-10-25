@@ -105,48 +105,44 @@ if ($alertes) {
     echo '</ul></div>';
 }
 
-/* Fil des pointages : derniers mouvements des 24 dernières heures */
-$depuis = date('Y-m-d H:i:s', time() - 86400);
-$st = db()->prepare('SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? OR p.fin >= ? ORDER BY p.id DESC LIMIT 60');
-$st->execute([$depuis, $depuis]);
+/* Pointages de la journée en cours uniquement (la journée de service commence à 4 h,
+   pour garder les fins de soirée après minuit). Le reste est dans l'historique (page Heures). */
+$debutJour = (date('G') < 4 ? date('Y-m-d', strtotime('-1 day')) : $today) . ' 04:00:00';
+$st = db()->prepare('SELECT p.*, e.prenom, e.nom FROM pointages p JOIN employes e ON e.id = p.employe_id WHERE p.debut >= ? OR p.fin >= ? ORDER BY p.id DESC');
+$st->execute([$debutJour, $debutJour]);
 $evts = [];
 foreach ($st->fetchAll() as $p) {
     $nom = trim($p['prenom'] . ' ' . $p['nom']);
-    if ($p['debut'] >= $depuis) {
+    if ($p['debut'] >= $debutJour) {
         $evts[] = ['t' => $p['debut'], 'k' => 'in', 'nom' => $nom, 'etab' => $p['etab'], 'm' => $p['manuel']];
     }
-    if ($p['fin'] !== null && $p['fin'] >= $depuis) {
+    if ($p['fin'] !== null && $p['fin'] >= $debutJour) {
         $evts[] = ['t' => $p['fin'], 'k' => 'out', 'nom' => $nom, 'etab' => $p['etab'], 'm' => $p['manuel'], 'd' => minutes_between($p['debut'], $p['fin'])];
     }
 }
 usort($evts, fn($a, $b) => strcmp($b['t'], $a['t']));
-$evts = array_slice($evts, 0, 12);
-echo '<div class="card"><h3>Derniers pointages</h3>';
+$lienHisto = 'admin.php?p=heures&v=liste&m=' . h(substr($today, 0, 7));
+echo '<div class="card"><div class="row between"><h3 style="margin:0">Pointages du jour</h3><a class="small" href="' . $lienHisto . '">Historique ›</a></div>';
 if (!$evts) {
-    echo '<p class="muted" style="margin:0">Aucun pointage depuis 24 h.</p>';
+    echo '<p class="muted" style="margin:8px 0 0">Aucun pointage aujourd\'hui.</p>';
 } else {
     echo '<ul class="list feed">';
     foreach ($evts as $ev) {
-        $quand = substr($ev['t'], 0, 10) === $today ? date('H:i', strtotime($ev['t'])) : 'hier ' . date('H:i', strtotime($ev['t']));
         $recent = (time() - strtotime($ev['t'])) < 600;
         echo '<li' . ($recent ? ' class="recent"' : '') . '><span><span class="pill ' . ($ev['k'] === 'in' ? 'ok">Arrivée' : 'err">Départ') . '</span> <b>' . h($ev['nom']) . '</b>'
             . ' <span class="muted small">' . h(ETABS[$ev['etab']]) . ($ev['k'] === 'out' ? ' · ' . h(fmt_min($ev['d'])) : '') . ($ev['m'] ? ' · modifié' : '') . '</span></span>'
-            . '<b class="nowrap">' . h($quand) . '</b></li>';
+            . '<b class="nowrap">' . h(date('H:i', strtotime($ev['t']))) . '</b></li>';
     }
     echo '</ul>';
 }
 echo '</div>';
 
-/* Alertes : départs oubliés */
+/* Départs oubliés les jours précédents : un simple rappel, le détail est dans l'historique */
 $oublies = pointages_oublies();
 if ($oublies) {
-    echo '<div class="card" style="box-shadow:inset 0 0 0 1.5px var(--err-bg)"><h3>À corriger</h3><p class="muted small">Ces personnes ont pointé leur arrivée mais pas leur départ.</p><ul class="list">';
-    foreach ($oublies as $o) {
-        $ym = substr($o['debut'], 0, 7);
-        echo '<li><span><b>' . h(trim($o['prenom'] . ' ' . $o['nom'])) . '</b> — arrivée le ' . h(date('d/m à H:i', strtotime($o['debut']))) . ' (' . h(ETABS[$o['etab']]) . ')</span>'
-            . '<a class="btn small" href="admin.php?p=heures&m=' . h($ym) . '&e=' . (int)$o['employe_id'] . '">Corriger</a></li>';
-    }
-    echo '</ul></div>';
+    $n = count($oublies);
+    echo '<div class="card row between" style="box-shadow:inset 0 0 0 1.5px var(--err-bg)"><span><b>' . $n . ' départ' . ($n > 1 ? 's' : '') . ' oublié' . ($n > 1 ? 's' : '') . '</b> <span class="muted small">les jours précédents</span></span>'
+        . '<a class="btn small" href="admin.php?p=heures&m=' . h(substr($oublies[0]['debut'], 0, 7)) . '">Corriger</a></div>';
 }
 
 /* Par établissement */

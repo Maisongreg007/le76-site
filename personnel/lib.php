@@ -18,7 +18,30 @@ const JOURS_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi',
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 const OUBLI_HEURES = 16; // un pointage ouvert depuis plus longtemps = départ oublié
 // Mode démo (le76.fr/demo/personnel) : base séparée, données fictives, pas de mot de passe, aucun envoi
-define('DATA_DIR', defined('DEMO') ? __DIR__ . '/data/demo' : __DIR__ . '/data');
+// Les données sont rangées À CÔTÉ de public_html (comme l'outil hygiène) : la mise à jour
+// automatique du site ne peut pas les effacer. Repli : personnel/data (protégé par .htaccess).
+define('DATA_BASE', (function (): string {
+    $dehors = dirname(__DIR__, 2) . '/le76-personnel';
+    $ancien = __DIR__ . '/data';
+    if (!is_dir($dehors)) {
+        @mkdir($dehors, 0750, true);
+    }
+    if (!is_dir($dehors) || !is_writable($dehors)) {
+        return $ancien;
+    }
+    // Reprise unique des données de l'ancien emplacement, s'il en reste
+    foreach (['', '/demo'] as $sous) {
+        $vieux = glob($ancien . $sous . '/p_*.sqlite') ?: [];
+        if ($vieux && !(glob($dehors . $sous . '/p_*.sqlite') ?: [])) {
+            @mkdir($dehors . $sous, 0750, true);
+            foreach ($vieux as $f) {
+                @copy($f, $dehors . $sous . '/' . basename($f));
+            }
+        }
+    }
+    return $dehors;
+})());
+define('DATA_DIR', defined('DEMO') ? DATA_BASE . '/demo' : DATA_BASE);
 define('ASSETS', defined('DEMO') ? '../../personnel/assets/' : 'assets/');
 
 /* ---------- Utilitaires ---------- */
