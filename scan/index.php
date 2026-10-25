@@ -181,16 +181,27 @@ function toast(msg, isErr) {
   toast.t = setTimeout(() => t.className = '', isErr ? 6000 : 3500);
 }
 
-async function api(action, body) {
-  const r = await fetch('api.php?action=' + action, {
-    method: body ? 'POST' : 'GET',
-    body, headers: {'X-Requested-With': 'scan'}, credentials: 'same-origin'
-  });
+async function api(action, body, query) {
+  const q = query ? '&' + new URLSearchParams(query).toString() : '';
+  const opts = {method: body ? 'POST' : 'GET', headers: {'X-Requested-With': 'scan'}, credentials: 'same-origin'};
+  if (typeof body === 'string') { opts.body = body; opts.headers['Content-Type'] = 'application/octet-stream'; }
+  else if (body) { opts.body = body; }
+  const r = await fetch('api.php?action=' + action + q, opts);
   let j;
-  try { j = await r.json(); } catch (e) { throw new Error('Réponse inattendue du serveur.'); }
+  try { j = await r.json(); }
+  catch (e) { throw new Error(r.status === 403 ? 'Envoi bloqué par l\'hébergeur. Réessaie, ou prends le document en photo.' : 'Réponse inattendue du serveur.'); }
   if (r.status === 401) { location.reload(); }
   if (!j.ok) throw new Error(j.error || 'Erreur');
   return j;
+}
+
+function toBase64(blob) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result).split(',')[1] || '');
+    fr.onerror = () => rej(new Error('Lecture du fichier impossible.'));
+    fr.readAsDataURL(blob);
+  });
 }
 
 /* ---- Lecture d'une image : réduite et mise à l'endroit ---- */
@@ -269,12 +280,7 @@ async function send(category) {
   toast('Envoi en cours…');
   try {
     const file = await buildFile();
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('category', category);
-    fd.append('label', $('label').value);
-    fd.append('date', $('date').value);
-    const r = await api('upload', fd);
+    const r = await api('upload', await toBase64(file), {category, label: $('label').value, date: $('date').value});
     pages.length = 0; $('label').value = '';
     toast('Rangé dans : ' + r.where);
     loadInbox();
