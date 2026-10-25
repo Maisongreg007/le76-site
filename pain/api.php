@@ -6,11 +6,11 @@
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
-require __DIR__ . '/sumup.php';
+require __DIR__ . '/stripe.php';
 
 try {
-    if (($_GET['action'] ?? '') === 'sumup') {
-        notification_sumup();
+    if (($_GET['action'] ?? '') === 'stripe') {
+        notification_stripe();
     }
     if (($_GET['action'] ?? '') === 'export') {
         connecte() || erreur('Connecte-toi pour continuer.', 401);
@@ -34,7 +34,7 @@ try {
         case 'catalogue':
             $r = reglages();
             repondre(['ok' => true, 'products' => array_map(fn($p) => array_diff_key($p, ['cost' => 1]), produits(true)),
-                'settings' => array_intersect_key($r, array_flip(['title', 'place', 'message', 'ordering_open', 'pickup_from', 'pickup_to', 'cutoff_days', 'cutoff_time', 'max_per_product', 'season_start', 'season_end'])) + ['card_online' => sumup_actif()],
+                'settings' => array_intersect_key($r, array_flip(['title', 'place', 'message', 'ordering_open', 'pickup_from', 'pickup_to', 'cutoff_days', 'cutoff_time', 'max_per_product', 'season_start', 'season_end'])) + ['card_online' => carte_active()],
                 'preview' => apercu_equipe() && ($r['season_start'] !== '' || $r['season_end'] !== '' || !$r['ordering_open']),
                 'dates' => jours_commandables(), 'today' => date('Y-m-d'), 'now' => date('Y-m-d H:i'), 'staff' => connecte()]);
         case 'commander':
@@ -44,7 +44,7 @@ try {
             if (verifier_carte($c)) {
                 $c = commande_par('id', (int) $c['id']);
             }
-            repondre(['ok' => true, 'order' => vue_commande($c, connecte()), 'staff' => connecte(), 'cardOnline' => sumup_actif()]);
+            repondre(['ok' => true, 'order' => vue_commande($c, connecte()), 'staff' => connecte(), 'cardOnline' => carte_active()]);
         case 'modifier':
             modifier_client($q);
         case 'annuler':
@@ -68,8 +68,10 @@ try {
     connecte() || erreur('Connecte-toi pour continuer.', 401);
     switch ($action) {
         case 'jour':
+            verifier_cartes_en_cours();
             jour_equipe((string) ($q['date'] ?? date('Y-m-d')));
         case 'commandes':
+            verifier_cartes_en_cours();
             liste_equipe($q);
         case 'retirer':
             retirer((int) ($q['id'] ?? 0), (bool) ($q['force'] ?? false), (string) ($q['method'] ?? ''));
@@ -109,12 +111,12 @@ try {
             repondre(['ok' => true, 'log' => $st->fetchAll()]);
         case 'code':
             changer_code((string) ($q['old'] ?? ''), (string) ($q['new'] ?? ''));
-        case 'sumup':
-            repondre(['ok' => true, 'sumup' => sumup_vue()]);
-        case 'sumup_enregistrer':
-            repondre(['ok' => true, 'sumup' => sumup_enregistrer(is_array($q['sumup'] ?? null) ? $q['sumup'] : [])]);
-        case 'sumup_tester':
-            repondre(sumup_tester());
+        case 'stripe':
+            repondre(['ok' => true, 'stripe' => stripe_vue()]);
+        case 'stripe_enregistrer':
+            repondre(['ok' => true, 'stripe' => stripe_enregistrer(is_array($q['stripe'] ?? null) ? $q['stripe'] : [])]);
+        case 'stripe_tester':
+            repondre(stripe_tester());
         case 'exemples':
             creer_exemples();
         case 'supprimer_exemples':

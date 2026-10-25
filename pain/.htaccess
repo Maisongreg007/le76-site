@@ -1,5 +1,5 @@
 Options -Indexes
-<FilesMatch "^(lib|sumup)\.php$">
+<FilesMatch "^(lib|stripe|sumup)\.php$">
 Require all denied
 </FilesMatch>
 <IfModule mod_headers.c>

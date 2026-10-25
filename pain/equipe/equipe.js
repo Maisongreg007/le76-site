@@ -339,8 +339,8 @@ async function renderSettings() {
         <div class="group pad small">${j.dates.length ? j.dates.map(d => `${cap(dfr(d.date, { weekday: 'long', day: 'numeric', month: 'short' }))} <span class="mute">(jusqu’au ${dfr(d.limit.slice(0, 10), { day: 'numeric', month: 'short' })} ${d.limit.slice(11)})</span>`).join('<br>') : '<span class="mute">Aucun pour le moment.</span>'}</div>
         <div class="group-title">Affiche pour l’accueil</div>
         <div class="group pad"><p class="small mute">Une affiche A4 avec le QR code de la page de commande, à imprimer pour l’accueil, le snack ou les sanitaires.</p><button class="btn-plain btn-sm" id="sPoster">Ouvrir l’affiche</button> <a class="link small" href="${esc(publicUrl)}" target="_blank" rel="noopener">${esc(publicUrl.replace(/^https?:\/\//, ''))}</a></div>
-        <div class="group-title">Paiement par carte en ligne (SumUp)</div>
-        <div class="group pad" id="sumupBox"><p class="small mute">Chargement…</p></div>
+        <div class="group-title">Paiement par carte en ligne (Stripe)</div>
+        <div class="group pad" id="cardBox"><p class="small mute">Chargement…</p></div>
         <div class="group-title">Ventes d’exemple</div>
         <div class="group pad"><p class="small mute">Des commandes fictives sur 3 semaines pour voir l’outil « en vrai » (préparation, retraits, chiffres). Elles sont marquées « exemple » et se suppriment d’un clic avant l’ouverture.</p>
           <div class="row-btns"><button class="btn-plain btn-sm" id="exAdd">Ajouter des ventes d’exemple</button><button class="btn-danger btn-sm" id="exDel">Supprimer les exemples</button></div><p class="small mute" id="exCount" style="margin-top:8px"></p></div>
@@ -363,7 +363,7 @@ async function renderSettings() {
   $('sPoster').onclick = () => poster(publicUrl, s);
   const exCount = async () => { try { const n = (await api('nb_exemples')).count; $('exCount').textContent = n ? n + ' commande(s) d’exemple en place.' : 'Aucune commande d’exemple.'; $('exDel').disabled = !n; $('exAdd').disabled = !!n; } catch { } };
   exCount();
-  sumupBox();
+  cardBox();
   $('exAdd').onclick = async () => { try { const r = await api('exemples'); toast(r.created + ' commandes d’exemple ajoutées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('exDel').onclick = async () => { if (!confirm('Supprimer toutes les commandes d’exemple ? Les vraies commandes ne sont pas touchées.')) return; try { const r = await api('supprimer_exemples'); toast(r.deleted + ' commandes d’exemple supprimées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('cSave').onclick = async () => { try { await api('code', { old: $('cOld').value, new: $('cNew').value }); toast('Code changé. Les autres appareils devront le saisir.'); $('cOld').value = $('cNew').value = ''; } catch (e) { toast(e.message, true); } };
@@ -383,24 +383,24 @@ function poster(url, s) {
   w.document.close();
 }
 
-async function sumupBox() {
-  let v; try { v = (await api('sumup')).sumup; } catch (e) { $('sumupBox').innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
-  $('sumupBox').innerHTML = `
-    <p class="small mute">Les campeurs peuvent payer leur commande par carte depuis leur bon. La commande est validée automatiquement dès que SumUp confirme le paiement. L’argent arrive sur ton compte SumUp. La clé reste sur le serveur et n’est jamais affichée.</p>
-    <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="suOn" ${v.enabled ? 'checked' : ''}> Proposer le paiement par carte en ligne</label>
-    <label class="field"><span>Code marchand SumUp (commence par MC)</span><input id="suMc" maxlength="20" autocapitalize="characters" value="${esc(v.merchant)}" placeholder="MC…"></label>
-    <label class="field"><span>Clé API SumUp</span><input id="suKey" type="password" autocomplete="off" placeholder="${v.hasKey ? 'Clé enregistrée (' + esc(v.keyHint) + ') : laisse vide pour la garder' : 'sk_live_…'}"></label>
-    <div class="row-btns"><button class="btn-soft btn-sm" id="suSave">Enregistrer</button>${v.hasKey ? '<button class="btn-plain btn-sm" id="suTest">Tester la connexion</button><button class="btn-plain btn-sm" id="suDel">Retirer la clé</button>' : ''}</div>
-    <p class="small" id="suMsg" style="margin-top:8px">${v.enabled ? '<span class="pill p-ok">Carte en ligne active</span>' : '<span class="pill p-gray">Carte en ligne désactivée</span>'}</p>`;
+async function cardBox() {
+  let v; try { v = (await api('stripe')).stripe; } catch (e) { $('cardBox').innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  $('cardBox').innerHTML = `
+    <p class="small mute">Les campeurs peuvent payer leur commande par carte (et Apple Pay / Google Pay) depuis leur bon. La commande est validée automatiquement dès que Stripe confirme le paiement. L’argent arrive sur ton compte Stripe puis sur ton compte bancaire. La clé reste sur le serveur et n’est jamais affichée.</p>
+    <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="stOn" ${v.enabled ? 'checked' : ''}> Proposer le paiement par carte en ligne</label>
+    <label class="field"><span>Clé secrète Stripe (Développeurs → Clés API → « Clé secrète »)</span><input id="stKey" type="password" autocomplete="off" spellcheck="false" placeholder="${v.hasKey ? 'Clé enregistrée (' + esc(v.keyHint) + ') : laisse vide pour la garder' : 'sk_live_…'}"></label>
+    <div class="row-btns"><button class="btn-soft btn-sm" id="stSave">Enregistrer</button>${v.hasKey ? '<button class="btn-plain btn-sm" id="stTest">Tester la connexion</button><button class="btn-plain btn-sm" id="stDel">Retirer la clé</button>' : ''}</div>
+    <p class="small" id="stMsg" style="margin-top:8px">${v.enabled ? '<span class="pill p-ok">Carte en ligne active</span>' : '<span class="pill p-gray">Carte en ligne désactivée</span>'}${v.hasKey && v.test ? ' <span class="pill p-warn">Mode test : aucun vrai paiement</span>' : ''}</p>
+    <details class="small mute" style="margin-top:8px"><summary>Notification Stripe (facultatif)</summary><p>Pour que les paiements apparaissent même si le campeur ferme la page trop vite : dans Stripe → Développeurs → Webhooks → Ajouter une destination, événement <b>checkout.session.completed</b>, adresse :<br><code style="user-select:all">${esc(v.webhook)}</code><br>Sans cela, les paiements sont quand même vérifiés quand tu ouvres l’espace équipe.</p></details>`;
   const save = async extra => {
-    try { await api('sumup_enregistrer', { sumup: { enabled: $('suOn').checked, merchant: $('suMc').value, key: $('suKey').value, ...extra } }); toast('Réglages SumUp enregistrés.'); sumupBox(); } catch (e) { toast(e.message, true); }
+    try { await api('stripe_enregistrer', { stripe: { enabled: $('stOn').checked, key: $('stKey').value, ...extra } }); toast('Réglages Stripe enregistrés.'); cardBox(); } catch (e) { toast(e.message, true); }
   };
-  $('suSave').onclick = () => save({});
-  if ($('suDel')) $('suDel').onclick = () => { if (confirm('Retirer la clé SumUp ? La carte en ligne sera désactivée.')) { $('suOn').checked = false; save({ removeKey: true }); } };
-  if ($('suTest')) $('suTest').onclick = async () => {
-    $('suMsg').textContent = 'Test en cours…';
-    try { const r = await api('sumup_tester'); $('suMsg').innerHTML = r.matches ? `<span class="pill p-ok">Connexion OK</span> ${esc(r.name || '')} ${esc(r.merchant || '')}` : `<span class="pill p-warn">Clé valide, mais le code marchand ne correspond pas (${esc(r.merchant)})</span>`; }
-    catch (e) { $('suMsg').innerHTML = `<span class="pill p-red">${esc(e.message)}</span>`; }
+  $('stSave').onclick = () => save({});
+  if ($('stDel')) $('stDel').onclick = () => { if (confirm('Retirer la clé Stripe ? La carte en ligne sera désactivée.')) { $('stOn').checked = false; save({ removeKey: true }); } };
+  if ($('stTest')) $('stTest').onclick = async () => {
+    $('stMsg').textContent = 'Test en cours…';
+    try { const r = await api('stripe_tester'); $('stMsg').innerHTML = `<span class="pill p-ok">Connexion OK</span> ${esc(r.name || '')} ${r.live ? '' : '<span class="pill p-warn">mode test</span>'}${r.charges ? '' : ' <span class="pill p-warn">Compte Stripe pas encore activé pour encaisser</span>'}`; }
+    catch (e) { $('stMsg').innerHTML = `<span class="pill p-red">${esc(e.message)}</span>`; }
   };
 }
 
