@@ -1,0 +1,3 @@
+{ "name": "Pain · équipe", "short_name": "Pain équipe", "lang": "fr", "start_url": "./", "scope": "./", "display": "standalone",
+  "background_color": "#f2f2f7", "theme_color": "#f2f2f7",
+  "icons": [ { "src": "../icone-192.png?v=1", "sizes": "192x192", "type": "image/png" }, { "src": "../icone-512.png?v=1", "sizes": "512x512", "type": "image/png" } ] }
