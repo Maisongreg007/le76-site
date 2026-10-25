@@ -107,6 +107,10 @@ function db(): PDO
     if (!in_array('paiement', $cols, true)) {
         $pdo->exec("ALTER TABLE commandes ADD COLUMN paiement TEXT NOT NULL DEFAULT ''");
     }
+    if (!in_array('checkout_id', $cols, true)) {
+        $pdo->exec('ALTER TABLE commandes ADD COLUMN checkout_id TEXT');
+        $pdo->exec('ALTER TABLE commandes ADD COLUMN checkout_montant INTEGER');
+    }
     $pdo->exec('CREATE TABLE IF NOT EXISTS lignes (
         commande_id INTEGER NOT NULL REFERENCES commandes(id) ON DELETE CASCADE,
         produit_id INTEGER NOT NULL, nom TEXT NOT NULL, emoji TEXT NOT NULL DEFAULT \'\',
@@ -258,14 +262,27 @@ function limite_commande(string $jour, ?array $r = null): DateTimeImmutable
     return (new DateTimeImmutable($jour . ' ' . $r['cutoff_time']))->modify('-' . $r['cutoff_days'] . ' day');
 }
 
+/**
+ * Aperçu équipe : connectée à l'espace équipe sur le même appareil, l'équipe peut utiliser la boutique
+ * hors saison ou commandes en pause (pour tester). Les jours, fermetures et heures limites restent appliqués.
+ */
+function apercu_equipe(?bool $actif = null): bool
+{
+    static $a = false;
+    if ($actif !== null) {
+        $a = $actif;
+    }
+    return $a;
+}
+
 /** Jour ouvert (saison, jour de la semaine, fermetures), sans tenir compte de l'heure limite. */
 function jour_ouvert(string $jour, ?array $r = null): bool
 {
     $r ??= reglages();
-    if ($r['season_start'] !== '' && $jour < $r['season_start']) {
+    if (!apercu_equipe() && $r['season_start'] !== '' && $jour < $r['season_start']) {
         return false;
     }
-    if ($r['season_end'] !== '' && $jour > $r['season_end']) {
+    if (!apercu_equipe() && $r['season_end'] !== '' && $jour > $r['season_end']) {
         return false;
     }
     if (in_array($jour, $r['closed_dates'], true)) {
@@ -278,7 +295,7 @@ function jour_ouvert(string $jour, ?array $r = null): bool
 function jour_commandable(string $jour, ?array $r = null): bool
 {
     $r ??= reglages();
-    if (!$r['ordering_open'] || !date_valide($jour) || !jour_ouvert($jour, $r)) {
+    if ((!$r['ordering_open'] && !apercu_equipe()) || !date_valide($jour) || !jour_ouvert($jour, $r)) {
         return false;
     }
     $max = (new DateTimeImmutable('today'))->modify('+' . $r['days_ahead'] . ' day')->format('Y-m-d');
@@ -405,7 +422,7 @@ function nouveau_code(): string
 
 function commande_par(string $champ, string|int $valeur): ?array
 {
-    if (!in_array($champ, ['id', 'jeton', 'code', 'cle'], true)) {
+    if (!in_array($champ, ['id', 'jeton', 'code', 'cle', 'checkout_id'], true)) {
         throw new InvalidArgumentException('champ');
     }
     $st = db()->prepare("SELECT * FROM commandes WHERE $champ = ?");
@@ -509,10 +526,13 @@ function expirer_impayees(): void
     }
     $fait = true;
     $r = reglages();
-    $st = db()->prepare("SELECT id, jour FROM commandes WHERE statut = 'pending' AND jour <= ?");
+    $st = db()->prepare("SELECT * FROM commandes WHERE statut = 'pending' AND jour <= ?");
     $st->execute([date('Y-m-d', strtotime('+' . ($r['cutoff_days'] + 1) . ' day'))]);
     foreach ($st->fetchAll() as $c) {
         if (new DateTimeImmutable() >= limite_commande($c['jour'], $r)) {
+            if (!empty($c['checkout_id']) && function_exists('verifier_carte') && verifier_carte($c)) {
+                continue;
+            }
             $u = db()->prepare("UPDATE commandes SET statut = 'cancelled', annule_le = ?, modifie_le = ? WHERE id = ? AND statut = 'pending'");
             $u->execute([maintenant(), maintenant(), $c['id']]);
             if ($u->rowCount() === 1) {

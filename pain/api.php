@@ -6,8 +6,12 @@
  */
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
+require __DIR__ . '/sumup.php';
 
 try {
+    if (($_GET['action'] ?? '') === 'sumup') {
+        notification_sumup();
+    }
     if (($_GET['action'] ?? '') === 'export') {
         connecte() || erreur('Connecte-toi pour continuer.', 401);
         exporter((string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? ''));
@@ -23,23 +27,32 @@ try {
     expirer_impayees();
 
     /* ---------- Public ---------- */
+    if (in_array($action, ['catalogue', 'commander', 'modifier', 'annuler', 'bon', 'payer_carte'], true) && connecte()) {
+        apercu_equipe(true);
+    }
     switch ($action) {
         case 'catalogue':
             $r = reglages();
             repondre(['ok' => true, 'products' => array_map(fn($p) => array_diff_key($p, ['cost' => 1]), produits(true)),
-                'settings' => array_intersect_key($r, array_flip(['title', 'place', 'message', 'ordering_open', 'pickup_from', 'pickup_to', 'cutoff_days', 'cutoff_time', 'max_per_product'])),
+                'settings' => array_intersect_key($r, array_flip(['title', 'place', 'message', 'ordering_open', 'pickup_from', 'pickup_to', 'cutoff_days', 'cutoff_time', 'max_per_product', 'season_start', 'season_end'])) + ['card_online' => sumup_actif()],
+                'preview' => apercu_equipe() && ($r['season_start'] !== '' || $r['season_end'] !== '' || !$r['ordering_open']),
                 'dates' => jours_commandables(), 'today' => date('Y-m-d'), 'now' => date('Y-m-d H:i'), 'staff' => connecte()]);
         case 'commander':
             commander($q, false);
         case 'bon':
             $c = commande_publique($q);
-            repondre(['ok' => true, 'order' => vue_commande($c, connecte()), 'staff' => connecte()]);
+            if (verifier_carte($c)) {
+                $c = commande_par('id', (int) $c['id']);
+            }
+            repondre(['ok' => true, 'order' => vue_commande($c, connecte()), 'staff' => connecte(), 'cardOnline' => sumup_actif()]);
         case 'modifier':
             modifier_client($q);
         case 'annuler':
             annuler_client($q);
         case 'retrouver':
             retrouver($q);
+        case 'payer_carte':
+            payer_carte($q);
         case 'etat':
             repondre(['ok' => true, 'installe' => code_hache() !== null, 'connecte' => connecte()]);
         case 'installer':
@@ -96,6 +109,12 @@ try {
             repondre(['ok' => true, 'log' => $st->fetchAll()]);
         case 'code':
             changer_code((string) ($q['old'] ?? ''), (string) ($q['new'] ?? ''));
+        case 'sumup':
+            repondre(['ok' => true, 'sumup' => sumup_vue()]);
+        case 'sumup_enregistrer':
+            repondre(['ok' => true, 'sumup' => sumup_enregistrer(is_array($q['sumup'] ?? null) ? $q['sumup'] : [])]);
+        case 'sumup_tester':
+            repondre(sumup_tester());
         case 'exemples':
             creer_exemples();
         case 'supprimer_exemples':
@@ -217,6 +236,7 @@ function modifier_client(array $q): never
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, (int) $c['id']);
     [$total, $cout] = enregistrer_lignes((int) $c['id'], $lignes);
+    $pdo->prepare('UPDATE commandes SET checkout_id = NULL, checkout_montant = NULL WHERE id = ?')->execute([$c['id']]);
     $pdo->prepare('UPDATE commandes SET prenom = ?, nom = ?, emplacement = ?, telephone = ?, remarque = ?, langue = ?, jour = ?, total = ?, cout = ?, modifie_le = ? WHERE id = ? AND statut = ?')
         ->execute([$prenom, $nom, $empl, $tel, $rem, $langue, $jour, $total, $cout, maintenant(), $c['id'], 'pending']);
     journaliser('client', 'Commande modifiée', (int) $c['id'], $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));

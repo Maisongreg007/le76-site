@@ -3,7 +3,7 @@
 
 const T = {
   fr: {
-    lang: 'Français', pickupWord: 'Retrait', required: 'Prénom, nom, n° d’emplacement et téléphone sont obligatoires.', firstName: 'Prénom', lastName: 'Nom', saveImg: 'Enregistrer le bon (image)', saveHelp: 'L’image s’enregistre dans vos photos ou téléchargements. Vous pouvez aussi la montrer hors connexion.', find: 'Vous avez perdu votre bon ?', findBtn: 'Retrouver mon bon', findHelp: 'Indiquez le téléphone et l’emplacement donnés à la commande.', none: 'Aucune commande trouvée avec ce téléphone et cet emplacement.', phoneHelp: 'Pour vous joindre et retrouver votre bon si besoin.', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
+    lang: 'Français', pickupWord: 'Retrait', opensOn: 'Les précommandes ouvriront le', seasonOver: 'La saison des précommandes est terminée. À l’année prochaine !', preview: 'Aperçu équipe : la boutique est fermée aux campeurs (hors saison ou en pause). Vous pouvez tester ; vos commandes sont réelles, pensez à les annuler.', payCard: 'Payer par carte maintenant', payCardNote: 'Paiement sécurisé sur la page SumUp. Vous pouvez aussi payer au comptoir.', checking: 'Vérification du paiement…', paidOk: 'Paiement reçu : votre commande est validée.', notYet: 'Paiement pas encore confirmé. Si vous avez payé, actualisez dans un instant.', orCounter: 'ou au comptoir', required: 'Prénom, nom, n° d’emplacement et téléphone sont obligatoires.', firstName: 'Prénom', lastName: 'Nom', saveImg: 'Enregistrer le bon (image)', saveHelp: 'L’image s’enregistre dans vos photos ou téléchargements. Vous pouvez aussi la montrer hors connexion.', find: 'Vous avez perdu votre bon ?', findBtn: 'Retrouver mon bon', findHelp: 'Indiquez le téléphone et l’emplacement donnés à la commande.', none: 'Aucune commande trouvée avec ce téléphone et cet emplacement.', phoneHelp: 'Pour vous joindre et retrouver votre bon si besoin.', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
     name: 'Nom', pitch: 'N° d’emplacement', phone: 'Téléphone', phoneOpt: 'Téléphone (facultatif)', note: 'Remarque (facultatif)',
     total: 'Total', confirm: 'Valider la commande', update: 'Enregistrer les modifications', payOnSite: 'Validée après paiement.',
     until: 'Commande possible jusqu’au', at: 'à', pickup: 'Retrait le', from: 'de', to: 'à', closed: 'Les commandes en ligne sont fermées pour le moment.',
@@ -16,7 +16,7 @@ const T = {
     qty: 'Qté', product: 'Produit', amount: 'Montant',
   },
   de: {
-    lang: 'Deutsch', pickupWord: 'Abholung', required: 'Vorname, Nachname, Stellplatz und Telefon sind Pflichtfelder.', firstName: 'Vorname', lastName: 'Nachname', saveImg: 'Abholschein speichern (Bild)', saveHelp: 'Das Bild wird in Ihren Fotos oder Downloads gespeichert und funktioniert auch offline.', find: 'Abholschein verloren?', findBtn: 'Abholschein finden', findHelp: 'Telefon und Stellplatz wie bei der Bestellung angeben.', none: 'Keine Bestellung mit diesem Telefon und Stellplatz gefunden.', phoneHelp: 'Um Sie zu erreichen und Ihren Schein wiederzufinden.', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
+    lang: 'Deutsch', pickupWord: 'Abholung', opensOn: 'Vorbestellungen öffnen am', seasonOver: 'Die Vorbestell-Saison ist beendet. Bis nächstes Jahr!', preview: 'Vorschau für das Team.', payCard: 'Jetzt mit Karte bezahlen', payCardNote: 'Sichere Zahlung auf der SumUp-Seite. Sie können auch an der Theke bezahlen.', checking: 'Zahlung wird geprüft…', paidOk: 'Zahlung erhalten: Ihre Bestellung ist bestätigt.', notYet: 'Zahlung noch nicht bestätigt. Wenn Sie bezahlt haben, laden Sie die Seite gleich neu.', orCounter: 'oder an der Theke', required: 'Vorname, Nachname, Stellplatz und Telefon sind Pflichtfelder.', firstName: 'Vorname', lastName: 'Nachname', saveImg: 'Abholschein speichern (Bild)', saveHelp: 'Das Bild wird in Ihren Fotos oder Downloads gespeichert und funktioniert auch offline.', find: 'Abholschein verloren?', findBtn: 'Abholschein finden', findHelp: 'Telefon und Stellplatz wie bei der Bestellung angeben.', none: 'Keine Bestellung mit diesem Telefon und Stellplatz gefunden.', phoneHelp: 'Um Sie zu erreichen und Ihren Schein wiederzufinden.', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
     name: 'Name', pitch: 'Stellplatz-Nr.', phone: 'Telefon', phoneOpt: 'Telefon (optional)', note: 'Bemerkung (optional)',
     total: 'Summe', confirm: 'Bestellung absenden', update: 'Änderungen speichern', payOnSite: 'Gültig nach Bezahlung.',
     until: 'Bestellbar bis', at: 'um', pickup: 'Abholung am', from: 'von', to: 'bis', closed: 'Online-Bestellungen sind derzeit geschlossen.',
@@ -29,7 +29,7 @@ const T = {
     qty: 'Anz.', product: 'Produkt', amount: 'Betrag',
   },
   en: {
-    lang: 'English', pickupWord: 'Pick-up', required: 'First name, last name, pitch number and phone are required.', firstName: 'First name', lastName: 'Last name', saveImg: 'Save voucher (image)', saveHelp: 'The image is saved to your photos or downloads and also works offline.', find: 'Lost your voucher?', findBtn: 'Find my voucher', findHelp: 'Enter the phone number and pitch used for the order.', none: 'No order found with this phone number and pitch.', phoneHelp: 'So we can reach you and find your voucher if needed.', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
+    lang: 'English', pickupWord: 'Pick-up', opensOn: 'Pre-orders open on', seasonOver: 'The pre-order season is over. See you next year!', preview: 'Team preview.', payCard: 'Pay by card now', payCardNote: 'Secure payment on the SumUp page. You can also pay at the counter.', checking: 'Checking payment…', paidOk: 'Payment received: your order is confirmed.', notYet: 'Payment not confirmed yet. If you paid, refresh in a moment.', orCounter: 'or at the counter', required: 'First name, last name, pitch number and phone are required.', firstName: 'First name', lastName: 'Last name', saveImg: 'Save voucher (image)', saveHelp: 'The image is saved to your photos or downloads and also works offline.', find: 'Lost your voucher?', findBtn: 'Find my voucher', findHelp: 'Enter the phone number and pitch used for the order.', none: 'No order found with this phone number and pitch.', phoneHelp: 'So we can reach you and find your voucher if needed.', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
     name: 'Name', pitch: 'Pitch number', phone: 'Phone', phoneOpt: 'Phone (optional)', note: 'Note (optional)',
     total: 'Total', confirm: 'Place order', update: 'Save changes', payOnSite: 'Confirmed once paid.',
     until: 'Order until', at: 'at', pickup: 'Pick-up on', from: 'from', to: 'to', closed: 'Online ordering is closed for now.',
@@ -42,7 +42,7 @@ const T = {
     qty: 'Qty', product: 'Product', amount: 'Amount',
   },
   nl: {
-    lang: 'Nederlands', pickupWord: 'Ophalen', required: 'Voornaam, achternaam, plaatsnummer en telefoon zijn verplicht.', firstName: 'Voornaam', lastName: 'Achternaam', saveImg: 'Bon opslaan (afbeelding)', saveHelp: 'De afbeelding wordt in uw foto’s of downloads bewaard en werkt ook offline.', find: 'Bon kwijt?', findBtn: 'Mijn bon zoeken', findHelp: 'Vul het telefoonnummer en de plaats van de bestelling in.', none: 'Geen bestelling gevonden met dit telefoonnummer en deze plaats.', phoneHelp: 'Om u te bereiken en uw bon terug te vinden.', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
+    lang: 'Nederlands', pickupWord: 'Ophalen', opensOn: 'Voorbestellingen openen op', seasonOver: 'Het voorbestelseizoen is voorbij. Tot volgend jaar!', preview: 'Voorbeeld voor het team.', payCard: 'Nu betalen met kaart', payCardNote: 'Veilig betalen op de SumUp-pagina. U kunt ook aan de balie betalen.', checking: 'Betaling wordt gecontroleerd…', paidOk: 'Betaling ontvangen: uw bestelling is bevestigd.', notYet: 'Betaling nog niet bevestigd. Hebt u betaald, vernieuw dan zo meteen.', orCounter: 'of aan de balie', required: 'Voornaam, achternaam, plaatsnummer en telefoon zijn verplicht.', firstName: 'Voornaam', lastName: 'Achternaam', saveImg: 'Bon opslaan (afbeelding)', saveHelp: 'De afbeelding wordt in uw foto’s of downloads bewaard en werkt ook offline.', find: 'Bon kwijt?', findBtn: 'Mijn bon zoeken', findHelp: 'Vul het telefoonnummer en de plaats van de bestelling in.', none: 'Geen bestelling gevonden met dit telefoonnummer en deze plaats.', phoneHelp: 'Om u te bereiken en uw bon terug te vinden.', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
     name: 'Naam', pitch: 'Plaatsnummer', phone: 'Telefoon', phoneOpt: 'Telefoon (optioneel)', note: 'Opmerking (optioneel)',
     total: 'Totaal', confirm: 'Bestelling plaatsen', update: 'Wijzigingen opslaan', payOnSite: 'Bevestigd na betaling.',
     until: 'Bestellen kan tot', at: 'om', pickup: 'Ophalen op', from: 'van', to: 'tot', closed: 'Online bestellen is momenteel gesloten.',
@@ -125,7 +125,8 @@ function renderOrder() {
     <h1>${esc(EDIT ? t('edit') + ' · ' + EDIT.code : s.title)}</h1>
     <div class="sub">${esc(s.place)} · ${t('pickupWord')} ${s.pickup_from}–${s.pickup_to}</div>
     ${s.message && !EDIT ? `<div class="notice">${esc(s.message)}</div>` : ''}
-    ${!s.ordering_open ? `<div class="notice warn">${t('closed')}</div>` : !dates.length ? `<div class="notice warn">${t('noDay')}</div>` : `
+    ${CAT.preview ? `<div class="staffbar no-print"><span class="grow">${t('preview')}</span><a class="btn-plain btn-sm" style="background:rgba(255,255,255,.2);color:inherit;display:inline-flex;align-items:center;text-decoration:none" href="equipe/">Espace équipe</a></div>` : ''}
+    ${!s.ordering_open && !CAT.preview ? `<div class="notice warn">${t('closed')}</div>` : !dates.length ? `<div class="notice warn">${s.season_start && CAT.today < s.season_start ? `${t('opensOn')} ${day(s.season_start, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.` : s.season_end && CAT.today > s.season_end ? t('seasonOver') : t('noDay')}</div>` : `
     <div class="group-title">${t('pick')}</div>
     <div class="days">${dates.map(d => { const x = new Date(d.date + 'T12:00:00'); return `<button class="day ${d.date === DAY ? 'on' : ''}" data-day="${d.date}"><div class="w">${x.toLocaleDateString(LOCALES[L], { weekday: 'short' })}</div><div class="n">${x.getDate()}</div><div class="m">${x.toLocaleDateString(LOCALES[L], { month: 'short' })}</div></button>`; }).join('')}</div>
     ${sel ? `<p class="small mute" style="margin:4px 6px 0">${t('until')} ${day(sel.limit.slice(0, 10), { weekday: 'long', day: 'numeric', month: 'long' })} ${t('at')} ${hm(sel.limit)}</p>` : ''}
@@ -143,7 +144,7 @@ function renderOrder() {
     </div>
     <p class="small mute" style="margin:6px 6px 0">${t('phoneHelp')}</p>
     <div class="basket">
-      <div class="total"><span>${t('total')} <span class="small mute">· ${t('payOnSite')}</span></span><b class="num">${eur(totalCents)}</b></div>
+      <div class="total"><span>${t('total')} <span class="small mute">· ${t('payOnSite')}${s.card_online ? ' 💳' : ''}</span></span><b class="num">${eur(totalCents)}</b></div>
       <button class="btn-main" id="fGo" ${totalCents ? '' : 'disabled'}>${EDIT ? t('update') : t('confirm')}</button>
       ${EDIT ? `<button class="btn-plain" style="width:100%;margin-top:8px" id="fBack">${t('back')}</button>` : ''}
       <p class="error" id="fErr"></p>
@@ -183,14 +184,26 @@ async function submitOrder() {
     toast(EDIT ? t('saved') : t('thanks'));
     if (!EDIT) { KEY = uid(); CART = {}; }
     history.pushState(null, '', '?c=' + encodeURIComponent(j.order.token));
+    CARD = !!CAT?.settings?.card_online;
     renderTicket(j.order, j.staff);
   } catch (e) { err.textContent = e.message; if (e.status === 409) { try { CAT = await api('catalogue'); } catch { } } }
   finally { busy = false; if ($('fGo')) $('fGo').disabled = false; }
 }
 
 /* ================= Bon ================= */
+let CARD = false;
 async function showTicket(token) {
-  try { const j = await api('bon', { token }); renderTicket(j.order, j.staff); }
+  const back = new URLSearchParams(location.search).get('paye') === '1';
+  try {
+    let j = await api('bon', { token }); CARD = !!j.cardOnline;
+    if (back && j.order.status === 'pending') {
+      toast(t('checking'));
+      for (let i = 0; i < 6 && j.order.status === 'pending'; i++) { await new Promise(r => setTimeout(r, 2000)); j = await api('bon', { token }); }
+      toast(j.order.status === 'pending' ? t('notYet') : t('paidOk'), j.order.status === 'pending');
+    } else if (back && j.order.paid) toast(t('paidOk'));
+    if (back) history.replaceState(null, '', '?c=' + encodeURIComponent(token));
+    renderTicket(j.order, j.staff);
+  }
   catch (e) { $('app').innerHTML = `<div class="top"><div class="hero-ic">🥐</div>${langSwitch()}</div><div class="notice warn">${esc(e.status === 404 ? t('notFound') : e.message)}</div><p style="margin-top:14px"><a class="link" href="./">${t('newOrder')}</a></p>`; wireLang(() => showTicket(token)); }
 }
 function renderTicket(o, staff) {
@@ -213,6 +226,7 @@ function renderTicket(o, staff) {
       </table>
       ${o.note ? `<p class="small mute" style="margin-top:12px">${esc(o.note)}</p>` : ''}
     </div>
+    ${o.status === 'pending' && CARD && o.editable ? `<button class="btn-main" style="margin-top:14px" id="tPay">💳 ${t('payCard')} · ${eur(o.total)}</button><p class="small mute" style="margin:8px 6px 0">${t('payCardNote')}</p>` : ''}
     ${o.status === 'pending' ? `<div class="notice warn"><b>${t('pending')}.</b> ${t('pendingNote')} ${day(o.limit.slice(0, 10))} ${t('at')} ${hm(o.limit)}. ${t('pendingNote2')}</div>` : o.status === 'confirmed' ? `<div class="notice">${t('paidNote')}</div>` : ''}
     ${o.status === 'confirmed' ? `<p class="small mute" style="margin:12px 6px">${t('showTicket')} ${t('saveTicket')}</p>` : ''}
     <div class="row-btns no-print" style="margin-top:10px">
@@ -225,6 +239,11 @@ function renderTicket(o, staff) {
   wireLang(() => renderTicket(o, staff));
   if ($('tEdit')) $('tEdit').onclick = () => showOrder(o);
   if ($('tSave')) $('tSave').onclick = () => saveTicketImage(o, url);
+  if ($('tPay')) $('tPay').onclick = async () => {
+    $('tPay').disabled = true;
+    try { const j = await api('payer_carte', { token: o.token }); location.href = j.url; }
+    catch (e) { toast(e.message, true); $('tPay').disabled = false; }
+  };
   if ($('tCancel')) $('tCancel').onclick = async () => {
     if (!confirm(t('cancelAsk'))) return;
     try { const j = await api('annuler', { token: o.token }); toast(t('cancelled')); renderTicket(j.order, staff); } catch (e) { toast(e.message, true); }
