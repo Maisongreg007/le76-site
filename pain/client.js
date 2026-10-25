@@ -5,12 +5,12 @@ const T = {
   fr: {
     lang: 'Français', pickupWord: 'Retrait', required: 'Prénom, nom, n° d’emplacement et téléphone sont obligatoires.', firstName: 'Prénom', lastName: 'Nom', saveImg: 'Enregistrer le bon (image)', saveHelp: 'L’image s’enregistre dans vos photos ou téléchargements. Vous pouvez aussi la montrer hors connexion.', find: 'Vous avez perdu votre bon ?', findBtn: 'Retrouver mon bon', findHelp: 'Indiquez le téléphone et l’emplacement donnés à la commande.', none: 'Aucune commande trouvée avec ce téléphone et cet emplacement.', phoneHelp: 'Pour vous joindre et retrouver votre bon si besoin.', order: 'Commander', pick: 'Jour de retrait', products: 'Votre commande', you: 'Vos coordonnées',
     name: 'Nom', pitch: 'N° d’emplacement', phone: 'Téléphone', phoneOpt: 'Téléphone (facultatif)', note: 'Remarque (facultatif)',
-    total: 'Total', confirm: 'Valider la commande', update: 'Enregistrer les modifications', payOnSite: 'Paiement sur place au retrait.',
+    total: 'Total', confirm: 'Valider la commande', update: 'Enregistrer les modifications', payOnSite: 'Validée après paiement.',
     until: 'Commande possible jusqu’au', at: 'à', pickup: 'Retrait le', from: 'de', to: 'à', closed: 'Les commandes en ligne sont fermées pour le moment.',
     noDay: 'Aucun jour n’est ouvert à la commande pour le moment.', empty: 'Ajoute au moins un produit.', ticket: 'Votre bon',
     showTicket: 'Présentez ce bon (ou son code) au comptoir.', saveTicket: 'Gardez cette page : ajoutez-la à l’écran d’accueil ou faites une capture d’écran.',
     print: 'Imprimer / PDF', edit: 'Modifier', cancel: 'Annuler la commande', cancelAsk: 'Annuler cette commande ?', cancelled: 'Commande annulée',
-    confirmed: 'Confirmée', collected: 'Retirée', st_cancelled: 'Annulée', editUntil: 'Modifiable jusqu’au', noEdit: 'Cette commande ne peut plus être modifiée en ligne.',
+    confirmed: 'Payée · validée', pending: 'En attente de paiement', pendingNote: 'Votre commande sera validée après paiement. Passez au comptoir (espèces ou carte) avant le', pendingNote2: 'Sans paiement, elle est annulée automatiquement.', paidNote: 'Payée : il ne reste plus qu’à la retirer.', collected: 'Retirée', st_cancelled: 'Annulée', editUntil: 'Modifiable jusqu’au', noEdit: 'Cette commande ne peut plus être modifiée en ligne.',
     myOrders: 'Mes commandes', newOrder: 'Nouvelle commande', back: 'Retour', thanks: 'Merci ! Votre commande est enregistrée.', saved: 'Modifications enregistrées.',
     notFound: 'Bon introuvable.', network: 'Connexion impossible. Vérifiez le réseau et réessayez.', max: 'maximum', each: 'pièce', paid: 'Payée', unpaid: 'À payer sur place',
     qty: 'Qté', product: 'Produit', amount: 'Montant',
@@ -18,12 +18,12 @@ const T = {
   de: {
     lang: 'Deutsch', pickupWord: 'Abholung', required: 'Vorname, Nachname, Stellplatz und Telefon sind Pflichtfelder.', firstName: 'Vorname', lastName: 'Nachname', saveImg: 'Abholschein speichern (Bild)', saveHelp: 'Das Bild wird in Ihren Fotos oder Downloads gespeichert und funktioniert auch offline.', find: 'Abholschein verloren?', findBtn: 'Abholschein finden', findHelp: 'Telefon und Stellplatz wie bei der Bestellung angeben.', none: 'Keine Bestellung mit diesem Telefon und Stellplatz gefunden.', phoneHelp: 'Um Sie zu erreichen und Ihren Schein wiederzufinden.', order: 'Bestellen', pick: 'Abholtag', products: 'Ihre Bestellung', you: 'Ihre Angaben',
     name: 'Name', pitch: 'Stellplatz-Nr.', phone: 'Telefon', phoneOpt: 'Telefon (optional)', note: 'Bemerkung (optional)',
-    total: 'Summe', confirm: 'Bestellung absenden', update: 'Änderungen speichern', payOnSite: 'Bezahlung vor Ort bei der Abholung.',
+    total: 'Summe', confirm: 'Bestellung absenden', update: 'Änderungen speichern', payOnSite: 'Gültig nach Bezahlung.',
     until: 'Bestellbar bis', at: 'um', pickup: 'Abholung am', from: 'von', to: 'bis', closed: 'Online-Bestellungen sind derzeit geschlossen.',
     noDay: 'Derzeit ist kein Tag zur Bestellung geöffnet.', empty: 'Bitte mindestens ein Produkt wählen.', ticket: 'Ihr Abholschein',
     showTicket: 'Zeigen Sie diesen Schein (oder den Code) an der Theke.', saveTicket: 'Behalten Sie diese Seite: zum Home-Bildschirm hinzufügen oder Screenshot machen.',
     print: 'Drucken / PDF', edit: 'Ändern', cancel: 'Bestellung stornieren', cancelAsk: 'Diese Bestellung stornieren?', cancelled: 'Bestellung storniert',
-    confirmed: 'Bestätigt', collected: 'Abgeholt', st_cancelled: 'Storniert', editUntil: 'Änderbar bis', noEdit: 'Diese Bestellung kann online nicht mehr geändert werden.',
+    confirmed: 'Bezahlt · bestätigt', pending: 'Wartet auf Zahlung', pendingNote: 'Ihre Bestellung wird nach der Bezahlung bestätigt. Bitte an der Theke bezahlen (bar oder Karte) bis', pendingNote2: 'Ohne Bezahlung wird sie automatisch storniert.', paidNote: 'Bezahlt: Sie müssen sie nur noch abholen.', collected: 'Abgeholt', st_cancelled: 'Storniert', editUntil: 'Änderbar bis', noEdit: 'Diese Bestellung kann online nicht mehr geändert werden.',
     myOrders: 'Meine Bestellungen', newOrder: 'Neue Bestellung', back: 'Zurück', thanks: 'Danke! Ihre Bestellung ist eingegangen.', saved: 'Änderungen gespeichert.',
     notFound: 'Abholschein nicht gefunden.', network: 'Keine Verbindung. Bitte Netz prüfen und erneut versuchen.', max: 'max.', each: 'Stück', paid: 'Bezahlt', unpaid: 'Vor Ort zu bezahlen',
     qty: 'Anz.', product: 'Produkt', amount: 'Betrag',
@@ -31,12 +31,12 @@ const T = {
   en: {
     lang: 'English', pickupWord: 'Pick-up', required: 'First name, last name, pitch number and phone are required.', firstName: 'First name', lastName: 'Last name', saveImg: 'Save voucher (image)', saveHelp: 'The image is saved to your photos or downloads and also works offline.', find: 'Lost your voucher?', findBtn: 'Find my voucher', findHelp: 'Enter the phone number and pitch used for the order.', none: 'No order found with this phone number and pitch.', phoneHelp: 'So we can reach you and find your voucher if needed.', order: 'Order', pick: 'Pick-up day', products: 'Your order', you: 'Your details',
     name: 'Name', pitch: 'Pitch number', phone: 'Phone', phoneOpt: 'Phone (optional)', note: 'Note (optional)',
-    total: 'Total', confirm: 'Place order', update: 'Save changes', payOnSite: 'Pay on site when you collect.',
+    total: 'Total', confirm: 'Place order', update: 'Save changes', payOnSite: 'Confirmed once paid.',
     until: 'Order until', at: 'at', pickup: 'Pick-up on', from: 'from', to: 'to', closed: 'Online ordering is closed for now.',
     noDay: 'No day is open for ordering at the moment.', empty: 'Add at least one product.', ticket: 'Your voucher',
     showTicket: 'Show this voucher (or its code) at the counter.', saveTicket: 'Keep this page: add it to your home screen or take a screenshot.',
     print: 'Print / PDF', edit: 'Change', cancel: 'Cancel order', cancelAsk: 'Cancel this order?', cancelled: 'Order cancelled',
-    confirmed: 'Confirmed', collected: 'Collected', st_cancelled: 'Cancelled', editUntil: 'Can be changed until', noEdit: 'This order can no longer be changed online.',
+    confirmed: 'Paid · confirmed', pending: 'Awaiting payment', pendingNote: 'Your order is confirmed once paid. Please pay at the counter (cash or card) before', pendingNote2: 'Unpaid orders are cancelled automatically.', paidNote: 'Paid: you only need to collect it.', collected: 'Collected', st_cancelled: 'Cancelled', editUntil: 'Can be changed until', noEdit: 'This order can no longer be changed online.',
     myOrders: 'My orders', newOrder: 'New order', back: 'Back', thanks: 'Thank you! Your order is confirmed.', saved: 'Changes saved.',
     notFound: 'Voucher not found.', network: 'No connection. Check the network and try again.', max: 'max', each: 'each', paid: 'Paid', unpaid: 'To pay on site',
     qty: 'Qty', product: 'Product', amount: 'Amount',
@@ -44,12 +44,12 @@ const T = {
   nl: {
     lang: 'Nederlands', pickupWord: 'Ophalen', required: 'Voornaam, achternaam, plaatsnummer en telefoon zijn verplicht.', firstName: 'Voornaam', lastName: 'Achternaam', saveImg: 'Bon opslaan (afbeelding)', saveHelp: 'De afbeelding wordt in uw foto’s of downloads bewaard en werkt ook offline.', find: 'Bon kwijt?', findBtn: 'Mijn bon zoeken', findHelp: 'Vul het telefoonnummer en de plaats van de bestelling in.', none: 'Geen bestelling gevonden met dit telefoonnummer en deze plaats.', phoneHelp: 'Om u te bereiken en uw bon terug te vinden.', order: 'Bestellen', pick: 'Ophaaldag', products: 'Uw bestelling', you: 'Uw gegevens',
     name: 'Naam', pitch: 'Plaatsnummer', phone: 'Telefoon', phoneOpt: 'Telefoon (optioneel)', note: 'Opmerking (optioneel)',
-    total: 'Totaal', confirm: 'Bestelling plaatsen', update: 'Wijzigingen opslaan', payOnSite: 'Betalen ter plaatse bij het ophalen.',
+    total: 'Totaal', confirm: 'Bestelling plaatsen', update: 'Wijzigingen opslaan', payOnSite: 'Bevestigd na betaling.',
     until: 'Bestellen kan tot', at: 'om', pickup: 'Ophalen op', from: 'van', to: 'tot', closed: 'Online bestellen is momenteel gesloten.',
     noDay: 'Er is momenteel geen dag open voor bestellingen.', empty: 'Kies minstens één product.', ticket: 'Uw bon',
     showTicket: 'Toon deze bon (of de code) aan de balie.', saveTicket: 'Bewaar deze pagina: zet hem op uw beginscherm of maak een screenshot.',
     print: 'Afdrukken / PDF', edit: 'Wijzigen', cancel: 'Bestelling annuleren', cancelAsk: 'Deze bestelling annuleren?', cancelled: 'Bestelling geannuleerd',
-    confirmed: 'Bevestigd', collected: 'Opgehaald', st_cancelled: 'Geannuleerd', editUntil: 'Te wijzigen tot', noEdit: 'Deze bestelling kan online niet meer worden gewijzigd.',
+    confirmed: 'Betaald · bevestigd', pending: 'Wacht op betaling', pendingNote: 'Uw bestelling wordt bevestigd na betaling. Betaal aan de balie (contant of kaart) vóór', pendingNote2: 'Zonder betaling wordt ze automatisch geannuleerd.', paidNote: 'Betaald: u hoeft ze alleen nog op te halen.', collected: 'Opgehaald', st_cancelled: 'Geannuleerd', editUntil: 'Te wijzigen tot', noEdit: 'Deze bestelling kan online niet meer worden gewijzigd.',
     myOrders: 'Mijn bestellingen', newOrder: 'Nieuwe bestelling', back: 'Terug', thanks: 'Bedankt! Uw bestelling is geplaatst.', saved: 'Wijzigingen opgeslagen.',
     notFound: 'Bon niet gevonden.', network: 'Geen verbinding. Controleer het netwerk en probeer opnieuw.', max: 'max.', each: 'stuk', paid: 'Betaald', unpaid: 'Ter plaatse te betalen',
     qty: 'Aant.', product: 'Product', amount: 'Bedrag',
@@ -197,7 +197,7 @@ function renderTicket(o, staff) {
   remember(o);
   const url = location.origin + location.pathname + '?c=' + encodeURIComponent(o.token);
   let qr = ''; try { qr = qrSvg(url); } catch { }
-  const stLabel = { confirmed: t('confirmed'), collected: t('collected'), cancelled: t('st_cancelled') }[o.status];
+  const stLabel = { pending: t('pending'), confirmed: t('confirmed'), collected: t('collected'), cancelled: t('st_cancelled') }[o.status];
   $('app').innerHTML = `
     ${staff ? staffBar(o) : ''}
     <div class="top"><div><h1 style="font-size:26px">${t('ticket')}</h1></div>${langSwitch()}</div>
@@ -211,8 +211,9 @@ function renderTicket(o, staff) {
         ${o.items.map(i => `<tr><td>${esc(i.emoji)} ${esc(i.name)}</td><td class="r num">${i.qty} × ${eur(i.price)}</td><td class="r num">${eur(i.qty * i.price)}</td></tr>`).join('')}
         <tr><td><b>${t('total')}</b></td><td></td><td class="r num"><b>${eur(o.total)}</b></td></tr>
       </table>
-      <p class="small mute" style="margin-top:12px">${o.paid ? t('paid') : t('unpaid')}${o.note ? ' · ' + esc(o.note) : ''}</p>
+      ${o.note ? `<p class="small mute" style="margin-top:12px">${esc(o.note)}</p>` : ''}
     </div>
+    ${o.status === 'pending' ? `<div class="notice warn"><b>${t('pending')}.</b> ${t('pendingNote')} ${day(o.limit.slice(0, 10))} ${t('at')} ${hm(o.limit)}. ${t('pendingNote2')}</div>` : o.status === 'confirmed' ? `<div class="notice">${t('paidNote')}</div>` : ''}
     ${o.status === 'confirmed' ? `<p class="small mute" style="margin:12px 6px">${t('showTicket')} ${t('saveTicket')}</p>` : ''}
     <div class="row-btns no-print" style="margin-top:10px">
       ${o.editable ? `<button class="btn-soft" id="tEdit">${t('edit')}</button><button class="btn-danger" id="tCancel">${t('cancel')}</button>` : ''}
@@ -268,23 +269,26 @@ async function saveTicketImage(o, url) {
 
 /* L'équipe, connectée sur son téléphone, scanne le QR : le bon s'ouvre avec les boutons de retrait. */
 function staffBar(o) {
-  const today = new Date().toLocaleDateString('sv-SE');
-  return `<div class="staffbar no-print"><span class="grow">Équipe · ${o.status === 'confirmed' ? (o.date === today ? 'à retirer aujourd’hui' : 'prévue le ' + new Date(o.date + 'T12:00').toLocaleDateString('fr-FR')) : o.status === 'collected' ? 'déjà retirée' : 'annulée'}</span>
-    ${o.status === 'confirmed' ? `<button class="btn-ok btn-sm" id="sCollect">✓ Retirée et payée</button><button class="btn-plain btn-sm" style="background:rgba(255,255,255,.2);color:inherit" id="sCollectUnpaid">Retirée, non payée</button>` : ''}
-    ${o.status === 'collected' ? `<button class="btn-plain btn-sm" style="background:rgba(255,255,255,.2);color:inherit" id="sUndo">Annuler le retrait</button>` : ''}
-    <a class="btn-plain btn-sm" style="background:rgba(255,255,255,.2);color:inherit;display:inline-flex;align-items:center;text-decoration:none" href="equipe/">Espace équipe</a></div>`;
+  const today = new Date().toLocaleDateString('sv-SE'), btn = 'style="background:rgba(255,255,255,.2);color:inherit"';
+  const when = o.date === today ? 'aujourd’hui' : 'le ' + new Date(o.date + 'T12:00').toLocaleDateString('fr-FR');
+  const etat = { pending: 'à payer · retrait ' + when, confirmed: 'payée · à remettre ' + when, collected: 'déjà retirée', cancelled: 'annulée' }[o.status];
+  return `<div class="staffbar no-print"><span class="grow">Équipe · ${etat}</span>
+    ${o.status === 'pending' ? `<button class="btn-ok btn-sm" data-pay="especes">Espèces encaissées</button><button class="btn-ok btn-sm" data-pay="carte">Carte encaissée</button>` : ''}
+    ${o.status === 'confirmed' ? `<button class="btn-ok btn-sm" id="sCollect">✓ Remise au client</button>` : ''}
+    ${o.status === 'collected' ? `<button class="btn-plain btn-sm" ${btn} id="sUndo">Annuler le retrait</button>` : ''}
+    <a class="btn-plain btn-sm" ${btn.replace('"', '"display:inline-flex;align-items:center;text-decoration:none;')} href="equipe/">Espace équipe</a></div>`;
 }
 function wireStaff(o) {
-  const run = async (action, extra = {}) => {
-    try { await api(action, { id: o.id, ...extra }); toast(action === 'retirer' ? 'Retrait enregistré.' : 'Retrait annulé.'); showTicket(o.token); }
+  const run = async (action, extra = {}, msg) => {
+    try { await api(action, { id: o.id, ...extra }); toast(msg); showTicket(o.token); }
     catch (e) {
-      if (e.status === 409 && action === 'retirer' && /autre jour|était prévue/.test(e.message) && confirm(e.message + '\n\nValider quand même le retrait ?')) return run(action, { ...extra, force: true });
+      if (e.status === 409 && action === 'retirer' && /autre jour|était prévue/.test(e.message) && confirm(e.message + '\n\nRemettre quand même ?')) return run(action, { ...extra, force: true }, msg);
       toast(e.message, true);
     }
   };
-  if ($('sCollect')) $('sCollect').onclick = () => run('retirer', { paid: true });
-  if ($('sCollectUnpaid')) $('sCollectUnpaid').onclick = () => run('retirer', { paid: false });
-  if ($('sUndo')) $('sUndo').onclick = () => run('annuler_retrait');
+  document.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => run('encaisser', { method: b.dataset.pay }, 'Paiement encaissé : commande validée.'));
+  if ($('sCollect')) $('sCollect').onclick = () => run('retirer', {}, 'Remise enregistrée.');
+  if ($('sUndo')) $('sUndo').onclick = () => run('annuler_retrait', {}, 'Retrait annulé.');
 }
 
 /* ================= Démarrage ================= */

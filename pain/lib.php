@@ -18,7 +18,8 @@ mb_internal_encoding('UTF-8');
 const P_COOKIE = 'le76_pain';
 const P_DUREE = 400 * 86400;
 const P_LANGS = ['fr', 'de', 'en', 'nl'];
-const P_STATUTS = ['confirmed', 'collected', 'cancelled'];
+const P_STATUTS = ['pending', 'confirmed', 'collected', 'cancelled'];   // à payer → payée (à remettre) → retirée ; ou annulée
+const P_PAIEMENTS = ['especes' => 'Espèces', 'carte' => 'Carte', 'en_ligne' => 'Carte en ligne'];
 
 const P_REGLAGES_DEFAUT = [
     'title' => 'Pain & viennoiseries',
@@ -102,6 +103,9 @@ function db(): PDO
     $cols = array_column($pdo->query('PRAGMA table_info(commandes)')->fetchAll(), 'name');
     if (!in_array('prenom', $cols, true)) {
         $pdo->exec("ALTER TABLE commandes ADD COLUMN prenom TEXT NOT NULL DEFAULT ''");
+    }
+    if (!in_array('paiement', $cols, true)) {
+        $pdo->exec("ALTER TABLE commandes ADD COLUMN paiement TEXT NOT NULL DEFAULT ''");
     }
     $pdo->exec('CREATE TABLE IF NOT EXISTS lignes (
         commande_id INTEGER NOT NULL REFERENCES commandes(id) ON DELETE CASCADE,
@@ -426,7 +430,8 @@ function vue_commande(array $c, bool $equipe): array
         'note' => $c['remarque'], 'lang' => $c['langue'], 'date' => $c['jour'], 'status' => $c['statut'], 'paid' => (bool) $c['paye'],
         'total' => (int) $c['total'], 'items' => lignes_de((int) $c['id']), 'createdAt' => $c['cree_le'],
         'collectedAt' => $c['retire_le'], 'cancelledAt' => $c['annule_le'],
-        'editable' => $c['statut'] === 'confirmed' && jour_commandable($c['jour']),
+        'paymentMethod' => $c['paiement'] ?? '',
+        'editable' => $c['statut'] === 'pending' && jour_commandable($c['jour']),
         'limit' => limite_commande($c['jour'])->format('Y-m-d H:i'),
     ];
     if ($equipe) {
@@ -490,6 +495,31 @@ function champs_client(array $q, bool $equipe = false): array
     $rem = texte($q['note'] ?? '', 200, false, 'La remarque');
     $langue = in_array($q['lang'] ?? 'fr', P_LANGS, true) ? ($q['lang'] ?? 'fr') : 'fr';
     return [$nom, $empl, $tel, $rem, $langue, $prenom];
+}
+
+/**
+ * Une commande de campeur n'est validée qu'une fois payée. Passé l'heure limite sans paiement,
+ * elle est annulée automatiquement (et n'entre pas dans la préparation).
+ */
+function expirer_impayees(): void
+{
+    static $fait = false;
+    if ($fait) {
+        return;
+    }
+    $fait = true;
+    $r = reglages();
+    $st = db()->prepare("SELECT id, jour FROM commandes WHERE statut = 'pending' AND jour <= ?");
+    $st->execute([date('Y-m-d', strtotime('+' . ($r['cutoff_days'] + 1) . ' day'))]);
+    foreach ($st->fetchAll() as $c) {
+        if (new DateTimeImmutable() >= limite_commande($c['jour'], $r)) {
+            $u = db()->prepare("UPDATE commandes SET statut = 'cancelled', annule_le = ?, modifie_le = ? WHERE id = ? AND statut = 'pending'");
+            $u->execute([maintenant(), maintenant(), $c['id']]);
+            if ($u->rowCount() === 1) {
+                journaliser('système', 'Annulée : non payée avant l’heure limite', (int) $c['id']);
+            }
+        }
+    }
 }
 
 /* ------------------------------------------------------------------ */

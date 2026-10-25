@@ -20,6 +20,7 @@ try {
         erreur('Requête illisible.');
     }
     $action = (string) ($q['action'] ?? '');
+    expirer_impayees();
 
     /* ---------- Public ---------- */
     switch ($action) {
@@ -58,11 +59,13 @@ try {
         case 'commandes':
             liste_equipe($q);
         case 'retirer':
-            retirer((int) ($q['id'] ?? 0), (bool) ($q['force'] ?? false), (bool) ($q['paid'] ?? true));
+            retirer((int) ($q['id'] ?? 0), (bool) ($q['force'] ?? false), (string) ($q['method'] ?? ''));
+        case 'encaisser':
+            encaisser((int) ($q['id'] ?? 0), (string) ($q['method'] ?? ''));
         case 'annuler_retrait':
             annuler_retrait((int) ($q['id'] ?? 0));
-        case 'payer':
-            payer((int) ($q['id'] ?? 0), (bool) ($q['paid'] ?? true));
+        case 'annuler_paiement':
+            annuler_paiement((int) ($q['id'] ?? 0));
         case 'creer':
             commander($q, true);
         case 'modifier_equipe':
@@ -156,9 +159,16 @@ function commander(array $q, bool $equipe): never
     $pdo->exec('BEGIN IMMEDIATE');
     $lignes = lignes_depuis($q['items'] ?? null, $jour, 0, $equipe);
     $now = maintenant();
-    $pdo->prepare('INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, total, cout, origine, cree_le, modifie_le)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)')
-        ->execute([jeton(), nouveau_code(), $cle, $prenom, $nom, $empl, $tel, $rem, $langue, $jour, 'confirmed', $equipe ? 'equipe' : 'client', $now, $now]);
+    // Campeur : la commande attend son paiement. Équipe : espèces / carte encaissées, ou « à payer au retrait » (validée par l'équipe).
+    $methode = $equipe ? (string) ($q['method'] ?? '') : '';
+    if ($equipe && $methode !== '' && $methode !== 'later' && !isset(P_PAIEMENTS[$methode])) {
+        erreur('Mode de paiement invalide.');
+    }
+    $statut = $equipe && $methode !== '' ? 'confirmed' : 'pending';
+    $paye = isset(P_PAIEMENTS[$methode]) ? 1 : 0;
+    $pdo->prepare('INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, paiement, total, cout, origine, cree_le, modifie_le)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?)')
+        ->execute([jeton(), nouveau_code(), $cle, $prenom, $nom, $empl, $tel, $rem, $langue, $jour, $statut, $paye, $paye ? $methode : '', $equipe ? 'equipe' : 'client', $now, $now]);
     $id = (int) $pdo->lastInsertId();
     [$total, $cout] = enregistrer_lignes($id, $lignes);
     $pdo->prepare('UPDATE commandes SET total = ?, cout = ? WHERE id = ?')->execute([$total, $cout, $id]);
@@ -195,8 +205,8 @@ function modifier_client(array $q): never
         erreur('Trop de modifications. Réessaie plus tard.', 429);
     }
     $c = commande_publique($q);
-    if ($c['statut'] !== 'confirmed' || !jour_commandable($c['jour'])) {
-        erreur('Cette commande ne peut plus être modifiée (heure limite dépassée). Passe au comptoir.', 409);
+    if ($c['statut'] !== 'pending' || !jour_commandable($c['jour'])) {
+        erreur($c['statut'] === 'confirmed' ? 'Cette commande est déjà payée : pour la modifier, passe au comptoir.' : 'Cette commande ne peut plus être modifiée (heure limite dépassée). Passe au comptoir.', 409);
     }
     $jour = (string) ($q['date'] ?? $c['jour']);
     if (!jour_commandable($jour)) {
@@ -208,7 +218,7 @@ function modifier_client(array $q): never
     $lignes = lignes_depuis($q['items'] ?? null, $jour, (int) $c['id']);
     [$total, $cout] = enregistrer_lignes((int) $c['id'], $lignes);
     $pdo->prepare('UPDATE commandes SET prenom = ?, nom = ?, emplacement = ?, telephone = ?, remarque = ?, langue = ?, jour = ?, total = ?, cout = ?, modifie_le = ? WHERE id = ? AND statut = ?')
-        ->execute([$prenom, $nom, $empl, $tel, $rem, $langue, $jour, $total, $cout, maintenant(), $c['id'], 'confirmed']);
+        ->execute([$prenom, $nom, $empl, $tel, $rem, $langue, $jour, $total, $cout, maintenant(), $c['id'], 'pending']);
     journaliser('client', 'Commande modifiée', (int) $c['id'], $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', (int) $c['id']), false)]);
@@ -217,10 +227,10 @@ function modifier_client(array $q): never
 function annuler_client(array $q): never
 {
     $c = commande_publique($q);
-    if ($c['statut'] !== 'confirmed' || !jour_commandable($c['jour'])) {
-        erreur('Cette commande ne peut plus être annulée en ligne (heure limite dépassée). Passe au comptoir.', 409);
+    if ($c['statut'] !== 'pending' || !jour_commandable($c['jour'])) {
+        erreur($c['statut'] === 'confirmed' ? 'Cette commande est déjà payée : pour l’annuler, passe au comptoir.' : 'Cette commande ne peut plus être annulée en ligne (heure limite dépassée). Passe au comptoir.', 409);
     }
-    db()->prepare("UPDATE commandes SET statut = 'cancelled', annule_le = ?, modifie_le = ? WHERE id = ? AND statut = 'confirmed'")
+    db()->prepare("UPDATE commandes SET statut = 'cancelled', annule_le = ?, modifie_le = ? WHERE id = ? AND statut = 'pending'")
         ->execute([maintenant(), maintenant(), $c['id']]);
     journaliser('client', 'Commande annulée par le client', (int) $c['id']);
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', (int) $c['id']), false)]);
@@ -251,22 +261,29 @@ function jour_equipe(string $jour): never
             continue;
         }
         foreach ($o['items'] as $l) {
-            $prep[$l['id']] ??= ['id' => $l['id'], 'name' => $l['name'], 'emoji' => $l['emoji'], 'total' => 0, 'remaining' => 0];
+            $prep[$l['id']] ??= ['id' => $l['id'], 'name' => $l['name'], 'emoji' => $l['emoji'], 'total' => 0, 'remaining' => 0, 'pending' => 0];
+            if ($o['status'] === 'pending') {
+                $prep[$l['id']]['pending'] += $l['qty'];
+                continue;
+            }
             $prep[$l['id']]['total'] += $l['qty'];
             if ($o['status'] === 'confirmed') {
                 $prep[$l['id']]['remaining'] += $l['qty'];
             }
         }
     }
-    $actives = array_filter($orders, fn($o) => $o['status'] !== 'cancelled');
+    $valides = array_filter($orders, fn($o) => in_array($o['status'], ['confirmed', 'collected'], true));
+    $attente = array_filter($orders, fn($o) => $o['status'] === 'pending');
     repondre(['ok' => true, 'date' => $jour, 'orders' => $orders, 'prep' => array_values($prep),
         'summary' => [
-            'orders' => count($actives),
+            'orders' => count($valides),
             'collected' => count(array_filter($orders, fn($o) => $o['status'] === 'collected')),
             'waiting' => count(array_filter($orders, fn($o) => $o['status'] === 'confirmed')),
-            'cancelled' => count($orders) - count($actives),
-            'total' => array_sum(array_map(fn($o) => $o['total'], $actives)),
-            'paid' => array_sum(array_map(fn($o) => $o['paid'] ? $o['total'] : 0, $actives)),
+            'pending' => count($attente),
+            'pendingTotal' => array_sum(array_map(fn($o) => $o['total'], $attente)),
+            'cancelled' => count(array_filter($orders, fn($o) => $o['status'] === 'cancelled')),
+            'total' => array_sum(array_map(fn($o) => $o['total'], $valides)),
+            'paid' => array_sum(array_map(fn($o) => $o['paid'] ? $o['total'] : 0, $valides)),
         ],
         'limit' => limite_commande($jour)->format('Y-m-d H:i'), 'open' => jour_ouvert($jour), 'orderable' => jour_commandable($jour)]);
 }
@@ -305,8 +322,35 @@ function liste_equipe(array $q): never
     repondre(['ok' => true, 'orders' => array_map(fn($c) => vue_commande($c, true), $st->fetchAll())]);
 }
 
-/** Retrait atomique : une seule validation possible, même si deux personnes scannent en même temps. */
-function retirer(int $id, bool $force, bool $paye): never
+function methode_valide(string $m): void
+{
+    if (!isset(P_PAIEMENTS[$m])) {
+        erreur('Choisis le mode de paiement (espèces ou carte).');
+    }
+}
+
+/** Paiement reçu au comptoir : la commande est validée (et entre dans la préparation). */
+function encaisser(int $id, string $methode): never
+{
+    methode_valide($methode);
+    $c = commande_equipe($id);
+    if ($c['statut'] === 'cancelled') {
+        erreur('Cette commande est annulée. Rétablis-la d’abord.', 409);
+    }
+    if ($c['paye']) {
+        erreur('Cette commande est déjà payée (' . (P_PAIEMENTS[$c['paiement']] ?? 'payée') . ').', 409);
+    }
+    $st = db()->prepare("UPDATE commandes SET paye = 1, paiement = ?, statut = CASE WHEN statut = 'pending' THEN 'confirmed' ELSE statut END, modifie_le = ? WHERE id = ? AND paye = 0 AND statut != 'cancelled'");
+    $st->execute([$methode, maintenant(), $id]);
+    if ($st->rowCount() !== 1) {
+        erreur('Cette commande vient d’être modifiée par quelqu’un d’autre. Actualise.', 409);
+    }
+    journaliser('équipe', 'Paiement encaissé (' . P_PAIEMENTS[$methode] . ')', $id, eur((int) $c['total']));
+    repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), true)]);
+}
+
+/** Remise au client, atomique : une seule remise possible, même si deux personnes scannent en même temps. */
+function retirer(int $id, bool $force, string $methode): never
 {
     $c = commande_equipe($id);
     if ($c['statut'] === 'collected') {
@@ -315,21 +359,27 @@ function retirer(int $id, bool $force, bool $paye): never
     if ($c['statut'] === 'cancelled') {
         erreur('Cette commande est annulée.', 409);
     }
+    if (!$c['paye'] && $methode === '') {
+        erreur('Cette commande n’est pas payée : encaisse-la (espèces ou carte) avant de la remettre.', 409);
+    }
+    if (!$c['paye']) {
+        methode_valide($methode);
+    }
     if ($c['jour'] !== date('Y-m-d') && !$force) {
         erreur($c['jour'] > date('Y-m-d') ? 'Cette commande est prévue pour un autre jour (' . date('d/m', strtotime($c['jour'])) . ').' : 'Cette commande était prévue le ' . date('d/m', strtotime($c['jour'])) . '.', 409);
     }
-    $st = db()->prepare("UPDATE commandes SET statut = 'collected', retire_le = ?, paye = CASE WHEN ? THEN 1 ELSE paye END, modifie_le = ? WHERE id = ? AND statut = 'confirmed'");
-    $st->execute([maintenant(), $paye ? 1 : 0, maintenant(), $id]);
+    $st = db()->prepare("UPDATE commandes SET statut = 'collected', retire_le = ?, paye = 1, paiement = CASE WHEN paye = 1 THEN paiement ELSE ? END, modifie_le = ? WHERE id = ? AND statut IN ('pending', 'confirmed')");
+    $st->execute([maintenant(), $methode, maintenant(), $id]);
     if ($st->rowCount() !== 1) {
         erreur('Cette commande vient d’être retirée par quelqu’un d’autre.', 409);
     }
-    journaliser('équipe', 'Retrait', $id, $paye ? 'payé' : 'non payé');
+    journaliser('équipe', 'Retrait', $id, $c['paye'] ? 'déjà payée' : 'encaissée au retrait (' . P_PAIEMENTS[$methode] . ')');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), true)]);
 }
 
 function annuler_retrait(int $id): never
 {
-    $c = commande_equipe($id);
+    commande_equipe($id);
     $st = db()->prepare("UPDATE commandes SET statut = 'confirmed', retire_le = NULL, modifie_le = ? WHERE id = ? AND statut = 'collected'");
     $st->execute([maintenant(), $id]);
     if ($st->rowCount() !== 1) {
@@ -339,11 +389,18 @@ function annuler_retrait(int $id): never
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), true)]);
 }
 
-function payer(int $id, bool $paye): never
+/** Erreur d'encaissement : la commande repasse « à payer ». */
+function annuler_paiement(int $id): never
 {
-    commande_equipe($id);
-    db()->prepare('UPDATE commandes SET paye = ?, modifie_le = ? WHERE id = ?')->execute([$paye ? 1 : 0, maintenant(), $id]);
-    journaliser('équipe', $paye ? 'Marquée payée' : 'Marquée non payée', $id);
+    $c = commande_equipe($id);
+    if ($c['statut'] === 'collected') {
+        erreur('Annule d’abord le retrait.', 409);
+    }
+    if (!$c['paye']) {
+        erreur('Cette commande n’est pas payée.', 409);
+    }
+    db()->prepare("UPDATE commandes SET paye = 0, paiement = '', statut = CASE WHEN statut = 'confirmed' THEN 'pending' ELSE statut END, modifie_le = ? WHERE id = ?")->execute([maintenant(), $id]);
+    journaliser('équipe', 'Paiement annulé', $id);
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), true)]);
 }
 
@@ -390,7 +447,7 @@ function retablir(int $id): never
     $pdo->exec('BEGIN IMMEDIATE');
     // Les limites du jour s'appliquent de nouveau
     lignes_depuis(array_map(fn($l) => ['id' => $l['id'], 'qty' => $l['qty']], lignes_de($id)), $c['jour'], $id, true);
-    $pdo->prepare("UPDATE commandes SET statut = 'confirmed', annule_le = NULL, modifie_le = ? WHERE id = ?")->execute([maintenant(), $id]);
+    $pdo->prepare("UPDATE commandes SET statut = CASE WHEN paye = 1 THEN 'confirmed' ELSE 'pending' END, annule_le = NULL, modifie_le = ? WHERE id = ?")->execute([maintenant(), $id]);
     journaliser('équipe', 'Commande rétablie', $id);
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), true)]);
@@ -460,7 +517,7 @@ function chiffres(string $from, string $to): never
     if (!date_valide($from) || !date_valide($to) || $from > $to) {
         erreur('Période invalide.');
     }
-    $st = db()->prepare("SELECT jour, statut, paye, total, cout FROM commandes WHERE jour BETWEEN ? AND ? AND statut != 'cancelled'");
+    $st = db()->prepare("SELECT jour, statut, paye, total, cout FROM commandes WHERE jour BETWEEN ? AND ? AND statut IN ('confirmed', 'collected')");
     $st->execute([$from, $to]);
     $jours = [];
     foreach ($st->fetchAll() as $c) {
@@ -479,7 +536,7 @@ function chiffres(string $from, string $to): never
     }
     ksort($jours);
     $st = db()->prepare("SELECT l.produit_id id, l.nom name, l.emoji, SUM(l.quantite) qty, SUM(l.quantite * l.prix) total, SUM(l.quantite * l.cout) cost
-        FROM lignes l JOIN commandes c ON c.id = l.commande_id WHERE c.jour BETWEEN ? AND ? AND c.statut != 'cancelled' GROUP BY l.produit_id, l.nom ORDER BY qty DESC");
+        FROM lignes l JOIN commandes c ON c.id = l.commande_id WHERE c.jour BETWEEN ? AND ? AND c.statut IN ('confirmed', 'collected') GROUP BY l.produit_id, l.nom ORDER BY qty DESC");
     $st->execute([$from, $to]);
     $produits = array_map(fn($r) => ['id' => (int) $r['id'], 'name' => $r['name'], 'emoji' => $r['emoji'], 'qty' => (int) $r['qty'], 'total' => (int) $r['total'], 'cost' => (int) $r['cost']], $st->fetchAll());
     repondre(['ok' => true, 'days' => array_values($jours), 'products' => $produits]);
@@ -496,12 +553,12 @@ function exporter(string $from, string $to): never
     header('Content-Disposition: attachment; filename="commandes-camping-' . $from . '-au-' . $to . '.csv"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
-    $statuts = ['confirmed' => 'À retirer', 'collected' => 'Retirée', 'cancelled' => 'Annulée'];
-    fputcsv($out, ['Jour', 'Code', 'Prénom', 'Nom', 'Emplacement', 'Téléphone', 'Détail', 'Total (€)', 'Coût d’achat (€)', 'Statut', 'Payée', 'Créée le', 'Retirée le', 'Remarque'], ';', '"', '');
+    $statuts = ['pending' => 'À payer', 'confirmed' => 'Payée, à remettre', 'collected' => 'Retirée', 'cancelled' => 'Annulée'];
+    fputcsv($out, ['Jour', 'Code', 'Prénom', 'Nom', 'Emplacement', 'Téléphone', 'Détail', 'Total (€)', 'Coût d’achat (€)', 'Statut', 'Paiement', 'Créée le', 'Retirée le', 'Remarque'], ';', '"', '');
     foreach ($st->fetchAll() as $c) {
         fputcsv($out, [$c['jour'], $c['code'], $c['prenom'], $c['nom'], $c['emplacement'], $c['telephone'], resume_lignes(lignes_de((int) $c['id'])),
             number_format($c['total'] / 100, 2, ',', ''), number_format($c['cout'] / 100, 2, ',', ''), $statuts[$c['statut']] ?? $c['statut'],
-            $c['paye'] ? 'oui' : 'non', $c['cree_le'], $c['retire_le'] ?? '', $c['remarque']], ';', '"', '');
+            $c['paye'] ? (P_PAIEMENTS[$c['paiement']] ?? 'oui') : 'non', $c['cree_le'], $c['retire_le'] ?? '', $c['remarque']], ';', '"', '');
     }
     exit;
 }
@@ -541,18 +598,21 @@ function creer_exemples(): never
             }
             $r = mt_rand(1, 100);
             if ($jour < $aujourdhui) {
-                [$statut, $paye] = $r <= 4 ? ['cancelled', 0] : ($r <= 8 ? ['confirmed', 0] : ['collected', 1]);
+                [$statut, $paye] = $r <= 6 ? ['cancelled', 0] : ($r <= 9 ? ['confirmed', 1] : ['collected', 1]);
             } elseif ($jour === $aujourdhui) {
-                [$statut, $paye] = $r <= 50 ? ['collected', 1] : ['confirmed', 0];
+                [$statut, $paye] = $r <= 55 ? ['collected', 1] : ['confirmed', 1];
+            } elseif ($jour === date('Y-m-d', strtotime('+1 day'))) {
+                [$statut, $paye] = $r <= 70 ? ['confirmed', 1] : ['pending', 0];
             } else {
-                [$statut, $paye] = ['confirmed', 0];
+                [$statut, $paye] = $r <= 40 ? ['confirmed', 1] : ['pending', 0];
             }
+            $methode = $paye ? ($r % 3 === 0 ? 'carte' : 'especes') : '';
             $cree = date('Y-m-d H:i:s', strtotime($jour . ' -1 day ' . mt_rand(9, 19) . ':' . sprintf('%02d', mt_rand(0, 59))));
             $retire = $statut === 'collected' ? $jour . ' ' . sprintf('%02d:%02d:00', mt_rand(8, 11), mt_rand(0, 59)) : null;
             $tel = '+' . ['49 17', '31 6', '33 6'][mt_rand(0, 2)] . mt_rand(1000000, 9999999);
-            $pdo->prepare("INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, total, cout, origine, cree_le, modifie_le, retire_le, annule_le)
-                VALUES (?, ?, NULL, ?, ?, ?, ?, '', ?, ?, ?, ?, 0, 0, 'exemple', ?, ?, ?, ?)")
-                ->execute([jeton(), nouveau_code(), $prenoms[mt_rand(0, 19)], $noms[mt_rand(0, 19)], (string) mt_rand(1, 240), $tel, $langues[mt_rand(0, 6)], $jour, $statut, $paye, $cree, $cree, $retire, $statut === 'cancelled' ? $cree : null]);
+            $pdo->prepare("INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, paiement, total, cout, origine, cree_le, modifie_le, retire_le, annule_le)
+                VALUES (?, ?, NULL, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, 0, 0, 'exemple', ?, ?, ?, ?)")
+                ->execute([jeton(), nouveau_code(), $prenoms[mt_rand(0, 19)], $noms[mt_rand(0, 19)], (string) mt_rand(1, 240), $tel, $langues[mt_rand(0, 6)], $jour, $statut, $paye, $methode, $cree, $cree, $retire, $statut === 'cancelled' ? $cree : null]);
             $id = (int) $pdo->lastInsertId();
             [$total, $cout] = enregistrer_lignes($id, $lignes);
             $pdo->prepare('UPDATE commandes SET total = ?, cout = ? WHERE id = ?')->execute([$total, $cout, $id]);

@@ -3,7 +3,8 @@
 
 const $ = id => document.getElementById(id);
 let VIEW = 'day', DAY = todayStr(), PRODUCTS = [], SETTINGS = null, OF = { from: '', to: '', status: '', q: '' }, busy = false;
-const ST = { confirmed: ['À retirer', 'p-ok'], collected: ['Retirée', 'p-blue'], cancelled: ['Annulée', 'p-red'] };
+const PAY = { especes: 'espèces', carte: 'carte', en_ligne: 'carte en ligne' };
+const ST = { pending: ['À payer', 'p-warn'], confirmed: ['Payée · à remettre', 'p-ok'], collected: ['Retirée', 'p-blue'], cancelled: ['Annulée', 'p-red'] };
 const WEEK = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
 function todayStr() { return new Date().toLocaleDateString('sv-SE'); }
@@ -74,7 +75,7 @@ async function renderDay() {
   let j;
   try { j = await api('jour', { date: DAY }); } catch (e) { $('view').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
   const isToday = DAY === todayStr(), s = j.summary;
-  const waiting = j.orders.filter(o => o.status === 'confirmed'), others = j.orders.filter(o => o.status !== 'confirmed');
+  const toPay = j.orders.filter(o => o.status === 'pending'), waiting = j.orders.filter(o => o.status === 'confirmed'), others = j.orders.filter(o => ['collected', 'cancelled'].includes(o.status));
   $('view').innerHTML = `
     <div class="top" style="flex-wrap:wrap">
       <div><h1>${isToday ? 'Aujourd’hui' : cap(dfr(DAY))}</h1><div class="sub">${cap(dfr(DAY, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))}${j.open ? '' : ' · <span class="pill p-gray">fermé</span>'} · commandes clients ${j.orderable ? 'ouvertes jusqu’au ' + dfr(j.limit.slice(0, 10), { day: 'numeric', month: 'short' }) + ' à ' + j.limit.slice(11) : 'closes'}</div></div>
@@ -85,43 +86,50 @@ async function renderDay() {
       </div>
     </div>
     <div class="group-title">À préparer · ${dfr(DAY, { day: 'numeric', month: 'long' })}</div>
-    <div class="prep">${j.prep.length ? j.prep.map(p => `<div class="c"><div style="font-size:26px">${esc(p.emoji)}</div><div class="q">${p.total}</div><div>${esc(p.name)}</div><div class="r">${p.remaining} encore à remettre</div></div>`).join('') : '<div class="c"><div class="mute">Aucune commande pour ce jour.</div></div>'}</div>
+    <div class="prep">${j.prep.length ? j.prep.map(p => `<div class="c"><div style="font-size:26px">${esc(p.emoji)}</div><div class="q">${p.total}</div><div>${esc(p.name)}</div><div class="r">${p.remaining} encore à remettre${p.pending ? ` · <b style="color:var(--orange)">+${p.pending} en attente de paiement</b>` : ''}</div></div>`).join('') : '<div class="c"><div class="mute">Aucune commande pour ce jour.</div></div>'}</div>
     <div class="stats" style="margin-top:10px">
-      <div class="stat"><div class="k">Commandes</div><div class="v">${s.orders}</div></div>
-      <div class="stat"><div class="k">À retirer</div><div class="v">${s.waiting}</div></div>
+      <div class="stat"><div class="k">Commandes validées</div><div class="v">${s.orders}</div></div>
+      <div class="stat"><div class="k">À payer</div><div class="v" style="color:var(--orange)">${s.pending}</div><div class="small mute">${eur(s.pendingTotal)}</div></div>
+      <div class="stat"><div class="k">Payées · à remettre</div><div class="v">${s.waiting}</div></div>
       <div class="stat"><div class="k">Retirées</div><div class="v">${s.collected}</div></div>
       <div class="stat"><div class="k">Chiffre du jour</div><div class="v">${eur(s.total)}</div></div>
       <div class="stat"><div class="k">Encaissé</div><div class="v">${eur(s.paid)}</div></div>
     </div>
-    <div class="group-title no-print" style="display:flex;gap:10px;align-items:center;justify-content:space-between"><span>À retirer (${waiting.length})</span><input id="dSearch" type="search" placeholder="Nom, emplacement, téléphone ou code" style="max-width:280px;min-height:36px;padding:6px 10px;text-transform:none"></div>
-    <div class="print-only"><h2>Commandes à retirer</h2></div>
-    <div class="group orders" id="dWaiting">${waiting.length ? waiting.map(orderLi).join('') : '<div class="empty">Personne n’attend de commande.</div>'}</div>
+    <div class="group-title no-print" style="display:flex;gap:10px;align-items:center;justify-content:space-between"><span>Payées · à remettre (${waiting.length})</span><input id="dSearch" type="search" placeholder="Nom, emplacement, téléphone ou code" style="max-width:280px;min-height:36px;padding:6px 10px;text-transform:none"></div>
+    <div class="print-only"><h2>Commandes payées à remettre</h2></div>
+    <div class="group orders dList">${waiting.length ? waiting.map(orderLi).join('') : '<div class="empty">Aucune commande payée en attente de retrait.</div>'}</div>
+    <div class="group-title">À payer (${toPay.length}) · non validées, pas encore à préparer</div>
+    <div class="group orders dList">${toPay.length ? toPay.map(orderLi).join('') : '<div class="empty">Aucune commande en attente de paiement.</div>'}</div>
     ${others.length ? `<div class="group-title">Retirées et annulées (${others.length})</div><div class="group orders">${others.map(orderLi).join('')}</div>` : ''}`;
   document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { DAY = +b.dataset.d === 0 ? todayStr() : addDays(DAY, +b.dataset.d); renderDay(); });
   $('dPick').onchange = e => { if (e.target.value) { DAY = e.target.value; renderDay(); } };
   $('dNew').onclick = () => orderSheet(null, DAY);
-  $('dSearch').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('#dWaiting .li').forEach(li => li.hidden = q && !li.dataset.s.includes(q)); };
+  $('dSearch').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('.dList .li').forEach(li => li.hidden = q && !li.dataset.s.includes(q)); };
   wireOrders(j.orders, renderDay);
   if (isToday) dayTimer = setInterval(() => { if (VIEW === 'day' && $('sheet').hidden && !document.activeElement?.matches('input')) renderDay(); }, 30000);
 }
 function orderLi(o) {
   const [lbl, cls] = ST[o.status];
   return `<div class="li ${o.status !== 'confirmed' ? 'done' : ''}" data-s="${esc((o.name + ' ' + o.pitch + ' ' + o.code + ' ' + o.phone + ' ' + o.phone.replace(/\D/g, '')).toLowerCase())}">
-    <span class="main"><div class="t">${esc(o.name)} · empl. ${esc(o.pitch)} <span class="pill ${cls}">${lbl}</span> ${o.paid ? '<span class="pill p-blue">payée</span>' : ''} ${o.origin === 'equipe' ? '<span class="pill p-gray">équipe</span>' : ''}${o.example ? '<span class="pill p-warn">exemple</span>' : ''}</div>
+    <span class="main"><div class="t">${esc(o.name)} · empl. ${esc(o.pitch)} <span class="pill ${cls}">${lbl}</span> ${o.paid && o.paymentMethod ? `<span class="pill p-blue">${PAY[o.paymentMethod] || 'payée'}</span>` : ''}${o.status === 'confirmed' && !o.paid ? '<span class="pill p-warn">à payer au retrait</span>' : ''} ${o.origin === 'equipe' ? '<span class="pill p-gray">équipe</span>' : ''}${o.example ? '<span class="pill p-warn">exemple</span>' : ''}</div>
     <div class="d">${o.items.map(i => `${i.qty} × ${esc(i.name)}`).join(' · ')} — <b>${eur(o.total)}</b> · ${esc(o.code)}${o.phone ? ' · ' + esc(o.phone) : ''}${o.note ? ' · « ' + esc(o.note) + ' »' : ''}</div></span>
     <span class="acts no-print">
-      ${o.status === 'confirmed' ? `<button class="btn-ok btn-sm" data-collect="${o.id}">Retirée</button>` : ''}
+      ${o.status === 'pending' || (o.status === 'confirmed' && !o.paid) ? `<button class="btn-ok btn-sm" data-pay="${o.id}" data-m="especes">Espèces</button><button class="btn-ok btn-sm" data-pay="${o.id}" data-m="carte">Carte</button>` : ''}
+      ${o.status === 'confirmed' && o.paid ? `<button class="btn-ok btn-sm" data-collect="${o.id}">Remise</button>` : ''}
       <button class="btn-plain btn-sm" data-open="${o.id}">…</button>
     </span></div>`;
 }
 function wireOrders(list, refresh) {
-  document.querySelectorAll('[data-collect]').forEach(b => b.onclick = () => collect(+b.dataset.collect, true, refresh));
+  document.querySelectorAll('[data-collect]').forEach(b => b.onclick = () => collect(+b.dataset.collect, '', refresh));
+  document.querySelectorAll('[data-pay]').forEach(b => b.onclick = async () => {
+    try { await api('encaisser', { id: +b.dataset.pay, method: b.dataset.m }); toast('Paiement encaissé (' + PAY[b.dataset.m] + ') : commande validée.'); refresh(); } catch (e) { toast(e.message, true); }
+  });
   document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => orderMenu(list.find(o => o.id === +b.dataset.open), refresh));
 }
-async function collect(id, paid, refresh, force = false) {
-  try { await api('retirer', { id, paid, force }); toast('Retrait enregistré.'); refresh(); }
+async function collect(id, method, refresh, force = false) {
+  try { await api('retirer', { id, method, force }); toast('Remise enregistrée.'); refresh(); }
   catch (e) {
-    if (e.status === 409 && /autre jour|était prévue/.test(e.message) && confirm(e.message + '\n\nValider quand même ?')) return collect(id, paid, refresh, true);
+    if (e.status === 409 && /autre jour|était prévue/.test(e.message) && confirm(e.message + '\n\nRemettre quand même ?')) return collect(id, method, refresh, true);
     toast(e.message, true);
   }
 }
@@ -140,16 +148,18 @@ function orderMenu(o, refresh) {
       <div class="row"><span class="mute">Retrait</span><span class="val">${cap(dfr(o.date))}</span></div>
       <div class="row"><span class="mute">Détail</span><span class="val">${o.items.map(i => `${i.qty} × ${esc(i.name)}`).join(', ')}</span></div>
       <div class="row"><span class="mute">Total</span><span class="val"><b>${eur(o.total)}</b> <span class="small mute">(achat ${eur(o.cost)}, marge ${eur(o.total - o.cost)})</span></span></div>
-      <div class="row"><span class="mute">Statut</span><span class="val"><span class="pill ${ST[o.status][1]}">${ST[o.status][0]}</span> ${o.paid ? '<span class="pill p-blue">payée</span>' : '<span class="pill p-warn">non payée</span>'}</span></div>
+      <div class="row"><span class="mute">Statut</span><span class="val"><span class="pill ${ST[o.status][1]}">${ST[o.status][0]}</span> ${o.paid ? `<span class="pill p-blue">payée · ${PAY[o.paymentMethod] || ''}</span>` : '<span class="pill p-warn">non payée</span>'}</span></div>
       ${o.phone ? `<div class="row"><span class="mute">Téléphone</span><span class="val"><a class="link" href="tel:${esc(o.phone)}">${esc(o.phone)}</a></span></div>` : ''}
       ${o.note ? `<div class="row"><span class="mute">Remarque</span><span class="val">${esc(o.note)}</span></div>` : ''}
       <div class="row"><span class="mute">Passée le</span><span class="val small">${new Date(o.createdAt.replace(' ', 'T')).toLocaleString('fr-FR')}${o.origin === 'equipe' ? ' · par l’équipe' : ''}</span></div>
       ${o.collectedAt ? `<div class="row"><span class="mute">Retirée le</span><span class="val small">${new Date(o.collectedAt.replace(' ', 'T')).toLocaleString('fr-FR')}</span></div>` : ''}
     </div>
     <div style="display:grid;gap:8px;margin-top:14px">
-      ${o.status === 'confirmed' ? `<button class="btn-ok" data-a="collect">Retirée et payée</button><button class="btn-soft" data-a="collect-unpaid">Retirée, pas encore payée</button>` : ''}
+      ${!o.paid && o.status !== 'cancelled' && o.status !== 'collected' ? `<button class="btn-ok" data-a="pay-especes">Espèces encaissées · valider</button><button class="btn-ok" data-a="pay-carte">Carte encaissée · valider</button>` : ''}
+      ${o.status === 'confirmed' && o.paid ? `<button class="btn-ok" data-a="collect">Remise au client</button>` : ''}
       ${o.status === 'collected' ? `<button class="btn-plain" data-a="undo">Annuler le retrait</button>` : ''}
-      ${o.status !== 'cancelled' ? `<button class="btn-plain" data-a="paid">${o.paid ? 'Marquer non payée' : 'Marquer payée'}</button><button class="btn-plain" data-a="edit">Modifier la commande</button><button class="btn-danger" data-a="cancel">Annuler la commande</button>` : `<button class="btn-plain" data-a="restore">Rétablir la commande</button>`}
+      ${o.paid && o.status === 'confirmed' ? `<button class="btn-plain" data-a="unpay">Annuler le paiement (erreur d’encaissement)</button>` : ''}
+      ${o.status !== 'cancelled' ? `<button class="btn-plain" data-a="edit">Modifier la commande</button><button class="btn-danger" data-a="cancel">Annuler la commande${o.paid ? ' (pense à rembourser)' : ''}</button>` : `<button class="btn-plain" data-a="restore">Rétablir la commande</button>`}
       <a class="btn-plain" style="display:grid;place-items:center;text-decoration:none;color:inherit" href="${esc(url)}" target="_blank" rel="noopener">Voir le bon du client</a>
       <button class="btn-plain" data-a="copy">Copier le lien du bon</button>
       ${o.phone ? `<a class="btn-plain" style="display:grid;place-items:center;text-decoration:none;color:inherit" href="${esc(smsLink(o, url))}">Renvoyer le bon par SMS</a>` : ''}
@@ -157,9 +167,10 @@ function orderMenu(o, refresh) {
   const act = async (action, body, msg) => { try { await api(action, { id: o.id, ...body }); closeSheet(); toast(msg); refresh(); } catch (e) { toast(e.message, true); } };
   $('sheetBody').querySelectorAll('[data-a]').forEach(b => b.onclick = async () => {
     const a = b.dataset.a;
-    if (a === 'collect' || a === 'collect-unpaid') { closeSheet(); collect(o.id, a === 'collect', refresh); }
+    if (a === 'collect') { closeSheet(); collect(o.id, '', refresh); }
+    if (a === 'pay-especes' || a === 'pay-carte') act('encaisser', { method: a.slice(4) }, 'Paiement encaissé : commande validée.');
+    if (a === 'unpay') act('annuler_paiement', {}, 'Paiement annulé : la commande repasse « à payer ».');
     if (a === 'undo') act('annuler_retrait', {}, 'Retrait annulé.');
-    if (a === 'paid') act('payer', { paid: !o.paid }, o.paid ? 'Marquée non payée.' : 'Marquée payée.');
     if (a === 'restore') act('retablir', {}, 'Commande rétablie.');
     if (a === 'edit') orderSheet(o, o.date, refresh);
     if (a === 'copy') { try { await navigator.clipboard.writeText(url); toast('Lien copié.'); } catch { prompt('Lien du bon :', url); } }
@@ -182,6 +193,7 @@ function orderSheet(o, date, refresh = render) {
     <div class="group">${prods.map(p => `<div class="li"><span class="emoji">${esc(p.emoji)}</span><span class="main"><div class="t">${esc(p.name)}</div><div class="d">${eur(p.price)}</div></span><input type="number" min="0" max="${SETTINGS?.max_per_product || 50}" inputmode="numeric" data-q="${p.id}" value="${cart[p.id] || ''}" placeholder="0" style="width:80px;text-align:center"></div>`).join('')}</div>
     <div class="fields3" style="margin-top:12px"><label class="field"><span>Prénom</span><input id="oFirst" maxlength="40" value="${esc(o?.firstName || '')}"></label><label class="field"><span>Nom</span><input id="oName" maxlength="60" value="${esc(o?.lastName || '')}"></label><label class="field"><span>Emplacement</span><input id="oPitch" maxlength="30" value="${esc(o?.pitch || '')}"></label></div>
     <div class="fields2"><label class="field"><span>Téléphone</span><input id="oPhone" type="tel" maxlength="30" value="${esc(o?.phone || '')}"></label><label class="field"><span>Remarque</span><input id="oNote" maxlength="200" value="${esc(o?.note || '')}"></label></div>
+    ${o ? '' : `<label class="field"><span>Paiement</span><select id="oPay"><option value="especes">Espèces encaissées</option><option value="carte">Carte encaissée</option><option value="later">À payer au retrait (validée par l’équipe)</option><option value="">En attente de paiement (comme un campeur)</option></select></label>`}
     <div class="total"><span>Total</span><b id="oTotal">${eur(0)}</b></div>
     <button class="btn-main" id="oSave">${o ? 'Enregistrer' : 'Créer la commande'}</button>`);
   const items = () => [...document.querySelectorAll('[data-q]')].map(i => ({ id: +i.dataset.q, qty: +(i.value || 0) })).filter(i => i.qty > 0);
@@ -192,7 +204,7 @@ function orderSheet(o, date, refresh = render) {
     if (busy) return; busy = true;
     try {
       const body = { date: $('oDate').value, firstName: $('oFirst').value, lastName: $('oName').value, pitch: $('oPitch').value, phone: $('oPhone').value, note: $('oNote').value, items: items() };
-      if (o) await api('modifier_equipe', { id: o.id, ...body }); else await api('creer', { key, ...body });
+      if (o) await api('modifier_equipe', { id: o.id, ...body }); else await api('creer', { key, method: $('oPay').value, ...body });
       closeSheet(); toast(o ? 'Commande modifiée.' : 'Commande créée.'); if (!o) DAY = body.date; refresh();
     } catch (e) { toast(e.message, true); } finally { busy = false; }
   };
@@ -202,13 +214,13 @@ function orderSheet(o, date, refresh = render) {
 async function renderOrders() {
   if (!OF.from) { OF.from = addDays(todayStr(), -7); OF.to = addDays(todayStr(), 14); }
   let j; try { j = await api('commandes', OF.q.trim() ? { ...OF, from: '', to: '' } : OF); } catch (e) { $('view').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
-  const total = j.orders.filter(o => o.status !== 'cancelled').reduce((a, o) => a + o.total, 0);
+  const total = j.orders.filter(o => ['confirmed', 'collected'].includes(o.status)).reduce((a, o) => a + o.total, 0);
   $('view').innerHTML = `
-    <div class="top"><div><h1>Commandes</h1><div class="sub">${j.orders.length} commande(s) · ${eur(total)} hors annulées</div></div>
+    <div class="top"><div><h1>Commandes</h1><div class="sub">${j.orders.length} commande(s) · ${eur(total)} validées (payées)</div></div>
       <div class="row-btns"><button class="btn-soft btn-sm" id="oNew">+ Commande</button><a class="btn-plain btn-sm" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit" href="../api.php?action=export&from=${OF.from}&to=${OF.to}">Exporter (Excel / CSV)</a></div></div>
     <div class="group pad" style="margin-top:14px"><div class="filters">
       <input type="date" id="fFrom" value="${OF.from}"><input type="date" id="fTo" value="${OF.to}">
-      <select id="fSt"><option value="">Tous statuts</option><option value="confirmed">À retirer</option><option value="collected">Retirées</option><option value="cancelled">Annulées</option></select>
+      <select id="fSt"><option value="">Tous statuts</option><option value="pending">À payer</option><option value="confirmed">Payées, à remettre</option><option value="collected">Retirées</option><option value="cancelled">Annulées</option></select>
       <input id="fQ" type="search" placeholder="Nom, emplacement, téléphone, code (toutes dates)" value="${esc(OF.q)}">
     </div></div>
     <div class="group orders" style="margin-top:12px">${j.orders.length ? j.orders.map(o => orderLi(o).replace('<span class="main">', `<span class="main"><div class="small mute">${cap(dfr(o.date, { weekday: 'short', day: 'numeric', month: 'short' }))}</div>`)).join('') : '<div class="empty">Aucune commande.</div>'}</div>`;
@@ -265,7 +277,7 @@ async function renderStats() {
   const sum = k => j.days.reduce((a, d) => a + d[k], 0), tot = sum('total'), cost = sum('cost');
   const maxDay = Math.max(1, ...j.days.map(d => d.total));
   $('view').innerHTML = `
-    <div class="top"><div><h1>Chiffres</h1><div class="sub">Hors commandes annulées</div></div>
+    <div class="top"><div><h1>Chiffres</h1><div class="sub">Commandes validées (payées) uniquement</div></div>
       <div class="row-btns"><input type="date" id="sFrom" value="${SF.from}" style="width:auto;min-height:36px"><input type="date" id="sTo" value="${SF.to}" style="width:auto;min-height:36px"></div></div>
     <div class="stats" style="margin-top:14px">
       <div class="stat"><div class="k">Commandes</div><div class="v">${sum('orders')}</div></div>
