@@ -34,13 +34,13 @@ ol li{margin-bottom:6px}
   <a class="app" href="hygiene/"><img src="/hygiene/icone-192.png" alt=""><span><b>Registre hygiène</b>Températures, ménage, réceptions, étiquettes DLC, huiles, refroidissement, documents.</span></a>
   <a class="app" href="reserver/"><img src="/equipe/icone-192.png?v=2" alt=""><span><b>Réservation · page client</b>Ce que voit le client sur le site : jours, créneaux, places restantes, demande en ligne (FR / DE).</span></a>
   <a class="app" href="equipe/"><img src="/equipe/icone-192.png?v=2" alt=""><span><b>Réservations · appli équipe</b>Carnet du jour, demandes à valider, couverts, arrivées, soirées, réglages. Connecté d'office.</span></a>
-  <a class="app" href="club/"><img src="/club/icone-192.png" alt=""><span><b>Le Club · carte client</b>Carte de fidélité sur le téléphone (QR des tables, sans appli), visites, cadeau, offres reçues, désinscription (FR / DE).</span></a>
-  <a class="app" href="equipe/#club"><img src="/club/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Le Club · équipe</b>Scanner une carte, compter la visite, offrir le cadeau, offres par e-mail avec aperçu et validation (simulées).</span></a>
+  <a class="app" href="club/"><img src="/club/icone-192.png?v=2" alt=""><span><b>Le Club · carte client</b>Carte de fidélité sur le téléphone (QR des tables, sans appli), visites, cadeau, offres reçues, désinscription (FR / DE).</span></a>
+  <a class="app" href="equipe/#club"><img src="/club/icone-192.png?v=2" alt=""><span><b>Le Club · équipe</b>Scanner une carte, compter la visite, offrir le cadeau, offres par e-mail avec aperçu et validation (simulées).</span></a>
   <a class="app" href="cout-matiere/"><span class="ico-cm" aria-hidden="true">€</span><span><b>Coût matière</b>Carte, fiches techniques, mercuriale, food cost et coefficient, boissons, allergènes, écran service.</span></a>
   <a class="app" href="pain/"><img src="/pain/icone-192.png" alt=""><span><b>Pain du camping · campeurs</b>Précommande de pain et viennoiseries pour le lendemain (FR / DE / EN / NL), bon avec QR code, paiement par carte (simulé).</span></a>
   <a class="app" href="pain/equipe/"><img src="/pain/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Pain du camping · équipe</b>Commandes du jour, encaissement, remise, chiffres, feuille de vente et bon boulanger à imprimer.</span></a>
   <a class="app" href="caisse/"><img src="/demo/caisse/icone-192.png" alt=""><span><b>ComptaCaisse</b>Caisse espèces du 76 et du camping : entrées, sorties, dépôts en banque, comptage, monnaie, transferts, clôture du mois.</span></a>
-  <a class="app" href="scan/"><img src="/scan/icon-192.png" alt=""><span><b>Scan des documents</b>Photographier une facture, la ranger d’un clic (factures, livraisons, banque…). Le vrai outil classe tout dans Google Drive.</span></a>
+  <a class="app" href="scan/"><img src="/scan/icon-192.png?v=2" alt=""><span><b>Scan des documents</b>Photographier une facture, la ranger d’un clic (factures, livraisons, banque…). Le vrai outil classe tout dans Google Drive.</span></a>
 </div>
 
 <div class="card"><h3>Espace employé (lien perso, sans mot de passe)</h3><p class="muted small" style="margin-top:0">Chaque employé reçoit un lien : ses horaires, ses jours « pas dispo », ses demandes de congé.</p>

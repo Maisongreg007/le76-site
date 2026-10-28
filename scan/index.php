@@ -29,8 +29,8 @@ $cats = CATEGORIES;
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <?php if (!$A): ?><link rel="manifest" href="manifest.webmanifest"><?php endif; ?>
-<link rel="apple-touch-icon" href="<?= $A ?>apple-touch-icon.png?v=1">
-<link rel="icon" type="image/png" href="<?= $A ?>icon-192.png?v=1">
+<link rel="apple-touch-icon" href="<?= $A ?>apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" href="<?= $A ?>icon-192.png?v=2">
 <title>Scan 76</title>
 <style>
   :root {
@@ -115,7 +115,7 @@ $cats = CATEGORIES;
 <main>
 <?php if (!$logged): ?>
   <form class="login" method="post" autocomplete="on">
-    <img class="app-icon" src="<?= $A ?>apple-touch-icon.png?v=1" alt="">
+    <img class="app-icon" src="<?= $A ?>apple-touch-icon.png?v=2" alt="">
     <h1>Documents du 76</h1>
     <div class="sub">Entre le mot de passe commun</div>
     <div class="group">
