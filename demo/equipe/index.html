@@ -59,7 +59,7 @@
   @media (max-width: 420px) { main { padding: 16px 14px 28px; } .top { padding-left: 16px; padding-right: 16px; } }
 
   /* Barre d'onglets (translucide) */
-  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255,251,245,.94); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: .5px solid var(--line); padding-bottom: var(--bot); }
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(5, 1fr); background: rgba(255,251,245,.94); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: .5px solid var(--line); padding-bottom: var(--bot); }
   nav.tabs button { border: 0; background: transparent; padding: 8px 0 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .68rem; font-weight: 500; color: var(--muted); position: relative; letter-spacing: 0; }
   nav.tabs button svg { width: 27px; height: 27px; }
   nav.tabs button.on { color: var(--rust); }
@@ -252,16 +252,19 @@
   @keyframes pop { from { transform: scale(.88); opacity: 0; } }
 </style>
 </head>
-<body><div style="position:sticky;top:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:#5a4fcf;color:#fff;font:600 13px/1.3 -apple-system,BlinkMacSystemFont,sans-serif"><span>Démo · carnet de réservations de l'équipe · données fictives</span><span style="display:flex;gap:6px;flex-wrap:wrap"><a href="../" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Accueil démo</a><a href="../reserver/" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Page client</a><form method="post" action="/demo/api/reinitialiser.php" style="margin:0"><button style="color:#fff;background:rgba(255,255,255,.18);border:0;border-radius:99px;padding:4px 11px;font:inherit;cursor:pointer">Réinitialiser</button></form></span></div>
+<body><div style="position:sticky;top:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:#5a4fcf;color:#fff;font:600 13px/1.3 -apple-system,BlinkMacSystemFont,sans-serif"><span>Démo · carnet de réservations de l'équipe · données fictives</span><span style="display:flex;gap:6px;flex-wrap:wrap"><a href="../" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Accueil démo</a><a href="../reserver/" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Page client</a><a href="../club/" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Carte du Club</a><form method="post" action="/demo/api/reinitialiser.php" style="margin:0"><button style="color:#fff;background:rgba(255,255,255,.18);border:0;border-radius:99px;padding:4px 11px;font:inherit;cursor:pointer">Réinitialiser</button></form></span></div>
 <div id="root"><div class="loading">Chargement…</div></div>
 
 <svg width="0" height="0" style="position:absolute">
   <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
   <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-club" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M6.5 15h4M15.5 9.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3z"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
 </svg>
 
+<script src="/club/qr.js"></script>
+<script src="/equipe/club.js"></script>
 <script>
 (() => {
 'use strict';
@@ -402,10 +405,11 @@ function coque() {
       <button data-vue="carnet"><svg><use href="#i-book"/></svg>Carnet</button>
       <button data-vue="demandes"><svg><use href="#i-bell"/></svg>Demandes<span class="badge" id="badge" hidden></span></button>
       <button data-vue="avenir"><svg><use href="#i-cal"/></svg>À venir</button>
+      <button data-vue="club"><svg><use href="#i-club"/></svg>Club</button>
       <button data-vue="plus"><svg><use href="#i-more"/></svg>Plus</button>
     </nav>`;
   root.querySelector('nav.tabs').onclick = e => { const b = e.target.closest('button'); if (b) aller(b.dataset.vue); };
-  document.getElementById('fab').onclick = () => formulaireResa(null, S.vue === 'carnet' ? S.date : today());
+  document.getElementById('fab').onclick = () => S.vue === 'club' ? window.LE76club.nouveau() : formulaireResa(null, S.vue === 'carnet' ? S.date : today());
 }
 function majBadge(n) {
   if (n !== undefined) {
@@ -424,7 +428,10 @@ function aller(vue, date) {
 function lireHash() {
   const h = location.hash.slice(1);
   if (h.startsWith('jour=')) { S.date = h.slice(5); afficher('carnet'); }
-  else afficher(['demandes', 'avenir', 'plus'].includes(h) ? h : 'carnet');
+  else if (h.startsWith('carte=')) { // QR d'une carte du Club scanné avec l'appareil photo
+    const c = decodeURIComponent(h.slice(6)); history.replaceState(null, '', '#club'); afficher('club'); window.LE76club.fiche({ carte: c });
+  }
+  else afficher(['demandes', 'avenir', 'club', 'plus'].includes(h) ? h : 'carnet');
 }
 window.addEventListener('hashchange', () => S.moi && lireHash());
 
@@ -432,7 +439,8 @@ function afficher(vue) {
   S.vue = vue;
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.vue === vue));
   document.getElementById('fab').hidden = vue === 'plus';
-  ({ carnet: vueCarnet, demandes: vueDemandes, avenir: vueAvenir, plus: vuePlus })[vue]();
+  document.getElementById('fab').setAttribute('aria-label', vue === 'club' ? 'Nouvelle carte du Club' : 'Nouvelle réservation');
+  ({ carnet: vueCarnet, demandes: vueDemandes, avenir: vueAvenir, club: () => window.LE76club.vue(), plus: vuePlus })[vue]();
   window.scrollTo(0, 0);
 }
 function enTete(titre, avecDate) {
@@ -1077,12 +1085,16 @@ function rafraichir(force) {
   if (S.vue === 'carnet') vueCarnet(true);
   else if (S.vue === 'demandes') vueDemandes(true);
   else if (S.vue === 'avenir' && !document.getElementById('q')?.value) vueAvenir(true);
+  else if (S.vue === 'club' && !document.getElementById('clQ')?.value) window.LE76club.vue(true);
   else api('demandes').then(d => d.ok && majBadge(d.demandes.length));
 }
 setInterval(() => document.visibilityState === 'visible' && rafraichir(), 45000);
 setInterval(verifierEvenements, 20000); // même si l'onglet est en arrière-plan sur l'ordinateur
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { rafraichir(); verifierEvenements(); } });
 void 0&&navigator.serviceWorker?.addEventListener('message', e => { if (e.data?.type === 'push') { verifierEvenements(); rafraichir(); } });
+
+// Outils partagés avec l'onglet Club (equipe/club.js)
+window.LE76 = { api, toast, sheet, sw, enTete, S, API };
 
 demarrer();
 })();

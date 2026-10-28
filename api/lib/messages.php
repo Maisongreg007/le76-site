@@ -8,7 +8,7 @@ declare(strict_types=1);
 /* E-mails                                                             */
 /* ------------------------------------------------------------------ */
 
-function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?string $repondre_a = null): bool
+function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?string $repondre_a = null, array $entetes_en_plus = []): bool
 {
     if (defined('DEMO')) {
         return true; // démo : aucun e-mail n'est réellement envoyé
@@ -30,6 +30,12 @@ function envoyer_mail(string $a, string $sujet, string $html, string $texte, ?st
     $rep = $repondre_a ?: ($r['alertes_email'][0] ?? null);
     if ($rep && filter_var($rep, FILTER_VALIDATE_EMAIL)) {
         $entetes[] = "Reply-To: $rep";
+    }
+    // Entêtes supplémentaires (ex. lien de désinscription en un clic des offres du Club)
+    foreach ($entetes_en_plus as $e) {
+        if (is_string($e) && !preg_match('/[\r\n]/', $e)) {
+            $entetes[] = $e;
+        }
     }
     $corps = "--$limite\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
         . chunk_split(base64_encode($texte))

@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le Club · Le 76 · Beinheim</title>
+<meta name="description" content="La carte de fidélité du 76, restaurant à Beinheim : vos visites comptent, sans application à installer.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#fbf5ec">
+<!-- Pas de manifeste : « Sur l'écran d'accueil » garde l'adresse de SA carte (?c=…), propre à chaque client -->
+<link rel="apple-touch-icon" href="/club/icone-180.png">
+<link rel="icon" href="/club/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Club du 76">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Jost:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fbf5ec; --paper: #fffbf5; --sand: #f3e7d6; --ink: #2b1d16; --brown: #4a2c1d;
+    --muted: #7a6a5c; --rust: #b7372a; --rust-dark: #8e2a20; --orange: #d9762b; --gold: #c98a3a; --gold-light: #e7b66a;
+    --line: #e8d9c3; --green: #3d7a4f; --green-bg: #e6f0e4;
+    --serif: "Playfair Display", Georgia, serif; --sans: "Jost", system-ui, sans-serif; --script: "Caveat", cursive;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 400 17px/1.55 var(--sans);
+    background-image: radial-gradient(ellipse at 10% 0%, rgba(217,118,43,.10), transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(183,55,42,.07), transparent 50%);
+    background-attachment: fixed; min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+  a { color: var(--rust); }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; height: 64px; padding-top: env(safe-area-inset-top); }
+  .brand { text-decoration: none; display: flex; align-items: baseline; gap: 2px; color: var(--ink); }
+  .brand b { font: 800 1.55rem/1 var(--serif); }
+  .brand span { font: 700 1.95rem/1 var(--script); color: var(--gold); }
+  .lang { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--brown); font: 600 .8rem/1 var(--sans); letter-spacing: .08em; text-decoration: none; }
+
+  .intro { padding: 10px 0 22px; text-align: center; }
+  .kicker { font: 600 .74rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 12px; }
+  .intro h1 { font-size: clamp(2.2rem, 9vw, 3rem); color: var(--brown); }
+  .intro h1 em { font-style: italic; font-weight: 500; color: var(--rust); }
+  .intro p { color: var(--muted); margin: 12px auto 0; max-width: 24em; }
+  .promesse { display: inline-block; font: 700 1.6rem/1.1 var(--script); color: var(--rust); margin-top: 14px; transform: rotate(-2deg); }
+
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 20px 50px rgba(74,44,29,.08); padding: 22px; margin-bottom: 22px; }
+  .fields { display: grid; gap: 14px; }
+  label.f { display: block; font-weight: 500; font-size: .92rem; color: var(--brown); }
+  label.f input { display: block; width: 100%; margin-top: 6px; padding: 14px; border: 1.5px solid var(--line); border-radius: 13px; background: #fff; font: inherit; color: var(--ink); }
+  label.f input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,138,58,.18); }
+  .check { display: flex; gap: 12px; align-items: flex-start; background: var(--sand); border-radius: 13px; padding: 13px 14px; font-size: .94rem; cursor: pointer; }
+  .check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--rust); }
+  .check small { display: block; color: var(--muted); font-size: .82rem; margin-top: 3px; }
+  .pot { position: absolute; left: -5000px; width: 1px; height: 1px; overflow: hidden; }
+  .btn { display: flex; width: 100%; align-items: center; justify-content: center; gap: 10px; background: var(--rust); color: #fff; padding: 16px 26px; border-radius: 999px; font-weight: 600; font-size: 1.05rem; border: 0; text-decoration: none; transition: transform .12s, background .15s; }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .5; }
+  .btn.ghost { background: transparent; color: var(--brown); border: 2px solid var(--line); }
+  .err { background: #fbe5e1; color: var(--rust-dark); border-radius: 12px; padding: 12px 14px; font-size: .95rem; }
+  .msg { background: var(--green-bg); color: var(--green); border-radius: 12px; padding: 12px 14px; font-size: .95rem; }
+  .small { font-size: .82rem; color: var(--muted); text-align: center; margin: 14px 0 0; }
+  .linkbtn { background: none; border: 0; padding: 0; color: var(--rust); text-decoration: underline; font-size: inherit; }
+
+  .etapes { display: grid; gap: 10px; margin: 0 0 24px; }
+  .etape { display: flex; gap: 14px; align-items: center; }
+  .etape i { font-style: normal; width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--paper); border: 1px solid var(--line); font-size: 1.15rem; }
+  .etape b { display: block; font-weight: 600; color: var(--brown); }
+  .etape span { color: var(--muted); font-size: .9rem; }
+
+  /* La carte */
+  .carte { position: relative; border-radius: 24px; padding: 22px 22px 20px; color: #f6e9d6; overflow: hidden;
+    background: radial-gradient(120% 90% at 100% 0%, #5a3626 0%, transparent 60%), linear-gradient(160deg, #3a261c 0%, #2b1d16 55%, #20150f 100%);
+    box-shadow: 0 24px 50px rgba(43,29,22,.32), inset 0 1px 0 rgba(255,255,255,.08); margin-bottom: 18px; }
+  .carte::after { content: "76"; position: absolute; right: -14px; bottom: -48px; font: 800 11rem/1 var(--serif); color: rgba(201,138,58,.07); pointer-events: none; }
+  .carte .haut { display: flex; justify-content: space-between; align-items: flex-start; }
+  .carte .logo { display: flex; align-items: baseline; gap: 2px; }
+  .carte .logo b { font: 800 1.5rem/1 var(--serif); color: #fff; }
+  .carte .logo span { font: 700 1.85rem/1 var(--script); color: var(--gold-light); }
+  .carte .club { font: 600 .68rem/1 var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--gold-light); border: 1px solid rgba(231,182,106,.45); border-radius: 999px; padding: 6px 10px; }
+  .carte h2 { font: 700 2rem/1.1 var(--serif); color: #fff; margin: 22px 0 4px; }
+  .carte .depuis { font-size: .85rem; color: #cbb69a; }
+  .tampons { display: grid; grid-template-columns: repeat(var(--n, 6), 1fr); gap: 8px; margin: 20px 0 10px; max-width: 100%; }
+  .tampon { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(231,182,106,.5); display: grid; place-items: center; font-size: .95rem; color: transparent; }
+  .tampon.plein { background: var(--gold-light); border: 0; color: var(--ink); font-weight: 700; box-shadow: 0 3px 10px rgba(0,0,0,.25); }
+  .tampon.cadeau { border-style: solid; border-color: var(--gold-light); color: var(--gold-light); font-size: 1.1rem; }
+  .carte .reste { font-size: .95rem; color: #ecdcc5; }
+  .carte .reste b { color: #fff; }
+  .qr { background: #fff; border-radius: 18px; margin-top: 18px; padding: 14px; display: flex; align-items: center; gap: 16px; color: var(--ink); position: relative; z-index: 1; }
+  .qr svg { width: 128px; height: 128px; flex: none; display: block; }
+  .qr .num { font: 600 1.35rem/1.2 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .04em; }
+  .qr small { display: block; color: var(--muted); font-size: .82rem; line-height: 1.35; margin-top: 6px; }
+
+  .cadeau-dispo { background: linear-gradient(135deg, #2f7a46, #3d8f57); color: #fff; border-radius: 18px; padding: 16px 18px; margin-bottom: 14px; display: flex; gap: 14px; align-items: center; box-shadow: 0 12px 28px rgba(47,122,70,.25); }
+  .cadeau-dispo .ico { font-size: 2rem; }
+  .cadeau-dispo b { display: block; font-size: 1.08rem; }
+  .cadeau-dispo span { font-size: .9rem; opacity: .9; }
+  .offre { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--orange); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+  .offre b { display: block; font-family: var(--serif); font-size: 1.1rem; color: var(--brown); }
+  .offre span { display: block; font-size: .88rem; color: var(--muted); margin-top: 4px; }
+  .offre.utilisee { opacity: .55; border-left-color: var(--line); }
+  .section { font: 600 .74rem/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin: 26px 4px 12px; }
+  .reglage { display: flex; gap: 14px; align-items: center; justify-content: space-between; }
+  .reglage b { display: block; font-weight: 600; color: var(--brown); }
+  .reglage small { display: block; font-size: .84rem; color: var(--muted); margin-top: 2px; }
+  .sw { position: relative; width: 51px; height: 31px; flex: none; }
+  .sw input { opacity: 0; width: 100%; height: 100%; position: absolute; margin: 0; z-index: 1; cursor: pointer; }
+  .sw i { position: absolute; inset: 0; border-radius: 99px; background: #d6c8b6; transition: background .2s; pointer-events: none; }
+  .sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.15); transition: transform .2s; }
+  .sw input:checked + i { background: var(--green); }
+  .sw input:checked + i::after { transform: translateX(20px); }
+  .astuce { display: flex; gap: 12px; align-items: flex-start; background: var(--sand); border-radius: 16px; padding: 14px 16px; font-size: .92rem; color: var(--brown); }
+  .astuce .ico { font-size: 1.4rem; line-height: 1; }
+  .done { text-align: center; padding: 18px 4px; }
+  .done .ok { width: 74px; height: 74px; border-radius: 50%; background: var(--green-bg); color: var(--green); display: grid; place-items: center; margin: 0 auto 16px; font-size: 2.2rem; }
+  .done h2 { font-size: 1.8rem; color: var(--brown); }
+  .done p { color: var(--muted); max-width: 24em; margin: 10px auto 18px; }
+  .loading { text-align: center; padding: 50px 0; color: var(--muted); }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 10px 0 40px; }
+  footer a { color: var(--muted); }
+  #tel { white-space: nowrap; }
+  .astuce svg { width: 22px; height: 22px; flex: none; color: var(--rust); margin-top: 1px; }
+  @keyframes pop { 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+  .tampon.nouveau { animation: pop .6s cubic-bezier(.2,1.3,.4,1) both; }
+  @media print { header, footer, .no-print { display: none !important; } body { background: #fff; } .carte { box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body><div style="position:sticky;top:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:#5a4fcf;color:#fff;font:600 13px/1.3 -apple-system,BlinkMacSystemFont,sans-serif"><span>Démo · carte du Club (client) · rien n'est envoyé</span><span style="display:flex;gap:6px;flex-wrap:wrap"><a href="../" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Accueil démo</a><a href="../equipe/#club" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Appli équipe</a></span></div>
+<div class="wrap">
+  <header>
+    <a class="brand" id="brandLink" href="/" aria-label="Le 76"><b>Le</b><span>76</span></a>
+    <a class="lang" id="langBtn" href="#">DE</a>
+  </header>
+  <main id="app"><div class="loading">…</div></main>
+  <footer><span id="adresse">Le 76 · 76 rue Principale, 67930 Beinheim</span> · <a href="tel:+33388863187" id="tel">03 88 86 31 87</a><br><a href="/mentions-legales.html#club" id="confid">Vos données et le Club</a></footer>
+</div>
+
+<script src="/club/qr.js"></script>
+<script>
+(() => {
+  'use strict';
+  const API = '/demo/api/club.php';
+  const ICI = '/demo/club/';
+  const EQUIPE = '/demo/equipe/'; // le QR de la carte ouvre la fiche du client dans l'appli de l'équipe
+  const app = document.getElementById('app');
+  const qs = new URLSearchParams(location.search);
+  let LANG = qs.get('lang');
+  if (LANG !== 'de' && LANG !== 'fr') { LANG = null; try { LANG = localStorage.getItem('le76_langue'); } catch (e) {} }
+  if (LANG !== 'de' && LANG !== 'fr') LANG = /^de/i.test(navigator.language || '') ? 'de' : 'fr';
+  const DE = LANG === 'de';
+  const L = (fr, de) => DE ? de : fr;
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const MOIS = DE ? ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'] : ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const dateTxt = d => { const [y, m, j] = d.split('-').map(Number); return DE ? `${j}. ${MOIS[m - 1]} ${y}` : `${j === 1 ? '1er' : j} ${MOIS[m - 1]} ${y}`; };
+  const CLE = 'le76_club_carte';
+  const lire = () => { try { return localStorage.getItem(CLE); } catch (e) { return null; } };
+  const garder = j => { try { j ? localStorage.setItem(CLE, j) : localStorage.removeItem(CLE); } catch (e) {} };
+
+  // Textes fixes
+  const lb = document.getElementById('langBtn');
+  lb.textContent = DE ? 'FR' : 'DE';
+  lb.onclick = ev => { ev.preventDefault(); const a = DE ? 'fr' : 'de'; try { localStorage.setItem('le76_langue', a); } catch (e) {} const u = new URL(location.href); u.searchParams.set('lang', a); location.href = u; };
+  if (DE) {
+    document.documentElement.lang = 'de';
+    document.title = 'Der Club · Le 76 · Beinheim (Elsass)';
+    document.getElementById('brandLink').href = '/de/';
+    document.getElementById('adresse').textContent = 'Le 76 · 76 rue Principale, 67930 Beinheim, Frankreich';
+    document.getElementById('tel').textContent = '+33 3 88 86 31 87';
+    document.getElementById('confid').textContent = 'Ihre Daten und der Club';
+  }
+
+  async function api(action, data = {}, get = false) {
+    try {
+      const r = get ? await fetch(`${API}?action=${action}&lang=${LANG}`)
+        : await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, lang: LANG, ...data }) });
+      return await r.json();
+    } catch (e) { return { ok: false, erreur: L('Pas de connexion. Vérifiez internet et réessayez.', 'Keine Verbindung. Bitte prüfen Sie Ihr Internet.') }; }
+  }
+  const sw = (id, on) => `<span class="sw"><input type="checkbox" id="${id}" ${on ? 'checked' : ''}><i></i></span>`;
+
+  /* ---------- Rejoindre le Club ---------- */
+  async function vueInscription(message) {
+    const infos = await api('infos', {}, true);
+    const seuil = infos.seuil || 6, cadeau = infos.cadeau || L('Un dessert offert', 'Ein Dessert gratis');
+    app.innerHTML = `
+      <div class="intro">
+        <span class="kicker">${L('Le Club du 76', 'Der Club des Le 76')}</span>
+        <h1>${L('Vos visites <em>comptent</em>', 'Ihre Besuche <em>zählen</em>')}</h1>
+        <p>${L('Une carte de fidélité sur votre téléphone, sans application à installer.', 'Eine Treuekarte auf Ihrem Handy – ganz ohne App.')}</p>
+        <span class="promesse">${seuil} ${L('visites', 'Besuche')} = ${esc(cadeau.toLowerCase())} ✦</span>
+      </div>
+      ${infos.ok && !infos.ouvert ? `<div class="card"><div class="err">${L('Les inscriptions au Club sont fermées pour le moment. Revenez bientôt !', 'Die Anmeldung zum Club ist derzeit geschlossen. Bis bald!')}</div></div>` : `
+      <form class="card" id="f" novalidate>
+        <div class="fields">
+          ${message ? `<div class="msg">${esc(message)}</div>` : ''}
+          <label class="f">${L('Votre prénom', 'Ihr Vorname')}<input name="prenom" required maxlength="40" autocomplete="given-name"></label>
+          <label class="f">${L('Votre e-mail', 'Ihre E-Mail')} <small>${L('(pour retrouver votre carte)', '(um Ihre Karte wiederzufinden)')}</small><input name="email" type="email" required maxlength="120" autocomplete="email" inputmode="email" autocapitalize="none"></label>
+          <label class="check"><input type="checkbox" name="offres"><span>${L('J’accepte de recevoir les offres du 76 par e-mail', 'Ich möchte die Angebote des Le 76 per E-Mail erhalten')}<small>${L('Facultatif, quelques fois par an. Votre carte fonctionne aussi sans. Désinscription en un clic.', 'Freiwillig, einige Male im Jahr. Ihre Karte funktioniert auch ohne. Abmeldung mit einem Klick.')}</small></span></label>
+          <div class="pot" aria-hidden="true"><label>Site web<input name="site_web" tabindex="-1" autocomplete="off"></label></div>
+          <div id="erreur" class="err" hidden></div>
+          <button class="btn" id="ok">${L('Créer ma carte', 'Meine Karte erstellen')}</button>
+        </div>
+        <p class="small">${L('Vos données restent chez Le 76 et ne sont jamais revendues.', 'Ihre Daten bleiben beim Le 76 und werden niemals weitergegeben.')} <a href="/mentions-legales.html#club">${L('En savoir plus', 'Mehr erfahren')}</a></p>
+      </form>
+      <div class="etapes">
+        <div class="etape"><i>📱</i><div><b>${L('Votre carte, sur votre téléphone', 'Ihre Karte auf dem Handy')}</b><span>${L('Ajoutez-la à l’écran d’accueil en un geste.', 'Mit einem Fingertipp auf dem Home-Bildschirm.')}</span></div></div>
+        <div class="etape"><i>✓</i><div><b>${L('L’équipe la scanne à chaque visite', 'Das Team scannt sie bei jedem Besuch')}</b><span>${L('Une visite comptée par jour.', 'Ein Besuch pro Tag wird gezählt.')}</span></div></div>
+        <div class="etape"><i>🎁</i><div><b>${L(`Au bout de ${seuil} visites`, `Nach ${seuil} Besuchen`)}</b><span>${esc(cadeau)}.</span></div></div>
+      </div>
+      <p class="small" style="margin-bottom:24px"><button class="linkbtn" id="deja">${L('J’ai déjà une carte', 'Ich habe schon eine Karte')}</button></p>`}`;
+    const f = document.getElementById('f');
+    if (!f) return;
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      const e = document.getElementById('erreur'), b = document.getElementById('ok');
+      e.hidden = true; b.disabled = true;
+      const r = await api('inscription', { prenom: f.prenom.value, email: f.email.value, offres: f.offres.checked, site_web: f.site_web.value, origine: qs.has('t') ? 'table' : 'site' });
+      b.disabled = false;
+      if (!r.ok) { e.textContent = r.erreur; e.hidden = false; return; }
+      if (r.existe) { vueInscription(r.message); return; }
+      garder(r.carte.jeton);
+      afficherCarte(r.carte, true);
+    };
+    document.getElementById('deja').onclick = vueRetrouver;
+  }
+
+  function vueRetrouver() {
+    app.innerHTML = `<form class="card" id="f" style="margin-top:20px">
+      <h2 style="font-size:1.6rem;color:var(--brown);margin-bottom:8px">${L('Retrouver ma carte', 'Meine Karte wiederfinden')}</h2>
+      <p style="color:var(--muted);margin:0 0 16px">${L('Indiquez l’adresse utilisée à l’inscription : nous vous renvoyons le lien de votre carte. Vous pouvez aussi simplement la demander à l’équipe.', 'Geben Sie die bei der Anmeldung verwendete Adresse an: Wir senden Ihnen den Link erneut. Sie können auch einfach das Team fragen.')}</p>
+      <div class="fields"><label class="f">E-mail<input name="email" type="email" required autocomplete="email" autocapitalize="none"></label>
+      <div id="rep" hidden></div><button class="btn">${L('Recevoir le lien', 'Link erhalten')}</button>
+      <button type="button" class="btn ghost" id="retour">${L('Retour', 'Zurück')}</button></div></form>`;
+    const f = document.getElementById('f');
+    document.getElementById('retour').onclick = () => vueInscription();
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      const r = await api('retrouver', { email: f.email.value });
+      const d = document.getElementById('rep'); d.hidden = false;
+      d.className = r.ok ? 'msg' : 'err'; d.textContent = r.ok ? r.message : r.erreur;
+    };
+  }
+
+  /* ---------- Ma carte ---------- */
+  async function chargerCarte(jeton) {
+    const r = await api('carte', { jeton });
+    if (!r.ok) {
+      garder(null);
+      app.innerHTML = `<div class="card" style="margin-top:20px"><div class="done"><h2>${L('Carte introuvable', 'Karte nicht gefunden')}</h2><p>${esc(r.erreur)}</p><a class="btn" href="${ICI}${DE ? '?lang=de' : ''}">${L('Rejoindre le Club', 'Dem Club beitreten')}</a></div></div>`;
+      return;
+    }
+    garder(r.carte.jeton);
+    afficherCarte(r.carte);
+  }
+
+  function afficherCarte(c, nouvelle) {
+    // L'adresse garde le jeton : « Sur l'écran d'accueil » ouvrira directement CETTE carte
+    history.replaceState(null, '', `${ICI}?c=${c.jeton}${DE ? '&lang=de' : ''}`);
+    const k = c.compteurs, n = k.seuil;
+    const plein = k.cadeaux_dispo > 0 && k.tampons === 0 ? n : k.tampons;
+    let t = '';
+    for (let i = 1; i <= n; i++) t += `<div class="tampon ${i <= plein ? 'plein' : ''} ${i === n && i > plein ? 'cadeau' : ''} ${i === plein && !nouvelle && k.venu_aujourdhui ? 'nouveau' : ''}">${i <= plein ? '✓' : i === n ? '🎁' : ''}</div>`;
+    const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const installe = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+    app.innerHTML = `
+      ${nouvelle ? `<div class="intro" style="padding-bottom:14px"><span class="kicker">${L('Bienvenue au Club', 'Willkommen im Club')}</span><h1 style="font-size:2rem">${L('Votre carte est <em>prête</em>', 'Ihre Karte ist <em>bereit</em>')}</h1></div>` : '<div style="height:8px"></div>'}
+      <div class="carte">
+        <div class="haut"><div class="logo"><b>Le</b><span>76</span></div><span class="club">${L('Le Club', 'Der Club')}</span></div>
+        <h2>${esc(c.prenom)}</h2>
+        <div class="depuis">${L('Membre depuis le', 'Mitglied seit dem')} ${dateTxt(c.inscrit_le)}</div>
+        <div class="tampons" style="--n:${n}">${t}</div>
+        <div class="reste">${k.cadeaux_dispo > 0 ? L('<b>Votre cadeau vous attend !</b>', '<b>Ihr Geschenk wartet!</b>')
+          : k.reste === 1 ? L('Plus qu’<b>une visite</b> avant votre cadeau', 'Nur noch <b>ein Besuch</b> bis zu Ihrem Geschenk')
+          : L(`Encore <b>${k.reste} visites</b> avant votre cadeau`, `Noch <b>${k.reste} Besuche</b> bis zu Ihrem Geschenk`)}</div>
+        <div class="qr">${qrSvg(location.origin + EQUIPE + '#carte=' + c.carte, { border: 1 })}<div><div class="num">${esc(c.carte)}</div><small>${L('Montrez ce code à l’équipe à chaque visite.', 'Zeigen Sie diesen Code bei jedem Besuch dem Team.')}</small></div></div>
+      </div>
+      ${k.cadeaux_dispo > 0 ? `<div class="cadeau-dispo"><div class="ico">🎁</div><div><b>${esc(c.cadeau)}${k.cadeaux_dispo > 1 ? ` × ${k.cadeaux_dispo}` : ''}</b><span>${L('À demander à l’équipe lors de votre prochaine visite.', 'Fragen Sie beim nächsten Besuch einfach das Team.')}</span></div></div>` : ''}
+      ${c.offres_recues.length ? `<div class="section">${L('Vos offres', 'Ihre Angebote')}</div>${c.offres_recues.map(o => `<div class="offre ${o.utilise_le ? 'utilisee' : ''}"><b>${esc(o.titre)}</b><span>${o.utilise_le ? L('Déjà utilisée — merci !', 'Bereits eingelöst – danke!') : esc(o.conditions)}</span></div>`).join('')}` : ''}
+      ${!installe ? `<div class="section no-print">${L('Gardez-la sous la main', 'Immer griffbereit')}</div>
+      <div class="astuce no-print">${iOS ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>' : '<span class="ico">📲</span>'}<div>${iOS
+        ? L('Touchez <b>Partager</b> en bas de Safari, puis <b>« Sur l’écran d’accueil »</b> : votre carte s’ouvrira d’un geste, comme une appli.', 'Tippen Sie unten in Safari auf <b>Teilen</b> und dann auf <b>„Zum Home-Bildschirm“</b>: Ihre Karte öffnet sich dann wie eine App.')
+        : L('Dans le menu du navigateur, choisissez <b>« Ajouter à l’écran d’accueil »</b> : votre carte s’ouvrira d’un geste.', 'Wählen Sie im Browsermenü <b>„Zum Startbildschirm hinzufügen“</b>: Ihre Karte öffnet sich mit einem Fingertipp.')}</div></div>` : ''}
+      <div class="section no-print">${L('Les offres du 76', 'Angebote des Le 76')}</div>
+      <div class="card no-print" style="padding:16px 18px"><div class="reglage"><div><b>${L('Recevoir les offres par e-mail', 'Angebote per E-Mail erhalten')}</b><small>${c.offres ? L('Oui, quelques fois par an. Vous pouvez arrêter à tout moment.', 'Ja, einige Male im Jahr. Jederzeit abbestellbar.') : L('Non. Votre carte de fidélité fonctionne quand même.', 'Nein. Ihre Treuekarte funktioniert trotzdem.')}</small></div>${sw('accord', c.offres)}</div></div>
+      <p class="small no-print"><button class="linkbtn" id="imprimer">${L('Imprimer ma carte', 'Karte drucken')}</button> · <button class="linkbtn" id="oublier">${L('Retirer la carte de ce téléphone', 'Karte von diesem Handy entfernen')}</button></p>
+      <div style="height:20px"></div>`;
+    document.getElementById('accord').onchange = async e => {
+      e.target.disabled = true;
+      const r = await api('accord', { jeton: c.jeton, accord: e.target.checked });
+      r.ok ? afficherCarte(r.carte) : (e.target.checked = !e.target.checked, e.target.disabled = false, alert(r.erreur));
+    };
+    document.getElementById('imprimer').onclick = () => print();
+    document.getElementById('oublier').onclick = () => {
+      if (!confirm(L('Retirer la carte de ce téléphone ? Elle n’est pas supprimée : vous pourrez la retrouver avec votre e-mail ou auprès de l’équipe.', 'Karte von diesem Handy entfernen? Sie wird nicht gelöscht: Sie finden sie über Ihre E-Mail oder beim Team wieder.'))) return;
+      garder(null); history.replaceState(null, '', ICI + (DE ? '?lang=de' : '')); vueInscription();
+    };
+  }
+
+  /* ---------- Désinscription (lien des e-mails) ---------- */
+  function vueDesinscription(jeton) {
+    app.innerHTML = `<div class="card" style="margin-top:20px"><div class="done">
+      <h2>${L('Ne plus recevoir nos offres ?', 'Keine Angebote mehr erhalten?')}</h2>
+      <p>${L('Vous ne recevrez plus d’e-mails d’offres du 76. Votre carte de fidélité et vos visites restent intactes.', 'Sie erhalten keine Angebots-E-Mails mehr vom Le 76. Ihre Treuekarte und Ihre Besuche bleiben erhalten.')}</p>
+      <button class="btn" id="oui">${L('Me désinscrire', 'Abmelden')}</button></div></div>`;
+    document.getElementById('oui').onclick = async () => {
+      const r = await api('desinscrire', { jeton });
+      app.innerHTML = `<div class="card" style="margin-top:20px"><div class="done">${r.ok
+        ? `<div class="ok">✓</div><h2>${L('C’est noté', 'Erledigt')}</h2><p>${L('Vous ne recevrez plus nos offres par e-mail. À bientôt au 76 !', 'Sie erhalten keine Angebote mehr per E-Mail. Bis bald im Le 76!')}</p><a class="btn ghost" href="${ICI}?c=${jeton}${DE ? '&lang=de' : ''}">${L('Voir ma carte', 'Meine Karte ansehen')}</a>`
+        : `<h2>${L('Lien introuvable', 'Link nicht gefunden')}</h2><p>${esc(r.erreur)}</p>`}</div></div>`;
+    };
+  }
+
+  // Démarrage : lien de désinscription, carte dans l'adresse, carte gardée sur le téléphone, sinon inscription
+  const desinscr = qs.get('desinscrire'), c = qs.get('c') || lire();
+  if (desinscr && /^[a-f0-9]{32}$/.test(desinscr)) vueDesinscription(desinscr);
+  else if (c && /^[a-f0-9]{32}$/.test(c)) chargerCarte(c);
+  else vueInscription();
+  // Carte à jour quand on revient sur l'appli (visite validée par l'équipe pendant ce temps)
+  document.addEventListener('visibilitychange', () => { const j = lire(); if (document.visibilityState === 'visible' && j && document.querySelector('.carte')) chargerCarte(j); });
+})();
+</script>
+</body>
+</html>

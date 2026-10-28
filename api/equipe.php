@@ -12,12 +12,14 @@ define('COOKIE', defined('DEMO') ? 'le76_equipe_demo' : 'le76_equipe');
 const DUREE_SESSION = 400 * 86400;
 
 rappels_en_arriere_plan();
+require_once __DIR__ . '/lib/club.php';
+club_envois_en_arriere_plan(); // offres du Club en attente, par petits lots
 
 try {
     $q = lire_requete();
     $action = (string) ($q['action'] ?? '');
     $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    if ($methode !== 'POST' && !in_array($action, ['export', 'export_abonnes'], true)) {
+    if ($methode !== 'POST' && !in_array($action, ['export', 'export_abonnes', 'club_export'], true)) {
         erreur('Méthode non autorisée.', 405);
     }
 
@@ -38,6 +40,12 @@ try {
     }
 
     $moi = utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
+
+    // Le Club (fidélité et offres par e-mail) : onglet « Club » de l'appli
+    if (str_starts_with($action, 'club_')) {
+        require __DIR__ . '/lib/club-equipe.php';
+        club_equipe($action, $q, $moi);
+    }
 
     switch ($action) {
         case 'evenements':
