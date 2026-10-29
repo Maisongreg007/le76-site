@@ -93,7 +93,7 @@ async function renderDay() {
     </div>
     <div class="row-btns no-print" style="margin:4px 0 6px">
       <button class="btn-plain btn-sm" id="dSheet">🧾 Feuille de vente · ${isToday ? 'aujourd’hui' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
-      <button class="btn-plain btn-sm" id="dBaker">🥖 Bon boulanger · ${isToday ? 'demain' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
+      <button class="btn-soft btn-sm" id="dBaker">🥖 Commande boulanger · ${isToday ? 'demain' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
       </div>
     </div>
     <div class="group-title">À préparer · ${dfr(DAY, { day: 'numeric', month: 'long' })}</div>
@@ -116,7 +116,7 @@ async function renderDay() {
   $('dPick').onchange = e => { if (e.target.value) { DAY = e.target.value; renderDay(); } };
   $('dNew').onclick = () => orderSheet(null, DAY);
   $('dSheet').onclick = () => printSales(DAY);
-  $('dBaker').onclick = () => printBaker(isToday ? addDays(DAY, 1) : DAY);
+  $('dBaker').onclick = () => bakerSheet(isToday ? addDays(DAY, 1) : DAY);
   $('dSearch').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('.dList .li').forEach(li => li.hidden = q && !li.dataset.s.includes(q)); };
   wireOrders(j.orders, renderDay);
   if (isToday) dayTimer = setInterval(() => { if (VIEW === 'day' && $('sheet').hidden && !document.activeElement?.matches('input')) renderDay(); }, 30000);
@@ -447,6 +447,66 @@ async function printSales(date) {
     <h2>Commandes à remettre (par emplacement)</h2>
     <table>${head}${ok.map(row).join('') || '<tr><td colspan="5">Aucune commande.</td></tr>'}</table>
     ${pend.length ? `<h2>Non payées (${pend.length}) · ne pas préparer sans paiement</h2><table>${head}${pend.map(row).join('')}</table>` : ''}`);
+}
+
+/* ================= Commande boulanger ================= */
+// Quantités à commander au boulanger pour un jour : précommandes payées + ajout pour la vente au comptoir
+// (l'ajout est retenu sur l'appareil, d'un jour à l'autre).
+function bakerExtra() { try { return JSON.parse(localStorage.getItem('pain_boulanger_extra') || '{}') || {}; } catch { return {}; } }
+function bakerExtraSave(x) { try { localStorage.setItem('pain_boulanger_extra', JSON.stringify(x)); } catch { } }
+async function bakerSheet(date) {
+  let j; try { j = await api('jour', { date }); } catch (e) { return toast(e.message, true); }
+  const extra = bakerExtra();
+  const rows = PRODUCTS.filter(p => p.active || j.prep.some(x => x.id === p.id && x.total)).map(p => {
+    const x = j.prep.find(y => y.id === p.id) || {};
+    return { p, q: x.total || 0, w: x.pending || 0 };
+  });
+  const open = new Date() < new Date(j.limit.replace(' ', 'T'));
+  const quand = dfr(date, { weekday: 'long', day: 'numeric', month: 'long' });
+  const tot = r => r.q + (+extra[r.p.id] || 0);
+  const message = () => `Bonjour, voici la commande pour ${quand} :\n` + rows.filter(r => tot(r)).map(r => `${tot(r)} × ${r.p.name}`).join('\n') + '\nMerci !';
+  const draw = () => {
+    openSheet('Commande boulanger', `
+      <div class="row-btns" style="justify-content:center;margin-bottom:10px">
+        <button class="btn-plain btn-sm" id="bPrev">‹</button><b style="font-size:17px;min-width:200px;text-align:center">${cap(quand)}</b><button class="btn-plain btn-sm" id="bNext">›</button>
+      </div>
+      ${open ? `<p class="small" style="background:rgba(255,149,0,.14);color:var(--orange);padding:10px 12px;border-radius:12px">⚠️ Les campeurs peuvent encore commander jusqu’au ${dfr(j.limit.slice(0, 10), { weekday: 'long' })} à ${j.limit.slice(11)} : chiffres provisoires.</p>` : ''}
+      <div class="group" style="margin-top:10px">${rows.map(r => `
+        <div class="li" style="align-items:center">
+          <span style="font-size:28px">${esc(r.p.emoji)}</span>
+          <span class="main"><div class="t">${esc(r.p.name)}</div><div class="d">${r.q} précommandé(s)${r.w ? ` · <span style="color:var(--orange)">+${r.w} pas encore payé(s)</span>` : ''}</div></span>
+          <span style="display:flex;align-items:center;gap:6px" title="En plus pour la vente au comptoir"><span class="small mute">+</span>
+            <input type="number" min="0" max="999" inputmode="numeric" data-x="${r.p.id}" value="${+extra[r.p.id] || ''}" placeholder="0" style="width:64px;text-align:center"></span>
+          <span style="font-size:30px;font-weight:700;min-width:56px;text-align:right" data-t="${r.p.id}">${tot(r)}</span>
+        </div>`).join('')}</div>
+      <p class="small mute" style="margin:6px 4px 14px">Le chiffre en gros = à commander. La case « + » ajoute de quoi vendre au comptoir ; elle est retenue sur cet appareil.</p>
+      <div class="row-btns" style="flex-wrap:wrap">
+        ${SETTINGS?.printer_ip ? '<button class="btn-main" id="bPrint" style="flex:1">🖨️ Imprimer le ticket</button>' : ''}
+        <button class="btn-soft" id="bSend" style="flex:1">💬 Envoyer au boulanger</button>
+      </div>
+      <div class="row-btns" style="margin-top:8px"><button class="btn-plain btn-sm" id="bCopy">Copier le texte</button><button class="btn-plain btn-sm" id="bA4">Feuille A4</button></div>`);
+    $('bPrev').onclick = () => bakerSheet(addDays(date, -1));
+    $('bNext').onclick = () => bakerSheet(addDays(date, 1));
+    document.querySelectorAll('[data-x]').forEach(i => i.oninput = () => {
+      const v = Math.max(0, Math.min(999, parseInt(i.value, 10) || 0));
+      if (v) extra[i.dataset.x] = v; else delete extra[i.dataset.x];
+      bakerExtraSave(extra);
+      const r = rows.find(y => String(y.p.id) === i.dataset.x);
+      document.querySelector(`[data-t="${i.dataset.x}"]`).textContent = tot(r);
+    });
+    if ($('bPrint')) $('bPrint').onclick = async () => {
+      try { await api('boulanger_imprimer', { date, extra }); toast(RELAY.alive ? 'Ticket envoyé à l’imprimante.' : 'Ticket en attente : il sortira dès qu’un appareil du camping joindra l’imprimante.'); relayTick(); }
+      catch (e) { toast(e.message, true); }
+    };
+    $('bSend').onclick = async () => {
+      const text = message();
+      try { if (navigator.share) { await navigator.share({ text }); return; } } catch { return; }
+      location.href = 'sms:?&body=' + encodeURIComponent(text);
+    };
+    $('bCopy').onclick = async () => { try { await navigator.clipboard.writeText(message()); toast('Texte copié : colle-le dans un SMS ou WhatsApp.'); } catch { toast('Copie impossible sur cet appareil.', true); } };
+    $('bA4').onclick = () => printBaker(date);
+  };
+  draw();
 }
 
 async function printBaker(date) {

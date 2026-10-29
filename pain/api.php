@@ -136,6 +136,8 @@ try {
             imprimante_relais($q);
         case 'lien_appareil':
             lien_appareil();
+        case 'boulanger_imprimer':
+            boulanger_imprimer((string) ($q['date'] ?? ''), is_array($q['extra'] ?? null) ? $q['extra'] : []);
         case 'imprimante_vider':
             $n = db()->exec("UPDATE impressions SET statut = 'echec', erreur = 'annulé' WHERE statut IN ('attente', 'envoye')");
             journaliser('équipe', 'File d’impression vidée', null, (string) $n);
@@ -751,6 +753,61 @@ function imprimante_relais(array $q): never
     }
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'ip' => $ip, 'jobs' => $jobs]);
+}
+
+/**
+ * Commande à passer au boulanger pour un jour de retrait : quantités des précommandes payées
+ * (+ ce que l'équipe ajoute pour la vente au comptoir), imprimée sur l'imprimante des bons.
+ */
+function boulanger_imprimer(string $jour, array $extra): never
+{
+    date_valide($jour) || erreur('Date invalide.');
+    if (reglages()['printer_ip'] === '') {
+        erreur('Renseigne d’abord l’imprimante dans Réglages → Imprimante des bons.');
+    }
+    $st = db()->prepare("SELECT l.produit_id id, SUM(l.quantite) q FROM lignes l JOIN commandes c ON c.id = l.commande_id
+        WHERE c.jour = ? AND c.statut IN ('confirmed', 'collected') GROUP BY l.produit_id");
+    $st->execute([$jour]);
+    $payees = array_column($st->fetchAll(), 'q', 'id');
+    $st = db()->prepare("SELECT l.produit_id id, SUM(l.quantite) q FROM lignes l JOIN commandes c ON c.id = l.commande_id
+        WHERE c.jour = ? AND c.statut = 'pending' GROUP BY l.produit_id");
+    $st->execute([$jour]);
+    $attente = array_column($st->fetchAll(), 'q', 'id');
+    $r = reglages();
+    $jours = ['', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
+    $j = new DateTimeImmutable($jour);
+    $trait = ['text' => str_repeat('-', 48)];
+    $lignes = [
+        ['text' => 'COMMANDE BOULANGER', 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
+        ['text' => 'Pour ' . $jours[(int) $j->format('N')] . ' ' . $j->format('d/m'), 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
+        $trait,
+    ];
+    $detail = [];
+    $total = 0;
+    foreach (produits(false) as $p) {
+        $q = (int) ($payees[$p['id']] ?? 0);
+        $x = max(0, min(999, (int) ($extra[(string) $p['id']] ?? 0)));
+        if ($q + $x === 0) {
+            continue;   // rien à commander : pas de ligne « 0 » qui embrouille le boulanger
+        }
+        $lignes[] = ['text' => str_pad((string) ($q + $x), 4, ' ', STR_PAD_LEFT) . '  ' . $p['name'], 'bold' => true, 'width' => 2, 'height' => 2];
+        $detail[] = ['text' => $p['name'] . ' : ' . $q . ' precommande(s)' . ($x ? ' + ' . $x . ' comptoir' : '') . (!empty($attente[$p['id']]) ? ' (' . $attente[$p['id']] . ' non payee(s))' : '')];
+        $total += $q + $x;
+    }
+    $lignes[] = $trait;
+    array_push($lignes, ...$detail);
+    if (new DateTimeImmutable() < limite_commande($jour, $r)) {
+        $lignes[] = $trait;
+        $lignes[] = ['text' => 'ATTENTION : les campeurs peuvent encore', 'bold' => true];
+        $lignes[] = ['text' => 'commander jusqu\'au ' . limite_commande($jour, $r)->format('d/m \a H\hi') . '. Chiffres provisoires.', 'bold' => true];
+    }
+    $lignes[] = $trait;
+    $lignes[] = ['text' => 'Etabli le ' . date('d/m/Y H:i')];
+    $lignes[] = ['feed' => 3];
+    $lignes[] = ['cut' => true];
+    imprimante_ajouter($lignes, null);
+    journaliser('équipe', 'Commande boulanger imprimée', null, $jour . ' · ' . $total . ' pièce(s)');
+    repondre(['ok' => true]);
 }
 
 /** QR code pour connecter un autre appareil de l'équipe : valable 10 minutes, une seule fois. */
