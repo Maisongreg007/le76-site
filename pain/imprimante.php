@@ -12,9 +12,20 @@ require __DIR__ . '/lib.php';
 
 const IMP_MAX_ESSAIS = 3;
 
-header('Content-Type: text/xml; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Robots-Tag: noindex, nofollow');
+
+// Ouverte dans un navigateur : simple explication, sans toucher aux tickets ni à l'état de l'imprimante.
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST' || !isset($_POST['ConnectionType'])) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Imprimante</title>'
+        . '<body style="font:17px -apple-system,system-ui,sans-serif;max-width:560px;margin:40px auto;padding:0 16px;line-height:1.5">'
+        . '<h1 style="font-size:22px">Adresse réservée à l’imprimante</h1>'
+        . '<p>Cette adresse ne s’ouvre pas dans un navigateur : elle se colle dans la page de configuration de l’imprimante Epson, rubrique <b>Server Direct Print</b>.</p></body>';
+    exit;
+}
+
+header('Content-Type: text/xml; charset=utf-8');
 
 try {
     $conf = imprimante_conf();
