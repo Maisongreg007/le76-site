@@ -1,0 +1,14 @@
+{
+  "name": "CAMPING OS 76 · Restaurant du camping",
+  "short_name": "Camping 76",
+  "start_url": "/camping/",
+  "scope": "/camping/",
+  "display": "standalone",
+  "background_color": "#f7f5ee",
+  "theme_color": "#265e4d",
+  "lang": "fr",
+  "icons": [
+    { "src": "/camping/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/camping/icone-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
