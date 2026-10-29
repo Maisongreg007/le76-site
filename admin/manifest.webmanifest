@@ -1,0 +1,16 @@
+{
+  "name": "Le 76 · Portail",
+  "short_name": "Le 76",
+  "description": "Tous les outils du restaurant Le 76 au même endroit",
+  "lang": "fr",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#2b1d16",
+  "theme_color": "#2b1d16",
+  "icons": [
+    { "src": "/admin/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/admin/icone-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/admin/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

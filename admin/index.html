@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le 76 · Portail</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2b1d16">
+<link rel="manifest" href="/admin/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/admin/icone-180.png">
+<link rel="icon" href="/admin/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Le 76">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  /* Même style « façon Apple » que l'appli des réservations */
+  :root {
+    --cream: #fbf5ec; --paper: #fffbf5; --sand: #f3e7d6; --fill: rgba(122,90,60,.10);
+    --ink: #2b1d16; --brown: #4a2c1d; --muted: #7a6a5c; --faint: #b3a596;
+    --rust: #b7372a; --gold: #c98a3a; --line: #e8d9c3; --green: #2f7a46; --green-bg: #e3efe1; --amber: #a86412; --amber-bg: #fdf0d9;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Inter", system-ui, sans-serif;
+    --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Inter", system-ui, sans-serif;
+    --logo: "Playfair Display", Georgia, serif;
+    --top: env(safe-area-inset-top, 0px); --bot: env(safe-area-inset-bottom, 0px); --r: 16px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--cream); color: var(--ink); font: 400 17px/1.4 var(--sans); -webkit-font-smoothing: antialiased; letter-spacing: -.01em; }
+  button, input { font: inherit; color: inherit; letter-spacing: inherit; }
+  button { cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3 { margin: 0; }
+  [hidden] { display: none !important; }
+
+  .top { background: var(--ink); color: #f6e9d6; padding: calc(14px + var(--top)) 22px 26px; }
+  .top-in { max-width: 980px; margin: 0 auto; }
+  .top-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .logo { font: 800 1.25rem/1 var(--logo); color: #fff; letter-spacing: 0; }
+  .logo span { color: var(--gold); }
+  .moi { font-size: .85rem; color: #d8c6ad; background: rgba(255,255,255,.1); border: 0; border-radius: 999px; padding: 6px 12px; }
+  .top h1 { font: 700 2.2rem/1.1 var(--display); letter-spacing: -.025em; color: #fff; margin-top: 16px; }
+  .top p { margin: 4px 0 0; color: #cbb69a; font-size: 1rem; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 22px 22px calc(40px + var(--bot)); }
+  @media (max-width: 480px) { main { padding: 18px 14px 36px; } .top { padding-left: 16px; padding-right: 16px; } }
+  .section { font: 600 .74rem/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 28px 4px 12px; }
+  .section:first-child { margin-top: 4px; }
+
+  /* Résumé du jour */
+  .jour { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .carte { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: block; position: relative; transition: transform .12s; }
+  .carte:active { transform: scale(.985); }
+  .carte .t { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .95rem; color: var(--brown); }
+  .carte .t img, .carte .t .ico { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+  .carte .chiffres { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+  .carte .chiffres div b { display: block; font: 700 1.9rem/1 var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .carte .chiffres div span { font-size: .8rem; color: var(--muted); }
+  .carte .chiffres div.off b { color: var(--faint); }
+  .carte .alerte { position: absolute; top: 14px; right: 14px; background: var(--rust); color: #fff; font-weight: 700; font-size: .78rem; border-radius: 999px; padding: 4px 10px; }
+  .carte .alerte.or { background: var(--amber-bg); color: var(--amber); }
+  .carte .pied { margin-top: 12px; font-size: .84rem; color: var(--muted); }
+
+  /* Applis de gestion : grille façon écran d'accueil */
+  .applis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  @media (max-width: 480px) { .applis { grid-template-columns: 1fr 1fr; gap: 10px; } }
+  .appli { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-height: 132px; transition: transform .12s, box-shadow .12s; }
+  .appli:hover { box-shadow: 0 8px 22px rgba(74,44,29,.08); }
+  .appli:active { transform: scale(.97); }
+  .appli img, .appli .ico { width: 52px; height: 52px; border-radius: 13px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+  .ico { display: grid; place-items: center; color: #fff; font: 700 1.4rem/1 var(--display); }
+  .appli b { font-weight: 600; font-size: .98rem; line-height: 1.2; }
+  .appli small { display: block; color: var(--muted); font-size: .78rem; line-height: 1.3; margin-top: 2px; }
+  .appli .resp { font-size: .62rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+
+  /* Pages clients : liste groupée */
+  .group { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-top: .5px solid var(--line); }
+  .row:first-child { border-top: 0; }
+  .row img, .row .ico { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+  .row .grow { flex: 1; min-width: 0; }
+  .row .grow b { display: block; font-weight: 600; }
+  .row .grow small { display: block; color: var(--muted); font-size: .83rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .bt { display: flex; gap: 6px; flex: none; }
+  .pill { border: 0; border-radius: 999px; background: var(--fill); color: var(--rust); font-weight: 600; font-size: .85rem; padding: 8px 13px; white-space: nowrap; }
+  .pill:active { opacity: .7; }
+  @media (max-width: 520px) { .row { flex-wrap: wrap; } .row .bt { width: 100%; padding-left: 54px; } }
+
+  /* Connexion */
+  .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 20px calc(24px + var(--bot)); background: var(--ink); }
+  .login .box { width: 100%; max-width: 380px; background: var(--cream); border-radius: 22px; padding: 28px 22px; }
+  .login .big { font: 800 3rem/1 var(--logo); text-align: center; }
+  .login .big span { color: var(--gold); font-family: "Caveat", cursive; font-size: 3.8rem; }
+  .login p.lead { text-align: center; color: var(--muted); margin: 10px 0 26px; }
+  .field { display: block; margin-bottom: 16px; font-size: .8rem; font-weight: 500; color: var(--muted); }
+  .field input { display: block; width: 100%; margin-top: 6px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 17px; outline: none; }
+  .field input:focus { box-shadow: 0 0 0 3px rgba(183,55,42,.22); }
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; border: 0; border-radius: 12px; min-height: 50px; padding: 12px 18px; font-weight: 600; font-size: 1rem; background: var(--rust); color: #fff; }
+  .btn.ghost { background: var(--fill); color: var(--rust); }
+
+  /* Fenêtre (QR) */
+  .veil { position: fixed; inset: 0; z-index: 50; background: rgba(43,29,22,.45); display: flex; align-items: center; justify-content: center; padding: 20px; animation: fade .2s; }
+  .sheet { background: var(--cream); width: 100%; max-width: 420px; border-radius: 18px; padding: 22px; text-align: center; animation: up .3s cubic-bezier(.2,.9,.3,1); }
+  .sheet h2 { font: 700 1.4rem/1.2 var(--display); margin-bottom: 4px; }
+  .sheet p { color: var(--muted); margin: 0 0 16px; font-size: .9rem; word-break: break-all; }
+  .sheet .qr { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+  .sheet .qr svg { width: 100%; height: auto; display: block; }
+  .sheet .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + var(--bot)); transform: translateX(-50%); z-index: 80; background: rgba(43,29,22,.92); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: .93rem; font-weight: 500; animation: up .25s; }
+  .toast.err { background: rgba(183,55,42,.95); }
+  .loading { text-align: center; color: var(--muted); padding: 60px 0; }
+  footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 30px; }
+  footer button { border: 0; background: none; color: var(--rust); font-size: .85rem; }
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Chargement…</div></div>
+<script src="/club/qr.js"></script>
+<script>
+(() => {
+'use strict';
+const BASE = '';                    // '/demo' dans la version démo
+const SITE = 'https://le76.fr';
+const API = BASE + '/api/equipe.php';
+const root = document.getElementById('root');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const plur = (n, s, p) => `${n} ${n > 1 ? (p || s + 's') : s}`;
+
+/* Outils de gestion. « tous » : toute l'équipe ; sinon réservé aux responsables. */
+const APPLIS = [
+  { nom: 'Réservations', desc: 'Carnet, demandes, soirées', url: BASE + '/equipe/', icone: '/equipe/icone-192.png', tous: true },
+  { nom: 'Le Club', desc: 'Cartes, visites, cadeaux, offres', url: BASE + '/equipe/#club', icone: '/club/icone-192.png?v=2', tous: true },
+  { nom: 'Registre hygiène', desc: 'Températures, ménage, DLC', url: BASE + '/hygiene/', icone: '/hygiene/icone-192.png', tous: true },
+  { nom: 'Pointeuse · Le 76', desc: 'Arrivées et départs', url: BASE + '/personnel/pointeuse.php?site=le76', icone: '/personnel/assets/icons/pointeuse-le76-192.png?v=2', tous: true, lettre: 'P', couleur: '#4a2c1d' },
+  { nom: 'Pointeuse · Camping', desc: 'Arrivées et départs', url: BASE + '/personnel/pointeuse.php?site=camping', icone: '/personnel/assets/icons/pointeuse-camping-192.png?v=2', tous: true, lettre: 'P', couleur: '#2f7a46' },
+  { nom: 'Pain du camping', desc: 'Commandes du jour, encaissement', url: BASE + '/pain/equipe/', icone: '/pain/icone-192.png', tous: true },
+  { nom: 'Scan des documents', desc: 'Factures, livraisons → Drive', url: BASE + '/scan/', icone: '/scan/icon-192.png', tous: true },
+  { nom: 'Personnel', desc: 'Planning, heures, coûts, congés', url: BASE + '/personnel/admin.php', icone: '/personnel/assets/icons/admin-192.png?v=2', lettre: 'P', couleur: '#5a4fcf' },
+  { nom: 'Coût matière', desc: 'Fiches techniques, food cost', url: '/demo/cout-matiere/', lettre: '€', couleur: 'linear-gradient(160deg,#34a0ff,#0a6bd6)' },
+  { nom: 'ComptaCaisse', desc: 'Caisse espèces, banque', url: BASE ? '/demo/caisse/' : 'https://comptacaisse.fr', icone: '/demo/caisse/icone-192.png' },
+];
+
+/* Pages que voient les clients. */
+const CLIENTS = [
+  { nom: 'Réserver une table', chemin: '/reserver/', icone: '/equipe/icone-192.png', desc: 'Demande de réservation en ligne (FR / DE)' },
+  { nom: 'Le Club', chemin: '/club/', qr: '/club/?t=1', icone: '/club/icone-192.png?v=2', desc: 'Carte de fidélité, QR des tables' },
+  { nom: 'Pain du camping', chemin: '/pain/', icone: '/pain/icone-192.png', desc: 'Précommande des campeurs' },
+  { nom: 'Site du 76', chemin: '/', lettre: '76', couleur: '#2b1d16', desc: 'La carte, les soirées, les horaires' },
+];
+
+function icone(a, cls = '') {
+  const repli = `<span class="ico ${cls}" style="background:${a.couleur || '#c98a3a'}">${esc(a.lettre || a.nom[0])}</span>`;
+  if (!a.icone) return repli;
+  return `<img class="${cls}" src="${esc(a.icone)}" alt="" onerror="this.outerHTML=this.dataset.repli" data-repli="${esc(repli)}">`;
+}
+
+async function api(action, data = {}) {
+  try {
+    const r = await fetch(API, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ...data }) });
+    const d = await r.json(); d.statut = r.status; return d;
+  } catch { return { ok: false, erreur: 'Pas de connexion au serveur. Vérifie internet.' }; }
+}
+function toast(msg, err) {
+  document.querySelector('.toast')?.remove();
+  const t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : ''); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+
+/* ---------- Connexion (mêmes comptes que l'appli des réservations) ---------- */
+function ecranConnexion() {
+  root.innerHTML = `<div class="login"><form class="box" id="cnx">
+    <div class="big">Le <span>76</span></div>
+    <p class="lead">Portail du restaurant</p>
+    <label class="field">Identifiant<input name="identifiant" required autocapitalize="none" autocomplete="username"></label>
+    <label class="field">Mot de passe<input name="mdp" type="password" required autocomplete="current-password"></label>
+    <button class="btn">Se connecter</button>
+    <p style="text-align:center;color:var(--muted);font-size:.82rem;margin:16px 0 0">Mêmes identifiants que l’appli des réservations.</p></form></div>`;
+  document.getElementById('cnx').onsubmit = async ev => {
+    ev.preventDefault(); const f = ev.target;
+    const r = await api('connexion', { identifiant: f.identifiant.value.trim(), mdp: f.mdp.value });
+    r.ok ? afficher() : toast(r.erreur, true);
+  };
+}
+
+/* ---------- Portail ---------- */
+async function afficher(silencieux) {
+  const d = await api('portail');
+  if (!d.ok) { if (d.statut === 401) return ecranConnexion(); if (!silencieux) root.innerHTML = `<div class="loading">${esc(d.erreur)}</div>`; return; }
+  const admin = d.moi.admin, x = new Date();
+  const h = x.getHours(), salut = h < 5 || h >= 18 ? 'Bonsoir' : 'Bonjour';
+  const date = `${JOURS[x.getDay()]} ${x.getDate() === 1 ? '1er' : x.getDate()} ${MOIS[x.getMonth()]}`;
+  const r = d.resa, c = d.club, p = d.pain;
+  const applis = APPLIS.filter(a => a.tous || admin);
+  root.innerHTML = `
+    <header class="top"><div class="top-in">
+      <div class="top-row"><div class="logo">Le <span>76</span></div><button class="moi" id="deco">${esc(d.moi.nom)}${admin ? ' · responsable' : ''}</button></div>
+      <h1>${salut} ${esc(d.moi.nom)}</h1><p>${date[0].toUpperCase() + date.slice(1)}</p>
+    </div></header>
+    <main>
+      <div class="section">Aujourd’hui</div>
+      <div class="jour">
+        ${r ? `<a class="carte" href="${BASE}/equipe/${r.demandes ? '#demandes' : ''}">
+          <div class="t">${icone(APPLIS[0])}Réservations</div>
+          ${r.demandes ? `<span class="alerte">${plur(r.demandes, 'demande')} à valider</span>` : ''}
+          <div class="chiffres">
+            <div class="${r.ouvert_midi ? '' : 'off'}"><b>${r.ouvert_midi || r.midi ? r.midi : '—'}</b><span>${r.ouvert_midi || r.midi ? 'couverts midi' : 'fermé midi'}</span></div>
+            <div class="${r.ouvert_soir ? '' : 'off'}"><b>${r.ouvert_soir || r.soir ? r.soir : '—'}</b><span>${r.ouvert_soir || r.soir ? 'couverts soir' : 'fermé soir'}</span></div>
+          </div>
+          <div class="pied">${plur(r.tables, 'table')} réservée${r.tables > 1 ? 's' : ''}</div></a>` : ''}
+        ${c ? `<a class="carte" href="${BASE}/equipe/#club">
+          <div class="t">${icone(APPLIS[1])}Le Club</div>
+          ${c.cadeaux ? `<span class="alerte or">🎁 ${plur(c.cadeaux, 'cadeau')} à offrir</span>` : ''}
+          <div class="chiffres"><div><b>${c.visites}</b><span>visites aujourd’hui</span></div><div><b>${c.membres}</b><span>membres</span></div></div>
+          <div class="pied">${c.en_attente ? `📨 ${plur(c.en_attente, 'e-mail')} d’offre en cours d’envoi` : 'Scanne les cartes pour compter les visites'}</div></a>` : ''}
+        ${p ? `<a class="carte" href="${BASE}/pain/equipe/">
+          <div class="t">${icone(APPLIS[5])}Pain du camping</div>
+          <div class="chiffres"><div><b>${p.aujourdhui - p.retirees}</b><span>à retirer aujourd’hui</span></div><div><b>${p.demain}</b><span>pour demain</span></div></div>
+          <div class="pied">${plur(p.retirees, 'commande retirée', 'commandes retirées')} aujourd’hui</div></a>` : ''}
+      </div>
+
+      <div class="section">Gestion</div>
+      <div class="applis">${applis.map(a => `<a class="appli" href="${esc(a.url)}">${icone(a)}<div><b>${esc(a.nom)}</b><small>${esc(a.desc)}</small></div>${a.tous ? '' : '<span class="resp">Responsable</span>'}</a>`).join('')}</div>
+
+      <div class="section">Côté clients</div>
+      <div class="group">${CLIENTS.map((cl, i) => `<div class="row">${icone(cl)}
+        <div class="grow"><b>${esc(cl.nom)}</b><small>${esc(cl.desc)} · le76.fr${esc(cl.chemin === '/' ? '' : cl.chemin)}</small></div>
+        <div class="bt"><a class="pill" href="${BASE}${cl.chemin}" target="_blank" rel="noopener">Ouvrir</a><button class="pill" data-qr="${i}">QR</button><button class="pill" data-copie="${i}">Copier</button></div></div>`).join('')}</div>
+
+      <footer>${d.demo ? 'Démo · données fictives · ' : ''}Le 76 · 76 rue Principale, Beinheim<br><button id="deco2">Se déconnecter</button></footer>
+    </main>`;
+  const deco = async () => { if (!confirm('Se déconnecter de ce portail ?')) return; await api('deconnexion'); ecranConnexion(); };
+  document.getElementById('deco').onclick = deco;
+  document.getElementById('deco2').onclick = deco;
+  root.querySelectorAll('[data-qr]').forEach(b => b.onclick = () => montrerQR(CLIENTS[+b.dataset.qr]));
+  root.querySelectorAll('[data-copie]').forEach(b => b.onclick = async () => {
+    const url = SITE + CLIENTS[+b.dataset.copie].chemin;
+    try { await navigator.clipboard.writeText(url); toast('Lien copié : ' + url.replace('https://', '')); } catch { prompt('Lien à copier :', url); }
+  });
+}
+
+function montrerQR(cl) {
+  const url = SITE + (cl.qr || cl.chemin);
+  const v = document.createElement('div'); v.className = 'veil';
+  v.innerHTML = `<div class="sheet"><h2>${esc(cl.nom)}</h2><p>${esc(url.replace('https://', ''))}</p><div class="qr">${qrSvg(url, { border: 2 })}</div>
+    <div class="acts"><button class="btn ghost" data-f>Fermer</button><button class="btn" data-print>Imprimer</button></div></div>`;
+  v.onclick = e => {
+    if (e.target === v || e.target.closest('[data-f]')) v.remove();
+    if (e.target.closest('[data-print]')) {
+      const w = window.open('', '_blank'); if (!w) return toast('Autorise les fenêtres pour imprimer.', true);
+      w.document.write(`<!doctype html><meta charset="utf-8"><title>QR · ${esc(cl.nom)}</title><style>body{font-family:-apple-system,system-ui,sans-serif;text-align:center;padding:30mm 20mm;color:#2b1d16}h1{font-size:34px;margin:0 0 4mm}.q{width:110mm;margin:10mm auto}.q svg{width:100%}p{font-size:18px;color:#7a6a5c}</style><h1>Le 76 · ${esc(cl.nom)}</h1><div class="q">${qrSvg(url, { border: 2 })}</div><p>${esc(url.replace('https://', ''))}</p><script>onload=()=>print()<\/script>`);
+      w.document.close();
+    }
+  };
+  document.body.appendChild(v);
+}
+
+afficher();
+setInterval(() => document.visibilityState === 'visible' && !document.querySelector('.veil') && document.querySelector('.top') && afficher(true), 60000);
+document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && document.querySelector('.top') && afficher(true));
+})();
+</script>
+</body>
+</html>

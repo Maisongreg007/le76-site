@@ -41,6 +41,12 @@ try {
 
     $moi = utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
 
+    // Portail du 76 (/admin) : résumé du jour, en lecture seule
+    if ($action === 'portail') {
+        require_once __DIR__ . '/lib/portail.php';
+        repondre(['ok' => true] + portail_resume($moi));
+    }
+
     // Le Club (fidélité et offres par e-mail) : onglet « Club » de l'appli
     if (str_starts_with($action, 'club_')) {
         require __DIR__ . '/lib/club-equipe.php';
