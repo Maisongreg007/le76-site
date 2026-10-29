@@ -15,6 +15,8 @@ function ecole_exercices(): void
         return;
     }
     $pdo = db();
+    $pdo->exec('UPDATE produits SET depannage = 10');   // stock de dépannage pour s'entraîner à la vente comptoir
+    $produits = array_values(array_filter(produits(false), fn($p) => $p['active']));
     $pdo->exec('BEGIN IMMEDIATE');
     foreach ($clients as $i => [$prenom, $nom, $empl]) {
         $lignes = [];

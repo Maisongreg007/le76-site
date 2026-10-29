@@ -129,6 +129,11 @@ function db(): PDO
         $pdo->exec('ALTER TABLE commandes ADD COLUMN checkout_id TEXT');
         $pdo->exec('ALTER TABLE commandes ADD COLUMN checkout_montant INTEGER');
     }
+    $pcols = array_column($pdo->query('PRAGMA table_info(produits)')->fetchAll(), 'name');
+    if (!in_array('depannage', $pcols, true)) {
+        // Stock de dépannage : pièces commandées en plus chaque jour pour les retardataires (vente au comptoir)
+        $pdo->exec('ALTER TABLE produits ADD COLUMN depannage INTEGER NOT NULL DEFAULT 0');
+    }
     $pdo->exec('CREATE TABLE IF NOT EXISTS lignes (
         commande_id INTEGER NOT NULL REFERENCES commandes(id) ON DELETE CASCADE,
         produit_id INTEGER NOT NULL, nom TEXT NOT NULL, emoji TEXT NOT NULL DEFAULT \'\',
@@ -358,6 +363,7 @@ function produits(bool $actifsSeulement): array
         'id' => (int) $p['id'], 'name' => $p['nom'], 'names' => json_decode($p['noms'], true) ?: [], 'emoji' => $p['emoji'],
         'price' => (int) $p['prix'], 'cost' => (int) $p['cout'], 'active' => (bool) $p['actif'], 'sort' => (int) $p['ordre'],
         'dailyLimit' => $p['limite_jour'] === null ? null : (int) $p['limite_jour'],
+        'reserve' => (int) ($p['depannage'] ?? 0),
     ], $rows);
 }
 
@@ -365,7 +371,7 @@ function produits(bool $actifsSeulement): array
 function reserve_du_jour(string $jour, int $sauf = 0): array
 {
     $st = db()->prepare("SELECT l.produit_id, SUM(l.quantite) q FROM lignes l JOIN commandes c ON c.id = l.commande_id
-        WHERE c.jour = ? AND c.statut != 'cancelled' AND c.id != ? GROUP BY l.produit_id");
+        WHERE c.jour = ? AND c.statut != 'cancelled' AND c.origine != 'comptoir' AND c.id != ? GROUP BY l.produit_id");
     $st->execute([$jour, $sauf]);
     $out = [];
     foreach ($st->fetchAll() as $r) {

@@ -138,6 +138,7 @@ async function renderDay() {
     </div>
     <div class="group-title">À préparer · ${dfr(DAY, { day: 'numeric', month: 'long' })}</div>
     <div class="prep">${j.prep.length ? j.prep.map(p => `<div class="c"><div style="font-size:26px">${esc(p.emoji)}</div><div class="q">${p.total}</div><div>${esc(p.name)}</div><div class="r">${p.remaining} encore à remettre${p.pending ? ` · <b style="color:var(--orange)">+${p.pending} en attente de paiement</b>` : ''}</div></div>`).join('') : '<div class="c"><div class="mute">Aucune commande pour ce jour.</div></div>'}</div>
+    ${reserveCard(j, isToday)}
     <div class="stats" style="margin-top:10px">
       <div class="stat"><div class="k">Commandes validées</div><div class="v">${s.orders}</div></div>
       <div class="stat"><div class="k">À payer</div><div class="v" style="color:var(--orange)">${s.pending}</div><div class="small mute">${eur(s.pendingTotal)}</div></div>
@@ -159,7 +160,48 @@ async function renderDay() {
   $('dBaker').onclick = () => bakerSheet(isToday ? addDays(DAY, 1) : DAY);
   $('dSearch').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('.dList .li').forEach(li => li.hidden = q && !li.dataset.s.includes(q)); };
   wireOrders(j.orders, renderDay);
+  wireReserve(j, isToday);
   if (isToday) dayTimer = setInterval(() => { if (VIEW === 'day' && $('sheet').hidden && !document.activeElement?.matches('input')) renderDay(); }, 30000);
+}
+/* ---- Dépannage : stock en plus pour les retardataires, vendu au comptoir ---- */
+let RES_CART = {};
+function reserveCard(j, isToday) {
+  const r = j.reserve || { items: [], sales: 0, total: 0 };
+  const items = r.items.filter(i => i.stock || i.sold);
+  if (!items.length) return `<div class="group-title">Dépannage</div><div class="group pad small mute">Pas de stock de dépannage. Fixe-le dans <b>Produits</b> (ex. 10 baguettes par jour) : il s’ajoute à la commande boulanger et se vend ici aux retardataires.</div>`;
+  const total = items.reduce((a, i) => a + (RES_CART[i.id] || 0) * i.price, 0);
+  return `<div class="group-title">Dépannage · retardataires${r.sales ? ` · ${r.sales} vente(s), ${eur(r.total)}` : ''}</div>
+    <div class="prep">${items.map(i => `<div class="c" style="${i.left <= 0 ? 'opacity:.6' : ''}">
+      <div style="font-size:26px">${esc(i.emoji)}</div>
+      <div class="q" style="color:${i.left <= 0 ? 'var(--red)' : i.left <= 2 ? 'var(--orange)' : 'inherit'}">${i.left}</div>
+      <div>${esc(i.name)}</div><div class="r">reste sur ${i.stock}${i.sold ? ' · ' + i.sold + ' vendu(s)' : ''}</div>
+      ${isToday ? `<div class="row-btns no-print" style="margin-top:8px;justify-content:center;gap:6px">
+        <button class="btn-plain btn-sm" data-rm="${i.id}" style="min-width:40px">−</button>
+        <b style="min-width:28px;text-align:center;font-size:20px">${RES_CART[i.id] || 0}</b>
+        <button class="btn-plain btn-sm" data-ra="${i.id}" style="min-width:40px">+</button></div>` : ''}
+    </div>`).join('')}</div>
+    ${isToday ? `<div class="row-btns no-print" style="margin:8px 0 4px;align-items:center">
+      <b style="font-size:18px;margin-right:auto">${total ? 'À encaisser : ' + eur(total) : '<span class="small mute">Touche + pour préparer une vente</span>'}</b>
+      <button class="btn-ok" data-rpay="especes" ${total ? '' : 'disabled'}>Espèces</button><button class="btn-ok" data-rpay="carte" ${total ? '' : 'disabled'}>Carte</button></div>` : ''}`;
+}
+function wireReserve(j, isToday) {
+  if (!isToday) return;
+  const items = (j.reserve?.items || []);
+  document.querySelectorAll('[data-ra]').forEach(b => b.onclick = () => { RES_CART[b.dataset.ra] = (RES_CART[b.dataset.ra] || 0) + 1; renderDay(); });
+  document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { RES_CART[b.dataset.rm] = Math.max(0, (RES_CART[b.dataset.rm] || 0) - 1); renderDay(); });
+  document.querySelectorAll('[data-rpay]').forEach(b => b.onclick = async () => {
+    const lst = Object.entries(RES_CART).filter(([, q]) => q > 0).map(([id, qty]) => ({ id: +id, qty }));
+    if (!lst.length) return;
+    const send = async force => {
+      const r = await api('vente_comptoir', { items: lst, method: b.dataset.rpay, force });
+      RES_CART = {}; toast(`Vente encaissée (${b.dataset.rpay === 'especes' ? 'espèces' : 'carte'}) : ${eur(r.total)}`); renderDay();
+    };
+    try { await send(false); }
+    catch (e) {
+      if (e.status === 409 && confirm(e.message + '\n\nVendre quand même ?')) { try { await send(true); } catch (e2) { toast(e2.message, true); } }
+      else if (e.status !== 409) toast(e.message, true);
+    }
+  });
 }
 function orderLi(o) {
   const [lbl, cls] = ST[o.status];
@@ -292,7 +334,7 @@ async function renderProducts() {
     <div class="group" style="margin-top:14px">${PRODUCTS.map((p, i) => `
       <div class="li"><span class="emoji">${esc(p.emoji)}</span>
         <span class="main"><div class="t">${esc(p.name)} ${p.active ? '' : '<span class="pill p-gray">retiré de la vente</span>'}</div>
-        <div class="d">Vente ${eur(p.price)} · achat ${eur(p.cost)} · marge ${eur(p.price - p.cost)} (${p.price ? Math.round((p.price - p.cost) / p.price * 100) : 0} %)${p.dailyLimit !== null ? ' · ' + p.dailyLimit + ' max/jour' : ''}</div></span>
+        <div class="d">Vente ${eur(p.price)} · achat ${eur(p.cost)} · marge ${eur(p.price - p.cost)} (${p.price ? Math.round((p.price - p.cost) / p.price * 100) : 0} %)${p.dailyLimit !== null ? ' · ' + p.dailyLimit + ' max/jour' : ''}${p.reserve ? ' · dépannage ' + p.reserve + '/jour' : ''}</div></span>
         <span class="acts"><button class="btn-plain btn-sm" data-up="${i}" ${i ? '' : 'disabled'}>↑</button><button class="btn-plain btn-sm" data-edit="${p.id}">Modifier</button></span></div>`).join('')}</div>
     <p class="small mute" style="margin:10px 6px">Changer un prix ne modifie pas les commandes déjà passées : elles gardent le prix du jour de la commande. Un produit retiré de la vente n’est plus proposé aux campeurs.</p>`;
   $('pNew').onclick = () => productSheet(null);
@@ -307,6 +349,7 @@ function productSheet(p) {
     <div class="fields2"><label class="field"><span>Nom (français)</span><input id="pName" maxlength="50" value="${esc(p?.name || '')}"></label><label class="field"><span>Icône (emoji)</span><input id="pEmoji" maxlength="8" value="${esc(p?.emoji || '🥖')}"></label></div>
     <div class="fields3"><label class="field"><span>Allemand</span><input id="pDe" maxlength="50" value="${esc(p?.names?.de || '')}"></label><label class="field"><span>Anglais</span><input id="pEn" maxlength="50" value="${esc(p?.names?.en || '')}"></label><label class="field"><span>Néerlandais</span><input id="pNl" maxlength="50" value="${esc(p?.names?.nl || '')}"></label></div>
     <div class="fields3"><label class="field"><span>Prix de vente (€)</span><input id="pPrice" inputmode="decimal" value="${p ? inCents(p.price) : ''}"></label><label class="field"><span>Prix d’achat (€)</span><input id="pCost" inputmode="decimal" value="${p ? inCents(p.cost) : ''}"></label><label class="field"><span>Maximum par jour</span><input id="pLimit" inputmode="numeric" placeholder="illimité" value="${p?.dailyLimit ?? ''}"></label></div>
+    <label class="field"><span>Stock de dépannage par jour (commandé en plus au boulanger, pour les retardataires)</span><input id="pReserve" inputmode="numeric" placeholder="0" value="${p?.reserve || ''}"></label>
     <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="pActive" ${!p || p.active ? 'checked' : ''}> En vente</label>
     <div class="total"><span>Marge par pièce</span><b id="pMargin"></b></div>
     <button class="btn-main" id="pSave">Enregistrer</button>`);
@@ -316,7 +359,9 @@ function productSheet(p) {
     try {
       const lim = $('pLimit').value.trim();
       if (lim && !/^\d{1,5}$/.test(lim)) throw new Error('Maximum par jour : un nombre entier, ou vide pour illimité.');
-      const product = { id: p?.id, name: $('pName').value, emoji: $('pEmoji').value, names: { de: $('pDe').value, en: $('pEn').value, nl: $('pNl').value }, price: parseCents($('pPrice').value), cost: parseCents($('pCost').value || '0'), dailyLimit: lim === '' ? null : +lim, active: $('pActive').checked };
+      const res = $('pReserve').value.trim();
+      if (res && !/^\d{1,3}$/.test(res)) throw new Error('Stock de dépannage : un nombre entier (0 à 500).');
+      const product = { id: p?.id, name: $('pName').value, emoji: $('pEmoji').value, names: { de: $('pDe').value, en: $('pEn').value, nl: $('pNl').value }, price: parseCents($('pPrice').value), cost: parseCents($('pCost').value || '0'), dailyLimit: lim === '' ? null : +lim, reserve: res === '' ? 0 : +res, active: $('pActive').checked };
       PRODUCTS = (await api('produit', { product })).products; closeSheet(); toast('Produit enregistré.'); renderProducts();
     } catch (e) { toast(e.message, true); }
   };
@@ -513,7 +558,8 @@ function bakerExtra() { try { return JSON.parse(localStorage.getItem('pain_boula
 function bakerExtraSave(x) { try { localStorage.setItem('pain_boulanger_extra', JSON.stringify(x)); } catch { } }
 async function bakerSheet(date) {
   let j; try { j = await api('jour', { date }); } catch (e) { return toast(e.message, true); }
-  const extra = bakerExtra();
+  const extra = {};
+  PRODUCTS.forEach(p => { if (p.reserve) extra[p.id] = p.reserve; });
   const rows = PRODUCTS.filter(p => p.active || j.prep.some(x => x.id === p.id && x.total)).map(p => {
     const x = j.prep.find(y => y.id === p.id) || {};
     return { p, q: x.total || 0, w: x.pending || 0 };
@@ -532,11 +578,11 @@ async function bakerSheet(date) {
         <div class="li" style="align-items:center">
           <span style="font-size:28px">${esc(r.p.emoji)}</span>
           <span class="main"><div class="t">${esc(r.p.name)}</div><div class="d">${r.q} précommandé(s)${r.w ? ` · <span style="color:var(--orange)">+${r.w} pas encore payé(s)</span>` : ''}</div></span>
-          <span style="display:flex;align-items:center;gap:6px" title="En plus pour la vente au comptoir"><span class="small mute">+</span>
+          <span style="display:flex;align-items:center;gap:6px" title="Stock de dépannage (retardataires)"><span class="small mute">+ dépannage</span>
             <input type="number" min="0" max="999" inputmode="numeric" data-x="${r.p.id}" value="${+extra[r.p.id] || ''}" placeholder="0" style="width:64px;text-align:center"></span>
           <span style="font-size:30px;font-weight:700;min-width:56px;text-align:right" data-t="${r.p.id}">${tot(r)}</span>
         </div>`).join('')}</div>
-      <p class="small mute" style="margin:6px 4px 14px">Le chiffre en gros = à commander. La case « + » ajoute de quoi vendre au comptoir ; elle est retenue sur cet appareil.</p>
+      <p class="small mute" style="margin:6px 4px 14px">Le chiffre en gros = à commander : précommandes payées + stock de dépannage (réglé dans Produits, modifiable ici pour ce jour).</p>
       <div class="row-btns" style="flex-wrap:wrap">
         ${SETTINGS?.printer_ip ? '<button class="btn-main" id="bPrint" style="flex:1">🖨️ Imprimer le ticket</button>' : ''}
         <button class="btn-soft" id="bSend" style="flex:1">💬 Envoyer au boulanger</button>
@@ -546,8 +592,7 @@ async function bakerSheet(date) {
     $('bNext').onclick = () => bakerSheet(addDays(date, 1));
     document.querySelectorAll('[data-x]').forEach(i => i.oninput = () => {
       const v = Math.max(0, Math.min(999, parseInt(i.value, 10) || 0));
-      if (v) extra[i.dataset.x] = v; else delete extra[i.dataset.x];
-      bakerExtraSave(extra);
+      extra[i.dataset.x] = v;   // 0 compris : sinon le serveur reprendrait le stock de dépannage
       const r = rows.find(y => String(y.p.id) === i.dataset.x);
       document.querySelector(`[data-t="${i.dataset.x}"]`).textContent = tot(r);
     });

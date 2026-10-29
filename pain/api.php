@@ -149,6 +149,8 @@ try {
             imprimante_relais($q);
         case 'lien_appareil':
             lien_appareil();
+        case 'vente_comptoir':
+            vente_comptoir($q);
         case 'boulanger_imprimer':
             boulanger_imprimer((string) ($q['date'] ?? ''), is_array($q['extra'] ?? null) ? $q['extra'] : []);
         case 'imprimante_vider':
@@ -318,7 +320,9 @@ function jour_equipe(string $jour): never
     }
     $st = db()->prepare('SELECT * FROM commandes WHERE jour = ? ORDER BY CAST(emplacement AS INTEGER), emplacement, nom');
     $st->execute([$jour]);
-    $orders = array_map(fn($c) => vue_commande($c, true), $st->fetchAll());
+    $toutes = $st->fetchAll();
+    $orders = array_map(fn($c) => vue_commande($c, true), array_values(array_filter($toutes, fn($c) => $c['origine'] !== 'comptoir')));
+    $depannage = depannage_du_jour($jour, array_values(array_filter($toutes, fn($c) => $c['origine'] === 'comptoir' && $c['statut'] !== 'cancelled')));
     $prep = [];
     foreach ($orders as $o) {
         if ($o['status'] === 'cancelled') {
@@ -338,7 +342,7 @@ function jour_equipe(string $jour): never
     }
     $valides = array_filter($orders, fn($o) => in_array($o['status'], ['confirmed', 'collected'], true));
     $attente = array_filter($orders, fn($o) => $o['status'] === 'pending');
-    repondre(['ok' => true, 'date' => $jour, 'orders' => $orders, 'prep' => array_values($prep),
+    repondre(['ok' => true, 'date' => $jour, 'orders' => $orders, 'prep' => array_values($prep), 'reserve' => $depannage,
         'summary' => [
             'orders' => count($valides),
             'collected' => count(array_filter($orders, fn($o) => $o['status'] === 'collected')),
@@ -549,18 +553,22 @@ function enregistrer_produit(array $q): never
         erreur('Limite par jour invalide.');
     }
     $actif = (bool) ($p['active'] ?? true);
+    $depannage = $p['reserve'] ?? 0;
+    if (!is_int($depannage) || $depannage < 0 || $depannage > 500) {
+        erreur('Stock de dépannage invalide (0 à 500).');
+    }
     $id = (int) ($p['id'] ?? 0);
     if ($id > 0) {
         $st = db()->prepare('SELECT * FROM produits WHERE id = ?');
         $st->execute([$id]);
         $avant = $st->fetch() ?: erreur('Produit introuvable.', 404);
-        db()->prepare('UPDATE produits SET nom = ?, noms = ?, emoji = ?, prix = ?, cout = ?, actif = ?, limite_jour = ? WHERE id = ?')
-            ->execute([$nom, json_encode($noms, JSON_UNESCAPED_UNICODE), $emoji, $prix, $cout, $actif ? 1 : 0, $limite, $id]);
+        db()->prepare('UPDATE produits SET nom = ?, noms = ?, emoji = ?, prix = ?, cout = ?, actif = ?, limite_jour = ?, depannage = ? WHERE id = ?')
+            ->execute([$nom, json_encode($noms, JSON_UNESCAPED_UNICODE), $emoji, $prix, $cout, $actif ? 1 : 0, $limite, $depannage, $id]);
         journaliser('équipe', 'Produit modifié', null, $nom . ' · ' . eur((int) $avant['prix']) . ' → ' . eur($prix) . ($actif ? '' : ' · retiré de la vente'));
     } else {
         $ordre = (int) db()->query('SELECT COALESCE(MAX(ordre), 0) + 1 FROM produits')->fetchColumn();
-        db()->prepare('INSERT INTO produits (nom, noms, emoji, prix, cout, actif, ordre, limite_jour, cree_le) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-            ->execute([$nom, json_encode($noms, JSON_UNESCAPED_UNICODE), $emoji, $prix, $cout, $actif ? 1 : 0, $ordre, $limite, maintenant()]);
+        db()->prepare('INSERT INTO produits (nom, noms, emoji, prix, cout, actif, ordre, limite_jour, depannage, cree_le) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            ->execute([$nom, json_encode($noms, JSON_UNESCAPED_UNICODE), $emoji, $prix, $cout, $actif ? 1 : 0, $ordre, $limite, $depannage, maintenant()]);
         journaliser('équipe', 'Produit ajouté', null, $nom . ' · ' . eur($prix));
     }
     repondre(['ok' => true, 'products' => produits(false)]);
@@ -779,7 +787,7 @@ function boulanger_imprimer(string $jour, array $extra): never
         erreur('Renseigne d’abord l’imprimante dans Réglages → Imprimante des bons.');
     }
     $st = db()->prepare("SELECT l.produit_id id, SUM(l.quantite) q FROM lignes l JOIN commandes c ON c.id = l.commande_id
-        WHERE c.jour = ? AND c.statut IN ('confirmed', 'collected') GROUP BY l.produit_id");
+        WHERE c.jour = ? AND c.statut IN ('confirmed', 'collected') AND c.origine != 'comptoir' GROUP BY l.produit_id");
     $st->execute([$jour]);
     $payees = array_column($st->fetchAll(), 'q', 'id');
     $st = db()->prepare("SELECT l.produit_id id, SUM(l.quantite) q FROM lignes l JOIN commandes c ON c.id = l.commande_id
@@ -799,12 +807,12 @@ function boulanger_imprimer(string $jour, array $extra): never
     $total = 0;
     foreach (produits(false) as $p) {
         $q = (int) ($payees[$p['id']] ?? 0);
-        $x = max(0, min(999, (int) ($extra[(string) $p['id']] ?? 0)));
+        $x = max(0, min(999, (int) ($extra[(string) $p['id']] ?? $p['reserve'])));
         if ($q + $x === 0) {
             continue;   // rien à commander : pas de ligne « 0 » qui embrouille le boulanger
         }
         $lignes[] = ['text' => str_pad((string) ($q + $x), 4, ' ', STR_PAD_LEFT) . '  ' . $p['name'], 'bold' => true, 'width' => 2, 'height' => 2];
-        $detail[] = ['text' => $p['name'] . ' : ' . $q . ' precommande(s)' . ($x ? ' + ' . $x . ' comptoir' : '') . (!empty($attente[$p['id']]) ? ' (' . $attente[$p['id']] . ' non payee(s))' : '')];
+        $detail[] = ['text' => $p['name'] . ' : ' . $q . ' precommande(s)' . ($x ? ' + ' . $x . ' depannage' : '') . (!empty($attente[$p['id']]) ? ' (' . $attente[$p['id']] . ' non payee(s))' : '')];
         $total += $q + $x;
     }
     $lignes[] = $trait;
@@ -821,6 +829,66 @@ function boulanger_imprimer(string $jour, array $extra): never
     imprimante_ajouter($lignes, null);
     journaliser('équipe', 'Commande boulanger imprimée', null, $jour . ' · ' . $total . ' pièce(s)');
     repondre(['ok' => true]);
+}
+
+/**
+ * Stock de dépannage d'un jour : pour chaque produit, le stock prévu (commandé en plus au boulanger),
+ * ce qui a été vendu au comptoir et ce qu'il reste.
+ */
+function depannage_du_jour(string $jour, array $ventes): array
+{
+    $vendus = [];
+    $total = 0;
+    foreach ($ventes as $c) {
+        $total += (int) $c['total'];
+        foreach (lignes_de((int) $c['id']) as $l) {
+            $vendus[$l['id']] = ($vendus[$l['id']] ?? 0) + $l['qty'];
+        }
+    }
+    $out = [];
+    foreach (produits(false) as $p) {
+        $v = $vendus[$p['id']] ?? 0;
+        if (!$p['active'] && !$v) {
+            continue;
+        }
+        $out[] = ['id' => $p['id'], 'name' => $p['name'], 'emoji' => $p['emoji'], 'price' => $p['price'], 'stock' => $p['reserve'], 'sold' => $v, 'left' => $p['reserve'] - $v];
+    }
+    return ['items' => $out, 'sales' => count($ventes), 'total' => $total];
+}
+
+/**
+ * Vente au comptoir sur le stock de dépannage (retardataires, passants) : payée tout de suite,
+ * remise tout de suite, pas de bon de préparation. Vendre au-delà du stock demande une confirmation.
+ */
+function vente_comptoir(array $q): never
+{
+    $methode = (string) ($q['method'] ?? '');
+    methode_valide($methode);
+    $jour = date('Y-m-d');
+    $pdo = db();
+    $pdo->exec('BEGIN IMMEDIATE');
+    $lignes = lignes_depuis($q['items'] ?? null, $jour, 0, true);
+    if (empty($q['force'])) {
+        $st = $pdo->prepare("SELECT * FROM commandes WHERE jour = ? AND origine = 'comptoir' AND statut != 'cancelled'");
+        $st->execute([$jour]);
+        $d = array_column(depannage_du_jour($jour, $st->fetchAll())['items'], null, 'id');
+        foreach ($lignes as $l) {
+            $reste = $d[$l['produit_id']]['left'] ?? 0;
+            if ($l['quantite'] > $reste) {
+                erreur('Stock de dépannage : il ne reste que ' . max(0, $reste) . ' « ' . $l['nom'] . ' ».', 409);
+            }
+        }
+    }
+    $now = maintenant();
+    $pdo->prepare("INSERT INTO commandes (jeton, code, cle, prenom, nom, emplacement, telephone, remarque, langue, jour, statut, paye, paiement, total, cout, origine, cree_le, modifie_le, retire_le)
+        VALUES (?, ?, NULL, '', 'Vente comptoir', '—', '', '', 'fr', ?, 'collected', 1, ?, 0, 0, 'comptoir', ?, ?, ?)")
+        ->execute([jeton(), nouveau_code(), $jour, $methode, $now, $now, $now]);
+    $id = (int) $pdo->lastInsertId();
+    [$total, $cout] = enregistrer_lignes($id, $lignes);
+    $pdo->prepare('UPDATE commandes SET total = ?, cout = ? WHERE id = ?')->execute([$total, $cout, $id]);
+    journaliser('équipe', 'Vente dépannage (' . P_PAIEMENTS[$methode] . ')', $id, resume_lignes($lignes) . ' · ' . eur($total) . (!empty($q['force']) ? ' · au-delà du stock' : ''));
+    $pdo->exec('COMMIT');
+    repondre(['ok' => true, 'total' => $total]);
 }
 
 /** QR code pour connecter un autre appareil de l'équipe : valable 10 minutes, une seule fois. */
