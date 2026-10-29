@@ -151,6 +151,8 @@ try {
             lien_appareil();
         case 'vente_comptoir':
             vente_comptoir($q);
+        case 'liste_imprimer':
+            liste_imprimer((string) ($q['date'] ?? ''));
         case 'boulanger_imprimer':
             boulanger_imprimer((string) ($q['date'] ?? ''), is_array($q['extra'] ?? null) ? $q['extra'] : []);
         case 'imprimante_vider':
@@ -763,6 +765,7 @@ function imprimante_relais(array $q): never
     }
     if (($q['alive'] ?? null) === true) {
         imprimante_vue('TM-m30II (relais)');
+        boulanger_auto();
     }
     $ip = reglages()['printer_ip'];
     $jobs = [];
@@ -786,6 +789,15 @@ function boulanger_imprimer(string $jour, array $extra): never
     if (reglages()['printer_ip'] === '') {
         erreur('Renseigne d’abord l’imprimante dans Réglages → Imprimante des bons.');
     }
+    [$lignes, $total] = boulanger_ticket($jour, $extra);
+    imprimante_ajouter($lignes, null);
+    journaliser('équipe', 'Commande boulanger imprimée', null, $jour . ' · ' . $total . ' pièce(s)');
+    repondre(['ok' => true]);
+}
+
+/** Ticket « commande boulanger » d'un jour : [lignes, nombre total de pièces]. */
+function boulanger_ticket(string $jour, array $extra): array
+{
     $st = db()->prepare("SELECT l.produit_id id, SUM(l.quantite) q FROM lignes l JOIN commandes c ON c.id = l.commande_id
         WHERE c.jour = ? AND c.statut IN ('confirmed', 'collected') AND c.origine != 'comptoir' GROUP BY l.produit_id");
     $st->execute([$jour]);
@@ -795,12 +807,11 @@ function boulanger_imprimer(string $jour, array $extra): never
     $st->execute([$jour]);
     $attente = array_column($st->fetchAll(), 'q', 'id');
     $r = reglages();
-    $jours = ['', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
     $j = new DateTimeImmutable($jour);
     $trait = ['text' => str_repeat('-', 48)];
     $lignes = [
         ['text' => 'COMMANDE BOULANGER', 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
-        ['text' => 'Pour ' . $jours[(int) $j->format('N')] . ' ' . $j->format('d/m'), 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
+        ['text' => 'Pour ' . JOURS_MAJ[(int) $j->format('N')] . ' ' . $j->format('d/m'), 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
         $trait,
     ];
     $detail = [];
@@ -826,9 +837,83 @@ function boulanger_imprimer(string $jour, array $extra): never
     $lignes[] = ['text' => 'Etabli le ' . date('d/m/Y H:i')];
     $lignes[] = ['feed' => 3];
     $lignes[] = ['cut' => true];
-    imprimante_ajouter($lignes, null);
-    journaliser('équipe', 'Commande boulanger imprimée', null, $jour . ' · ' . $total . ' pièce(s)');
+    return [$lignes, $total];
+}
+
+/**
+ * Liste des commandes payées d'un jour, triée par nom : numéro et nom en grand, bien lisibles,
+ * pour retrouver vite chaque commande à la remise.
+ */
+function liste_ticket(string $jour): array
+{
+    $st = db()->prepare("SELECT * FROM commandes WHERE jour = ? AND statut IN ('confirmed', 'collected') AND origine != 'comptoir'
+        ORDER BY UPPER(nom), UPPER(prenom), id");
+    $st->execute([$jour]);
+    $cmd = $st->fetchAll();
+    $j = new DateTimeImmutable($jour);
+    $trait = ['text' => str_repeat('-', 48)];
+    $lignes = [
+        ['text' => 'LISTE DES COMMANDES', 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
+        ['text' => 'Retrait ' . JOURS_MAJ[(int) $j->format('N')] . ' ' . $j->format('d/m'), 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
+        ['text' => count($cmd) . ' commande(s) payee(s) - triees par nom', 'align' => 'center'],
+        $trait,
+    ];
+    foreach ($cmd as $c) {
+        $nom = mb_strtoupper($c['nom']) . ' ' . $c['prenom'];
+        $lignes[] = ['text' => $c['code'] . '  ' . mb_substr($nom, 0, 38), 'bold' => true, 'height' => 2];
+        $lignes[] = ['text' => '   Empl. ' . $c['emplacement'] . ' - ' . str_replace(' × ', ' ', resume_lignes(lignes_de((int) $c['id'])))
+            . ($c['statut'] === 'collected' ? '  [retiree]' : '')];
+    }
+    if (!$cmd) {
+        $lignes[] = ['text' => 'Aucune commande payee pour ce jour.', 'align' => 'center'];
+    }
+    $lignes[] = $trait;
+    $lignes[] = ['text' => 'Imprime le ' . date('d/m/Y H:i')];
+    $lignes[] = ['feed' => 3];
+    $lignes[] = ['cut' => true];
+    return $lignes;
+}
+
+function liste_imprimer(string $jour): never
+{
+    date_valide($jour) || erreur('Date invalide.');
+    if (reglages()['printer_ip'] === '') {
+        erreur('Renseigne d’abord l’imprimante dans Réglages → Imprimante des bons.');
+    }
+    imprimante_ajouter(liste_ticket($jour), null);
+    journaliser('équipe', 'Liste des commandes imprimée', null, $jour);
     repondre(['ok' => true]);
+}
+
+/**
+ * Impression automatique à l'heure limite : dès que les commandes d'un jour sont closes (ex. la veille
+ * à 20 h), la commande boulanger et la liste des commandes de ce jour sortent toutes seules, une fois.
+ * Déclenchée par l'appareil relais (ou l'imprimante) : si personne n'est connecté à 20 h, elles sortent
+ * à la prochaine ouverture de la page, tant que le jour n'est pas passé.
+ */
+function boulanger_auto(): void
+{
+    $r = reglages();
+    if (mode_base() !== 'reel' || !$r['printer_on'] || !$r['baker_auto'] || $r['printer_ip'] === '') {
+        return;
+    }
+    $st = db()->prepare("SELECT valeur FROM reglages WHERE cle = 'boulanger_auto'");
+    $st->execute();
+    $fait = (string) ($st->fetchColumn() ?: '');
+    for ($i = 0; $i <= $r['cutoff_days'] + 1; $i++) {
+        $jour = date('Y-m-d', strtotime("+$i day"));
+        $maintenant = new DateTimeImmutable();
+        // Commandes closes, et retrait pas encore terminé (inutile d'imprimer la liste d'une matinée passée)
+        if ($jour <= $fait || !jour_ouvert($jour, $r) || $maintenant < limite_commande($jour, $r) || $maintenant >= new DateTimeImmutable($jour . ' ' . $r['pickup_to'])) {
+            continue;
+        }
+        [$lignes, $total] = boulanger_ticket($jour, []);
+        imprimante_ajouter($lignes, null);
+        imprimante_ajouter(liste_ticket($jour), null);
+        db()->prepare("INSERT INTO reglages (cle, valeur) VALUES ('boulanger_auto', ?) ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur")->execute([$jour]);
+        journaliser('système', 'Commande boulanger et liste imprimées automatiquement', null, $jour . ' · ' . $total . ' pièce(s)');
+        $fait = $jour;
+    }
 }
 
 /**

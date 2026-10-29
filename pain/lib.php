@@ -22,6 +22,7 @@ const P_DUREE = 400 * 86400;
 const P_LANGS = ['fr', 'de', 'en', 'nl'];
 const P_STATUTS = ['pending', 'confirmed', 'collected', 'cancelled'];   // à payer → payée (à remettre) → retirée ; ou annulée
 const P_PAIEMENTS = ['especes' => 'Espèces', 'carte' => 'Carte', 'en_ligne' => 'Carte en ligne'];
+const JOURS_MAJ = ['', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];   // tickets
 
 const P_REGLAGES_DEFAUT = [
     'title' => 'Pain & viennoiseries',
@@ -40,6 +41,7 @@ const P_REGLAGES_DEFAUT = [
     'max_per_product' => 20,
     'printer_on' => false,                      // un bon s'imprime à chaque commande payée
     'printer_ip' => '',                         // imprimante Epson sur le réseau du camping (relais : page équipe ouverte)
+    'baker_auto' => true,                       // à l'heure limite : commande boulanger + liste des commandes imprimées toutes seules
 ];
 
 const P_PRODUITS_DEFAUT = [
@@ -277,6 +279,7 @@ function valider_reglages(array $in): array
     }
     $out['max_per_product'] = (int) $mx;
     $out['printer_on'] = (bool) ($in['printer_on'] ?? $r['printer_on']);
+    $out['baker_auto'] = (bool) ($in['baker_auto'] ?? $r['baker_auto']);
     $ip = trim((string) ($in['printer_ip'] ?? $r['printer_ip']));
     if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
         erreur('Adresse de l’imprimante invalide (ex. 192.168.192.54).');

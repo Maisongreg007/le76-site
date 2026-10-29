@@ -134,6 +134,7 @@ async function renderDay() {
     <div class="row-btns no-print" style="margin:4px 0 6px">
       <button class="btn-plain btn-sm" id="dSheet">🧾 Feuille de vente · ${isToday ? 'aujourd’hui' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
       <button class="btn-soft btn-sm" id="dBaker">🥖 Commande boulanger · ${isToday ? 'demain' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>
+      ${SETTINGS?.printer_ip ? `<button class="btn-plain btn-sm" id="dList">📋 Imprimer la liste des commandes · ${isToday ? 'aujourd’hui' : dfr(DAY, { day: 'numeric', month: 'short' })}</button>` : ''}
       </div>
     </div>
     <div class="group-title">À préparer · ${dfr(DAY, { day: 'numeric', month: 'long' })}</div>
@@ -158,6 +159,7 @@ async function renderDay() {
   $('dNew').onclick = () => orderSheet(null, DAY);
   $('dSheet').onclick = () => printSales(DAY);
   $('dBaker').onclick = () => bakerSheet(isToday ? addDays(DAY, 1) : DAY);
+  if ($('dList')) $('dList').onclick = () => printList(DAY);
   $('dSearch').oninput = e => { const q = e.target.value.toLowerCase(); document.querySelectorAll('.dList .li').forEach(li => li.hidden = q && !li.dataset.s.includes(q)); };
   wireOrders(j.orders, renderDay);
   wireReserve(j, isToday);
@@ -476,7 +478,7 @@ async function renderSettings() {
     const settings = { ...s, ordering_open: $('sOpen').checked, title: $('sTitle').value, place: $('sPlace').value, message: $('sMsg').value,
       pickup_from: $('sFrom').value, pickup_to: $('sTo').value, open_days: days, cutoff_days: +$('sCd').value, cutoff_time: $('sCt').value,
       days_ahead: +$('sAhead').value, max_per_product: +$('sMax').value, season_start: $('sSs').value, season_end: $('sSe').value, closed_dates: closed,
-      printer_on: SETTINGS.printer_on, printer_ip: SETTINGS.printer_ip };
+      printer_on: SETTINGS.printer_on, printer_ip: SETTINGS.printer_ip, baker_auto: SETTINGS.baker_auto };
     try { const r = await api('reglages_enregistrer', { settings }); SETTINGS = r.settings; toast('Réglages enregistrés.'); renderSettings(); } catch (e) { toast(e.message, true); }
   };
   $('sPoster').onclick = () => poster(publicUrl, s);
@@ -587,6 +589,7 @@ async function bakerSheet(date) {
         ${SETTINGS?.printer_ip ? '<button class="btn-main" id="bPrint" style="flex:1">🖨️ Imprimer le ticket</button>' : ''}
         <button class="btn-soft" id="bSend" style="flex:1">💬 Envoyer au boulanger</button>
       </div>
+      ${SETTINGS?.printer_ip ? '<button class="btn-plain" id="bList" style="width:100%;margin-top:8px">📋 Imprimer la liste des commandes (numéros et noms)</button>' : ''}
       <div class="row-btns" style="margin-top:8px"><button class="btn-plain btn-sm" id="bCopy">Copier le texte</button><button class="btn-plain btn-sm" id="bA4">Feuille A4</button></div>`);
     $('bPrev').onclick = () => bakerSheet(addDays(date, -1));
     $('bNext').onclick = () => bakerSheet(addDays(date, 1));
@@ -607,8 +610,14 @@ async function bakerSheet(date) {
     };
     $('bCopy').onclick = async () => { try { await navigator.clipboard.writeText(message()); toast('Texte copié : colle-le dans un SMS ou WhatsApp.'); } catch { toast('Copie impossible sur cet appareil.', true); } };
     $('bA4').onclick = () => printBaker(date);
+    if ($('bList')) $('bList').onclick = () => printList(date);
   };
   draw();
+}
+
+async function printList(date) {
+  try { await api('liste_imprimer', { date }); toast(RELAY.alive ? 'Liste envoyée à l’imprimante.' : 'Liste en attente : elle sortira dès qu’un appareil du camping joindra l’imprimante.'); relayTick(); }
+  catch (e) { toast(e.message, true); }
 }
 
 async function printBaker(date) {
@@ -716,6 +725,7 @@ async function printerBox() {
   box.innerHTML = `
     <p class="small mute">Un bon de préparation sort sur l’imprimante Epson dès qu’une commande est payée. Les bons sont envoyés par cette page équipe, ouverte et écran allumé sur un appareil du camping (iPad de la caisse par exemple). Une commande payée pendant la nuit sort dès que la page est rouverte.</p>
     <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="prOn" ${p.on ? 'checked' : ''}> Imprimer un bon à chaque commande payée</label>
+    <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="prAuto" ${SETTINGS?.baker_auto ? 'checked' : ''}> Chaque soir à l’heure limite (${esc((SETTINGS?.cutoff_time || '20:00').replace(':', 'h'))}), imprimer tout seul la commande boulanger et la liste des commandes du lendemain</label>
     <div class="row-btns"><input id="prIp" inputmode="decimal" placeholder="Adresse de l’imprimante, ex. 192.168.192.54" value="${esc(p.ip)}" style="flex:1;min-width:0"><button class="btn-plain btn-sm" id="prIpSave">Enregistrer</button></div>
     <p class="small" style="margin:10px 0 4px">${ici} ${global}${p.waiting ? ` <span class="pill p-warn">${p.waiting} en attente</span>` : ''}</p>
     ${last ? `<p class="small mute" style="margin:0 0 6px">${last}</p>` : ''}
@@ -724,6 +734,10 @@ async function printerBox() {
       <p class="mute">L’appareil doit être sur le Wi-Fi du camping. Ouvre une fois <a class="link" href="https://${esc(p.ip)}/" target="_blank" rel="noopener">https://${esc(p.ip)}</a> : Safari affiche « Cette connexion n’est pas privée », c’est normal (c’est ton imprimante). Touche <b>Afficher les détails</b> puis <b>visiter ce site web</b>, reviens ici : l’appareil imprime alors les bons.</p></details>` : ''}`;
   $('prOn').onchange = async e => {
     try { const r = await api('reglages_enregistrer', { settings: { ...SETTINGS, printer_on: e.target.checked } }); SETTINGS = r.settings; toast(e.target.checked ? 'Les bons s’imprimeront à chaque commande payée.' : 'Impression des bons arrêtée.'); }
+    catch (err) { e.target.checked = !e.target.checked; toast(err.message, true); }
+  };
+  $('prAuto').onchange = async e => {
+    try { const r = await api('reglages_enregistrer', { settings: { ...SETTINGS, baker_auto: e.target.checked } }); SETTINGS = r.settings; toast(e.target.checked ? 'Impression automatique à l’heure limite activée.' : 'Impression automatique arrêtée : utilise le bouton « Commande boulanger ».'); }
     catch (err) { e.target.checked = !e.target.checked; toast(err.message, true); }
   };
   $('prIpSave').onclick = async () => {

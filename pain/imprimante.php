@@ -47,6 +47,9 @@ try {
         $pdo->exec('COMMIT');
         exit;
     }
+    if (function_exists('boulanger_auto')) {
+        boulanger_auto();
+    }
     $travaux = imprimante_donner(5);
     $pdo->exec('COMMIT');
     echo sdp_travaux($travaux);
