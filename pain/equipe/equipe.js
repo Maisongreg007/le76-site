@@ -490,7 +490,7 @@ async function printerBox() {
     ${last ? `<p class="small mute" style="margin:0 0 6px">${last}</p>` : ''}
     <div class="row-btns" style="margin-top:8px"><button class="btn-plain btn-sm" id="prTest">Imprimer un ticket test</button>${p.waiting ? '<button class="btn-plain btn-sm" id="prClear">Vider la file</button>' : ''}</div>
     <details class="small" style="margin-top:10px" ${ouvert || (ouvert === undefined && sec === null) ? 'open' : ''}><summary>Relier l’imprimante (une seule fois)</summary>
-      <p class="mute">Sur un appareil branché au réseau du camping, ouvre l’adresse de l’imprimante dans un navigateur (celle imprimée sur sa fiche réseau, ex. <b>192.168.192.53</b>), puis dans <b>ePOS-Print → Server Direct Print</b> : coche « Activer », colle l’adresse ci-dessous dans « URL », intervalle <b>5 secondes</b>, et enregistre.</p>
+      <p class="mute">Sur un appareil branché au réseau du camping, ouvre l’adresse de l’imprimante dans un navigateur (celle imprimée sur sa fiche réseau, en vérifiant que la page indique bien « TM-m30II » et la même adresse MAC), puis dans <b>ePOS-Print → Server Direct Print</b> : coche « Activer », colle l’adresse ci-dessous dans « URL », intervalle <b>5 secondes</b>, et enregistre.</p>
       <div class="row-btns"><input id="prUrl" readonly value="${esc(p.url)}" style="font-size:12px;flex:1;min-width:0"><button class="btn-plain btn-sm" id="prCopy">Copier</button></div>
       <p class="mute">Cette adresse est secrète : elle permet à l’imprimante de récupérer les bons.</p>
     </details>`;
