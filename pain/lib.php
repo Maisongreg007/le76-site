@@ -92,6 +92,8 @@ function db(): PDO
     $pdo->exec('CREATE TABLE IF NOT EXISTS reglages (cle TEXT PRIMARY KEY, valeur TEXT NOT NULL)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS sessions (jeton TEXT PRIMARY KEY, expire INTEGER NOT NULL)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS tentatives (cle TEXT NOT NULL, quand INTEGER NOT NULL)');
+    // Liens (QR) à usage unique pour connecter un autre appareil sans retaper le code
+    $pdo->exec('CREATE TABLE IF NOT EXISTS liens (jeton TEXT PRIMARY KEY, expire INTEGER NOT NULL)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS produits (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nom TEXT NOT NULL, noms TEXT NOT NULL DEFAULT \'{}\', emoji TEXT NOT NULL DEFAULT \'\',

@@ -23,7 +23,7 @@ async function api(action, body = {}) {
   try { r = await fetch('../api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ action, ...body }) }); }
   catch { throw new Error('Connexion impossible. Vérifie le réseau.'); }
   let j = {}; try { j = await r.json(); } catch { throw new Error('Réponse inattendue du serveur.'); }
-  if (r.status === 401 && !['connexion', 'code'].includes(action)) { showLogin(); throw new Error(j.error || 'Connecte-toi.'); }
+  if (r.status === 401 && !['connexion', 'code', 'connexion_lien'].includes(action)) { showLogin(); throw new Error(j.error || 'Connecte-toi.'); }
   if (!r.ok || !j.ok) throw Object.assign(new Error(j.error || 'Erreur.'), { status: r.status });
   return j;
 }
@@ -31,6 +31,12 @@ async function api(action, body = {}) {
 /* ================= Connexion ================= */
 let INSTALLED = true;
 async function start() {
+  // Arrivée par le QR code « Connecter un autre appareil »
+  const lien = new URLSearchParams(location.search).get('lien');
+  if (lien) {
+    history.replaceState(null, '', location.pathname);
+    try { await api('connexion_lien', { lien }); } catch (e) { INSTALLED = true; return showLogin(e.message); }
+  }
   try {
     const e = await api('etat');
     INSTALLED = e.installe;
@@ -354,7 +360,9 @@ async function renderSettings() {
         <div class="group pad"><p class="small mute">Des commandes fictives sur 3 semaines pour voir l’outil « en vrai » (préparation, retraits, chiffres). Elles sont marquées « exemple » et se suppriment d’un clic avant l’ouverture.</p>
           <div class="row-btns"><button class="btn-plain btn-sm" id="exAdd">Ajouter des ventes d’exemple</button><button class="btn-danger btn-sm" id="exDel">Supprimer les exemples</button></div><p class="small mute" id="exCount" style="margin-top:8px"></p></div>
         <div class="group-title">Code de l’équipe</div>
-        <div class="group pad"><div class="fields2"><input id="cOld" type="password" inputmode="numeric" placeholder="Code actuel"><input id="cNew" type="password" inputmode="numeric" placeholder="Nouveau code (4 à 8 chiffres)"></div><button class="btn-plain btn-sm" id="cSave" style="margin-top:10px">Changer le code</button> <button class="btn-plain btn-sm" id="cOut" style="margin-top:10px">Se déconnecter</button></div>
+        <div class="group pad"><div class="fields2"><input id="cOld" type="password" inputmode="numeric" placeholder="Code actuel"><input id="cNew" type="password" inputmode="numeric" placeholder="Nouveau code (4 à 8 chiffres)"></div><button class="btn-plain btn-sm" id="cSave" style="margin-top:10px">Changer le code</button> <button class="btn-plain btn-sm" id="cOut" style="margin-top:10px">Se déconnecter</button>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line, rgba(128,128,128,.25))"><button class="btn-soft btn-sm" id="cLink">Connecter un autre appareil</button>
+          <p class="small mute" style="margin-top:6px">Affiche un QR code à scanner avec le téléphone ou l’iPad à connecter, sans taper le code. Valable 10 minutes, une seule fois.</p><div id="cLinkBox"></div></div></div>
       </div>
     </div>
     <div class="basket"><button class="btn-main" id="sSave">Enregistrer les réglages</button></div>`;
@@ -378,6 +386,14 @@ async function renderSettings() {
   $('exAdd').onclick = async () => { try { const r = await api('exemples'); toast(r.created + ' commandes d’exemple ajoutées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('exDel').onclick = async () => { if (!confirm('Supprimer toutes les commandes d’exemple ? Les vraies commandes ne sont pas touchées.')) return; try { const r = await api('supprimer_exemples'); toast(r.deleted + ' commandes d’exemple supprimées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('cSave').onclick = async () => { try { await api('code', { old: $('cOld').value, new: $('cNew').value }); toast('Code changé. Les autres appareils devront le saisir.'); $('cOld').value = $('cNew').value = ''; } catch (e) { toast(e.message, true); } };
+  $('cLink').onclick = async () => {
+    try {
+      const r = await api('lien_appareil');
+      $('cLinkBox').innerHTML = `<div style="background:#fff;padding:12px;border-radius:12px;width:220px;margin-top:10px">${qrSvg(r.url)}</div>
+        <p class="small" style="margin-top:8px">Scanne avec l’appareil photo de l’iPhone ou de l’iPad. Valable jusqu’à ${esc(r.expires)}.</p>
+        <p class="small mute" style="word-break:break-all;user-select:all">${esc(r.url)}</p>`;
+    } catch (e) { toast(e.message, true); }
+  };
   $('cOut').onclick = async () => { try { await api('deconnexion'); } catch { } showLogin(); };
 }
 function poster(url, s) {

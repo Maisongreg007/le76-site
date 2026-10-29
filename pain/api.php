@@ -68,6 +68,8 @@ try {
             installer((string) ($q['code'] ?? ''));
         case 'connexion':
             connexion((string) ($q['code'] ?? ''));
+        case 'connexion_lien':
+            connexion_lien((string) ($q['lien'] ?? ''));
         case 'deconnexion':
             fermer_session();
             repondre(['ok' => true]);
@@ -132,6 +134,8 @@ try {
             imprimante_tester();
         case 'imprimante_relais':
             imprimante_relais($q);
+        case 'lien_appareil':
+            lien_appareil();
         case 'imprimante_vider':
             $n = db()->exec("UPDATE impressions SET statut = 'echec', erreur = 'annulé' WHERE statut IN ('attente', 'envoye')");
             journaliser('équipe', 'File d’impression vidée', null, (string) $n);
@@ -747,6 +751,34 @@ function imprimante_relais(array $q): never
     }
     $pdo->exec('COMMIT');
     repondre(['ok' => true, 'ip' => $ip, 'jobs' => $jobs]);
+}
+
+/** QR code pour connecter un autre appareil de l'équipe : valable 10 minutes, une seule fois. */
+function lien_appareil(): never
+{
+    $j = bin2hex(random_bytes(24));
+    db()->prepare('DELETE FROM liens WHERE expire < ?')->execute([time()]);
+    db()->prepare('INSERT INTO liens (jeton, expire) VALUES (?, ?)')->execute([hash('sha256', $j), time() + 600]);
+    journaliser('équipe', 'Lien de connexion d’un autre appareil créé', null);
+    repondre(['ok' => true, 'url' => url_site() . 'equipe/?lien=' . $j, 'expires' => date('H:i', time() + 600)]);
+}
+
+function connexion_lien(string $lien): never
+{
+    if (!limiter('lien:' . ip(), 20, 900)) {
+        erreur('Trop d’essais. Réessaie dans 15 minutes.', 429);
+    }
+    if (!preg_match('/^[a-f0-9]{48}$/', $lien)) {
+        erreur('Lien de connexion invalide.', 401);
+    }
+    $st = db()->prepare('DELETE FROM liens WHERE jeton = ? AND expire > ?');
+    $st->execute([hash('sha256', $lien), time()]);
+    if ($st->rowCount() !== 1) {
+        erreur('Ce lien a expiré ou a déjà servi. Crée un nouveau QR code depuis un appareil connecté.', 401);
+    }
+    journaliser('équipe', 'Appareil connecté par lien', null);
+    ouvrir_session();
+    repondre(['ok' => true]);
 }
 
 function changer_code(string $ancien, string $nouveau): never
