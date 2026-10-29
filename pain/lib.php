@@ -39,6 +39,7 @@ const P_REGLAGES_DEFAUT = [
     'closed_dates' => [],                       // fermetures exceptionnelles AAAA-MM-JJ
     'max_per_product' => 20,
     'printer_on' => false,                      // un bon s'imprime à chaque commande payée
+    'printer_ip' => '',                         // imprimante Epson sur le réseau du camping (relais : page équipe ouverte)
 ];
 
 const P_PRODUITS_DEFAUT = [
@@ -259,6 +260,11 @@ function valider_reglages(array $in): array
     }
     $out['max_per_product'] = (int) $mx;
     $out['printer_on'] = (bool) ($in['printer_on'] ?? $r['printer_on']);
+    $ip = trim((string) ($in['printer_ip'] ?? $r['printer_ip']));
+    if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
+        erreur('Adresse de l’imprimante invalide (ex. 192.168.192.54).');
+    }
+    $out['printer_ip'] = $ip;
     return $out;
 }
 
@@ -505,6 +511,50 @@ function imprimante_ajouter(array $lignes, ?int $commande): void
         ->execute(['P' . bin2hex(random_bytes(6)), $commande, json_encode($lignes, JSON_UNESCAPED_UNICODE), maintenant()]);
 }
 
+const IMP_MAX_ESSAIS = 3;
+
+/**
+ * Donne les tickets à imprimer (au plus $max) et les marque « envoyés ».
+ * À appeler dans une transaction. Un ticket envoyé sans réponse depuis 2 minutes est redonné ;
+ * rien de plus vieux que 2 jours (une imprimante rallumée ne ressort pas tout l'historique).
+ */
+function imprimante_donner(int $max): array
+{
+    $st = db()->prepare("SELECT * FROM impressions WHERE cree_le >= ? AND essais < ?
+        AND (statut = 'attente' OR (statut = 'envoye' AND envoye_le < ?)) ORDER BY id LIMIT " . max(1, min(10, $max)));
+    $st->execute([date('Y-m-d H:i:s', time() - 2 * 86400), IMP_MAX_ESSAIS, date('Y-m-d H:i:s', time() - 120)]);
+    $maj = db()->prepare("UPDATE impressions SET statut = 'envoye', envoye_le = ?, essais = essais + 1 WHERE id = ?");
+    $out = [];
+    foreach ($st->fetchAll() as $t) {
+        $lignes = json_decode((string) $t['lignes'], true);
+        if (is_array($lignes)) {
+            $maj->execute([maintenant(), $t['id']]);
+            $out[] = ['job' => $t['job'], 'lignes' => $lignes];
+        }
+    }
+    return $out;
+}
+
+/** Résultat d'impression : imprimé, ou à retenter (3 fois au plus : plus de papier, capot ouvert…). */
+function imprimante_noter(string $job, bool $ok, string $code): void
+{
+    if ($ok) {
+        db()->prepare("UPDATE impressions SET statut = 'imprime', fini_le = ?, erreur = '' WHERE job = ?")->execute([maintenant(), $job]);
+        return;
+    }
+    db()->prepare("UPDATE impressions SET statut = CASE WHEN essais < ? THEN 'attente' ELSE 'echec' END, fini_le = ?, erreur = ? WHERE job = ? AND statut = 'envoye'")
+        ->execute([IMP_MAX_ESSAIS, maintenant(), mb_substr($code, 0, 80), $job]);
+}
+
+/** L'imprimante a répondu : on note l'heure (affichée « Imprimante reliée »). */
+function imprimante_vue(string $nom): void
+{
+    $c = imprimante_conf();
+    $c['vu_le'] = maintenant();
+    $c['nom'] = mb_substr($nom, 0, 40);
+    imprimante_enregistrer($c);
+}
+
 /** État pour l'écran des réglages. */
 function imprimante_etat(string $urlBase): array
 {
@@ -512,7 +562,7 @@ function imprimante_etat(string $urlBase): array
     $n = db()->query("SELECT COUNT(*) FROM impressions WHERE statut IN ('attente', 'envoye') AND cree_le >= datetime('now', 'localtime', '-2 days')")->fetchColumn();
     $dernier = db()->query("SELECT i.statut, i.fini_le, i.erreur, c.code FROM impressions i LEFT JOIN commandes c ON c.id = i.commande_id WHERE i.statut IN ('imprime', 'echec') ORDER BY i.id DESC LIMIT 1")->fetch() ?: null;
     return [
-        'on' => (bool) reglages()['printer_on'],
+        'on' => (bool) reglages()['printer_on'], 'ip' => reglages()['printer_ip'],
         'url' => $urlBase . 'imprimante.php?k=' . $c['cle'],
         'seen' => $c['vu_le'], 'name' => $c['nom'], 'now' => maintenant(),
         'waiting' => (int) $n, 'last' => $dernier,

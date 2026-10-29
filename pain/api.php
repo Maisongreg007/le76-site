@@ -130,6 +130,8 @@ try {
             repondre(['ok' => true, 'printer' => imprimante_etat(url_site())]);
         case 'imprimante_tester':
             imprimante_tester();
+        case 'imprimante_relais':
+            imprimante_relais($q);
         case 'imprimante_vider':
             $n = db()->exec("UPDATE impressions SET statut = 'echec', erreur = 'annulé' WHERE statut IN ('attente', 'envoye')");
             journaliser('équipe', 'File d’impression vidée', null, (string) $n);
@@ -714,6 +716,37 @@ function imprimante_tester(): never
     imprimante_ajouter(epos_ticket_test(reglages()['title']), null);
     journaliser('équipe', 'Ticket de test envoyé à l’imprimante', null);
     repondre(['ok' => true, 'printer' => imprimante_etat(url_site())]);
+}
+
+/**
+ * Relais d'impression : la page équipe, ouverte sur un appareil du réseau du camping, envoie
+ * les tickets à l'imprimante (le serveur, sur Internet, ne peut pas la joindre).
+ * Elle transmet ici les résultats des tickets précédents et l'état de l'imprimante,
+ * et reçoit les tickets suivants, déjà au format Epson.
+ */
+function imprimante_relais(array $q): never
+{
+    $pdo = db();
+    $pdo->exec('BEGIN IMMEDIATE');
+    foreach (array_slice(is_array($q['results'] ?? null) ? $q['results'] : [], 0, 20) as $res) {
+        $job = (string) ($res['job'] ?? '');
+        if (preg_match('/^P[a-f0-9]{12}$/', $job)) {
+            imprimante_noter($job, ($res['ok'] ?? false) === true, (string) ($res['code'] ?? ''));
+        }
+    }
+    if (($q['alive'] ?? null) === true) {
+        imprimante_vue('TM-m30II (relais)');
+    }
+    $ip = reglages()['printer_ip'];
+    $jobs = [];
+    // Seul un appareil qui vient de joindre l'imprimante reçoit des tickets : un téléphone hors du camping n'en « prend » jamais.
+    if ($ip !== '' && ($q['alive'] ?? null) === true && ($q['ip'] ?? '') === $ip) {
+        foreach (imprimante_donner(3) as $t) {
+            $jobs[] = ['job' => $t['job'], 'xml' => epos_corps($t['lignes'])];
+        }
+    }
+    $pdo->exec('COMMIT');
+    repondre(['ok' => true, 'ip' => $ip, 'jobs' => $jobs]);
 }
 
 function changer_code(string $ancien, string $nouveau): never
