@@ -18,9 +18,18 @@ function parseCents(v) { const s = String(v).trim().replace(/\s|€/g, '').repla
 function inCents(c) { return (c / 100).toFixed(2).replace('.', ','); }
 function toast(m, err = false) { const e = $('toast'); e.textContent = m; e.className = 'show' + (err ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => e.className = '', err ? 5500 : 2800); }
 
-async function api(action, body = {}) {
+/*
+ * Mode école (par appareil) : l'appli fonctionne sur une base d'exercice à part (../ecole/api.php),
+ * pour s'entraîner à encaisser sans toucher aux vraies commandes. La connexion reste la vraie.
+ */
+const API_REEL = '../api.php', API_ECOLE = '../ecole/api.php';
+const TOUJOURS_REEL = new Set(['etat', 'installer', 'connexion', 'connexion_lien', 'code', 'deconnexion', 'lien_appareil']);
+let ECOLE = (() => { try { return localStorage.getItem('pain_ecole') === '1'; } catch { return false; } })();
+
+async function api(action, body = {}, base = null) {
+  base = base || (ECOLE && !TOUJOURS_REEL.has(action) ? API_ECOLE : API_REEL);
   let r;
-  try { r = await fetch('../api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ action, ...body }) }); }
+  try { r = await fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ action, ...body }) }); }
   catch { throw new Error('Connexion impossible. Vérifie le réseau.'); }
   let j = {}; try { j = await r.json(); } catch { throw new Error('Réponse inattendue du serveur.'); }
   if (r.status === 401 && !['connexion', 'code', 'connexion_lien'].includes(action)) { showLogin(); throw new Error(j.error || 'Connecte-toi.'); }
@@ -43,6 +52,8 @@ async function start() {
     if (!e.connecte) return showLogin();
   } catch (e) { return showLogin(e.message); }
   $('login').hidden = true; $('app').hidden = false;
+  if (ECOLE) { try { await ecoleSync(); } catch { } }
+  ecoleBar();
   await loadBase(); render(); relayStart();
 }
 function showLogin(msg) {
@@ -65,6 +76,35 @@ $('loginForm').onsubmit = async ev => {
 };
 async function loadBase() {
   try { PRODUCTS = (await api('produits')).products; SETTINGS = (await api('reglages')).settings; } catch (e) { toast(e.message, true); }
+}
+
+/* ================= Mode école ================= */
+// La base d'exercice reprend l'imprimante et ouvre les commandes toute l'année (elle est remise à neuf chaque nuit).
+async function ecoleSync() {
+  const reel = (await api('reglages', {}, API_REEL)).settings;
+  const e = (await api('reglages', {}, API_ECOLE)).settings;
+  if (e.printer_ip !== reel.printer_ip || e.printer_on !== reel.printer_on || e.season_start || e.season_end || !e.ordering_open || e.title !== reel.title) {
+    await api('reglages_enregistrer', { settings: { ...e, title: reel.title, printer_on: reel.printer_on, printer_ip: reel.printer_ip, season_start: '', season_end: '', ordering_open: true } }, API_ECOLE);
+  }
+}
+function ecoleBar() {
+  document.body.classList.toggle('ecole', ECOLE);
+  let b = $('ecoleBar');
+  if (!ECOLE) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement('div'); b.id = 'ecoleBar'; document.querySelector('#app header.bar').prepend(b); }
+  b.style.cssText = 'display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;background:#7c3aed;color:#fff;padding:8px 14px;font-size:14px;font-weight:600';
+  b.innerHTML = '<span>🎓 Mode école · commandes d’exercice, rien n’est réel</span><button id="ecoleOff" style="background:#fff;color:#7c3aed;border:0;border-radius:999px;padding:5px 14px;font-weight:700;font-size:13px">Quitter</button>';
+  $('ecoleOff').onclick = () => setEcole(false);
+}
+async function setEcole(on) {
+  if (on) {
+    try { await ecoleSync(); } catch (e) { return toast(e.message, true); }
+  }
+  ECOLE = on;
+  try { localStorage.setItem('pain_ecole', on ? '1' : '0'); } catch { }
+  ecoleBar(); closeSheet(); DAY = todayStr(); VIEW = 'day';
+  await loadBase(); render(); window.scrollTo(0, 0);
+  toast(on ? 'Mode école : entraîne-toi à encaisser, rien n’est réel.' : 'Retour au mode normal : vraies commandes.');
 }
 
 /* ================= Navigation ================= */
@@ -312,6 +352,19 @@ async function renderStats() {
 
 /* ================= Réglages ================= */
 async function renderSettings() {
+  if (ECOLE) {
+    $('view').innerHTML = `
+      <div class="top"><div><h1>Mode école</h1><div class="sub">Entraînement de l’équipe</div></div></div>
+      <div class="group pad" style="max-width:640px">
+        <p>Tu es en <b>mode école</b> sur cet appareil : les commandes, encaissements et retraits que tu fais ici sont des <b>exercices</b>. Les vraies commandes, les chiffres et la commande boulanger ne sont pas touchés.</p>
+        <p class="small mute">Les bons d’exercice s’impriment avec la mention « ÉCOLE – NE PAS PRÉPARER ». Les vrais bons continuent de sortir normalement. Les exercices sont remis à neuf chaque nuit.</p>
+        <div class="row-btns" style="margin-top:12px"><button class="btn-main" id="eOff">Revenir au mode normal</button><button class="btn-plain btn-sm" id="eReset">Remettre les exercices à neuf</button></div>
+      </div>
+      <p class="small mute" style="margin-top:12px">Les réglages de l’appli sont accessibles en mode normal.</p>`;
+    $('eOff').onclick = () => setEcole(false);
+    $('eReset').onclick = async () => { try { await api('demo_reinitialiser'); await ecoleSync(); await loadBase(); toast('Exercices remis à neuf.'); } catch (e) { toast(e.message, true); } };
+    return;
+  }
   let j; try { j = await api('reglages'); SETTINGS = j.settings; } catch (e) { toast(e.message, true); return; }
   const s = SETTINGS, publicUrl = location.origin + location.pathname.replace(/equipe\/.*$/, '');
   $('view').innerHTML = `
@@ -339,6 +392,9 @@ async function renderSettings() {
         </div>
         <div class="group-title">Imprimante des bons</div>
         <div class="group pad" id="prBox"><p class="small mute">Chargement…</p></div>
+        <div class="group-title">Mode école</div>
+        <div class="group pad"><p class="small mute">Pour former l’équipe : l’appli passe sur des commandes d’exercice (déjà prêtes, à encaisser en espèces ou par carte, à remettre…). Rien de réel n’est touché et un bandeau violet le rappelle en permanence. Ne concerne que cet appareil.</p>
+          <button class="btn-soft btn-sm" id="eOn">🎓 Passer en mode école</button></div>
       </div>
       <div>
         <div class="group-title">Saison</div>
@@ -386,6 +442,7 @@ async function renderSettings() {
   $('exAdd').onclick = async () => { try { const r = await api('exemples'); toast(r.created + ' commandes d’exemple ajoutées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('exDel').onclick = async () => { if (!confirm('Supprimer toutes les commandes d’exemple ? Les vraies commandes ne sont pas touchées.')) return; try { const r = await api('supprimer_exemples'); toast(r.deleted + ' commandes d’exemple supprimées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('cSave').onclick = async () => { try { await api('code', { old: $('cOld').value, new: $('cNew').value }); toast('Code changé. Les autres appareils devront le saisir.'); $('cOld').value = $('cNew').value = ''; } catch (e) { toast(e.message, true); } };
+  $('eOn').onclick = () => setEcole(true);
   $('cLink').onclick = async () => {
     try {
       const r = await api('lien_appareil');
@@ -571,20 +628,23 @@ async function relayTick() {
   if (RELAY.running || document.hidden || $('app').hidden) return;
   RELAY.running = true;
   try {
-    if (!RELAY.ip) { RELAY.ip = (await api('imprimante_relais')).ip || ''; if (!RELAY.ip) { RELAY.alive = null; return; } }
+    // Les vrais bons passent toujours, même quand cet appareil est en mode école.
+    if (!RELAY.ip) { RELAY.ip = (await api('imprimante_relais', {}, API_REEL)).ip || ''; if (!RELAY.ip) { RELAY.alive = null; return; } }
     const ip = RELAY.ip;
     RELAY.alive = (await eposSend(ip, `<epos-print xmlns="${EPOS_NS}"/>`)).reached;   // simple « tu es là ? », n'imprime rien
-    let r = await api('imprimante_relais', { alive: RELAY.alive, ip });
-    for (let tour = 0; r.jobs && r.jobs.length && tour < 5; tour++) {
-      const results = [];
-      for (const j of r.jobs) {
-        const s = await eposSend(ip, j.xml);
-        results.push({ job: j.job, ok: s.ok, code: s.code });
-        if (!s.reached) RELAY.alive = false;
+    for (const base of ECOLE ? [API_REEL, API_ECOLE] : [API_REEL]) {
+      let r = await api('imprimante_relais', { alive: RELAY.alive, ip }, base);
+      for (let tour = 0; r.jobs && r.jobs.length && tour < 5; tour++) {
+        const results = [];
+        for (const j of r.jobs) {
+          const s = await eposSend(ip, j.xml);
+          results.push({ job: j.job, ok: s.ok, code: s.code });
+          if (!s.reached) RELAY.alive = false;
+        }
+        r = await api('imprimante_relais', { alive: RELAY.alive, ip, results }, base);
       }
-      r = await api('imprimante_relais', { alive: RELAY.alive, ip, results });
+      if (base === API_REEL) RELAY.ip = r.ip || '';
     }
-    RELAY.ip = r.ip || '';
   } catch { } finally { RELAY.running = false; }
 }
 function relayStart() {

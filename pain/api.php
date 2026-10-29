@@ -7,7 +7,7 @@
 declare(strict_types=1);
 require __DIR__ . '/lib.php';
 require __DIR__ . '/stripe.php';
-if (defined('PAIN_DEMO')) {
+if (defined('PAIN_DEMO') || defined('PAIN_ECOLE')) {
     require __DIR__ . '/demo.php';
 }
 
@@ -33,7 +33,20 @@ try {
             repondre(['ok' => true, 'demo' => true, 'installe' => true, 'connecte' => connecte()]);
         }
     }
-    expirer_impayees();
+    if (defined('PAIN_ECOLE')) {
+        // École de l'équipe : commandes d'exercice, réservée à l'équipe connectée ; connexion et code se gèrent en mode normal.
+        connecte() || erreur('Connecte-toi pour continuer.', 401);
+        if (in_array($action, ['installer', 'connexion', 'connexion_lien', 'lien_appareil', 'code', 'deconnexion', 'stripe_enregistrer', 'payer_carte', 'exemples', 'supprimer_exemples'], true)) {
+            erreur('Pas disponible en mode école : repasse en mode normal.', 409);
+        }
+        demo_preparer($action === 'demo_reinitialiser');
+        if ($action === 'demo_reinitialiser') {
+            journaliser('équipe', 'Exercices remis à zéro', null);
+            repondre(['ok' => true]);
+        }
+    } else {
+        expirer_impayees();   // (école : les exercices « à payer » du jour restent à encaisser)
+    }
 
     /* ---------- Public ---------- */
     if (in_array($action, ['catalogue', 'commander', 'modifier', 'annuler', 'bon', 'payer_carte'], true) && connecte()) {

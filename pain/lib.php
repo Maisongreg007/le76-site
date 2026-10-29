@@ -52,16 +52,26 @@ const P_PRODUITS_DEFAUT = [
 /* Stockage                                                            */
 /* ------------------------------------------------------------------ */
 
+/** Mode de la base : vraie (« reel »), démo publique (« demo ») ou école de l'équipe (« ecole »). */
+function mode_base(): string
+{
+    return defined('PAIN_DEMO') ? 'demo' : (defined('PAIN_ECOLE') ? 'ecole' : 'reel');
+}
+
 function dossier(): string
 {
     static $d = null;
     if ($d !== null) {
         return $d;
     }
-    $env = getenv(defined('PAIN_DEMO') ? 'PAIN_DEMO_DONNEES' : 'PAIN_DONNEES');
-    $candidats = $env ? [$env] : (defined('PAIN_DEMO')
-        ? [dirname(__DIR__, 2) . '/le76-pain-demo', __DIR__ . '/donnees-demo']
-        : [dirname(__DIR__, 2) . '/le76-pain', __DIR__ . '/donnees']);
+    return $d = dossier_de(mode_base());
+}
+
+function dossier_de(string $mode): string
+{
+    $env = getenv(['demo' => 'PAIN_DEMO_DONNEES', 'ecole' => 'PAIN_ECOLE_DONNEES', 'reel' => 'PAIN_DONNEES'][$mode]);
+    $suffixe = ['demo' => '-demo', 'ecole' => '-ecole', 'reel' => ''][$mode];
+    $candidats = $env ? [$env] : [dirname(__DIR__, 2) . '/le76-pain' . $suffixe, __DIR__ . '/donnees' . $suffixe];
     foreach ($candidats as $c) {
         if (!is_dir($c)) {
             @mkdir($c, 0750, true);
@@ -70,7 +80,7 @@ function dossier(): string
             if (str_starts_with($c, __DIR__) && !is_file("$c/.htaccess")) {
                 file_put_contents("$c/.htaccess", "Require all denied\n");
             }
-            return $d = $c;
+            return $c;
         }
     }
     throw new RuntimeException('Impossible de créer le dossier des données.');
@@ -509,6 +519,11 @@ function imprimante_enregistrer(array $c): void
 /** Met un ticket dans la file ; l'imprimante le récupère à son prochain passage (quelques secondes). */
 function imprimante_ajouter(array $lignes, ?int $commande): void
 {
+    if (mode_base() !== 'reel') {
+        // Exercice : impossible à confondre avec un vrai bon.
+        $bandeau = ['text' => '*** ECOLE - EXERCICE - NE PAS PREPARER ***', 'align' => 'center', 'bold' => true];
+        $lignes = [$bandeau, ['feed' => 1], ...array_values(array_filter($lignes, fn($l) => empty($l['cut']) && empty($l['feed']))), ['feed' => 1], $bandeau, ['feed' => 3], ['cut' => true]];
+    }
     db()->prepare('INSERT INTO impressions (job, commande_id, lignes, cree_le) VALUES (?, ?, ?, ?)')
         ->execute(['P' . bin2hex(random_bytes(6)), $commande, json_encode($lignes, JSON_UNESCAPED_UNICODE), maintenant()]);
 }
@@ -730,6 +745,14 @@ function connecte(): bool
     $j = (string) ($_COOKIE[P_COOKIE] ?? '');
     if (!preg_match('/^[a-f0-9]{64}$/', $j)) {
         return $ok = false;
+    }
+    if (defined('PAIN_ECOLE')) {
+        // École : même connexion que l'espace équipe (sessions de la vraie base, en lecture seule).
+        $reel = new PDO('sqlite:' . dossier_de('reel') . '/pain.sqlite', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $reel->exec('PRAGMA busy_timeout = 8000');
+        $st = $reel->prepare('SELECT 1 FROM sessions WHERE jeton = ? AND expire > ?');
+        $st->execute([hash('sha256', $j), time()]);
+        return $ok = (bool) $st->fetchColumn();
     }
     $st = db()->prepare('SELECT 1 FROM sessions WHERE jeton = ? AND expire > ?');
     $st->execute([hash('sha256', $j), time()]);
