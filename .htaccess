@@ -1,5 +1,5 @@
 # Fichiers internes (édition du site) : non accessibles depuis le web
-RedirectMatch 404 ^/(\.github|\.git|outils|contenu|\.pages\.yml|api/lib|api/donnees|api/donnees-hygiene|personnel/data|personnel/pages|personnel/lib\.php|personnel/LISEZ-MOI\.txt|personnel/demo-seed\.php|scan/donnees|scan/lib\.php|scan/demo\.php|pain/donnees|pain/donnees-demo|demo/caisse/donnees-demo|pain/lib\.php|pain/stripe\.php|pain/demo\.php|camping/lib\.php|camping/demo\.php|camping/donnees|camping/donnees-demo)(/|$)
+RedirectMatch 404 ^/(\.github|\.git|outils|contenu|\.pages\.yml|lib|api/lib|api/donnees|api/donnees-hygiene|personnel/data|personnel/pages|personnel/lib\.php|personnel/LISEZ-MOI\.txt|personnel/demo-seed\.php|scan/donnees|scan/lib\.php|scan/demo\.php|pain/donnees|pain/donnees-demo|demo/caisse/donnees-demo|pain/lib\.php|pain/stripe\.php|pain/demo\.php|camping/lib\.php|camping/demo\.php|camping/donnees|camping/donnees-demo)(/|$)
 
 # Pages et appli : toujours vérifier s'il y a une nouvelle version (évite les anciennes versions en cache)
 <IfModule mod_headers.c>

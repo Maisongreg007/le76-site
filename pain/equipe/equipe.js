@@ -331,6 +331,8 @@ async function renderSettings() {
           <div class="fields2"><label class="field"><span>Commandes jusqu’à (jours à l’avance)</span><input id="sAhead" inputmode="numeric" value="${s.days_ahead}"></label>
           <label class="field"><span>Maximum par produit et par commande</span><input id="sMax" inputmode="numeric" value="${s.max_per_product}"></label></div>
         </div>
+        <div class="group-title">Imprimante des bons</div>
+        <div class="group pad" id="prBox"><p class="small mute">Chargement…</p></div>
       </div>
       <div>
         <div class="group-title">Saison</div>
@@ -364,13 +366,15 @@ async function renderSettings() {
   $('sSave').onclick = async () => {
     const settings = { ...s, ordering_open: $('sOpen').checked, title: $('sTitle').value, place: $('sPlace').value, message: $('sMsg').value,
       pickup_from: $('sFrom').value, pickup_to: $('sTo').value, open_days: days, cutoff_days: +$('sCd').value, cutoff_time: $('sCt').value,
-      days_ahead: +$('sAhead').value, max_per_product: +$('sMax').value, season_start: $('sSs').value, season_end: $('sSe').value, closed_dates: closed };
+      days_ahead: +$('sAhead').value, max_per_product: +$('sMax').value, season_start: $('sSs').value, season_end: $('sSe').value, closed_dates: closed,
+      printer_on: SETTINGS.printer_on };
     try { const r = await api('reglages_enregistrer', { settings }); SETTINGS = r.settings; toast('Réglages enregistrés.'); renderSettings(); } catch (e) { toast(e.message, true); }
   };
   $('sPoster').onclick = () => poster(publicUrl, s);
   const exCount = async () => { try { const n = (await api('nb_exemples')).count; $('exCount').textContent = n ? n + ' commande(s) d’exemple en place.' : 'Aucune commande d’exemple.'; $('exDel').disabled = !n; $('exAdd').disabled = !!n; } catch { } };
   exCount();
   cardBox();
+  printerBox();
   $('exAdd').onclick = async () => { try { const r = await api('exemples'); toast(r.created + ' commandes d’exemple ajoutées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('exDel').onclick = async () => { if (!confirm('Supprimer toutes les commandes d’exemple ? Les vraies commandes ne sont pas touchées.')) return; try { const r = await api('supprimer_exemples'); toast(r.deleted + ' commandes d’exemple supprimées.'); exCount(); } catch (e) { toast(e.message, true); } };
   $('cSave').onclick = async () => { try { await api('code', { old: $('cOld').value, new: $('cNew').value }); toast('Code changé. Les autres appareils devront le saisir.'); $('cOld').value = $('cNew').value = ''; } catch (e) { toast(e.message, true); } };
@@ -463,6 +467,41 @@ async function cardBox() {
     try { const r = await api('stripe_tester'); $('stMsg').innerHTML = `<span class="pill p-ok">Connexion OK</span> ${esc(r.name || '')} ${r.live ? '' : '<span class="pill p-warn">mode test</span>'}${r.charges ? '' : ' <span class="pill p-warn">Compte Stripe pas encore activé pour encaisser</span>'}`; }
     catch (e) { $('stMsg').innerHTML = `<span class="pill p-red">${esc(e.message)}</span>`; }
   };
+}
+
+/* ================= Imprimante des bons ================= */
+let printerTimer = null;
+async function printerBox() {
+  clearTimeout(printerTimer);
+  const box = $('prBox'); if (!box) return;
+  let p; try { p = (await api('imprimante')).printer; } catch (e) { box.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  if (!$('prBox')) return;
+  const ouvert = box.querySelector('details')?.open;
+  const sec = p.seen ? Math.max(0, Math.round((new Date(p.now.replace(' ', 'T')) - new Date(p.seen.replace(' ', 'T'))) / 1000)) : null;
+  const depuis = s => s < 120 ? s + ' s' : s < 7200 ? Math.round(s / 60) + ' min' : s < 172800 ? Math.round(s / 3600) + ' h' : Math.round(s / 86400) + ' jours';
+  const etat = sec === null ? '<span class="pill p-gray">Imprimante pas encore reliée</span>'
+    : sec < 90 ? '<span class="pill p-ok">Imprimante reliée</span>'
+    : `<span class="pill p-red">Pas de nouvelles depuis ${depuis(sec)}</span>`;
+  const last = p.last ? `Dernier ticket ${p.last.code ? esc(p.last.code) : 'de test'} : ${p.last.statut === 'imprime' ? 'imprimé' : 'pas imprimé' + (p.last.erreur ? ' (' + esc(p.last.erreur) + ')' : '')}${p.last.fini_le ? ' à ' + esc(p.last.fini_le.slice(11, 16)) : ''}` : '';
+  box.innerHTML = `
+    <p class="small mute">Un bon de préparation sort tout seul sur l’imprimante Epson dès qu’une commande est payée (au comptoir, par carte en ligne ou créée par l’équipe).</p>
+    <label class="field" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="prOn" ${p.on ? 'checked' : ''}> Imprimer un bon à chaque commande payée</label>
+    <p class="small" style="margin:8px 0 4px">${etat}${p.name ? ' <span class="mute">' + esc(p.name) + '</span>' : ''}${p.waiting ? ` <span class="pill p-warn">${p.waiting} en attente</span>` : ''}</p>
+    ${last ? `<p class="small mute" style="margin:0 0 6px">${last}</p>` : ''}
+    <div class="row-btns" style="margin-top:8px"><button class="btn-plain btn-sm" id="prTest">Imprimer un ticket test</button>${p.waiting ? '<button class="btn-plain btn-sm" id="prClear">Vider la file</button>' : ''}</div>
+    <details class="small" style="margin-top:10px" ${ouvert || (ouvert === undefined && sec === null) ? 'open' : ''}><summary>Relier l’imprimante (une seule fois)</summary>
+      <p class="mute">Sur un appareil branché au réseau du camping, ouvre l’adresse de l’imprimante dans un navigateur (celle imprimée sur sa fiche réseau, ex. <b>192.168.192.53</b>), puis dans <b>ePOS-Print → Server Direct Print</b> : coche « Activer », colle l’adresse ci-dessous dans « URL », intervalle <b>5 secondes</b>, et enregistre.</p>
+      <div class="row-btns"><input id="prUrl" readonly value="${esc(p.url)}" style="font-size:12px;flex:1;min-width:0"><button class="btn-plain btn-sm" id="prCopy">Copier</button></div>
+      <p class="mute">Cette adresse est secrète : elle permet à l’imprimante de récupérer les bons.</p>
+    </details>`;
+  $('prOn').onchange = async e => {
+    try { const r = await api('reglages_enregistrer', { settings: { ...SETTINGS, printer_on: e.target.checked } }); SETTINGS = r.settings; toast(e.target.checked ? 'Les bons s’imprimeront à chaque commande payée.' : 'Impression des bons arrêtée.'); }
+    catch (err) { e.target.checked = !e.target.checked; toast(err.message, true); }
+  };
+  $('prTest').onclick = async () => { try { await api('imprimante_tester'); toast(sec !== null && sec < 90 ? 'Ticket envoyé : il sort dans quelques secondes.' : 'Ticket en attente : il sortira dès que l’imprimante sera reliée.'); printerBox(); } catch (e) { toast(e.message, true); } };
+  if ($('prClear')) $('prClear').onclick = async () => { if (!confirm('Supprimer les tickets en attente ? Ils ne seront pas imprimés.')) return; try { await api('imprimante_vider'); printerBox(); } catch (e) { toast(e.message, true); } };
+  $('prCopy').onclick = async () => { try { await navigator.clipboard.writeText(p.url); toast('Adresse copiée.'); } catch { $('prUrl').select(); } };
+  printerTimer = setTimeout(printerBox, 10000);   // l'état de l'imprimante se met à jour tout seul
 }
 
 /* ================= Journal ================= */

@@ -126,6 +126,14 @@ try {
             repondre(['ok' => true, 'stripe' => stripe_enregistrer(is_array($q['stripe'] ?? null) ? $q['stripe'] : [])]);
         case 'stripe_tester':
             repondre(stripe_tester());
+        case 'imprimante':
+            repondre(['ok' => true, 'printer' => imprimante_etat(url_site())]);
+        case 'imprimante_tester':
+            imprimante_tester();
+        case 'imprimante_vider':
+            $n = db()->exec("UPDATE impressions SET statut = 'echec', erreur = 'annulé' WHERE statut IN ('attente', 'envoye')");
+            journaliser('équipe', 'File d’impression vidée', null, (string) $n);
+            repondre(['ok' => true, 'printer' => imprimante_etat(url_site())]);
         case 'exemples':
             creer_exemples();
         case 'supprimer_exemples':
@@ -204,7 +212,11 @@ function commander(array $q, bool $equipe): never
     $pdo->prepare('UPDATE commandes SET total = ?, cout = ? WHERE id = ?')->execute([$total, $cout, $id]);
     journaliser($equipe ? 'équipe' : 'client', 'Commande créée', $id, $prenom . ' ' . $nom . ' · empl. ' . $empl . ' · ' . $jour . ' · ' . resume_lignes($lignes) . ' · ' . eur($total));
     $pdo->exec('COMMIT');
-    repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), $equipe)]);
+    $c = commande_par('id', $id);
+    if ($statut === 'confirmed') {
+        imprimer_bon($c);
+    }
+    repondre(['ok' => true, 'order' => vue_commande($c, $equipe)]);
 }
 
 /** Le campeur a perdu son bon : téléphone + emplacement → ses commandes récentes et à venir. */
@@ -377,7 +389,9 @@ function encaisser(int $id, string $methode): never
         erreur('Cette commande vient d’être modifiée par quelqu’un d’autre. Actualise.', 409);
     }
     journaliser('équipe', 'Paiement encaissé (' . P_PAIEMENTS[$methode] . ')', $id, eur((int) $c['total']));
-    repondre(['ok' => true, 'order' => vue_commande(commande_par('id', $id), true)]);
+    $c = commande_par('id', $id);
+    imprimer_bon($c);
+    repondre(['ok' => true, 'order' => vue_commande($c, true)]);
 }
 
 /** Remise au client, atomique : une seule remise possible, même si deux personnes scannent en même temps. */
@@ -661,11 +675,6 @@ function generer_exemples(): int
     return $nb;
 }
 
-function eur(int $c): string
-{
-    return number_format($c / 100, 2, ',', ' ') . ' €';
-}
-
 function installer(string $code): never
 {
     if (!code_valide($code)) {
@@ -697,6 +706,14 @@ function connexion(string $code): never
     }
     ouvrir_session();
     repondre(['ok' => true]);
+}
+
+/** Ticket de test mis en file : il sort au prochain passage de l'imprimante. */
+function imprimante_tester(): never
+{
+    imprimante_ajouter(epos_ticket_test(reglages()['title']), null);
+    journaliser('équipe', 'Ticket de test envoyé à l’imprimante', null);
+    repondre(['ok' => true, 'printer' => imprimante_etat(url_site())]);
 }
 
 function changer_code(string $ancien, string $nouveau): never

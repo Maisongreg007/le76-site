@@ -151,9 +151,12 @@ function payer_carte(array $q): never
     }
     if (defined('PAIN_DEMO')) {
         // Démo : pas de vrai paiement, la commande est marquée payée par carte en ligne.
-        db()->prepare("UPDATE commandes SET statut = 'confirmed', paye = 1, paiement = 'en_ligne', modifie_le = ? WHERE id = ? AND statut = 'pending' AND paye = 0")
-            ->execute([maintenant(), $c['id']]);
+        $st = db()->prepare("UPDATE commandes SET statut = 'confirmed', paye = 1, paiement = 'en_ligne', modifie_le = ? WHERE id = ? AND statut = 'pending' AND paye = 0");
+        $st->execute([maintenant(), $c['id']]);
         journaliser('système', 'Paiement encaissé (Carte en ligne · démo)', (int) $c['id'], eur((int) $c['total']));
+        if ($st->rowCount() === 1) {
+            imprimer_bon(commande_par('id', (int) $c['id']));
+        }
         repondre(['ok' => true, 'url' => url_site() . '?c=' . rawurlencode($c['jeton']) . '&paye=1']);
     }
     // La page Stripe expire au plus tard à l'heure limite (Stripe exige au moins 30 minutes).
@@ -219,6 +222,7 @@ function verifier_carte(array $c): bool
     $u->execute([maintenant(), $c['id']]);
     if ($u->rowCount() === 1) {
         journaliser('système', 'Paiement encaissé (Carte en ligne)', (int) $c['id'], eur($montant) . ' · Stripe');
+        imprimer_bon(commande_par('id', (int) $c['id']));
         return true;
     }
     return false;

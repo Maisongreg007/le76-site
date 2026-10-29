@@ -12,6 +12,8 @@
  */
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/lib/epson.php';
+
 date_default_timezone_set('Europe/Paris');
 mb_internal_encoding('UTF-8');
 
@@ -36,6 +38,7 @@ const P_REGLAGES_DEFAUT = [
     'season_end' => '',
     'closed_dates' => [],                       // fermetures exceptionnelles AAAA-MM-JJ
     'max_per_product' => 20,
+    'printer_on' => false,                      // un bon s'imprime à chaque commande payée
 ];
 
 const P_PRODUITS_DEFAUT = [
@@ -118,6 +121,11 @@ function db(): PDO
         produit_id INTEGER NOT NULL, nom TEXT NOT NULL, emoji TEXT NOT NULL DEFAULT \'\',
         prix INTEGER NOT NULL, cout INTEGER NOT NULL, quantite INTEGER NOT NULL)');
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_lignes ON lignes(commande_id)');
+    // Tickets à imprimer : l'imprimante vient les chercher (attente → envoye → imprime, ou echec)
+    $pdo->exec('CREATE TABLE IF NOT EXISTS impressions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, job TEXT NOT NULL UNIQUE, commande_id INTEGER,
+        lignes TEXT NOT NULL, statut TEXT NOT NULL DEFAULT \'attente\', essais INTEGER NOT NULL DEFAULT 0,
+        cree_le TEXT NOT NULL, envoye_le TEXT, fini_le TEXT, erreur TEXT NOT NULL DEFAULT \'\')');
     $pdo->exec('CREATE TABLE IF NOT EXISTS journal (
         id INTEGER PRIMARY KEY AUTOINCREMENT, quand TEXT NOT NULL, qui TEXT NOT NULL,
         action TEXT NOT NULL, commande_id INTEGER, detail TEXT NOT NULL DEFAULT \'\')');
@@ -250,6 +258,7 @@ function valider_reglages(array $in): array
         erreur('Quantité maximale invalide (1 à 200).');
     }
     $out['max_per_product'] = (int) $mx;
+    $out['printer_on'] = (bool) ($in['printer_on'] ?? $r['printer_on']);
     return $out;
 }
 
@@ -463,6 +472,100 @@ function vue_commande(array $c, bool $equipe): array
         }
     }
     return $v;
+}
+
+/* ------------------------------------------------------------------ */
+/* Imprimante des bons (Epson, Server Direct Print)                    */
+/* ------------------------------------------------------------------ */
+
+/** Clé secrète de l'adresse que l'imprimante interroge, et dernier contact. */
+function imprimante_conf(): array
+{
+    $st = db()->prepare("SELECT valeur FROM reglages WHERE cle = 'imprimante'");
+    $st->execute();
+    $v = $st->fetchColumn();
+    $c = $v === false ? [] : (json_decode((string) $v, true) ?: []);
+    if (empty($c['cle'])) {
+        $c = ['cle' => bin2hex(random_bytes(16)), 'vu_le' => null, 'nom' => ''];
+        imprimante_enregistrer($c);
+    }
+    return $c + ['vu_le' => null, 'nom' => ''];
+}
+
+function imprimante_enregistrer(array $c): void
+{
+    db()->prepare("INSERT INTO reglages (cle, valeur) VALUES ('imprimante', ?) ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur")
+        ->execute([json_encode($c, JSON_UNESCAPED_UNICODE)]);
+}
+
+/** Met un ticket dans la file ; l'imprimante le récupère à son prochain passage (quelques secondes). */
+function imprimante_ajouter(array $lignes, ?int $commande): void
+{
+    db()->prepare('INSERT INTO impressions (job, commande_id, lignes, cree_le) VALUES (?, ?, ?, ?)')
+        ->execute(['P' . bin2hex(random_bytes(6)), $commande, json_encode($lignes, JSON_UNESCAPED_UNICODE), maintenant()]);
+}
+
+/** État pour l'écran des réglages. */
+function imprimante_etat(string $urlBase): array
+{
+    $c = imprimante_conf();
+    $n = db()->query("SELECT COUNT(*) FROM impressions WHERE statut IN ('attente', 'envoye') AND cree_le >= datetime('now', 'localtime', '-2 days')")->fetchColumn();
+    $dernier = db()->query("SELECT i.statut, i.fini_le, i.erreur, c.code FROM impressions i LEFT JOIN commandes c ON c.id = i.commande_id WHERE i.statut IN ('imprime', 'echec') ORDER BY i.id DESC LIMIT 1")->fetch() ?: null;
+    return [
+        'on' => (bool) reglages()['printer_on'],
+        'url' => $urlBase . 'imprimante.php?k=' . $c['cle'],
+        'seen' => $c['vu_le'], 'name' => $c['nom'], 'now' => maintenant(),
+        'waiting' => (int) $n, 'last' => $dernier,
+    ];
+}
+
+/**
+ * Bon de production d'une commande fraîchement payée, mis en file pour l'imprimante.
+ * N'échoue jamais bruyamment : un souci d'impression ne doit jamais empêcher d'encaisser un client.
+ */
+function imprimer_bon(array $c): void
+{
+    try {
+        if (!reglages()['printer_on']) {
+            return;
+        }
+        $r = reglages();
+        $trait = ['text' => str_repeat('-', 48)];
+        $jours = ['', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+        $j = new DateTimeImmutable($c['jour']);
+        $quand = $c['jour'] === date('Y-m-d') ? 'AUJOURD\'HUI' : ($c['jour'] === date('Y-m-d', strtotime('+1 day')) ? 'DEMAIN' : strtoupper($jours[(int) $j->format('N')]));
+        $lignes = [
+            ['text' => $r['title'], 'align' => 'center', 'bold' => true],
+            ['text' => 'Retrait ' . $quand . ' ' . $j->format('d/m'), 'align' => 'center', 'bold' => true, 'width' => 2, 'height' => 2],
+            ['text' => 'de ' . str_replace(':', 'h', $r['pickup_from']) . ' a ' . str_replace(':', 'h', $r['pickup_to']), 'align' => 'center'],
+            $trait,
+            ['text' => 'Empl. ' . $c['emplacement'], 'bold' => true, 'width' => 2, 'height' => 2],
+            ['text' => trim(($c['prenom'] ?? '') . ' ' . $c['nom']) . ($c['telephone'] !== '' ? '  -  ' . $c['telephone'] : '')],
+            $trait,
+        ];
+        foreach (lignes_de((int) $c['id']) as $l) {
+            $lignes[] = ['text' => $l['qty'] . ' x ' . $l['name'], 'bold' => true, 'width' => 2, 'height' => 2];
+        }
+        $rem = trim((string) ($c['remarque'] ?? ''));
+        if ($rem !== '') {
+            $lignes[] = $trait;
+            $lignes[] = ['text' => 'Remarque : ' . $rem, 'bold' => true];
+        }
+        $lignes[] = $trait;
+        $methode = P_PAIEMENTS[$c['paiement'] ?? ''] ?? '';
+        $lignes[] = ['text' => 'Total ' . eur((int) $c['total']) . ($methode !== '' ? ' - paye (' . mb_strtolower($methode) . ')' : ''), 'bold' => true];
+        $lignes[] = ['text' => 'Commande ' . $c['code'] . ' - ' . date('d/m H:i')];
+        $lignes[] = ['feed' => 3];
+        $lignes[] = ['cut' => true];
+        imprimante_ajouter($lignes, (int) $c['id']);
+    } catch (Throwable $e) {
+        error_log('pain: impression du bon #' . ($c['id'] ?? '?') . ' échouée : ' . $e->getMessage());
+    }
+}
+
+function eur(int $c): string
+{
+    return number_format($c / 100, 2, ',', ' ') . ' €';
 }
 
 function enregistrer_lignes(int $id, array $lignes): array
