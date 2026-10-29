@@ -32,14 +32,22 @@ const C_DEFAULT_STAFF = [
     'drivers' => [['id' => 'livreur1', 'name' => 'Livreur 1'], ['id' => 'livreur2', 'name' => 'Livreur 2']],
 ];
 const C_DEFAULT_MENU = [
-    ['id' => 'margherita', 'name' => 'Pizza Margherita', 'description' => 'Tomate, mozzarella, basilic', 'price' => 1150, 'station' => 'pizza', 'active' => true],
-    ['id' => 'reine', 'name' => 'Pizza Reine', 'description' => 'Jambon, champignons, mozzarella', 'price' => 1350, 'station' => 'pizza', 'active' => true],
-    ['id' => 'burger', 'name' => 'Burger du camping', 'description' => 'Bœuf, cheddar, salade · avec frites', 'price' => 1450, 'station' => 'cuisine', 'active' => true],
-    ['id' => 'frites', 'name' => 'Frites maison', 'description' => 'Une portion à partager', 'price' => 450, 'station' => 'cuisine', 'active' => true],
-    ['id' => 'salade', 'name' => 'Salade estivale', 'description' => 'Crudités, feta, olives', 'price' => 1050, 'station' => 'cuisine', 'active' => true],
-    ['id' => 'limonade', 'name' => 'Limonade artisanale', 'description' => '33 cl · sans alcool', 'price' => 350, 'station' => 'bar', 'active' => true],
-    ['id' => 'eau', 'name' => 'Eau minérale', 'description' => '50 cl', 'price' => 200, 'station' => 'bar', 'active' => true],
+    ['id' => 'margherita', 'name' => 'Pizza Margherita', 'description' => 'Tomate, mozzarella, basilic', 'price' => 1150, 'station' => 'pizza', 'active' => true,
+        'tr' => ['de' => ['name' => 'Pizza Margherita', 'description' => 'Tomate, Mozzarella, Basilikum'], 'en' => ['name' => 'Margherita pizza', 'description' => 'Tomato, mozzarella, basil'], 'nl' => ['name' => 'Pizza Margherita', 'description' => 'Tomaat, mozzarella, basilicum']]],
+    ['id' => 'reine', 'name' => 'Pizza Reine', 'description' => 'Jambon, champignons, mozzarella', 'price' => 1350, 'station' => 'pizza', 'active' => true,
+        'tr' => ['de' => ['name' => 'Pizza Regina', 'description' => 'Schinken, Champignons, Mozzarella'], 'en' => ['name' => 'Ham & mushroom pizza', 'description' => 'Ham, mushrooms, mozzarella'], 'nl' => ['name' => 'Pizza Regina', 'description' => 'Ham, champignons, mozzarella']]],
+    ['id' => 'burger', 'name' => 'Burger du camping', 'description' => 'Bœuf, cheddar, salade · avec frites', 'price' => 1450, 'station' => 'cuisine', 'active' => true,
+        'tr' => ['de' => ['name' => 'Camping-Burger', 'description' => 'Rind, Cheddar, Salat · mit Pommes'], 'en' => ['name' => 'Campsite burger', 'description' => 'Beef, cheddar, lettuce · with fries'], 'nl' => ['name' => 'Campingburger', 'description' => 'Rund, cheddar, sla · met friet']]],
+    ['id' => 'frites', 'name' => 'Frites maison', 'description' => 'Une portion à partager', 'price' => 450, 'station' => 'cuisine', 'active' => true,
+        'tr' => ['de' => ['name' => 'Hausgemachte Pommes', 'description' => 'Eine Portion zum Teilen'], 'en' => ['name' => 'Homemade fries', 'description' => 'A portion to share'], 'nl' => ['name' => 'Huisgemaakte friet', 'description' => 'Een portie om te delen']]],
+    ['id' => 'salade', 'name' => 'Salade estivale', 'description' => 'Crudités, feta, olives', 'price' => 1050, 'station' => 'cuisine', 'active' => true,
+        'tr' => ['de' => ['name' => 'Sommersalat', 'description' => 'Rohkost, Feta, Oliven'], 'en' => ['name' => 'Summer salad', 'description' => 'Raw vegetables, feta, olives'], 'nl' => ['name' => 'Zomersalade', 'description' => 'Rauwkost, feta, olijven']]],
+    ['id' => 'limonade', 'name' => 'Limonade artisanale', 'description' => '33 cl · sans alcool', 'price' => 350, 'station' => 'bar', 'active' => true,
+        'tr' => ['de' => ['name' => 'Hausgemachte Limonade', 'description' => '33 cl · alkoholfrei'], 'en' => ['name' => 'Craft lemonade', 'description' => '33 cl · alcohol-free'], 'nl' => ['name' => 'Ambachtelijke limonade', 'description' => '33 cl · alcoholvrij']]],
+    ['id' => 'eau', 'name' => 'Eau minérale', 'description' => '50 cl', 'price' => 200, 'station' => 'bar', 'active' => true,
+        'tr' => ['de' => ['name' => 'Mineralwasser', 'description' => '50 cl'], 'en' => ['name' => 'Mineral water', 'description' => '50 cl'], 'nl' => ['name' => 'Mineraalwater', 'description' => '50 cl']]],
 ];
+const C_LANGS = ['de', 'en', 'nl'];
 
 /* ------------------------------------------------------------------ */
 /* Stockage : documents JSON (même modèle que l'aperçu)                */
@@ -51,8 +59,10 @@ function c_dossier(): string
     if ($d !== null) {
         return $d;
     }
-    $env = getenv('CAMPING_DONNEES');
-    $candidats = $env ? [$env] : [dirname(__DIR__, 2) . '/le76-camping', __DIR__ . '/donnees'];
+    $env = getenv(defined('CAMPING_DEMO') ? 'CAMPING_DEMO_DONNEES' : 'CAMPING_DONNEES');
+    $candidats = $env ? [$env] : (defined('CAMPING_DEMO')
+        ? [dirname(__DIR__, 2) . '/le76-camping-demo', __DIR__ . '/donnees-demo']
+        : [dirname(__DIR__, 2) . '/le76-camping', __DIR__ . '/donnees']);
     foreach ($candidats as $c) {
         if (!is_dir($c)) {
             @mkdir($c, 0750, true);
@@ -304,7 +314,7 @@ function place_order(array $in, string $key): array
             throw new Fault('Quantité invalide (0 à 20).');
         }
         if ($q) {
-            $items[] = ['id' => $m['id'], 'name' => $m['name'], 'description' => $m['description'], 'price' => $m['price'], 'station' => $m['station'], 'quantity' => $q];
+            $items[] = ['id' => $m['id'], 'name' => $m['name'], 'description' => $m['description'], 'price' => $m['price'], 'station' => $m['station'], 'quantity' => $q, 'tr' => $m['tr'] ?? []];
             $n += $q;
         }
     }
@@ -645,7 +655,19 @@ function save_menu(mixed $raw, array $who): void
             $pid = 'p' . strtolower(substr(c_hex(), 0, 6));
         }
         $seen[$pid] = true;
-        $items[] = ['id' => $pid, 'name' => $name, 'description' => $desc, 'price' => $price, 'station' => $st, 'active' => ($it['active'] ?? true) !== false];
+        $tr = [];
+        foreach (C_LANGS as $l) {
+            $x = is_array($it['tr'] ?? null) && is_array($it['tr'][$l] ?? null) ? $it['tr'][$l] : [];
+            $tn = trim((string) ($x['name'] ?? ''));
+            $td = trim((string) ($x['description'] ?? ''));
+            if (mb_strlen($tn) > 60 || mb_strlen($td) > 120) {
+                throw new Fault('Traduction trop longue pour « ' . $name . ' » (nom 60, description 120 caractères).');
+            }
+            if ($tn !== '' || $td !== '') {
+                $tr[$l] = ['name' => $tn, 'description' => $td];
+            }
+        }
+        $items[] = ['id' => $pid, 'name' => $name, 'description' => $desc, 'price' => $price, 'station' => $st, 'active' => ($it['active'] ?? true) !== false, 'tr' => $tr];
     }
     if (!array_filter($items, fn($i) => $i['active'])) {
         throw new Fault('Au moins un produit doit rester proposé.');
@@ -719,6 +741,116 @@ function export_all(): string
         'menu' => rd('config/menu'), 'settings' => rd('config/settings'), 'staff' => rd('config/staff'), 'map' => rd('config/map'),
         'drivers' => liste('drivers'), 'trips' => liste('trips'), 'orders' => liste('orders'),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+}
+
+/* ------------------------------------------------------------------ */
+/* Messages vus par les vacanciers, dans leur langue                   */
+/* ------------------------------------------------------------------ */
+
+const C_MESSAGES = [
+    'Les commandes en ligne sont momentanément fermées. Merci de revenir un peu plus tard.' => ['de' => 'Online-Bestellungen sind gerade geschlossen. Bitte versuchen Sie es etwas später.', 'en' => 'Online ordering is closed for the moment. Please come back a little later.', 'nl' => 'Online bestellen is even gesloten. Probeer het later opnieuw.'],
+    'Numéro d’emplacement obligatoire (16 caractères maximum).' => ['de' => 'Stellplatznummer erforderlich (höchstens 16 Zeichen).', 'en' => 'Pitch number required (16 characters maximum).', 'nl' => 'Plaatsnummer verplicht (maximaal 16 tekens).'],
+    'Cet emplacement n’existe pas. Vérifiez votre numéro.' => ['de' => 'Diesen Stellplatz gibt es nicht. Bitte prüfen Sie die Nummer.', 'en' => 'This pitch does not exist. Please check your number.', 'nl' => 'Deze plaats bestaat niet. Controleer uw nummer.'],
+    'Nom et mode de remise obligatoires.' => ['de' => 'Name und Liefer- oder Abholwahl sind erforderlich.', 'en' => 'Name and delivery or pick-up choice are required.', 'nl' => 'Naam en keuze bezorgen of afhalen zijn verplicht.'],
+    'Panier invalide.' => ['de' => 'Warenkorb ungültig. Bitte Seite neu laden.', 'en' => 'Invalid basket. Please reload the page.', 'nl' => 'Ongeldig mandje. Herlaad de pagina.'],
+    'Quantité invalide (0 à 20).' => ['de' => 'Ungültige Menge (0 bis 20).', 'en' => 'Invalid quantity (0 to 20).', 'nl' => 'Ongeldig aantal (0 tot 20).'],
+    'Panier vide ou trop volumineux.' => ['de' => 'Warenkorb leer oder zu groß.', 'en' => 'Basket empty or too large.', 'nl' => 'Mandje leeg of te groot.'],
+    'Trop de commandes d’un coup. Réessayez dans quelques minutes.' => ['de' => 'Zu viele Bestellungen auf einmal. Bitte in ein paar Minuten erneut versuchen.', 'en' => 'Too many orders at once. Please try again in a few minutes.', 'nl' => 'Te veel bestellingen tegelijk. Probeer het over een paar minuten opnieuw.'],
+    'Référence de demande invalide.' => ['de' => 'Ungültige Anfrage. Bitte Seite neu laden.', 'en' => 'Invalid request. Please reload the page.', 'nl' => 'Ongeldige aanvraag. Herlaad de pagina.'],
+];
+
+function c_traduire(string $m, mixed $lang): string
+{
+    return is_string($lang) && isset(C_MESSAGES[$m][$lang]) ? C_MESSAGES[$m][$lang] : $m;
+}
+
+/* ------------------------------------------------------------------ */
+/* Connexion des livreurs : prénom + code des livreurs                  */
+/* ------------------------------------------------------------------ */
+
+const C_COOKIE_LIVREUR = 'le76_camping_livreur';
+
+function c_chemin_cookie(): string
+{
+    return rtrim(str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/camping/api.php'))), '/') . '/';
+}
+
+function c_sessions(): PDO
+{
+    $pdo = c_db();
+    $pdo->exec('CREATE TABLE IF NOT EXISTS sessions (jeton TEXT PRIMARY KEY, driver TEXT NOT NULL, expire INTEGER NOT NULL)');
+    return $pdo;
+}
+
+function code_livreurs_defini(): bool
+{
+    return (bool) c_db()->query("SELECT 1 FROM kv WHERE cle = 'code_livreurs'")->fetchColumn();
+}
+
+function definir_code_livreurs(mixed $code, array $who): void
+{
+    need($who['role'], 'manager');
+    if (!is_string($code) || !preg_match('/^\d{4,8}$/D', $code)) {
+        throw new Fault('Le code des livreurs doit faire de 4 à 8 chiffres.');
+    }
+    c_db()->prepare("INSERT INTO kv (cle, valeur) VALUES ('code_livreurs', ?) ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur")
+        ->execute([password_hash($code, PASSWORD_DEFAULT)]);
+    c_sessions()->exec('DELETE FROM sessions'); // nouveau code : les livreurs se reconnectent
+}
+
+function livreur_connexion(array $q): void
+{
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '0');
+    if (!limiter('lvr:' . $ip, 10, 900)) {
+        throw new Fault('Trop d’essais. Réessayez dans 15 minutes.', 429);
+    }
+    $driver = (string) ($q['driver'] ?? '');
+    $h = c_db()->query("SELECT valeur FROM kv WHERE cle = 'code_livreurs'")->fetchColumn();
+    if (!$h) {
+        throw new Fault('Le responsable doit d’abord choisir le code des livreurs (Mon camping).', 409);
+    }
+    if (!est_livreur($driver) || !password_verify((string) ($q['code'] ?? ''), (string) $h)) {
+        throw new Fault('Prénom ou code incorrect.', 401);
+    }
+    $j = bin2hex(random_bytes(32));
+    $pdo = c_sessions();
+    $pdo->prepare('DELETE FROM sessions WHERE expire < ?')->execute([time()]);
+    $pdo->prepare('INSERT INTO sessions (jeton, driver, expire) VALUES (?, ?, ?)')->execute([hash('sha256', $j), $driver, time() + 120 * 86400]);
+    setcookie(C_COOKIE_LIVREUR, $j, ['expires' => time() + 120 * 86400, 'path' => c_chemin_cookie(), 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Lax']);
+}
+
+function livreur_deconnexion(): void
+{
+    $j = (string) ($_COOKIE[C_COOKIE_LIVREUR] ?? '');
+    if ($j !== '') {
+        c_sessions()->prepare('DELETE FROM sessions WHERE jeton = ?')->execute([hash('sha256', $j)]);
+    }
+    setcookie(C_COOKIE_LIVREUR, '', ['expires' => 1, 'path' => c_chemin_cookie()]);
+}
+
+function livreur_session(): ?array
+{
+    $j = (string) ($_COOKIE[C_COOKIE_LIVREUR] ?? '');
+    if (!preg_match('/^[a-f0-9]{64}$/', $j)) {
+        return null;
+    }
+    $st = c_sessions()->prepare('SELECT driver FROM sessions WHERE jeton = ? AND expire > ?');
+    $st->execute([hash('sha256', $j), time()]);
+    $d = $st->fetchColumn();
+    if (!$d || !est_livreur((string) $d)) {
+        return null;
+    }
+    $nom = comptes()[(string) $d][0] ?? 'Livreur';
+    return ['id' => 0, 'nom' => $nom, 'admin' => false, 'driver' => (string) $d];
+}
+
+/** Qui utilise l'appli : compte de l'équipe du 76, sinon livreur connecté par code. Démo : responsable d'office. */
+function c_moi(): ?array
+{
+    if (defined('CAMPING_DEMO')) {
+        return livreur_session() ?? ['id' => 0, 'nom' => 'Démo', 'admin' => true, 'demo' => true];
+    }
+    return equipe_utilisateur() ?? livreur_session();
 }
 
 /* ------------------------------------------------------------------ */

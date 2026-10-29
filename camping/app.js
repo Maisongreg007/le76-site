@@ -338,14 +338,16 @@ function makeCore(db, env) {
     try {
       r = await fetch(API, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ a }, data || {})) });
       d = await r.json();
-    } catch (e) { throw new base.Fault('Connexion impossible. Vérifiez le réseau et réessayez.', 503); }
+    } catch (e) { throw new base.Fault(t('network'), 503); }
     if (!r.ok || d.ok === false) throw new base.Fault(d.erreur || 'Action impossible.', r.status);
     return d;
   }
-  let me = null, installe = true, canManage = false, rev = null, lastSig = '', lastMe = '';
+  let me = null, installe = true, canManage = false, rev = null, lastSig = '', lastMe = '', codeLivreurs = false;
+  let loginMode = location.hash === '#livreur' ? 'driver' : 'staff';
+  const codeSession = () => !!(me && me.driver); // livreur connecté par le code (et non par un compte du 76)
   const mut = (a, data) => call(a, Object.assign({ as: actor || '' }, data || {})).then(async r => { await poll(true); return r; });
   const core = Object.assign({}, base, {
-    placeOrder: (input, key) => call('commander', { input, key }).then(async r => { track = r.id; await poll(true); return r; }),
+    placeOrder: (input, key) => call('commander', { input, key, lang: L }).then(async r => { track = r.id; await poll(true); return r; }),
     validate: (id, station) => mut('valider', { id, station }),
     assign: (ids, driver) => mut('confier', { ids, driver }),
     presence: () => mut('presence'),
@@ -404,7 +406,8 @@ function makeCore(db, env) {
     try {
       const d = await call('etat', { rev: force ? null : rev, track: track || '' });
       const meSig = JSON.stringify(d.me), meChanged = meSig !== lastMe; lastMe = meSig;
-      me = d.me; installe = d.installe; canManage = !!(me && me.admin);
+      me = d.me; installe = d.installe; canManage = !!(me && me.admin); codeLivreurs = !!d.codeLivreurs;
+      if (me && me.driver && actor !== me.driver) { actor = me.driver; ssSet('campingActor', actor); }
       let changed = false;
       if (!d.same) {
         rev = d.rev;
@@ -461,18 +464,95 @@ function makeCore(db, env) {
     if (view === 'client') client(); else if (view === 'track') tracking(); else team();
   }
 
+  /* ---------- langues (pages des clients) ---------- */
+  const T = {
+    fr: {
+      lang: 'Français', network: 'Connexion impossible. Vérifiez le réseau et réessayez.', navOrder: 'Commander', navTrack: 'Ma commande', navTeam: 'Équipe', badge: 'PAIEMENT À LA REMISE', foot1: 'Au rythme des vacances.', foot2: 'Livraison gratuite au camping · Retrait au restaurant',
+      eyebrow: 'LE RESTAURANT VIENT À VOUS', hero: 'Vos vacances.<br>Notre cuisine.', heroP: 'Commandez depuis votre mobil-home. On vous livre gratuitement, ou on vous retrouve au restaurant.', heroTag: 'Livraison offerte · Emplacement obligatoire',
+      closed: 'Les commandes en ligne sont momentanément fermées. Merci de revenir un peu plus tard.', menu: 'À la carte', demoMenu: 'Carte de démonstration', theMenu: 'La carte',
+      pizza: 'Au four à pizza', cuisine: 'Côté cuisine', bar: 'Côté bar', add: '+ Ajouter', addA: 'Ajouter', cart: 'Votre panier', less: 'Retirer une unité', more: 'Ajouter une unité', total: 'Total', delivery: 'Livraison', free: 'gratuite', deliveryBtn: 'Livraison', pickupBtn: 'Retrait',
+      spot: 'Emplacement / mobil-home *', spotEx: 'Ex. 127', name: 'Votre prénom *', nameEx: 'Ex. Camille', payNote: 'Paiement à la remise de la commande (espèces ou carte). Aucun paiement en ligne.', demoNote: ' Carte de démonstration : plats et prix d’exemple.',
+      consent: 'Je confirme ma commande.', submit: 'Commander · paiement à la remise', empty: 'Un petit creux ?<br>Ajoutez votre premier plat.',
+      yourOrder: 'Votre commande', codeHelp: 'Le code de suivi apparaît après votre commande (8 caractères, ex. 3FA9C1D2). Vous pouvez aussi le saisir ici.', code: 'Code de suivi', show: 'Afficher', notFound: 'Commande introuvable pour le code', otherCode: 'Saisir un autre code',
+      sReceived: 'Commande reçue', sReceivedT: 'Le restaurant a bien reçu votre commande.', sKitchen: 'En cuisine', sKitchenT: 'Préparation en cours :', kPizza: 'pizza', kCuisine: 'cuisine', kBar: 'boissons',
+      sReadyPick: 'Prête à retirer', sReadyPickT: 'Votre commande vous attend au comptoir du restaurant.', sCollected: 'Retirée', sReady: 'Prête', sReadyT: 'Votre commande est prête et attend son livreur.', sRoute: 'En route',
+      brings: '{n} vous l’apporte en golfette, à l’emplacement {s}.', bringsAnon: 'Un livreur vous l’apporte en golfette, à l’emplacement {s}.', sDelivered: 'Livrée', enjoy: 'Bon appétit !', paidIn: 'payée en', cash: 'espèces', card: 'carte',
+      hCollected: 'Commande retirée', hDelivered: 'Commande livrée', yourOrderUp: 'VOTRE COMMANDE', hello: 'Bonjour', paid: 'Payée', toPay: 'À régler à la remise', where: 'Où en est ma commande ?',
+      live: 'Cette page se met à jour toute seule. Pas d’horaire estimé : on vous livre dès que c’est prêt.', copy: 'Copier mon lien de suivi', other: 'Autre suivi', recap: 'Le récapitulatif',
+      atRestaurant: 'Retrait au restaurant', freeTo: 'Livraison gratuite à l’emplacement', payAt: 'paiement à la remise (espèces ou carte)', keep: 'Conservez votre lien : il permet de retrouver cette commande.', copied: 'Lien de suivi copié.', yourCode: 'Votre code :'
+    },
+    de: {
+      lang: 'Deutsch', network: 'Keine Verbindung. Bitte Netz prüfen und erneut versuchen.', navOrder: 'Bestellen', navTrack: 'Meine Bestellung', navTeam: 'Team', badge: 'ZAHLUNG BEI ÜBERGABE', foot1: 'Im Rhythmus der Ferien.', foot2: 'Kostenlose Lieferung auf dem Campingplatz · Abholung im Restaurant',
+      eyebrow: 'DAS RESTAURANT KOMMT ZU IHNEN', hero: 'Ihr Urlaub.<br>Unsere Küche.', heroP: 'Bestellen Sie von Ihrem Mobilheim aus. Wir liefern kostenlos, oder Sie holen im Restaurant ab.', heroTag: 'Kostenlose Lieferung · Stellplatz erforderlich',
+      closed: 'Online-Bestellungen sind gerade geschlossen. Bitte versuchen Sie es etwas später.', menu: 'Speisekarte', demoMenu: 'Beispielkarte', theMenu: 'Die Karte',
+      pizza: 'Aus dem Pizzaofen', cuisine: 'Aus der Küche', bar: 'Von der Bar', add: '+ Hinzufügen', addA: 'Hinzufügen', cart: 'Ihr Warenkorb', less: 'Eins weniger', more: 'Eins mehr', total: 'Summe', delivery: 'Lieferung', free: 'kostenlos', deliveryBtn: 'Lieferung', pickupBtn: 'Abholung',
+      spot: 'Stellplatz / Mobilheim *', spotEx: 'z. B. 127', name: 'Ihr Vorname *', nameEx: 'z. B. Anna', payNote: 'Bezahlung bei Übergabe (bar oder Karte). Keine Online-Zahlung.', demoNote: ' Beispielkarte: Gerichte und Preise nur zur Ansicht.',
+      consent: 'Ich bestätige meine Bestellung.', submit: 'Bestellen · Zahlung bei Übergabe', empty: 'Hunger?<br>Fügen Sie Ihr erstes Gericht hinzu.',
+      yourOrder: 'Ihre Bestellung', codeHelp: 'Der Verfolgungscode erscheint nach der Bestellung (8 Zeichen, z. B. 3FA9C1D2). Sie können ihn auch hier eingeben.', code: 'Verfolgungscode', show: 'Anzeigen', notFound: 'Keine Bestellung gefunden für den Code', otherCode: 'Anderen Code eingeben',
+      sReceived: 'Bestellung erhalten', sReceivedT: 'Das Restaurant hat Ihre Bestellung erhalten.', sKitchen: 'In der Küche', sKitchenT: 'Wird zubereitet:', kPizza: 'Pizza', kCuisine: 'Küche', kBar: 'Getränke',
+      sReadyPick: 'Abholbereit', sReadyPickT: 'Ihre Bestellung wartet an der Theke des Restaurants.', sCollected: 'Abgeholt', sReady: 'Fertig', sReadyT: 'Ihre Bestellung ist fertig und wartet auf den Fahrer.', sRoute: 'Unterwegs',
+      brings: '{n} bringt sie Ihnen mit dem Golfwagen zum Stellplatz {s}.', bringsAnon: 'Ein Fahrer bringt sie Ihnen mit dem Golfwagen zum Stellplatz {s}.', sDelivered: 'Geliefert', enjoy: 'Guten Appetit!', paidIn: 'bezahlt mit', cash: 'Bargeld', card: 'Karte',
+      hCollected: 'Bestellung abgeholt', hDelivered: 'Bestellung geliefert', yourOrderUp: 'IHRE BESTELLUNG', hello: 'Hallo', paid: 'Bezahlt', toPay: 'Zahlung bei Übergabe', where: 'Wo ist meine Bestellung?',
+      live: 'Diese Seite aktualisiert sich von selbst. Keine geschätzte Uhrzeit: Wir liefern, sobald alles fertig ist.', copy: 'Verfolgungslink kopieren', other: 'Andere Bestellung', recap: 'Übersicht',
+      atRestaurant: 'Abholung im Restaurant', freeTo: 'Kostenlose Lieferung zum Stellplatz', payAt: 'Zahlung bei Übergabe (bar oder Karte)', keep: 'Bewahren Sie den Link auf: Damit finden Sie diese Bestellung wieder.', copied: 'Link kopiert.', yourCode: 'Ihr Code:'
+    },
+    en: {
+      lang: 'English', network: 'No connection. Check your network and try again.', navOrder: 'Order', navTrack: 'My order', navTeam: 'Staff', badge: 'PAY ON DELIVERY', foot1: 'At holiday pace.', foot2: 'Free delivery on the campsite · Pick-up at the restaurant',
+      eyebrow: 'THE RESTAURANT COMES TO YOU', hero: 'Your holiday.<br>Our kitchen.', heroP: 'Order from your mobile home. We deliver for free, or meet you at the restaurant.', heroTag: 'Free delivery · Pitch number required',
+      closed: 'Online ordering is closed for the moment. Please come back a little later.', menu: 'Menu', demoMenu: 'Sample menu', theMenu: 'Our menu',
+      pizza: 'From the pizza oven', cuisine: 'From the kitchen', bar: 'From the bar', add: '+ Add', addA: 'Add', cart: 'Your basket', less: 'One less', more: 'One more', total: 'Total', delivery: 'Delivery', free: 'free', deliveryBtn: 'Delivery', pickupBtn: 'Pick-up',
+      spot: 'Pitch / mobile home *', spotEx: 'e.g. 127', name: 'Your first name *', nameEx: 'e.g. Emma', payNote: 'Pay when you receive your order (cash or card). No online payment.', demoNote: ' Sample menu: example dishes and prices.',
+      consent: 'I confirm my order.', submit: 'Order · pay on delivery', empty: 'Feeling peckish?<br>Add your first dish.',
+      yourOrder: 'Your order', codeHelp: 'Your tracking code appears after ordering (8 characters, e.g. 3FA9C1D2). You can also enter it here.', code: 'Tracking code', show: 'Show', notFound: 'No order found for code', otherCode: 'Enter another code',
+      sReceived: 'Order received', sReceivedT: 'The restaurant has received your order.', sKitchen: 'In the kitchen', sKitchenT: 'Being prepared:', kPizza: 'pizza', kCuisine: 'kitchen', kBar: 'drinks',
+      sReadyPick: 'Ready to collect', sReadyPickT: 'Your order is waiting at the restaurant counter.', sCollected: 'Collected', sReady: 'Ready', sReadyT: 'Your order is ready and waiting for its driver.', sRoute: 'On its way',
+      brings: '{n} is bringing it by golf cart to pitch {s}.', bringsAnon: 'A driver is bringing it by golf cart to pitch {s}.', sDelivered: 'Delivered', enjoy: 'Enjoy your meal!', paidIn: 'paid by', cash: 'cash', card: 'card',
+      hCollected: 'Order collected', hDelivered: 'Order delivered', yourOrderUp: 'YOUR ORDER', hello: 'Hello', paid: 'Paid', toPay: 'Pay on delivery', where: 'Where is my order?',
+      live: 'This page updates by itself. No estimated time: we deliver as soon as it is ready.', copy: 'Copy my tracking link', other: 'Track another order', recap: 'Summary',
+      atRestaurant: 'Pick-up at the restaurant', freeTo: 'Free delivery to pitch', payAt: 'pay on delivery (cash or card)', keep: 'Keep your link: it lets you find this order again.', copied: 'Tracking link copied.', yourCode: 'Your code:'
+    },
+    nl: {
+      lang: 'Nederlands', network: 'Geen verbinding. Controleer het netwerk en probeer opnieuw.', navOrder: 'Bestellen', navTrack: 'Mijn bestelling', navTeam: 'Team', badge: 'BETALEN BIJ AFGIFTE', foot1: 'Op vakantieritme.', foot2: 'Gratis bezorging op de camping · Afhalen in het restaurant',
+      eyebrow: 'HET RESTAURANT KOMT NAAR U', hero: 'Uw vakantie.<br>Onze keuken.', heroP: 'Bestel vanuit uw stacaravan. Wij bezorgen gratis, of u haalt af in het restaurant.', heroTag: 'Gratis bezorging · Plaatsnummer verplicht',
+      closed: 'Online bestellen is even gesloten. Probeer het later opnieuw.', menu: 'Menukaart', demoMenu: 'Voorbeeldkaart', theMenu: 'De kaart',
+      pizza: 'Uit de pizzaoven', cuisine: 'Uit de keuken', bar: 'Van de bar', add: '+ Toevoegen', addA: 'Toevoegen', cart: 'Uw mandje', less: 'Eén minder', more: 'Eén meer', total: 'Totaal', delivery: 'Bezorging', free: 'gratis', deliveryBtn: 'Bezorgen', pickupBtn: 'Afhalen',
+      spot: 'Plaats / stacaravan *', spotEx: 'bijv. 127', name: 'Uw voornaam *', nameEx: 'bijv. Sanne', payNote: 'Betalen bij afgifte (contant of met kaart). Geen online betaling.', demoNote: ' Voorbeeldkaart: gerechten en prijzen als voorbeeld.',
+      consent: 'Ik bevestig mijn bestelling.', submit: 'Bestellen · betalen bij afgifte', empty: 'Trek?<br>Voeg uw eerste gerecht toe.',
+      yourOrder: 'Uw bestelling', codeHelp: 'De volgcode verschijnt na uw bestelling (8 tekens, bijv. 3FA9C1D2). U kunt hem ook hier invullen.', code: 'Volgcode', show: 'Tonen', notFound: 'Geen bestelling gevonden voor code', otherCode: 'Andere code invullen',
+      sReceived: 'Bestelling ontvangen', sReceivedT: 'Het restaurant heeft uw bestelling ontvangen.', sKitchen: 'In de keuken', sKitchenT: 'Wordt bereid:', kPizza: 'pizza', kCuisine: 'keuken', kBar: 'drankjes',
+      sReadyPick: 'Klaar om af te halen', sReadyPickT: 'Uw bestelling wacht aan de balie van het restaurant.', sCollected: 'Afgehaald', sReady: 'Klaar', sReadyT: 'Uw bestelling is klaar en wacht op de bezorger.', sRoute: 'Onderweg',
+      brings: '{n} brengt hem met het golfkarretje naar plaats {s}.', bringsAnon: 'Een bezorger brengt hem met het golfkarretje naar plaats {s}.', sDelivered: 'Bezorgd', enjoy: 'Eet smakelijk!', paidIn: 'betaald met', cash: 'contant', card: 'kaart',
+      hCollected: 'Bestelling afgehaald', hDelivered: 'Bestelling bezorgd', yourOrderUp: 'UW BESTELLING', hello: 'Hallo', paid: 'Betaald', toPay: 'Betalen bij afgifte', where: 'Waar is mijn bestelling?',
+      live: 'Deze pagina werkt zichzelf bij. Geen geschatte tijd: we bezorgen zodra alles klaar is.', copy: 'Mijn volglink kopiëren', other: 'Andere bestelling', recap: 'Overzicht',
+      atRestaurant: 'Afhalen in het restaurant', freeTo: 'Gratis bezorging naar plaats', payAt: 'betalen bij afgifte (contant of met kaart)', keep: 'Bewaar uw link: zo vindt u deze bestelling terug.', copied: 'Volglink gekopieerd.', yourCode: 'Uw code:'
+    }
+  };
+  const LANGS = Object.keys(T);
+  let L = (() => { const s = lsGet('camping-lang'); if (T[s]) return s; const n = (navigator.language || 'fr').slice(0, 2); return T[n] ? n : 'fr'; })();
+  const t = (k, v) => { let s = (T[L] && T[L][k]) || T.fr[k] || k; if (v) for (const x in v) s = s.split('{' + x + '}').join(v[x]); return s; };
+  const nm = m => (m.tr && m.tr[L] && m.tr[L].name) || m.name;
+  const ds = m => (m.tr && m.tr[L] && m.tr[L].description) || m.description;
+  const langSwitch = () => `<div class="langs" role="group" aria-label="Langue">${LANGS.map(l => `<button type="button" data-lang="${l}" class="${l === L ? 'on' : ''}" title="${T[l].lang}" aria-pressed="${l === L}">${l.toUpperCase()}</button>`).join('')}</div>`;
+  function chrome() {
+    document.documentElement.lang = L;
+    const nb = document.querySelectorAll('nav button');
+    if (nb.length === 3) { nb[0].textContent = t('navOrder'); nb[1].textContent = t('navTrack'); nb[2].textContent = t('navTeam'); }
+    const bd = document.querySelector('header .demo'); if (bd) bd.textContent = t('badge');
+    const ft = document.querySelector('footer'); if (ft) ft.innerHTML = `${esc(t('foot1'))} <span>${esc(t('foot2'))}</span>`;
+  }
+
   /* ---------- client ---------- */
   const menuItems = () => S.menu.items.filter(m => m.active);
   function client() {
     const demo = !S.menu.confirmed, open = S.settings.open;
-    app.innerHTML = `<section class="hero"><div><span class="eyebrow">LE RESTAURANT VIENT À VOUS</span><h1>Vos vacances.<br>Notre cuisine.</h1><p>Commandez depuis votre mobil-home. On vous livre gratuitement, ou on vous retrouve au restaurant.</p><span class="tag">Livraison offerte · Emplacement obligatoire</span></div><div class="hero-art" aria-hidden="true">🍕</div></section>${open ? '' : '<div class="note">Les commandes en ligne sont momentanément fermées. Merci de revenir un peu plus tard.</div>'}<div class="grid"><section><div class="row between"><h2>À la carte</h2><span class="muted">${demo ? 'Carte de démonstration' : 'La carte'}</span></div><div class="menu">${menuItems().map(m => `<article class="card"><span class="tag">${esc(m.station === 'pizza' ? 'Au four à pizza' : m.station === 'bar' ? 'Côté bar' : 'Côté cuisine')}</span><h3>${esc(m.name)}</h3><p class="muted">${esc(m.description)}</p><div class="row between bottom"><span class="price">${money(m.price)}</span><button data-add="${esc(m.id)}" ${open ? '' : 'disabled'} aria-label="Ajouter ${esc(m.name)}">+ Ajouter</button></div></article>`).join('')}</div></section><aside class="panel cart"><h2>Votre panier</h2><div id="cart"></div></aside></div>`;
+    app.innerHTML = `<section class="hero"><div><div class="row between"><span class="eyebrow">${t('eyebrow')}</span>${langSwitch()}</div><h1>${t('hero')}</h1><p>${t('heroP')}</p><span class="tag">${t('heroTag')}</span></div><div class="hero-art" aria-hidden="true">🍕</div></section>${open ? '' : `<div class="note">${t('closed')}</div>`}<div class="grid"><section><div class="row between"><h2>${t('menu')}</h2><span class="muted">${demo ? t('demoMenu') : t('theMenu')}</span></div><div class="menu">${menuItems().map(m => `<article class="card"><span class="tag">${esc(t(m.station))}</span><h3>${esc(nm(m))}</h3><p class="muted">${esc(ds(m))}</p><div class="row between bottom"><span class="price">${money(m.price)}</span><button data-add="${esc(m.id)}" ${open ? '' : 'disabled'} aria-label="${t('addA')} ${esc(nm(m))}">${t('add')}</button></div></article>`).join('')}</div></section><aside class="panel cart"><h2>${t('cart')}</h2><div id="cart"></div></aside></div>`;
     drawCart();
   }
   function drawCart() {
     const demo = !S.menu.confirmed, open = S.settings.open, spots = (S.settings.spots || []).map(x => x[0]);
     for (const k of Object.keys(cart)) if (!menuItems().some(m => m.id === k) || !cart[k]) delete cart[k];
     const items = menuItems().filter(m => cart[m.id]);
-    $('#cart').innerHTML = items.length ? `${items.map(m => `<div class="cart-line"><div><strong>${esc(m.name)}</strong><br><small>${money(m.price)} × ${cart[m.id]}</small></div><div><button data-minus="${esc(m.id)}" aria-label="Retirer une unité">−</button> <button data-plus="${esc(m.id)}" aria-label="Ajouter une unité">+</button></div></div>`).join('')}<div class="row between total"><span>Total</span><span>${money(items.reduce((n, m) => n + m.price * cart[m.id], 0))}</span></div><small>Livraison : <strong>gratuite</strong></small><div class="choice"><button type="button" data-mode="delivery" class="${mode === 'delivery' ? 'active' : ''}">Livraison</button><button type="button" data-mode="pickup" class="${mode === 'pickup' ? 'active' : ''}">Retrait</button></div><form id="checkout"><label for="f-spot">Emplacement / mobil-home *</label><input id="f-spot" name="spot" required maxlength="16" pattern="[A-Za-z0-9 \\-]+" placeholder="Ex. 127" list="spots" autocomplete="off" value="${esc(form.spot)}">${spots.length ? `<datalist id="spots">${spots.map(s => `<option value="${esc(s)}">`).join('')}</datalist>` : ''}<label for="f-name">Votre prénom *</label><input id="f-name" name="name" required maxlength="60" placeholder="Ex. Camille" value="${esc(form.name)}"><div class="note">Paiement à la remise de la commande (espèces ou carte). Aucun paiement en ligne.${demo ? ' Carte de démonstration : plats et prix d’exemple.' : ''}</div><label class="inl chk" for="f-consent"><input id="f-consent" type="checkbox" name="consent" required ${form.consent ? 'checked' : ''}>Je confirme ma commande.</label><button class="primary full" style="margin-top:18px" ${open ? '' : 'disabled'}>Commander · paiement à la remise</button></form>` : '<div class="empty">Un petit creux ?<br>Ajoutez votre premier plat.</div>';
+    $('#cart').innerHTML = items.length ? `${items.map(m => `<div class="cart-line"><div><strong>${esc(nm(m))}</strong><br><small>${money(m.price)} × ${cart[m.id]}</small></div><div><button data-minus="${esc(m.id)}" aria-label="${t('less')}">−</button> <button data-plus="${esc(m.id)}" aria-label="${t('more')}">+</button></div></div>`).join('')}<div class="row between total"><span>${t('total')}</span><span>${money(items.reduce((n, m) => n + m.price * cart[m.id], 0))}</span></div><small>${t('delivery')} : <strong>${t('free')}</strong></small><div class="choice"><button type="button" data-mode="delivery" class="${mode === 'delivery' ? 'active' : ''}">${t('deliveryBtn')}</button><button type="button" data-mode="pickup" class="${mode === 'pickup' ? 'active' : ''}">${t('pickupBtn')}</button></div><form id="checkout"><label for="f-spot">${t('spot')}</label><input id="f-spot" name="spot" required maxlength="16" pattern="[A-Za-z0-9 \\-]+" placeholder="${t('spotEx')}" list="spots" autocomplete="off" value="${esc(form.spot)}">${spots.length ? `<datalist id="spots">${spots.map(s => `<option value="${esc(s)}">`).join('')}</datalist>` : ''}<label for="f-name">${t('name')}</label><input id="f-name" name="name" required maxlength="60" placeholder="${t('nameEx')}" value="${esc(form.name)}"><div class="note">${t('payNote')}${demo ? t('demoNote') : ''}</div><label class="inl chk" for="f-consent"><input id="f-consent" type="checkbox" name="consent" required ${form.consent ? 'checked' : ''}>${t('consent')}</label><button class="primary full" style="margin-top:18px" ${open ? '' : 'disabled'}>${t('submit')}</button></form>` : `<div class="empty">${t('empty')}</div>`;
   }
   async function submitOrder(formEl) {
     const btn = formEl.querySelector('button.primary'); btn.disabled = true;
@@ -485,33 +565,33 @@ function makeCore(db, env) {
   /* ---------- suivi ---------- */
   function tracking() {
     if (!track) {
-      app.innerHTML = '<div class="login panel"><h2>Votre commande</h2><p>Le code de suivi apparaît après votre commande (8 caractères, ex. 3FA9C1D2). Vous pouvez aussi le saisir ici.</p><form id="find"><label for="t-code">Code de suivi</label><input id="t-code" name="token" required maxlength="8" autocomplete="off"><button class="primary">Afficher</button></form></div>';
+      app.innerHTML = `<div class="login panel"><div class="row between"><h2>${t('yourOrder')}</h2>${langSwitch()}</div><p>${t('codeHelp')}</p><form id="find"><label for="t-code">${t('code')}</label><input id="t-code" name="token" required maxlength="8" autocomplete="off"><button class="primary">${t('show')}</button></form></div>`;
       return;
     }
     const o = orderById(String(track).toUpperCase());
-    if (!o) { app.innerHTML = `<div class="panel"><p class="error">Commande introuvable pour le code ${esc(track)}.</p><button id="other">Saisir un autre code</button></div>`; return; }
+    if (!o) { app.innerHTML = `<div class="panel"><div class="row between"><p class="error">${t('notFound')} ${esc(track)}.</p>${langSwitch()}</div><button id="other">${t('otherCode')}</button></div>`; return; }
     const s = eff(o), pick = o.mode === 'pickup';
     const evs = events(o), at = re => { const e = evs.find(x => re.test(x.a)); return e ? e.t : null; };
-    const trip = o.trip ? S.trips.find(t => t.id === o.trip) : null;
+    const trip = o.trip ? S.trips.find(x => x.id === o.trip) : null;
     const dname = trip ? ((S.staff.drivers || []).find(d => d.id === trip.driver) || {}).name : '';
-    const kitchen = Object.entries(o.stations).map(([k, v]) => `${{ pizza: 'pizza', cuisine: 'cuisine', bar: 'boissons' }[k] || k} ${v ? '✓' : '…'}`).join(' · ');
-    const paidTxt = o.paid ? ` · payée en ${core.METHODS[o.paid.method]}` : '';
+    const kitchen = Object.entries(o.stations).map(([k, v]) => `${t({ pizza: 'kPizza', cuisine: 'kCuisine', bar: 'kBar' }[k] || k)} ${v ? '✓' : '…'}`).join(' · ');
+    const paidTxt = o.paid ? ` · ${t('paidIn')} ${t(o.paid.method)}` : '';
     const steps = pick ? [
-      ['Commande reçue', o.created, 'Le restaurant a bien reçu votre commande.'],
-      ['En cuisine', o.created, 'Préparation en cours : ' + kitchen + '.'],
-      ['Prête à retirer', at(/prête/i), 'Votre commande vous attend au comptoir du restaurant.'],
-      ['Retirée', o.paid && o.paid.at, 'Bon appétit !' + paidTxt]
+      [t('sReceived'), o.created, t('sReceivedT')],
+      [t('sKitchen'), o.created, t('sKitchenT') + ' ' + kitchen + '.'],
+      [t('sReadyPick'), at(/prête/i), t('sReadyPickT')],
+      [t('sCollected'), o.paid && o.paid.at, t('enjoy') + paidTxt]
     ] : [
-      ['Commande reçue', o.created, 'Le restaurant a bien reçu votre commande.'],
-      ['En cuisine', o.created, 'Préparation en cours : ' + kitchen + '.'],
-      ['Prête', at(/prête/i), 'Votre commande est prête et attend son livreur.'],
-      ['En route', at(/Tournée attribuée/), (dname ? esc(dname) + ' vous l’apporte' : 'Un livreur vous l’apporte') + ' en golfette, à l’emplacement ' + esc(o.spot) + '.'],
-      ['Livrée', o.paid && o.paid.at, 'Bon appétit !' + paidTxt]
+      [t('sReceived'), o.created, t('sReceivedT')],
+      [t('sKitchen'), o.created, t('sKitchenT') + ' ' + kitchen + '.'],
+      [t('sReady'), at(/prête/i), t('sReadyT')],
+      [t('sRoute'), at(/Tournée attribuée/), dname ? t('brings', { n: esc(dname), s: esc(o.spot) }) : t('bringsAnon', { s: esc(o.spot) })],
+      [t('sDelivered'), o.paid && o.paid.at, t('enjoy') + paidTxt]
     ];
     const cur = pick ? ({ preparing: 1, ready: 2, collected: 3 }[s] ?? 1) : ({ preparing: 1, ready: 2, assigned: 3, delivering: 3, delivered: 4 }[s] ?? 1);
     const last = cur === steps.length - 1;
-    const head = last ? (pick ? 'Commande retirée' : 'Commande livrée') : steps[cur][0];
-    app.innerHTML = `<div class="hero"><div><span class="eyebrow">VOTRE COMMANDE · ${esc(o.id)}</span><h1>${esc(head)}</h1><p>Bonjour ${esc(o.name)}. ${steps[cur][2]}</p><span class="tag">${o.paid ? 'Payée' : 'À régler à la remise'} · ${money(o.total)}</span></div><div class="hero-art" aria-hidden="true">${pick ? '🛍' : '🛺'}</div></div><div class="grid"><section class="panel"><h2>Où en est ma commande ?</h2><ol class="ctrack">${steps.map(([label, t, txt], i) => `<li class="${i < cur || last ? 'done' : i === cur ? 'now' : ''}"><span class="dot">${i < cur || last ? '✓' : i + 1}</span><div><strong>${label}</strong>${t && (i <= cur) ? `<small> · ${hhmm(t)}</small>` : ''}${i === cur && !last ? `<p>${txt}</p>` : ''}</div></li>`).join('')}</ol><p class="muted">Cette page se met à jour toute seule. Pas d’horaire estimé : on vous livre dès que c’est prêt.</p><button id="copy">Copier mon lien de suivi</button> <button id="other">Autre suivi</button></section><aside class="panel"><h2>Le récapitulatif</h2>${o.items.map(i => `<p>${i.quantity} × ${esc(i.name)} <strong>${money(i.price * i.quantity)}</strong></p>`).join('')}<hr><strong>Total ${money(o.total)}</strong><p class="muted">${pick ? 'Retrait au restaurant' : 'Livraison gratuite à l’emplacement ' + esc(o.spot)} · paiement à la remise (espèces ou carte)</p><small>Conservez votre code : il permet de retrouver cette commande.</small></aside></div>`;
+    const head = last ? (pick ? t('hCollected') : t('hDelivered')) : steps[cur][0];
+    app.innerHTML = `<div class="hero"><div><div class="row between"><span class="eyebrow">${t('yourOrderUp')} · ${esc(o.id)}</span>${langSwitch()}</div><h1>${esc(head)}</h1><p>${t('hello')} ${esc(o.name)}. ${steps[cur][2]}</p><span class="tag">${o.paid ? t('paid') : t('toPay')} · ${money(o.total)}</span></div><div class="hero-art" aria-hidden="true">${pick ? '🛍' : '🛺'}</div></div><div class="grid"><section class="panel"><h2>${t('where')}</h2><ol class="ctrack">${steps.map(([label, tm, txt], i) => `<li class="${i < cur || last ? 'done' : i === cur ? 'now' : ''}"><span class="dot">${i < cur || last ? '✓' : i + 1}</span><div><strong>${label}</strong>${tm && (i <= cur) ? `<small> · ${hhmm(tm)}</small>` : ''}${i === cur && !last ? `<p>${txt}</p>` : ''}</div></li>`).join('')}</ol><p class="muted">${t('live')}</p><button id="copy">${t('copy')}</button> <button id="other">${t('other')}</button></section><aside class="panel"><h2>${t('recap')}</h2>${o.items.map(i => `<p>${i.quantity} × ${esc(nm(i))} <strong>${money(i.price * i.quantity)}</strong></p>`).join('')}<hr><strong>${t('total')} ${money(o.total)}</strong><p class="muted">${pick ? t('atRestaurant') : t('freeTo') + ' ' + esc(o.spot)} · ${t('payAt')}</p><small>${t('keep')}</small></aside></div>`;
   }
 
   /* ---------- équipe ---------- */
@@ -520,7 +600,7 @@ function makeCore(db, env) {
     app.innerHTML = `<div class="login panel"><span class="eyebrow">ESPACE ÉQUIPE</span><h1 style="font-size:38px">Bonjour l’équipe.</h1><p class="muted">Choisissez votre compte.</p><form id="login"><label for="l-actor">Compte</label><select id="l-actor" name="actor">${opts.map(([id, v]) => `<option value="${id}">${esc(v[0])}${v[1] === 'driver' ? '' : v[1] === 'manager' ? '' : ' · téléphone'}</option>`).join('')}</select><button class="primary full" style="margin-top:14px">Entrer</button></form><div class="note">Connecté : <strong>${esc(me.nom)}</strong>${canManage ? ' · responsable' : ''}. <button type="button" id="deco" class="sm">Se déconnecter</button></div></div>`;
   }
   function staffLogin() {
-    app.innerHTML = installe ? `<div class="login panel"><span class="eyebrow">ESPACE ÉQUIPE</span><h1 style="font-size:38px">Bonjour l’équipe.</h1><p class="muted">Connectez-vous avec votre compte du 76, le même que pour les réservations.</p><form id="staff-login"><label for="s-id">Identifiant</label><input id="s-id" name="identifiant" autocomplete="username" autocapitalize="none" required><label for="s-mdp">Mot de passe</label><input id="s-mdp" name="mdp" type="password" autocomplete="current-password" required><button class="primary full" style="margin-top:14px">Se connecter</button></form><p class="muted"><a href="/equipe/">Mot de passe oublié ou nouveau compte : appli des réservations</a></p></div>` : '<div class="login panel"><span class="eyebrow">ESPACE ÉQUIPE</span><h2>Aucun compte pour l’instant</h2><p class="muted">Créez d’abord le compte responsable dans l’appli des réservations, <a href="/equipe/">le76.fr/equipe</a>, puis revenez ici.</p></div>';
+    app.innerHTML = installe ? `<div class="login panel"><span class="eyebrow">ESPACE ÉQUIPE</span><h1 style="font-size:38px">Bonjour l’équipe.</h1><p class="muted">Connectez-vous avec votre compte du 76, le même que pour les réservations.</p><form id="staff-login"><label for="s-id">Identifiant</label><input id="s-id" name="identifiant" autocomplete="username" autocapitalize="none" required><label for="s-mdp">Mot de passe</label><input id="s-mdp" name="mdp" type="password" autocomplete="current-password" required><button class="primary full" style="margin-top:14px">Se connecter</button></form><p class="muted"><a href="/equipe/">Mot de passe oublié ou nouveau compte : appli des réservations</a></p><p><button type="button" id="to-driver" class="sm">Je suis livreur</button></p></div>` : '<div class="login panel"><span class="eyebrow">ESPACE ÉQUIPE</span><h2>Aucun compte pour l’instant</h2><p class="muted">Créez d’abord le compte responsable dans l’appli des réservations, <a href="/equipe/">le76.fr/equipe</a>, puis revenez ici.</p></div>';
   }
   async function staffConnect(f) {
     const b = f.querySelector('button'); b.disabled = true;
@@ -532,11 +612,22 @@ function makeCore(db, env) {
     } catch (e) { notice(e.message); b.disabled = false; }
   }
   async function staffLogout() {
+    if (me && (me.driver || me.demo)) { try { await call('livreur_deconnexion'); } catch (e) { } me = null; actor = null; ssDel('campingActor'); loginMode = 'staff'; await poll(true); return rerender(true); }
     try { await fetch('/api/equipe.php', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'deconnexion' }) }); } catch (e) { }
     me = null; actor = null; ssDel('campingActor'); await poll(true); rerender(true);
   }
+  const driverLink = () => location.origin + location.pathname.replace(/[^/]*$/, '') + 'livreur/';
+  function driverLogin() {
+    const ds = S.staff.drivers || [];
+    app.innerHTML = `<div class="login panel"><span class="eyebrow">ESPACE LIVREUR</span><h1 style="font-size:38px">Bonjour !</h1>${codeLivreurs ? `<p class="muted">Choisissez votre prénom et tapez le code des livreurs donné par le responsable.</p><form id="driver-login"><label for="d-who">Prénom</label><select id="d-who" name="driver">${ds.map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('')}</select><label for="d-code">Code des livreurs</label><input id="d-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required><button class="primary full" style="margin-top:14px">Commencer</button></form>${me && me.demo ? '<p class="note">Démo : le code est 1234.</p>' : ''}` : '<p class="muted">Le responsable doit d’abord choisir le code des livreurs dans Mon camping.</p>'}<p><button type="button" id="to-staff" class="sm">Compte de l’équipe du 76</button></p></div>`;
+  }
+  async function driverConnect(f) {
+    const b = f.querySelector('button'); b.disabled = true;
+    try { await call('livreur_connexion', { driver: f.driver.value, code: f.code.value.trim() }); actor = f.driver.value; ssSet('campingActor', actor); await poll(true); rerender(true); }
+    catch (e) { notice(friendly(e)); b.disabled = false; }
+  }
   function team() {
-    if (!me) return staffLogin();
+    if (!me || (loginMode === 'driver' && me.demo && !me.driver)) return loginMode === 'driver' ? driverLogin() : staffLogin();
     if (!actor) return login();
     const manager = role() === 'manager', driver = role() === 'driver';
     if (manager && tab === 'camping') return drawAdmin();
@@ -585,7 +676,7 @@ function makeCore(db, env) {
     const action = stage === 0 ? '<button class="primary big" id="presence">Je suis arrivé(e)</button>' : I.te === 'returning' ? `<button class="primary big" data-ret="${esc(t.id)}">Je suis de retour au restaurant</button>` : '';
     const undo = S.orders.filter(o => o.status === 'delivered' && recentlyMine(o) && S.trips.some(x => x.id === o.trip && x.driver === actor)).sort((a, b) => (a.paid.at < b.paid.at ? 1 : -1))[0];
     const doneTrips = S.trips.filter(x => x.driver === actor && x.state === 'done' && me.since && (x.returned || x.created) >= me.since).sort((a, b) => (a.created < b.created ? 1 : -1));
-    app.innerHTML = `<div class="toolbar"><div><span class="eyebrow">MODULE LIVREUR</span><h1>${esc(A[actor][0])}</h1></div><button id="logout">Changer de compte</button></div>
+    app.innerHTML = `<div class="toolbar"><div><span class="eyebrow">MODULE LIVREUR</span><h1>${esc(A[actor][0])}</h1></div>${codeSession() ? '<button id="deco">Se déconnecter</button>' : '<button id="logout">Changer de compte</button>'}</div>
 <section class="hero drv"><div class="drv-main"><span class="eyebrow">MON CYCLE · ${esc(labels[me.state])}${me.since ? ' depuis ' + hhmm(me.since) : ''}</span><h1>${title}</h1>${N ? `${bar(n, N)}<p class="muted">${n}/${N} remis · reste à encaisser <strong>${money(I.due)}</strong></p>` : ''}${cycleHtml(stage, false, N ? n + '/' + N : '')}${action}</div><div class="hero-art" aria-hidden="true">🛺</div></section>
 ${N ? `<nav class="chips" aria-label="Arrêts de la tournée">${stops.map((o, i) => `<button class="chip ${o.status === 'delivered' ? 'ok' : ''} ${o.id === focusStop ? 'on' : ''}" data-focus="${esc(o.id)}"><b>${o.status === 'delivered' ? '✓ ' : ''}${esc(o.spot)}</b><small>${esc(hintOf(o) || o.name)}</small></button>`).join('')}</nav>` : ''}
 ${focus ? focusCard(focus, stops.indexOf(focus), N) : N ? `<div class="panel done-card"><h2>Toutes les commandes sont remises</h2><p class="muted">Rentrez au restaurant puis touchez le bouton ci-dessus.</p></div>` : '<div class="panel empty">Aucune tournée en cours. Les commandes que le responsable vous confie apparaîtront ici.</div>'}
@@ -646,7 +737,7 @@ ${undo ? `<p class="undo">Remise de l’emplacement ${esc(undo.spot)} enregistr�
   /* ---------- Mon camping ---------- */
   const STN = { pizza: 'Pizza', cuisine: 'Cuisine', bar: 'Bar' };
   function menuEditor() {
-    $('#menu-editor').innerHTML = draftMenu.map((m, i) => `<div class="mrow"><input data-f="name" data-i="${i}" value="${esc(m.name)}" placeholder="Nom du produit" maxlength="60" aria-label="Nom du produit"><input data-f="description" data-i="${i}" value="${esc(m.description)}" placeholder="Description (facultatif)" maxlength="120" aria-label="Description"><div class="row"><input data-f="priceText" data-i="${i}" value="${esc(m.priceText != null ? m.priceText : (m.price / 100).toFixed(2).replace('.', ','))}" inputmode="decimal" placeholder="Prix €" aria-label="Prix en euros" style="width:96px"><select data-f="station" data-i="${i}" aria-label="Poste" style="width:auto">${Object.entries(STN).map(([k, v]) => `<option value="${k}" ${m.station === k ? 'selected' : ''}>${v}</option>`).join('')}</select><label class="inl"><input type="checkbox" data-f="active" data-i="${i}" ${m.active ? 'checked' : ''}>Proposé</label></div><div class="row"><button type="button" data-mv="${i}:-1" aria-label="Monter">↑</button><button type="button" data-mv="${i}:1" aria-label="Descendre">↓</button><button type="button" data-rm="${i}">Supprimer</button></div></div>`).join('') || '<div class="empty">Aucun produit.</div>';
+    $('#menu-editor').innerHTML = draftMenu.map((m, i) => `<div class="mrow"><input data-f="name" data-i="${i}" value="${esc(m.name)}" placeholder="Nom du produit" maxlength="60" aria-label="Nom du produit"><input data-f="description" data-i="${i}" value="${esc(m.description)}" placeholder="Description (facultatif)" maxlength="120" aria-label="Description"><div class="row"><input data-f="priceText" data-i="${i}" value="${esc(m.priceText != null ? m.priceText : (m.price / 100).toFixed(2).replace('.', ','))}" inputmode="decimal" placeholder="Prix €" aria-label="Prix en euros" style="width:96px"><select data-f="station" data-i="${i}" aria-label="Poste" style="width:auto">${Object.entries(STN).map(([k, v]) => `<option value="${k}" ${m.station === k ? 'selected' : ''}>${v}</option>`).join('')}</select><label class="inl"><input type="checkbox" data-f="active" data-i="${i}" ${m.active ? 'checked' : ''}>Proposé</label></div><div class="row"><button type="button" data-mv="${i}:-1" aria-label="Monter">↑</button><button type="button" data-mv="${i}:1" aria-label="Descendre">↓</button><button type="button" data-rm="${i}">Supprimer</button></div><details class="trad"><summary>Traductions (DE · EN · NL)</summary>${['de', 'en', 'nl'].map(l => `<div class="row"><b class="lg">${l.toUpperCase()}</b><input data-f="tr.${l}.name" data-i="${i}" value="${esc(((m.tr || {})[l] || {}).name || '')}" placeholder="Nom (${l.toUpperCase()})" maxlength="60" aria-label="Nom ${l.toUpperCase()}" style="flex:1;min-width:0;margin:0"><input data-f="tr.${l}.description" data-i="${i}" value="${esc(((m.tr || {})[l] || {}).description || '')}" placeholder="Description (${l.toUpperCase()})" maxlength="120" aria-label="Description ${l.toUpperCase()}" style="flex:2;min-width:0;margin:0"></div>`).join('')}<small>Laissé vide : le client voit le texte en français.</small></details></div>`).join('') || '<div class="empty">Aucun produit.</div>';
   }
   function staffEditor() {
     $('#staff-editor').innerHTML = [['managers', 'Responsables', 'un responsable'], ['drivers', 'Livreurs', 'un livreur']].map(([g, t, one]) => `<h3 style="margin-top:14px">${t}</h3>${draftStaff[g].map((x, i) => `<div class="row srow"><input data-g="${g}" data-i="${i}" value="${esc(x.name)}" maxlength="40" placeholder="Prénom" aria-label="Nom" style="flex:1;min-width:0;margin:0"><button type="button" data-srm="${g}:${i}">Retirer</button></div>`).join('')}<button type="button" data-sadd="${g}">+ Ajouter ${one}</button>`).join('');
@@ -655,7 +746,7 @@ ${undo ? `<p class="undo">Remise de l’emplacement ${esc(undo.spot)} enregistr�
     if (!draftMenu) draftMenu = S.menu.items.map(m => ({ ...m }));
     if (!draftStaff) draftStaff = { managers: (S.staff.managers || []).map(x => ({ ...x })), drivers: (S.staff.drivers || []).map(x => ({ ...x })) };
     const st = S.settings, spotsTxt = (st.spots || []).map(([s, h]) => s + (h ? ' ; ' + h : '')).join('\n');
-    app.innerHTML = `<div class="toolbar"><div><span class="eyebrow">MON CAMPING</span><h1>Carte, emplacements, sauvegarde</h1></div>${segHtml()}</div><div class="staff-grid"><section><div class="panel"><h2>La carte</h2><p class="muted">${S.menu.confirmed ? 'Cette carte est celle que voient vos clients.' : 'Pour l’instant, les clients voient une carte de démonstration. Saisissez vos vrais plats et prix, puis enregistrez.'}</p><div id="menu-editor"></div><div class="row" style="margin-top:14px"><button id="add-item" type="button">+ Ajouter un produit</button><button class="primary" id="save-menu" type="button">Enregistrer la carte</button></div><small>Un produit décoché n’est plus proposé mais reste dans la liste. Chaque produit va sur le ticket de son poste (pizza, cuisine ou bar).</small></div><div class="panel" style="margin-top:16px"><h2>L’équipe</h2><p class="muted">Vos responsables et vos livreurs. Les postes pizza, cuisine et bar sont fixes.</p><div id="staff-editor"></div><button class="primary full" id="save-staff" type="button" style="margin-top:14px">Enregistrer l’équipe</button></div><div class="panel" style="margin-top:16px"><h2>Emplacements et commandes</h2><label class="inl chk" for="open"><input type="checkbox" id="open" ${st.open ? 'checked' : ''}>Accepter les commandes en ligne</label><label for="spots-txt">Liste des emplacements (facultatif)</label><textarea id="spots-txt" rows="8" placeholder="127 ; Allée des Pins&#10;128 ; Allée des Pins">${esc(spotsTxt)}</textarea><small>Une ligne par emplacement : le numéro, puis un repère facultatif après un point-virgule. Si la liste est remplie, seuls ces emplacements peuvent commander, et le repère apparaît sur les tickets et chez les livreurs. Laissée vide, tout numéro est accepté.</small><button class="primary full" id="save-settings" type="button" style="margin-top:14px">Enregistrer</button></div></section><aside><div class="panel"><h2>Plan du camping</h2><p class="muted">Ajoutez votre vrai plan pour les livreurs.</p>${assetsNs ? `<label for="map-upload">Image PNG ou JPEG</label><input id="map-upload" type="file" accept="image/png,image/jpeg">` : '<small>Le dépôt de fichier est réservé aux éditeurs de cette page.</small>'}${S.map && S.map.id ? `<img class="map" style="margin-top:12px" src="api.php?a=plan&amp;v=${esc(S.map.id)}" alt="Plan du camping enregistré">` : '<small>Aucun plan fourni pour le moment.</small>'}</div><div class="panel" style="margin-top:16px"><h2>Sauvegarde</h2><p class="muted">Enregistre un fichier avec toutes les données (carte, réglages, commandes, tournées).</p>${dl ? '<button class="primary full" id="backup" type="button">Enregistrer une sauvegarde</button>' : '<small>Le téléchargement n’est pas disponible dans cette vue.</small>'}</div><div class="panel" style="margin-top:16px"><h2>Remise à zéro des commandes</h2><p class="muted">Efface toutes les commandes et tournées, et remet les livreurs en « absent ». La carte, les emplacements et le plan sont conservés. Une copie de sécurité est faite automatiquement juste avant.</p><label for="confirm-reset">Tapez EFFACER pour confirmer</label><input id="confirm-reset" autocomplete="off"><button class="full" id="reset" type="button">Effacer les commandes</button></div><div class="panel" style="margin-top:16px"><h2>Accès</h2><p class="muted">Chacun se connecte avec son compte du 76 (appli des réservations). Les comptes responsables ont accès à tout ; les autres travaillent comme poste ou livreur. Pour ajouter quelqu’un : le76.fr/equipe, onglet Équipe.</p></div></aside></div>`;
+    app.innerHTML = `<div class="toolbar"><div><span class="eyebrow">MON CAMPING</span><h1>Carte, emplacements, sauvegarde</h1></div>${segHtml()}</div><div class="staff-grid"><section><div class="panel"><h2>La carte</h2><p class="muted">${S.menu.confirmed ? 'Cette carte est celle que voient vos clients.' : 'Pour l’instant, les clients voient une carte de démonstration. Saisissez vos vrais plats et prix, puis enregistrez.'}</p><div id="menu-editor"></div><div class="row" style="margin-top:14px"><button id="add-item" type="button">+ Ajouter un produit</button><button class="primary" id="save-menu" type="button">Enregistrer la carte</button></div><small>Un produit décoché n’est plus proposé mais reste dans la liste. Chaque produit va sur le ticket de son poste (pizza, cuisine ou bar).</small></div><div class="panel" style="margin-top:16px"><h2>L’équipe</h2><p class="muted">Vos responsables et vos livreurs. Les postes pizza, cuisine et bar sont fixes.</p><div id="staff-editor"></div><button class="primary full" id="save-staff" type="button" style="margin-top:14px">Enregistrer l’équipe</button></div><div class="panel" style="margin-top:16px"><h2>Emplacements et commandes</h2><label class="inl chk" for="open"><input type="checkbox" id="open" ${st.open ? 'checked' : ''}>Accepter les commandes en ligne</label><label for="spots-txt">Liste des emplacements (facultatif)</label><textarea id="spots-txt" rows="8" placeholder="127 ; Allée des Pins&#10;128 ; Allée des Pins">${esc(spotsTxt)}</textarea><small>Une ligne par emplacement : le numéro, puis un repère facultatif après un point-virgule. Si la liste est remplie, seuls ces emplacements peuvent commander, et le repère apparaît sur les tickets et chez les livreurs. Laissée vide, tout numéro est accepté.</small><button class="primary full" id="save-settings" type="button" style="margin-top:14px">Enregistrer</button></div></section><aside><div class="panel"><h2>Connexion des livreurs</h2><p class="muted">Lien à donner aux livreurs : ils choisissent leur prénom et tapent le code. Pas besoin de compte.</p><p><strong>${esc(driverLink())}</strong></p><button type="button" id="copy-drv">Copier le lien</button><label for="drv-code">${codeLivreurs ? 'Nouveau code' : 'Code des livreurs'} (4 à 8 chiffres)</label><input id="drv-code" inputmode="numeric" autocomplete="off" maxlength="8"><button class="primary full" id="save-drv-code" type="button">${codeLivreurs ? 'Changer le code' : 'Enregistrer le code'}</button><small>${codeLivreurs ? 'Un code est en place. Le changer déconnecte tous les livreurs.' : 'Aucun code pour l’instant : les livreurs ne peuvent pas encore se connecter.'}</small></div><div class="panel" style="margin-top:16px"><h2>Plan du camping</h2><p class="muted">Ajoutez votre vrai plan pour les livreurs.</p>${assetsNs ? `<label for="map-upload">Image PNG ou JPEG</label><input id="map-upload" type="file" accept="image/png,image/jpeg">` : '<small>Le dépôt de fichier est réservé aux éditeurs de cette page.</small>'}${S.map && S.map.id ? `<img class="map" style="margin-top:12px" src="api.php?a=plan&amp;v=${esc(S.map.id)}" alt="Plan du camping enregistré">` : '<small>Aucun plan fourni pour le moment.</small>'}</div><div class="panel" style="margin-top:16px"><h2>Sauvegarde</h2><p class="muted">Enregistre un fichier avec toutes les données (carte, réglages, commandes, tournées).</p>${dl ? '<button class="primary full" id="backup" type="button">Enregistrer une sauvegarde</button>' : '<small>Le téléchargement n’est pas disponible dans cette vue.</small>'}</div><div class="panel" style="margin-top:16px"><h2>Remise à zéro des commandes</h2><p class="muted">Efface toutes les commandes et tournées, et remet les livreurs en « absent ». La carte, les emplacements et le plan sont conservés. Une copie de sécurité est faite automatiquement juste avant.</p><label for="confirm-reset">Tapez EFFACER pour confirmer</label><input id="confirm-reset" autocomplete="off"><button class="full" id="reset" type="button">Effacer les commandes</button></div><div class="panel" style="margin-top:16px"><h2>Accès</h2><p class="muted">Chacun se connecte avec son compte du 76 (appli des réservations). Les comptes responsables ont accès à tout ; les autres travaillent comme poste ou livreur. Pour ajouter quelqu’un : le76.fr/equipe, onglet Équipe.</p></div></aside></div>`;
     menuEditor(); staffEditor();
   }
   function parsePrice(m) {
@@ -668,7 +759,11 @@ ${undo ? `<p class="undo">Remise de l’emplacement ${esc(undo.spot)} enregistr�
     const t = e.target;
     if (t.form && t.form.id === 'checkout') { form[t.name] = t.type === 'checkbox' ? t.checked : t.value; return; }
     if (t.dataset.g) { draftStaff[t.dataset.g][+t.dataset.i].name = t.value; return; }
-    if (t.closest && t.closest('#menu-editor') && t.dataset.f) draftMenu[+t.dataset.i][t.dataset.f] = t.type === 'checkbox' ? t.checked : t.value;
+    if (t.closest && t.closest('#menu-editor') && t.dataset.f) {
+      const m = draftMenu[+t.dataset.i], path = t.dataset.f.split('.');
+      if (path.length === 3) { m.tr = Object.assign({}, m.tr); m.tr[path[1]] = Object.assign({}, m.tr[path[1]], { [path[2]]: t.value }); }
+      else m[t.dataset.f] = t.type === 'checkbox' ? t.checked : t.value;
+    }
   });
   app.addEventListener('change', e => {
     const t = e.target;
@@ -683,16 +778,22 @@ ${undo ? `<p class="undo">Remise de l’emplacement ${esc(undo.spot)} enregistr�
     if (f.id === 'checkout') submitOrder(f);
     else if (f.id === 'find') { track = new FormData(f).get('token').trim().toUpperCase(); lsSet('campingTrack', track); render(); }
     else if (f.id === 'staff-login') staffConnect(f);
+    else if (f.id === 'driver-login') driverConnect(f);
     else if (f.id === 'login') { actor = new FormData(f).get('actor'); ssSet('campingActor', actor); tab = 'orders'; rerender(true); }
   });
   app.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return; const d = b.dataset, id = b.id;
+    if (d.lang) { L = d.lang; lsSet('camping-lang', L); chrome(); return rerender(true); }
     if (d.add) { cart[d.add] = Math.min(20, (cart[d.add] || 0) + 1); requestKey = newKey(); return drawCart(); }
     if (d.plus || d.minus) { const k = d.plus || d.minus; cart[k] = Math.max(0, Math.min(20, (cart[k] || 0) + (d.plus ? 1 : -1))); requestKey = newKey(); return drawCart(); }
     if (d.mode) { mode = d.mode; requestKey = newKey(); return drawCart(); }
-    if (id === 'copy') { const link = location.origin + location.pathname + '?suivi=' + track; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => notice('Lien de suivi copié.'), () => notice('Votre code : ' + track)); return; }
+    if (id === 'copy') { const link = location.origin + location.pathname + '?suivi=' + track; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => notice(t('copied')), () => notice(t('yourCode') + ' ' + track)); return; }
     if (id === 'other') { track = null; lsDel('campingTrack'); return render(); }
     if (id === 'deco') return staffLogout();
+    if (id === 'to-driver') { loginMode = 'driver'; return rerender(true); }
+    if (id === 'to-staff') { loginMode = 'staff'; if (me && me.demo) { actor = null; ssDel('campingActor'); } return rerender(true); }
+    if (id === 'copy-drv') { const l = driverLink(); (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => notice('Lien des livreurs copié.'), () => notice(l)); return; }
+    if (id === 'save-drv-code') return act(() => mut('code_livreurs', { code: $('#drv-code').value.trim() }), 'Code des livreurs enregistré.');
     if (id === 'logout') { actor = null; ssDel('campingActor'); tab = 'orders'; draftMenu = null; selected.clear(); return rerender(true); }
     if (d.tab) { tab = d.tab; draftMenu = null; draftStaff = null; return rerender(true); }
     if (d.focus) { focusStop = d.focus; return rerender(true); }
@@ -723,7 +824,7 @@ ${undo ? `<p class="undo">Remise de l’emplacement ${esc(undo.spot)} enregistr�
     if (id === 'add-item') { draftMenu.push({ id: '', name: '', description: '', price: 0, priceText: '', station: 'cuisine', active: true }); menuEditor(); const ins = document.querySelectorAll('#menu-editor [data-f=name]'); ins[ins.length - 1].focus(); return; }
     if (id === 'save-menu') {
       const items = [];
-      for (const m of draftMenu) { const p = parsePrice(m); if (Number.isNaN(p)) return notice('Prix invalide pour « ' + (m.name || 'produit sans nom') + ' ».'); items.push({ id: m.id, name: m.name, description: m.description, price: p, station: m.station, active: m.active }); }
+      for (const m of draftMenu) { const p = parsePrice(m); if (Number.isNaN(p)) return notice('Prix invalide pour « ' + (m.name || 'produit sans nom') + ' ».'); items.push({ id: m.id, name: m.name, description: m.description, price: p, station: m.station, active: m.active, tr: m.tr || {} }); }
       return act(async () => { await core.saveMenu(items, who()); draftMenu = null; }, 'Carte enregistrée.');
     }
     if (d.srm) { const [g, i] = d.srm.split(':'); draftStaff[g].splice(+i, 1); return staffEditor(); }
@@ -739,8 +840,9 @@ ${undo ? `<p class="undo">Remise de l’emplacement ${esc(undo.spot)} enregistr�
 
   const qs = new URLSearchParams(location.search);
   if (/^[A-Fa-f0-9]{8}$/.test(qs.get('suivi') || '')) { track = qs.get('suivi').toUpperCase(); lsSet('campingTrack', track); view = 'track'; }
-  if (location.hash === '#equipe') view = 'team';
+  if (location.hash === '#equipe' || location.hash === '#livreur') view = 'team';
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  chrome();
   render();
   poll(true);
 })();

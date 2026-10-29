@@ -40,6 +40,9 @@ ol li{margin-bottom:6px}
   <a class="app" href="cout-matiere/"><span class="ico-cm" aria-hidden="true">€</span><span><b>Coût matière</b>Carte, fiches techniques, mercuriale, food cost et coefficient, boissons, allergènes, écran service.</span></a>
   <a class="app" href="pain/"><img src="/pain/icone-192.png" alt=""><span><b>Pain du camping · campeurs</b>Précommande de pain et viennoiseries pour le lendemain (FR / DE / EN / NL), bon avec QR code, paiement par carte (simulé).</span></a>
   <a class="app" href="pain/equipe/"><img src="/pain/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Pain du camping · équipe</b>Commandes du jour, encaissement, remise, chiffres, feuille de vente et bon boulanger à imprimer.</span></a>
+  <a class="app" href="camping/"><img src="/camping/icone-192.png" alt=""><span><b>Camping · commande des vacanciers</b>Commande depuis le mobil-home, livraison gratuite en golfette ou retrait, suivi en direct (FR / DE / EN / NL).</span></a>
+  <a class="app" href="camping/#equipe"><img src="/camping/icone-192.png" alt="" style="filter:hue-rotate(160deg)"><span><b>Camping · équipe</b>Validation par poste (pizza, cuisine, bar), tournées confiées aux livreurs, encaissement, carte et emplacements.</span></a>
+  <a class="app" href="camping/livreur/"><img src="/camping/icone-192.png" alt="" style="filter:hue-rotate(260deg)"><span><b>Camping · livreur</b>Lien des livreurs : prénom + code (1234 en démo), arrêt en cours en grand, espèces ou carte, caisse du service.</span></a>
   <a class="app" href="caisse/"><img src="/demo/caisse/icone-192.png" alt=""><span><b>ComptaCaisse</b>Caisse espèces du 76 et du camping : entrées, sorties, dépôts en banque, comptage, monnaie, transferts, clôture du mois.</span></a>
   <a class="app" href="scan/"><img src="/scan/icon-192.png?v=2" alt=""><span><b>Scan des documents</b>Photographier une facture, la ranger d’un clic (factures, livraisons, banque…). Le vrai outil classe tout dans Google Drive.</span></a>
 </div>
@@ -57,6 +60,7 @@ ol li{margin-bottom:6px}
 <li><b>Espace employé</b> : demande un congé avec Emma, puis accepte-la dans Aujourd'hui.</li>
 <li><b>Registre hygiène</b> : relève une température hors plage, coche le ménage, imprime une étiquette.</li>
 <li><b>Réservation</b> : fais une demande sur la page client, puis valide-la dans l'appli équipe (onglet des demandes).</li>
+<li><b>Camping · livraison</b> : commande une pizza comme un vacancier (essaie l’allemand), valide-la dans l’équipe, confie-la à Léa dans l’onglet Livreurs, puis connecte-toi comme Léa (code 1234) et encaisse.</li>
 <li><b>Pain du camping</b> : commande deux baguettes comme un campeur, paie « par carte », puis retrouve la commande dans l’espace équipe et imprime le bon boulanger.</li>
 <li><b>ComptaCaisse</b> : saisis une sortie d’espèces, fais un dépôt en banque, puis compte la caisse pour voir l’écart.</li>
 <li><b>Scan</b> : photographie un document et range-le dans « Factures fournisseurs », ou classe ceux qui attendent dans « À classer ».</li>

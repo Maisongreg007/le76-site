@@ -6,6 +6,11 @@
 declare(strict_types=1);
 
 require __DIR__ . '/lib.php';
+if (defined('CAMPING_DEMO')) {
+    require __DIR__ . '/demo.php';
+    header('X-Robots-Tag: noindex, nofollow');
+    demo_preparer();
+}
 
 const C_TOUJOURS = ['etat', 'commander'];
 
@@ -23,7 +28,7 @@ try {
         }
     }
     $a = (string) ($q['a'] ?? '');
-    $moi = equipe_utilisateur();
+    $moi = c_moi();
     $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '0');
 
     /* ---------- lecture ---------- */
@@ -58,6 +63,15 @@ try {
     if ($a === 'etat') {
         repondre(etat($q, $moi));
     }
+    if ($a === 'livreur_connexion') {
+        seed();
+        livreur_connexion($q); // hors transaction : les essais ratés restent comptés
+        repondre(['ok' => true]);
+    }
+    if ($a === 'livreur_deconnexion') {
+        livreur_deconnexion();
+        repondre(['ok' => true]);
+    }
 
     /* ---------- écriture : une transaction par action ---------- */
     $pdo = c_db();
@@ -67,11 +81,15 @@ try {
     $pdo->exec('BEGIN IMMEDIATE');
     try {
         if ($a === 'commander') {
-            if (!limiter('cmd:' . $ip, 30, 600)) {
-                throw new Fault('Trop de commandes d’un coup. Réessayez dans quelques minutes.', 429);
+            try {
+                if (!limiter('cmd:' . $ip, 30, 600)) {
+                    throw new Fault('Trop de commandes d’un coup. Réessayez dans quelques minutes.', 429);
+                }
+                seed();
+                $r = place_order(is_array($q['input'] ?? null) ? $q['input'] : [], (string) ($q['key'] ?? ''));
+            } catch (Fault $e) {
+                throw new Fault(c_traduire($e->getMessage(), $q['lang'] ?? null), $e->statut);
             }
-            seed();
-            $r = place_order(is_array($q['input'] ?? null) ? $q['input'] : [], (string) ($q['key'] ?? ''));
         } else {
             if (!$moi) {
                 throw new Fault('Connecte-toi pour continuer.', 401);
@@ -97,6 +115,9 @@ try {
 function qui(array $q, array $moi): array
 {
     $actor = (string) ($q['as'] ?? '');
+    if (!empty($moi['driver'])) {
+        $actor = $moi['driver']; // un livreur connecté par code n'agit que pour lui-même
+    }
     $c = comptes();
     if (!isset($c[$actor])) {
         throw new Fault('Choisissez votre compte dans l’espace équipe.', 403);
@@ -127,6 +148,7 @@ function action(string $a, array $q, array $who): ?array
         case 'reglages': save_settings($q['settings'] ?? null, $who); return null;
         case 'effacer': reset_tests($q['confirm'] ?? null, $who); return null;
         case 'plan': return enregistrer_plan($who);
+        case 'code_livreurs': definir_code_livreurs($q['code'] ?? null, $who); return null;
     }
     throw new Fault('Action inconnue.', 404);
 }
@@ -181,6 +203,12 @@ function etat(array $q, ?array $moi): array
         $orders = liste('orders', "json_extract(data, '$.created') >= ? OR json_extract(data, '$.status') NOT IN ('delivered', 'collected')", [$depuis]);
         $trips = liste('trips', "json_extract(data, '$.created') >= ? OR json_extract(data, '$.state') != 'done'", [$depuis]);
         $map = rd('config/map');
+        if (!empty($moi['driver'])) {
+            $trips = array_values(array_filter($trips, fn($t) => $t['driver'] === $moi['driver']));
+            $ids = array_column($trips, 'id');
+            $orders = array_values(array_filter($orders, fn($o) => $o['trip'] && in_array($o['trip'], $ids, true)));
+        }
+        $base['codeLivreurs'] = code_livreurs_defini();
         return $base + [
             'rev' => $rev, 'staff' => staff(), 'menu' => menu(), 'settings' => reglages(),
             'map' => $map ? ['id' => $map['id']] : null,
@@ -190,6 +218,7 @@ function etat(array $q, ?array $moi): array
     // Client : la carte, les réglages publics et, s'il la suit, sa commande.
     $r = reglages();
     $out = $base + [
+        'codeLivreurs' => code_livreurs_defini(),
         'rev' => null, 'staff' => ['managers' => [], 'drivers' => staff()['drivers']], 'menu' => menu(),
         'settings' => ['open' => (bool) ($r['open'] ?? true), 'spots' => array_map(fn($s) => [$s[0], $s[1]], $r['spots'] ?? [])],
         'map' => null, 'orders' => [], 'drivers' => [], 'trips' => [],
