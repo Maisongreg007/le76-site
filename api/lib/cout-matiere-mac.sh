@@ -62,6 +62,7 @@ DEJA=$(wc -l < "$DIR/envoyees.txt" | tr -d ' ')
 rm -rf "$APP"
 osacompile -o "$APP" -e 'do shell script "/bin/bash " & quoted form of (POSIX path of (path to home folder) & "Library/Application Support/Le76-Factures/envoyer.sh")' >/dev/null
 /usr/libexec/PlistBuddy -c "Add :LSUIElement bool true" "$APP/Contents/Info.plist" 2>/dev/null
+codesign --force --sign - "$APP" >/dev/null 2>&1   # re-signe après la modification (sinon macOS peut refuser de la lancer)
 
 # Lancement automatique : à chaque changement dans le dossier, et toutes les 15 minutes
 cat > "$PLIST" <<EOP
@@ -77,6 +78,7 @@ cat > "$PLIST" <<EOP
 EOP
 launchctl bootout "gui/$(id -u)/fr.le76.factures" 2>/dev/null
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
+open -g -a "$APP"   # premier passage tout de suite (et demande d'autorisation)
 
 echo ""
 echo "  ✅ C'est installé."
