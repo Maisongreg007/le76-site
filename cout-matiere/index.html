@@ -379,6 +379,7 @@ h1 .cm-t{color:var(--fg)}
 <input type="file" id="menu-file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
 <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
 <input type="file" id="rg-file" accept="application/json,.json" hidden>
+<input type="file" id="dep-file" accept="application/pdf,image/jpeg,image/png" multiple hidden>
 
 <script>
 /* ===== Pont serveur le76.fr : remplace le stockage de Claude par l'API du 76 ===== */
@@ -459,6 +460,7 @@ async function reduire(blob){
     const c=document.createElement('canvas');c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
     return c.toDataURL('image/jpeg',0.85)}catch(e){return enBase64(blob)}
 }
+CM.reduire=reduire;
 const sample={limits:async()=>({images:{maxCount:5}}),
   json:async(prompt,opt={})=>{const images=[];for(const b of (opt.images||[]))images.push(await reduire(b));
     const d=await post('ia',{prompt,images});return d.resultat}};
@@ -883,7 +885,7 @@ function renderFicheCalc(f){
 function renderIngredients(){
   const part=state.view==="bingredients"?"bar":"cuisine";
   const ings=Object.entries(state.ingredients).filter(([id,i])=>ingPart(id,i)[part]).sort(byName);
-  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button></div></div>
+  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-cm="deposer">Ajouter des factures</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button></div></div>
   <p class="hint" style="margin:0">Prix d'achat HT. La perte (épluchage, parage, cuisson) augmente le coût réel de ce que vous servez. Elle se remplit toute seule avec vos fiches et vos factures ; vous n'avez qu'à vérifier. Les allergènes saisis ici remontent dans toutes les fiches.</p>`+renderImport()+(state.imp?"":renderFactures(part));
   if(!ings.length) return h+`<div class="list"><div class="empty">Aucun ingrédient. Importez une facture fournisseur pour remplir la mercuriale automatiquement.</div></div>`;
   const sups=[...new Set(ings.map(([,i])=>i.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
@@ -1407,10 +1409,11 @@ function facturesDe(part){
 }
 function renderFactures(part){
   if(CM.lecture)return "";
-  const fs=facturesDe(part);
-  if(!fs.length)return CM.options.mail?`<p class="hint" style="margin:0">📬 Les factures envoyées à la boîte des factures arrivent ici toutes seules.</p>`:"";
-  return `<section class="list fac"><div class="fac-head"><h2 style="font-size:1.05rem">Factures reçues <span class="chip watch plain" style="margin-left:6px">${fs.length}</span></h2></div>
-  ${fs.map(([id,f])=>`<div class="fac-row"><div style="min-width:0"><b>${esc(f.fournisseur||f.expediteur||f.nom||"Facture")}</b>
+  const fs=facturesDe(part);const dp=state.depot;
+  const prog=dp?`<section class="card imp"><p class="msg">${dp.fini?"":'<span class="spin" aria-hidden="true"></span>'}${esc(dp.msg)}</p>${dp.fini?`<div class="acts"><button class="btn ghost sm" data-cm="depotOk">Fermer</button></div>`:""}</section>`:"";
+  if(!fs.length)return prog+`<p class="hint" style="margin:0">Touchez « Ajouter des factures » et sélectionnez tous les PDF ou photos de votre dossier de factures : celles déjà reçues sont reconnues et ignorées, les nouvelles sont lues et arrivent ici, prêtes à vérifier.</p>`;
+  return prog+`<section class="list fac"><div class="fac-head"><h2 style="font-size:1.05rem">Factures reçues <span class="chip watch plain" style="margin-left:6px">${fs.length}</span></h2></div>
+  ${fs.map(([id,f])=>`<div class="fac-row"><div style="min-width:0"><b>${esc(f.fournisseur||(f.expediteur&&f.expediteur!=="Dépôt"?f.expediteur:f.nom)||"Facture")}</b>
     <span class="sub">${f.date?"du "+esc(new Date(f.date).toLocaleDateString("fr-FR"))+" · ":""}${(f.lignes||[]).length?(f.lignes.length+" produit"+(f.lignes.length>1?"s":"")+" · "):""}reçue le ${esc(new Date((f.recu_le||"").replace(" ","T")).toLocaleDateString("fr-FR"))}${f.erreur?" · "+esc(f.erreur):""}</span></div>
     <div class="acts">${f.statut==="a_valider"?`<button class="btn sm" data-fac="ouvrir" data-id="${esc(id)}">Vérifier</button>`:f.statut==="erreur"?`<button class="btn ghost sm" data-fac="relire" data-id="${esc(id)}">Relire</button>`:`<span class="hint" style="margin:0"><span class="spin"></span>${FAC_ST[f.statut]}</span>`}
     <a class="btn ghost sm" href="/api/cout-matiere.php?action=facture_fichier&id=${encodeURIComponent(f.fichier||"")}" target="_blank" rel="noopener">Voir</a>
@@ -1496,6 +1499,8 @@ async function cmAction(a,t){
     if(a==="saveOpts"){t.disabled=true;const d=await CM.post("options_ecrire",{options:{ia_cle:document.getElementById("rg-cle").value,ia_modele:document.getElementById("rg-modele").value,imap_hote:document.getElementById("rg-hote").value,imap_user:document.getElementById("rg-user").value,imap_mdp:document.getElementById("rg-mdp").value,mail_actif:document.getElementById("rg-actif").checked}});CM.options=d.options;setStatus("Réglages enregistrés");render()}
     else if(a==="relever"){t.disabled=true;t.textContent="Relève en cours…";const d=await CM.post("factures_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);render()}
     else if(a==="importer"){document.getElementById("rg-file").click()}
+    else if(a==="deposer"){document.getElementById("dep-file").click()}
+    else if(a==="depotOk"){state.depot=null;render()}
   }catch(e){setStatus(e.message,true);t.disabled=false}
 }
 main.addEventListener("click",e=>{
@@ -1509,6 +1514,16 @@ main.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{if(e.target.id!=="rg-file")return;const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=async()=>{try{const s=JSON.parse(r.result);setStatus("Import en cours…");const d=await CM.post("importer",{sauvegarde:s});setStatus(d.importes+" éléments importés");setTimeout(()=>location.reload(),800)}catch(err){setStatus(err.message||"Fichier illisible",true)}};r.readAsText(f)},true);
+
+document.addEventListener("change",async e=>{if(e.target.id!=="dep-file")return;const files=[...e.target.files];e.target.value="";if(!files.length)return;
+  let nouv=0,dbl=0,err=0;state.imp=null;
+  for(let k=0;k<files.length;k++){const f=files[k];state.depot={msg:`Lecture de ${f.name} (${k+1} sur ${files.length})…`};render();
+    try{const donnees=/^image\//.test(f.type)?await CM.reduire(f):await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+      const d=await CM.post("facture_deposer",{nom:f.name,donnees});
+      if(d.doublon)dbl++;else{nouv++;if(d.facture){(CM.docs.factures=CM.docs.factures||{})[d.id]=d.facture;if(d.facture.statut==="erreur")err++}}}
+    catch(x){err++;setStatus(x.message,true)}}
+  state.depot={fini:true,msg:`${nouv} nouvelle${nouv>1?"s":""} facture${nouv>1?"s":""}${dbl?` · ${dbl} déjà reçue${dbl>1?"s":""}, ignorée${dbl>1?"s":""}`:""}${err?` · ${err} à relire (voir ci-dessous)`:""}.`};render();
+});
 document.getElementById("cm-gear").addEventListener("click",async()=>{try{const o=await CM.post("options");CM.options=o.options}catch(e){}state.view="reglages";state.open=null;render();window.scrollTo(0,0)});
 document.addEventListener("cm-factures",()=>{const a=document.activeElement;if(a&&main.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;if(state.imp&&state.imp.status==="review")return;render()});
 

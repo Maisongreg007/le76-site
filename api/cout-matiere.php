@@ -17,6 +17,10 @@ define('COOKIE', defined('DEMO') ? 'le76_equipe_demo' : 'le76_equipe');
 try {
     $q = lire_requete();
     $action = (string) ($q['action'] ?? '');
+    // Dépôt automatique depuis le Mac (dossier des factures) : clé de dépôt au lieu de la session
+    if ($action === 'facture_deposer' && !empty($q['cle']) && cm_cle_depot_ok((string) $q['cle'])) {
+        repondre(['ok' => true] + cm_facture_deposer((string) ($q['nom'] ?? ''), (string) ($q['donnees'] ?? '')));
+    }
     $moi = cm_utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
     $admin = (bool) $moi['admin'];
     $public = ['id' => (int) $moi['id'], 'nom' => $moi['nom'], 'admin' => $admin];
@@ -70,6 +74,10 @@ try {
             repondre(['ok' => true, 'importes' => $n]);
         case 'factures_relever':
             repondre(['ok' => true] + cm_relever_factures(!empty($q['forcer'])));
+        case 'facture_deposer':
+            repondre(['ok' => true] + cm_facture_deposer((string) ($q['nom'] ?? ''), (string) ($q['donnees'] ?? '')));
+        case 'cle_depot':
+            repondre(['ok' => true, 'cle' => cm_cle_depot(!empty($q['nouvelle']))]);
         case 'facture_relire':
             repondre(['ok' => true] + cm_facture_relire((string) ($q['id'] ?? '')));
     }

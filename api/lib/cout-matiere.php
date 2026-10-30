@@ -516,3 +516,53 @@ function cm_relever_factures(bool $forcer = false): array
     cm_option('derniere_releve_msg', $msg);
     return ['releve' => true, 'nouvelles' => $nouvelles, 'message' => $msg];
 }
+
+/* ------------------------------------------------------------------ */
+/* Dépôt de factures (bouton de l'appli ou dossier du Mac)             */
+/* ------------------------------------------------------------------ */
+
+function cm_cle_depot(bool $nouvelle = false): string
+{
+    $o = cm_options();
+    $c = (string) ($o['depot_cle'] ?? '');
+    if ($c === '' || $nouvelle) {
+        $c = bin2hex(random_bytes(20));
+        cm_option('depot_cle', $c);
+    }
+    return $c;
+}
+
+function cm_cle_depot_ok(string $cle): bool
+{
+    $c = (string) (cm_options()['depot_cle'] ?? '');
+    return $c !== '' && hash_equals($c, $cle);
+}
+
+/** Enregistre un PDF ou une photo de facture, puis la fait lire par l'IA. Un même fichier n'est pris qu'une fois. */
+function cm_facture_deposer(string $nom, string $b64): array
+{
+    $bin = base64_decode(preg_replace('/^data:[^,]+,/', '', $b64), true);
+    if ($bin === false || strlen($bin) < 500 || strlen($bin) > 20_000_000) {
+        erreur("Ce fichier n'a pas pu être reçu.");
+    }
+    $ext = str_starts_with($bin, '%PDF') ? 'pdf' : (str_starts_with($bin, "\x89PNG") ? 'png' : (str_starts_with($bin, "\xFF\xD8") ? 'jpg' : ''));
+    if ($ext === '') {
+        erreur('Seuls les PDF et les photos (JPEG, PNG) sont acceptés.');
+    }
+    $cle = 'fichier:' . sha1($bin);
+    $deja = cm_db()->prepare('SELECT 1 FROM mails_lus WHERE cle = ?');
+    $deja->execute([$cle]);
+    if ($deja->fetchColumn()) {
+        return ['doublon' => true, 'message' => 'Facture déjà reçue.'];
+    }
+    @set_time_limit(240);
+    $id = bin2hex(random_bytes(10));
+    $fichier = $id . '.' . $ext;
+    file_put_contents(cm_dossier('factures') . '/' . $fichier, $bin);
+    cm_db()->prepare('INSERT OR IGNORE INTO mails_lus (cle, quand) VALUES (?, ?)')->execute([$cle, maintenant()]);
+    $f = ['fichier' => $fichier, 'nom' => mb_substr($nom !== '' ? $nom : "facture.$ext", 0, 120), 'expediteur' => 'Dépôt', 'sujet' => '',
+        'recu_le' => maintenant(), 'statut' => 'lecture', 'lignes' => []];
+    cm_ecrire([['coll' => 'factures', 'id' => $id, 'data' => $f]]);
+    $f = cm_lire_facture($id, $f);
+    return ['doublon' => false, 'id' => $id, 'facture' => $f];
+}
