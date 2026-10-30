@@ -15,7 +15,22 @@ require __DIR__ . '/lib/cout-matiere.php';
 define('COOKIE', defined('DEMO') ? 'le76_equipe_demo' : 'le76_equipe');
 
 try {
+    // Envoi d'un fichier par le Mac (formulaire multipart) : dossier des factures surveillé
+    if (!empty($_FILES['fichier']) && ($_POST['action'] ?? '') === 'facture_deposer') {
+        cm_cle_depot_ok((string) ($_POST['cle'] ?? '')) || erreur('Clé de dépôt refusée : relance l\'installation depuis les Réglages.', 403);
+        $tmp = (string) ($_FILES['fichier']['tmp_name'] ?? '');
+        is_uploaded_file($tmp) || erreur("Fichier non reçu.");
+        repondre(['ok' => true] + cm_facture_deposer((string) ($_FILES['fichier']['name'] ?? ''), base64_encode((string) file_get_contents($tmp))));
+    }
     $q = lire_requete();
+    // Installateur pour le Mac : curl … | bash depuis le Terminal
+    if (($q['action'] ?? '') === 'installeur') {
+        cm_cle_depot_ok((string) ($q['cle'] ?? '')) || erreur('Clé refusée.', 403);
+        header('Content-Type: text/plain; charset=utf-8');
+        $url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'le76.fr') . '/api/cout-matiere.php';
+        echo str_replace(['__CLE__', '__URL__'], [(string) $q['cle'], $url], (string) file_get_contents(__DIR__ . '/lib/cout-matiere-mac.sh'));
+        exit;
+    }
     $action = (string) ($q['action'] ?? '');
     // Dépôt automatique depuis le Mac (dossier des factures) : clé de dépôt au lieu de la session
     if ($action === 'facture_deposer' && !empty($q['cle']) && cm_cle_depot_ok((string) $q['cle'])) {

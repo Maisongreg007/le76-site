@@ -1489,6 +1489,12 @@ function renderReglages(){
     <p class="hint" style="margin:0">${o.imap_dispo===false?'<span class="bad-t">L\'hébergement ne permet pas de lire les mails (IMAP).</span> ':''}Dernière relève : ${o.derniere_releve?esc(new Date(o.derniere_releve.replace(" ","T")).toLocaleString("fr-FR"))+" · "+esc(o.derniere_releve_msg||""):"jamais"}</p>
     <div class="acts"><button class="btn" data-cm="saveOpts">Enregistrer</button><button class="btn ghost" data-cm="relever">Relever maintenant</button></div>
   </section>
+  <section class="card reg"><h2>Dossier des factures sur le Mac</h2>
+    <p class="hint" style="margin:0">Pose un PDF ou une photo de facture dans ton dossier : il part tout seul, est lu par l'IA et arrive dans « Factures reçues », prêt à vérifier. Le Mac doit rester allumé (l'iMac du bureau est parfait). Les factures déjà présentes dans le dossier au moment de l'installation ne sont pas renvoyées.</p>
+    ${state.cmdMac?`<p class="hint" style="margin:0">Sur l'iMac, ouvre l'app <b>Terminal</b>, colle cette ligne puis appuie sur Entrée. Une fenêtre te demandera de choisir ton dossier des factures.</p>
+    <textarea id="rg-cmd" readonly style="min-height:70px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem">${esc(state.cmdMac)}</textarea>
+    <div class="acts"><button class="btn" data-cm="copierCmd">Copier la ligne</button><button class="btn ghost" data-cm="nouvelleCle">Changer la clé</button></div>`:`<div class="acts"><button class="btn" data-cm="cmdMac">Installer sur le Mac</button></div>`}
+  </section>
   <section class="card reg"><h2>Sauvegarde</h2>
     <p class="hint" style="margin:0">Téléchargez une copie de toutes vos données, ou remettez une sauvegarde (cela remplace la mercuriale, les fiches et les cartes actuelles).</p>
     <div class="acts"><a class="btn ghost" href="/api/cout-matiere.php?action=exporter">Télécharger une sauvegarde</a><button class="btn ghost" data-cm="importer">Remettre une sauvegarde…</button></div>
@@ -1499,6 +1505,8 @@ async function cmAction(a,t){
     if(a==="saveOpts"){t.disabled=true;const d=await CM.post("options_ecrire",{options:{ia_cle:document.getElementById("rg-cle").value,ia_modele:document.getElementById("rg-modele").value,imap_hote:document.getElementById("rg-hote").value,imap_user:document.getElementById("rg-user").value,imap_mdp:document.getElementById("rg-mdp").value,mail_actif:document.getElementById("rg-actif").checked}});CM.options=d.options;setStatus("Réglages enregistrés");render()}
     else if(a==="relever"){t.disabled=true;t.textContent="Relève en cours…";const d=await CM.post("factures_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);render()}
     else if(a==="importer"){document.getElementById("rg-file").click()}
+    else if(a==="cmdMac"||a==="nouvelleCle"){const d=await CM.post("cle_depot",{nouvelle:a==="nouvelleCle"});state.cmdMac=`curl -fsSL "${location.origin}/api/cout-matiere.php?action=installeur&cle=${d.cle}" | bash`;render();if(a==="nouvelleCle")setStatus("Nouvelle clé : relance l'installation sur le Mac")}
+    else if(a==="copierCmd"){const ta=document.getElementById("rg-cmd");try{await navigator.clipboard.writeText(ta.value);setStatus("Ligne copiée")}catch(x){ta.select();document.execCommand("copy");setStatus("Ligne copiée")}}
     else if(a==="deposer"){document.getElementById("dep-file").click()}
     else if(a==="depotOk"){state.depot=null;render()}
   }catch(e){setStatus(e.message,true);t.disabled=false}
