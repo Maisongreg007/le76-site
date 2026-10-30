@@ -198,7 +198,7 @@ async function afficher(silencieux) {
   const admin = d.moi.admin, x = new Date();
   const h = x.getHours(), salut = h < 5 || h >= 18 ? 'Bonsoir' : 'Bonjour';
   const date = `${JOURS[x.getDay()]} ${x.getDate() === 1 ? '1er' : x.getDate()} ${MOIS[x.getMonth()]}`;
-  const r = d.resa, c = d.club, p = d.pain;
+  const r = d.resa, c = d.club, p = d.pain, cm = d.cout;
   const applis = APPLIS.filter(a => a.tous || admin);
   root.innerHTML = `
     <header class="top"><div class="top-in">
@@ -221,6 +221,11 @@ async function afficher(silencieux) {
           ${c.cadeaux ? `<span class="alerte or">🎁 ${plur(c.cadeaux, 'cadeau')} à offrir</span>` : ''}
           <div class="chiffres"><div><b>${c.visites}</b><span>visites aujourd’hui</span></div><div><b>${c.membres}</b><span>membres</span></div></div>
           <div class="pied">${c.en_attente ? `📨 ${plur(c.en_attente, 'e-mail')} d’offre en cours d’envoi` : 'Scanne les cartes pour compter les visites'}</div></a>` : ''}
+        ${cm && cm.a_verifier && admin ? `<a class="carte" href="${BASE}/cout-matiere/">
+          <div class="t">${icone(APPLIS.find(a => a.nom === 'Coût matière'))}Coût matière</div>
+          <span class="alerte">${plur(cm.a_verifier, 'facture')} à vérifier</span>
+          <div class="chiffres"><div><b>${cm.a_verifier}</b><span>nouvelle${cm.a_verifier > 1 ? 's' : ''} facture${cm.a_verifier > 1 ? 's' : ''}</span></div></div>
+          <div class="pied">À vérifier pour mettre les prix à jour</div></a>` : ''}
         ${p ? `<a class="carte" href="${BASE}/pain/equipe/">
           <div class="t">${icone(APPLIS[5])}Pain du camping</div>
           <div class="chiffres"><div><b>${p.aujourdhui - p.retirees}</b><span>à retirer aujourd’hui</span></div><div><b>${p.demain}</b><span>pour demain</span></div></div>

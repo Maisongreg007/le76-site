@@ -18,6 +18,7 @@ function portail_resume(array $moi): array
         'resa' => portail_resa($auj),
         'club' => portail_club($auj),
         'pain' => portail_pain($auj),
+        'cout' => portail_cout(),
         'demo' => defined('DEMO'),
     ];
 }
@@ -109,4 +110,26 @@ function portail_pain(string $auj): ?array
         }
     }
     return null; // pas de base du pain : hors saison ou pas encore installé
+}
+
+/** Coût matière : factures reçues à vérifier (base séparée, lecture seule). */
+function portail_cout(): ?array
+{
+    $f = dossier_donnees() . '/cout-matiere/cout-matiere.sqlite';
+    if (!is_file($f)) {
+        return null;
+    }
+    try {
+        $pdo = new PDO('sqlite:' . $f, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::SQLITE_ATTR_OPEN_FLAGS => PDO::SQLITE_OPEN_READONLY]);
+        $n = 0;
+        foreach ($pdo->query("SELECT data FROM docs WHERE coll = 'factures' AND data IS NOT NULL") as $l) {
+            if ((json_decode($l['data'], true)['statut'] ?? '') === 'a_valider') {
+                $n++;
+            }
+        }
+        return ['a_verifier' => $n];
+    } catch (Throwable $e) {
+        error_log('[portail] coût matière : ' . $e->getMessage());
+        return null;
+    }
 }
