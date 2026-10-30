@@ -1,0 +1,80 @@
+<?php
+/**
+ * Coût matière du 76 (appli /cout-matiere/) : stockage partagé, lecture des factures par l'IA,
+ * relève automatique de la boîte facturation@le76.fr.
+ *
+ * Mêmes comptes et même session que le portail et l'appli des réservations.
+ * Responsables : lecture et écriture. Reste de l'équipe : lecture seule.
+ * Les données vivent dans le dossier de données des réservations (hors de public_html).
+ */
+declare(strict_types=1);
+
+require __DIR__ . '/lib/base.php';
+require __DIR__ . '/lib/cout-matiere.php';
+
+define('COOKIE', defined('DEMO') ? 'le76_equipe_demo' : 'le76_equipe');
+
+try {
+    $q = lire_requete();
+    $action = (string) ($q['action'] ?? '');
+    $moi = cm_utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
+    $admin = (bool) $moi['admin'];
+    $public = ['id' => (int) $moi['id'], 'nom' => $moi['nom'], 'admin' => $admin];
+
+    // Fichiers (GET) : photos des fiches et factures reçues
+    if ($action === 'photo') {
+        cm_envoyer_fichier('photos', (string) ($q['id'] ?? ''));
+    }
+    if ($action === 'facture_fichier') {
+        cm_envoyer_fichier('factures', (string) ($q['id'] ?? ''));
+    }
+    if ($action === 'exporter') {
+        $admin || erreur('Réservé au responsable.', 403);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Disposition: attachment; filename="cout-matiere-le76-' . date('Y-m-d') . '.json"');
+        echo json_encode(cm_sauvegarde(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit;
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        erreur('Méthode non autorisée.', 405);
+    }
+
+    switch ($action) {
+        case 'charger':
+            [$docs, $rev] = cm_tout();
+            repondre(['ok' => true, 'moi' => $public, 'docs' => $docs, 'rev' => $rev, 'options' => cm_options_publiques($admin)]);
+        case 'changements':
+            repondre(['ok' => true] + cm_changements((int) ($q['depuis'] ?? 0)));
+    }
+
+    $admin || erreur('Réservé au responsable : demande-lui de faire la modification.', 403);
+
+    switch ($action) {
+        case 'ecrire':
+            $rev = cm_ecrire(is_array($q['ecritures'] ?? null) ? $q['ecritures'] : []);
+            repondre(['ok' => true, 'rev' => $rev]);
+        case 'ia':
+            repondre(['ok' => true, 'resultat' => cm_ia_requete($q)]);
+        case 'photo_envoyer':
+            repondre(['ok' => true] + cm_photo_enregistrer((string) ($q['donnees'] ?? '')));
+        case 'photo_supprimer':
+            cm_fichier_supprimer('photos', (string) ($q['id'] ?? ''));
+            repondre(['ok' => true]);
+        case 'options':
+            repondre(['ok' => true, 'options' => cm_options_publiques(true)]);
+        case 'options_ecrire':
+            cm_options_enregistrer(is_array($q['options'] ?? null) ? $q['options'] : []);
+            repondre(['ok' => true, 'options' => cm_options_publiques(true)]);
+        case 'importer':
+            $n = cm_importer(is_array($q['sauvegarde'] ?? null) ? $q['sauvegarde'] : []);
+            repondre(['ok' => true, 'importes' => $n]);
+        case 'factures_relever':
+            repondre(['ok' => true] + cm_relever_factures(!empty($q['forcer'])));
+        case 'facture_relire':
+            repondre(['ok' => true] + cm_facture_relire((string) ($q['id'] ?? '')));
+    }
+    erreur('Action inconnue.');
+} catch (Throwable $e) {
+    error_log('[cout-matiere] ' . $e->getMessage() . ' @' . $e->getFile() . ':' . $e->getLine());
+    erreur('Problème technique : ' . $e->getMessage(), 500);
+}
