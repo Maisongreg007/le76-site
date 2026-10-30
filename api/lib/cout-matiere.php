@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-const CM_COLLECTIONS = ['ingredients', 'fiches', 'carte', 'boissons', 'factures', 'set'];
+const CM_COLLECTIONS = ['ingredients', 'fiches', 'carte', 'boissons', 'factures', 'set', 'menus', 'alertes'];
 const CM_MODELES = ['claude-sonnet-5-5', 'claude-sonnet-4-5', 'claude-3-5-sonnet-latest'];
 
 /* ------------------------------------------------------------------ */

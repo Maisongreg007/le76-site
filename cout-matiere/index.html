@@ -127,7 +127,7 @@ h2{font-family:var(--f-display);font-weight:700;font-size:1.2rem;letter-spacing:
 .fields{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:14px}
 .fields.f3{grid-template-columns:2fr 1.2fr 1fr 1fr}
 .f{display:flex;flex-direction:column;gap:6px;min-width:0}
-input[type=text],input[type=search],input[type=password],select,textarea{background:var(--field);border:0;border-radius:10px;padding:9px 12px;width:100%;min-width:0;outline:none;transition:box-shadow .15s}
+input[type=text],input[type=search],input[type=password],input[type=date],select,textarea{background:var(--field);border:0;border-radius:10px;padding:9px 12px;width:100%;min-width:0;outline:none;transition:box-shadow .15s}
 input[type=text]:focus,input[type=search]:focus,input[type=password]:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px var(--accent-soft)}
 select{-webkit-appearance:none;appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a8a8e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
 textarea{min-height:150px;resize:vertical;line-height:1.5}
@@ -266,6 +266,8 @@ nav button{position:relative}
 .nav-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:.7rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
 @media (max-width:720px){.nav-badge{position:absolute;top:0;left:calc(50% + 6px)}}
 .fac-banner{box-shadow:0 0 0 2px var(--accent-soft),var(--shadow)}
+.alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
+@media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
 td:first-child input[data-if="name"]{min-width:240px}
 h1 a.cm-back{color:var(--accent);text-decoration:none;font-weight:600}
@@ -429,7 +431,7 @@ function suivre(){
       if(d.changements&&d.changements.length){const parColl={};
         d.changements.forEach(c=>{(CM.docs[c.coll]=CM.docs[c.coll]||{});if(c.data===null)delete CM.docs[c.coll][c.id];else CM.docs[c.coll][c.id]=c.data;(parColl[c.coll]=parColl[c.coll]||[]).push(c)});
         Object.entries(parColl).forEach(([coll,list])=>{(CM.listeners[coll]||[]).forEach(cb=>{try{cb({metadata:{hasPendingWrites:false},docChanges:()=>list.map(c=>({type:c.data===null?'removed':'modified',doc:{id:c.id,data:()=>c.data}}))})}catch(e){}})});
-        if(parColl.factures)document.dispatchEvent(new CustomEvent('cm-factures'));}
+        if(parColl.factures||parColl.menus||parColl.alertes)document.dispatchEvent(new CustomEvent('cm-factures'));}
       CM.rev=Math.max(CM.rev,d.rev||0);}catch(e){}};
   suivi=setInterval(()=>{if(!document.hidden)tick()},12000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
@@ -637,7 +639,7 @@ function migrate(d){
 }
 
 /* ---------- Rendu ---------- */
-const PARTS={cuisine:[["carte","Carte des repas","Carte"],["fiches","Fiches techniques","Fiches"],["ingredients","Mercuriale","Mercuriale"]],bar:[["boissons","Carte des boissons","Carte"],["bfiches","Recettes boissons","Recettes"],["bingredients","Mercuriale bar","Mercuriale"]]};
+const PARTS={cuisine:[["carte","Carte des repas","Carte"],["fiches","Fiches techniques","Fiches"],["menus","Menus & soirées","Menus"],["ingredients","Mercuriale","Mercuriale"]],bar:[["boissons","Carte des boissons","Carte"],["bfiches","Recettes boissons","Recettes"],["bingredients","Mercuriale bar","Mercuriale"]]};
 const partOf=v=>PARTS.bar.some(([k])=>k===v)?"bar":(v==="service"||v==="allergenes"||v==="reglages")?(state.lastPart||"cuisine"):"cuisine";
 const FOOD_SECTIONS=SECTIONS.filter(s=>s!=="Boissons");
 const isFood=it=>it.section!=="Boissons";
@@ -649,13 +651,13 @@ function ingPart(id,i){
   const ds=i.dept==="bar"||DRINK_SUP.test(i.supplier||"");
   return {cuisine:food||(!ds&&!bar),bar:bar||ds};
 }
-const ICONS={"carte": "<path d=\"M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z\"/><path d=\"M9 9h6M9 13h6\"/>", "fiches": "<path d=\"M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "ingredients": "<path d=\"M4 9h16l-1.5 10.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 9z\"/><path d=\"M8.5 9l3.5-5 3.5 5\"/>", "boissons": "<path d=\"M7 3h10l-.8 6.5A4.2 4.2 0 0 1 12 13.2a4.2 4.2 0 0 1-4.2-3.7L7 3z\"/><path d=\"M12 13.2V20M8.5 21h7M7.4 6.5h9.2\"/>", "bfiches": "<path d=\"M8 8h8l-1.2 12.2a1 1 0 0 1-1 .8h-3.6a1 1 0 0 1-1-.8L8 8z\"/><path d=\"M9.5 8V5.5A2.5 2.5 0 0 1 12 3a2.5 2.5 0 0 1 2.5 2.5V8M8.6 12.5h6.8\"/>", "bingredients": "<path d=\"M3.5 8h17v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V8z\"/><path d=\"M3.5 8l2-4h13l2 4M9 12h6\"/>", "service": "<path d=\"M4 18h16M5.5 18a6.5 6.5 0 0 1 13 0\"/><path d=\"M12 9.5V8M10.5 6.5h3\"/>", "allergenes": "<path d=\"M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7l8-4z\"/><path d=\"M12 8v5M12 16.5v.01\"/>"};
+const ICONS={"carte": "<path d=\"M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z\"/><path d=\"M9 9h6M9 13h6\"/>", "fiches": "<path d=\"M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "ingredients": "<path d=\"M4 9h16l-1.5 10.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 9z\"/><path d=\"M8.5 9l3.5-5 3.5 5\"/>", "boissons": "<path d=\"M7 3h10l-.8 6.5A4.2 4.2 0 0 1 12 13.2a4.2 4.2 0 0 1-4.2-3.7L7 3z\"/><path d=\"M12 13.2V20M8.5 21h7M7.4 6.5h9.2\"/>", "bfiches": "<path d=\"M8 8h8l-1.2 12.2a1 1 0 0 1-1 .8h-3.6a1 1 0 0 1-1-.8L8 8z\"/><path d=\"M9.5 8V5.5A2.5 2.5 0 0 1 12 3a2.5 2.5 0 0 1 2.5 2.5V8M8.6 12.5h6.8\"/>", "bingredients": "<path d=\"M3.5 8h17v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V8z\"/><path d=\"M3.5 8l2-4h13l2 4M9 12h6\"/>", "service": "<path d=\"M4 18h16M5.5 18a6.5 6.5 0 0 1 13 0\"/><path d=\"M12 9.5V8M10.5 6.5h3\"/>", "allergenes": "<path d=\"M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7l8-4z\"/><path d=\"M12 8v5M12 16.5v.01\"/>", "menus": "<path d=\"M6 3v18M6 3c2.5 0 4 1.6 4 4.5S8.5 12 6 12\"/><path d=\"M15 3v6a3 3 0 0 0 6 0V3M18 3v18\"/>"};
 const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
 function renderNav(){
   const part=partOf(state.view);if(state.view!=="service"&&state.view!=="allergenes")state.lastPart=part;
   document.querySelectorAll("[data-part]").forEach(b=>b.setAttribute("aria-pressed",String(state.view!=="service"&&state.view!=="allergenes"&&b.dataset.part===part)));
   const nav=document.getElementById("nav");if(!nav)return;
-  nav.innerHTML=PARTS[part].filter(([k])=>!CM.lecture||k==="fiches"||k==="bfiches").map(([k,l,sh])=>`<button role="tab" aria-selected="${k===state.view}" data-tab="${k}">${ico(k)}<span class="tl">${l}</span><span class="ts">${sh}</span>${(k==="ingredients"||k==="bingredients")&&!CM.lecture&&facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length?`<span class="nav-badge">${facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length}</span>`:""}</button>`).join("")+`<button role="tab" aria-selected="${state.view==="allergenes"}" data-tab="allergenes">${ico("allergenes")}<span class="tl">Allergènes</span><span class="ts">Allergènes</span></button>`+`<button role="tab" aria-selected="${state.view==="service"}" data-tab="service">${ico("service")}<span class="tl">Service</span><span class="ts">Service</span></button>`;
+  nav.innerHTML=PARTS[part].filter(([k])=>!CM.lecture||k==="fiches"||k==="bfiches"||k==="menus").map(([k,l,sh])=>`<button role="tab" aria-selected="${k===state.view}" data-tab="${k}">${ico(k)}<span class="tl">${l}</span><span class="ts">${sh}</span>${(k==="ingredients"||k==="bingredients")&&!CM.lecture&&facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length?`<span class="nav-badge">${facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length}</span>`:""}</button>`).join("")+`<button role="tab" aria-selected="${state.view==="allergenes"}" data-tab="allergenes">${ico("allergenes")}<span class="tl">Allergènes</span><span class="ts">Allergènes</span></button>`+`<button role="tab" aria-selected="${state.view==="service"}" data-tab="service">${ico("service")}<span class="tl">Service</span><span class="ts">Service</span></button>`;
   const hd=document.querySelector("header");if(hd)document.documentElement.style.setProperty("--hdr",hd.offsetHeight+"px");
 }
 function render(){
@@ -666,8 +668,9 @@ function render(){
     h+=`<div class="banner"><p><strong>Bienvenue.</strong> Commencez par importer vos factures fournisseurs : la mercuriale se remplit toute seule. Écrivez ensuite vos fiches techniques et importez votre carte.</p><div class="acts">${CM.lecture?"":`<button class="btn" data-cm="importer">Remettre ma sauvegarde</button>`}<button class="btn ghost" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="pickMenu">Importer ma carte</button></div></div>`;
   if(state.demo) h+=`<div class="banner"><p><strong>Ce sont des exemples.</strong> Modifiez-les pour commencer avec, ou repartez d'une page blanche et importez votre carte et vos factures.</p><div class="acts"><button class="btn" data-act="adopt">Garder les exemples</button><button class="btn ghost" data-act="empty">Partir de zéro</button></div></div>`;
   const o=state.open;
-  if(CM.lecture&&!["service","allergenes","fiches","bfiches"].includes(state.view))state.view=state.view==="boissons"||state.view==="bingredients"?"bfiches":"fiches";
+  if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view))state.view=state.view==="boissons"||state.view==="bingredients"?"bfiches":"fiches";
   if(state.view==="reglages"){main.innerHTML=renderReglages();return}
+  if(state.view==="menus"){main.innerHTML=renderMenus();return}
   if(state.view==="service"){main.innerHTML=renderService();filterService();return}
   if(state.view==="allergenes"){main.innerHTML=renderAllergens();return}
   if(state.view==="boissons") h+=(o&&o.kind==="boi"&&state.boissons[o.id])?renderBoisson(o.id):renderBoissons();
@@ -679,7 +682,7 @@ function render(){
 }
 function bandeauFactures(part){if(CM.lecture)return "";const n=facturesDe(part).filter(([,f])=>f.statut==="a_valider").length;if(!n)return "";
   return `<div class="banner fac-banner"><p><strong>📬 ${n} nouvelle${n>1?"s":""} facture${n>1?"s":""} à vérifier.</strong> Les prix seront mis à jour dès que tu l${n>1?"es":"a"} valides.</p><button class="btn" data-tab-go="${part==="bar"?"bingredients":"ingredients"}">Voir ${n>1?"les factures":"la facture"}</button></div>`}
-function summaryHtml(){return bandeauFactures("cuisine")+bilanHtml()}
+function summaryHtml(){return bandeauFactures("cuisine")+renderAlertes("cuisine")+bilanHtml()}
 function renderCarte(){
   const items=Object.entries(state.carte).filter(([,it])=>isFood(it)).map(([id,it])=>({id,it,c:calcItem(it)}));
   let h=summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button></div></div>`+renderMenuImport()+`<div class="list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
@@ -1013,7 +1016,7 @@ function fixLinesForIngredient(ingId,touched){
   if(true)return;Object.entries(state.fiches).forEach(([fid,f])=>{let ch=false;(f.lines||[]).forEach(x=>{if(x.type!=="f"&&x.ref===ingId&&u[x.unit]==null){x.unit=defaultUnit(u);ch=true}});if(ch)touched.push(["fic",fid])});
 }
 function applyImport(){
-  const im=state.imp;if(!im||im.status!=="review")return;const touched=[];
+  const im=state.imp;if(!im||im.status!=="review")return;const touched=[];const _couts=photoCouts();
   im.lines.filter(l=>l.on&&l.name).forEach(l=>{
     if(l.match&&state.ingredients[l.match]){const i=state.ingredients[l.match];const _avant=num(i.price);i.price=num(l.price);
       if(num(i.packQty)>1&&l.unit===i.unit&&num(i.packPrice)>0&&Math.abs(num(l.price)-num(i.packPrice))/num(i.packPrice)<0.35){i.packPrice=num(l.price);i.price=num(l.price)/num(i.packQty)}delete i.auto;if(im.supplier)i.supplier=im.supplier;if(!(i.allergens||[]).length&&l.allergens.length)i.allergens=l.allergens;
@@ -1023,7 +1026,7 @@ function applyImport(){
     else{const id=uid();state.ingredients[id]={name:l.name,supplier:im.supplier||"",price:num(l.price),unit:l.unit,loss:0,allergens:l.allergens};touched.push(["ing",id])}
   });
   if(im.factureId)marquerFacture(im.factureId,"traitee");
-  state.imp=null;touched.push(...relinkAll());commitMany(touched);render();
+  state.imp=null;touched.push(...relinkAll());commitMany(touched);creerAlerte(_couts,im);render();
 }
 
 /* ---------- Import de la carte ---------- */
@@ -1181,7 +1184,7 @@ function renderBoissons(){
   const bs=Object.entries(state.boissons);
   let h=`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button></div></div>
   <p class="hint" style="margin:0">Chaque boisson a un ou plusieurs formats (verre, bouteille, pichet…). L'app calcule le coût de chaque format et propose un prix de vente selon le coefficient de sa famille. TVA : 20 % avec alcool, 10 % sans alcool.</p>`;
-  h+=bandeauFactures("bar")+bilanBar();
+  h+=bandeauFactures("bar")+renderAlertes("bar")+bilanBar();
   if(state.coefOpen)h+=`<section class="card"><div class="coefs">${BCATS.map(c=>`<label class="f"><span class="lbl">${esc(c)}</span><span class="target"><span>×</span><input type="text" inputmode="decimal" class="n" id="coef-${esc(c)}" data-coef="${esc(c)}" value="${n2.format(coefFor(c))}"></span></label>`).join("")}</div><p class="hint">Coefficient visé = prix HT ÷ coût. Exemple : ×5 sur un cocktail qui coûte 2 € donne 10 € HT, soit 12 € TTC à 20 %.</p></section>`;
   h+=`<div class="list">`;
   if(!bs.length)return h+`<div class="empty">Aucune boisson. Ajoutez vos vins, bières, softs et cocktails, ou importez la facture de votre fournisseur de boissons dans la mercuriale.</div></div>`;
@@ -1544,6 +1547,150 @@ function majTitre(){if(CM.lecture)return;const n=Object.values(CM.docs.factures|
 setInterval(majTitre,5000);
 document.addEventListener("cm-factures",()=>{majTitre();const a=document.activeElement;if(a&&main.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;if(state.imp&&state.imp.status==="review")return;render()});
 
+/* ---------- Alertes de prix : plats touchés par une hausse ---------- */
+function photoCouts(){
+  const o={};
+  Object.entries(state.carte).forEach(([id,it])=>{if(!isFood(it))return;const c=calcItem(it);if(c.cp>0)o["car:"+id]={cp:c.cp,ttc:num(it.ttc),tva:num(it.tva)||10,name:it.name}});
+  Object.entries(state.boissons).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>{const c=calcFormat(b,f);if(c.cost>0&&num(f.ttc)>0)o["boi:"+id+":"+k]={cp:c.cost,ttc:num(f.ttc),tva:c.tva,name:b.name+(f.label?" · "+f.label:"")}}));
+  return o;
+}
+const arrondiPrix=(v,boisson)=>boisson?Math.ceil(v*10-1e-9)/10:Math.ceil(v*2-1e-9)/2;
+function creerAlerte(avant,im){
+  const apres=photoCouts(),plats=[];
+  Object.entries(apres).forEach(([k,x])=>{const a=avant[k];if(!a||x.cp<=a.cp*1.005)return;
+    const ht=x.ttc/(1+x.tva/100),fcAvant=a.cp/(a.ttc/(1+a.tva/100)),boisson=k.startsWith("boi:");
+    const conseil=arrondiPrix(x.cp/fcAvant*(1+x.tva/100),boisson);
+    plats.push({cle:k,name:x.name,avant:+a.cp.toFixed(4),apres:+x.cp.toFixed(4),ttc:x.ttc,fcAvant:+fcAvant.toFixed(4),fcApres:+(x.cp/ht).toFixed(4),conseil:conseil>x.ttc+0.04?conseil:null,perte:+(x.cp-a.cp).toFixed(4)})});
+  if(!plats.length)return;
+  plats.sort((p,q)=>q.perte-p.perte);
+  const id=uid();
+  CM.ecrire("alertes",id,{date:new Date().toISOString().slice(0,10),fournisseur:im.supplier||"",plats,statut:"ouverte"}).catch(e=>setStatus(e.message,true));
+}
+function alertesOuvertes(part){
+  return Object.entries(CM.docs.alertes||{}).filter(([,a])=>a.statut==="ouverte").map(([id,a])=>[id,a,(a.plats||[]).filter(p=>(part==="bar")===p.cle.startsWith("boi:")&&!p.fait)]).filter(([,,ps])=>ps.length).sort((x,y)=>(y[1].date||"").localeCompare(x[1].date||""));
+}
+function renderAlertes(part){
+  if(CM.lecture)return "";
+  const al=alertesOuvertes(part);if(!al.length)return "";
+  const tgt=num(state.settings.target)/100;
+  return al.map(([id,a,ps])=>`<section class="list fac alerte-prix"><div class="fac-head"><div><h2 style="font-size:1.05rem">⚠️ Hausse de prix${a.fournisseur?" · "+esc(a.fournisseur):""}</h2><span class="hint" style="margin:2px 0 0;display:block">${ps.length} ${part==="bar"?"boisson":"plat"}${ps.length>1?"s":""} touché${part==="bar"?"e":""}${ps.length>1?"s":""} par la facture du ${esc(new Date(a.date).toLocaleDateString("fr-FR"))}. Le prix conseillé garde ta marge en % d'avant la hausse.</span></div><button class="btn ghost sm" data-alerte="fermer" data-id="${esc(id)}">Tout ignorer</button></div>
+    ${ps.map(p=>`<div class="fac-row"><div style="min-width:0"><b>${esc(p.name)}</b><span class="sub">Coût ${eur.format(p.avant)} → ${eur.format(p.apres)} <span class="delta up">+${eur.format(p.perte)}</span> · food cost ${pct(p.fcAvant)} → <span class="${p.fcApres>tgt?"bad-t":""}">${pct(p.fcApres)}</span> · vendu ${eur.format(p.ttc)}</span></div>
+      <div class="acts">${p.conseil?`<button class="btn sm" data-alerte="appliquer" data-id="${esc(id)}" data-cle="${esc(p.cle)}">Passer à ${eur.format(p.conseil)}</button>`:`<span class="hint" style="margin:0">Hausse absorbée</span>`}<button class="btn ghost sm" data-alerte="garder" data-id="${esc(id)}" data-cle="${esc(p.cle)}" title="Garder le prix actuel">Garder</button></div></div>`).join("")}</section>`).join("");
+}
+function alerteAction(a,id,cle){
+  const al=(CM.docs.alertes||{})[id];if(!al)return;const doc=JSON.parse(JSON.stringify(al));
+  if(a==="fermer")doc.statut="fermee";
+  else{const p=doc.plats.find(x=>x.cle===cle);if(!p)return;p.fait=a;
+    if(a==="appliquer"&&p.conseil){const [t,i,k]=cle.split(":");
+      if(t==="car"&&state.carte[i]){state.carte[i].ttc=p.conseil;queueSave("car",i)}
+      else if(t==="boi"&&state.boissons[i]&&state.boissons[i].formats[+k]){state.boissons[i].formats[+k].ttc=p.conseil;queueSave("boi",i)}
+      setStatus(p.name+" passe à "+eur.format(p.conseil))}
+    if(doc.plats.every(x=>x.fait))doc.statut="fermee";}
+  CM.docs.alertes[id]=doc;CM.ecrire("alertes",id,doc).catch(e=>setStatus(e.message,true));render();
+}
+
+/* ---------- Menus de soirée et liste de courses ---------- */
+function menusListe(){return Object.entries(CM.docs.menus||{}).sort((a,b)=>(b[1].date||"").localeCompare(a[1].date||""))}
+/* Source d'une ligne de menu : un article de la carte, une fiche, ou un format de boisson */
+function srcMenu(l){
+  if(l.type==="car"){const it=state.carte[l.ref];if(!it)return null;const f=state.fiches[it.fiche];return {name:it.name,cout:itemCost(it),fiche:f,mult:f?num(it.qty)*((YIELD[f.yieldUnit||"portion"].lines)[it.unit]??1)/Math.max(num(f.yield),0.0001):0,tva:num(it.tva)||10}}
+  if(l.type==="fic"){const f=state.fiches[l.ref];if(!f)return null;return {name:f.name,cout:ficheUnitCost(f),fiche:f,mult:1/Math.max(num(f.yield),0.0001),tva:f.category==="Boisson"?20:10}}
+  if(l.type==="boi"){const b=state.boissons[l.ref];const fm=b&&(b.formats||[])[num(l.k)];if(!fm)return null;const c=calcFormat(b,fm);return {name:b.name+(fm.label?" · "+fm.label:""),cout:c.cost,format:fm,tva:c.tva}}
+  return null;
+}
+function menuCalc(m){
+  const n=Math.max(num(m.couverts),0),parPers=(m.lignes||[]).reduce((s,l)=>{const x=srcMenu(l);return s+(x?x.cout*num(l.part||1):0)},0);
+  const tva=num(m.tva)||10,ttc=num(m.prix),ht=ttc/(1+tva/100),tgt=num(state.settings.target)/100||0.28;
+  return {n,parPers,total:parPers*n,ht,ca:ht*n,marge:(ht-parPers)*n,fc:ht>0?parPers/ht:null,conseil:parPers>0?Math.ceil(parPers/tgt*(1+tva/100)):null};
+}
+/* Développe un menu en ingrédients à acheter (unité d'achat), pertes comprises */
+function courses(m){
+  const acc={},ajoute=(id,q)=>{if(!(q>0))return;acc[id]=(acc[id]||0)+q};
+  const deplier=(f,mult,d=0)=>{if(!f||d>6)return;(f.lines||[]).forEach(l=>{
+    if(hasFixed(l))return;
+    if(l.type==="f"){const sf=state.fiches[l.ref];const u=lineUnits(l);if(!sf||!u||u[l.unit]==null)return;deplier(sf,mult*num(l.qty)*u[l.unit]/Math.max(num(sf.yield),0.0001),d+1)}
+    else{const i=state.ingredients[l.ref];if(!i)return;const b=baseQty(l,i);if(b==null)return;const perte=Math.min(Math.max(num(i.loss),0),95)/100;ajoute(l.ref,b*mult/(1-perte))}})};
+  const n=Math.max(num(m.couverts),0);
+  (m.lignes||[]).forEach(l=>{const x=srcMenu(l);if(!x)return;const q=n*num(l.part||1);
+    if(x.fiche)deplier(x.fiche,x.mult*q);
+    else if(x.format){const fm=x.format;if(fm.type==="f")deplier(state.fiches[fm.ref],num(fm.qty)*((YIELD[(state.fiches[fm.ref]||{}).yieldUnit||"portion"].lines)[fm.unit]??1)/Math.max(num((state.fiches[fm.ref]||{}).yield),0.0001)*q);
+      else{const i=state.ingredients[fm.ref];if(i){const b=baseQty(fm,i);if(b!=null)ajoute(fm.ref,b*q)}}}});
+  const parFour={};
+  Object.entries(acc).forEach(([id,q])=>{const i=state.ingredients[id];const sup=i.supplier||"Sans fournisseur";
+    const colis=num(i.packQty)>1?Math.ceil(q/num(i.packQty)-1e-9):null;
+    (parFour[sup]=parFour[sup]||[]).push({id,name:i.name,q,unit:i.unit,cout:q*num(i.price),colis,packQty:num(i.packQty),sansPrix:!(num(i.price)>0)})});
+  Object.values(parFour).forEach(l=>l.sort((a,b)=>a.name.localeCompare(b.name,"fr")));
+  return Object.entries(parFour).sort((a,b)=>a[0].localeCompare(b[0],"fr"));
+}
+const fmtQ=(q,u)=>u==="piece"?`${Math.ceil(q-1e-9)} pièce${Math.ceil(q-1e-9)>1?"s":""}`:u==="kg"?(q<1?`${Math.ceil(q*1000)} g`:`${n2.format(Math.ceil(q*10)/10)} kg`):(q<1?`${Math.ceil(q*100)} cl`:`${n2.format(Math.ceil(q*10)/10)} L`);
+function renderMenus(){
+  const o=state.open;if(o&&o.kind==="menu"&&(CM.docs.menus||{})[o.id])return renderMenu(o.id);
+  const ms=menusListe();
+  let h=`<div class="toolbar"><h2>Menus & soirées</h2>${CM.lecture?"":`<button class="btn" data-menu="nouveau">+ Nouveau menu</button>`}</div>
+  <p class="hint" style="margin:0">Compose un menu de soirée, de groupe ou d'événement à partir de ta carte et de tes fiches : l'app calcule le coût par personne, la marge totale, le prix conseillé et la liste de courses par fournisseur.</p><div class="list">`;
+  if(!ms.length)return h+`<div class="empty">Aucun menu pour l'instant. Crée le premier, par exemple celui de la soirée des 10 ans du 76.</div></div>`;
+  ms.forEach(([id,m])=>{const c=menuCalc(m);h+=`<button class="row f" data-menu="ouvrir" data-id="${esc(id)}"><span class="name">${esc(m.name||"Menu sans nom")}<span class="sub">${m.date?esc(new Date(m.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}))+" · ":""}${c.n} couvert${c.n>1?"s":""} · ${(m.lignes||[]).length} plat${(m.lignes||[]).length>1?"s":""}</span></span><span class="num hide-s">${eur.format(c.parPers)}<span class="sub">coût / pers.</span></span><span class="num hide-s">${num(m.prix)>0?eur.format(num(m.prix)):"—"}<span class="sub">prix / pers.</span></span><span class="chip ${c.fc==null?"nd":c.fc<=num(state.settings.target)/100?"ok":c.fc<=num(state.settings.target)/100+0.07?"watch":"alert"}">${c.fc!=null?pct(c.fc):"Prix ?"}</span></button>`});
+  return h+`</div>`;
+}
+function optionsMenu(){
+  const car=Object.entries(state.carte).filter(([,it])=>isFood(it)).sort(byName).map(([id,it])=>`<option value="car:${esc(id)}">${esc(it.name)}</option>`).join("");
+  const boi=[];Object.entries(state.boissons).sort(byName).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>boi.push(`<option value="boi:${esc(id)}:${k}">${esc(b.name+(f.label?" · "+f.label:""))}</option>`)));
+  const fic=Object.entries(state.fiches).sort(byName).map(([id,f])=>`<option value="fic:${esc(id)}">${esc(f.name)}</option>`).join("");
+  return `<option value="">+ Ajouter un plat ou une boisson…</option><optgroup label="Carte des repas">${car}</optgroup><optgroup label="Boissons">${boi.join("")}</optgroup><optgroup label="Fiches techniques">${fic}</optgroup>`;
+}
+function renderMenu(id){
+  const m=CM.docs.menus[id],c=menuCalc(m),ro=CM.lecture,tgt=num(state.settings.target);
+  const cs=courses(m);const totalCourses=cs.reduce((s,[,l])=>s+l.reduce((t,x)=>t+x.cout,0),0);
+  let h=`<button class="back" data-menu="retour">‹ Menus & soirées</button>
+  <section class="card"><div class="fields">
+    <div class="f"><label class="lbl" for="mn-name">Nom du menu</label><input type="text" id="mn-name" class="title-in" data-mn="name" value="${esc(m.name||"")}" ${ro?"readonly":""} placeholder="Soirée des 10 ans"></div>
+    <div class="f"><label class="lbl" for="mn-date">Date</label><input type="date" id="mn-date" data-mn="date" value="${esc(m.date||"")}" ${ro?"readonly":""}></div>
+    <div class="f"><label class="lbl" for="mn-couv">Couverts</label><input type="text" inputmode="numeric" class="n" id="mn-couv" data-mn="couverts" value="${esc(m.couverts||"")}" ${ro?"readonly":""}></div>
+    <div class="f"><label class="lbl" for="mn-prix">Prix / pers. TTC</label><input type="text" inputmode="decimal" class="n" id="mn-prix" data-mn="prix" value="${num(m.prix)?n2.format(num(m.prix)):""}" ${ro?"readonly":""}></div>
+    <div class="f"><label class="lbl" for="mn-tva">TVA</label><select id="mn-tva" data-mn="tva" ${ro?"disabled":""}>${[10,20].map(t=>`<option value="${t}" ${(num(m.tva)||10)===t?"selected":""}>${t} %</option>`).join("")}</select></div>
+  </div></section>
+  <section class="bilan" id="mn-bilan">${bilanMenu(m)}</section>
+  <section class="card"><h2 style="margin-bottom:8px">Composition</h2><p class="hint" style="margin:0 0 6px">« Part par convive » : 1 si chacun en prend, 0,5 si les convives choisissent entre deux plats, 0,25 pour une bouteille de vin pour quatre…</p>
+    <div class="ingrs">${(m.lignes||[]).map((l,k)=>{const x=srcMenu(l);return `<div class="ingr"><div class="ingr-name"><span class="ingr-sub">${x?esc(x.name):'<span class="bad-t">Élément supprimé</span>'}</span></div>
+      <div class="ingr-ctl"><input type="text" inputmode="decimal" class="n" id="mn-part-${k}" data-mnp="${k}" value="${n2.format(num(l.part||1))}" aria-label="Part par convive" ${ro?"readonly":""}><span class="hint" style="margin:0;width:70px">par conv.</span>
+      <div class="ingr-cost"><span>${x?eur.format(x.cout*num(l.part||1)):"—"}</span><span class="hint" style="margin:0;font-size:.7rem">/ pers.</span></div>${ro?"":`<button class="x" aria-label="Retirer" data-menu="retirer" data-k="${k}">✕</button>`}</div></div>`}).join("")}</div>
+    ${ro?"":`<select id="mn-add" style="margin-top:12px">${optionsMenu()}</select>`}
+  </section>
+  <section class="card"><div class="toolbar"><h2>Liste de courses · ${c.n} couverts</h2><div class="acts"><button class="btn ghost sm" data-act="imprimer">Imprimer</button></div></div>
+    <p class="hint" style="margin:6px 0 10px">Quantités totales à acheter, pertes comprises, arrondies au-dessus. Coût estimé : <b>${eur.format(totalCourses)} HT</b>.</p>
+    ${cs.length?cs.map(([sup,l])=>`<div class="group" style="border-radius:10px;margin-top:8px"><span class="lbl">${esc(sup)} · ${eur.format(l.reduce((t,x)=>t+x.cout,0))}</span></div>
+      <table class="qtytbl" style="width:100%"><tbody>${l.map(x=>`<tr><td>${esc(x.name)}${x.sansPrix?' <span class="used warn-t" style="display:inline">sans prix</span>':""}</td><td class="num" style="white-space:nowrap">${fmtQ(x.q,x.unit)}${x.colis?`<span class="used">${x.colis} colis de ${n2.format(x.packQty)}</span>`:""}</td><td class="num" style="white-space:nowrap;width:90px">${eur.format(x.cout)}</td></tr>`).join("")}</tbody></table>`).join(""):`<p class="empty" style="padding:10px">Ajoute des plats et le nombre de couverts.</p>`}
+  </section>
+  ${ro?"":`<div class="foot"><span></span><button class="btn danger" data-menu="supprimer">Supprimer ce menu</button></div>`}`;
+  return h;
+}
+function bilanMenu(m){
+  const c=menuCalc(m),tgt=num(state.settings.target);
+  return `<div class="hl"><span class="lbl">Marge totale</span><span class="big">${num(m.prix)>0?eur.format(c.marge):"—"} <small>HT</small></span><span class="sub">${num(m.prix)>0?eur.format(c.ht-c.parPers)+" par personne":"Indique le prix par personne"}</span></div>
+    <div><span class="lbl">Coût matière</span><span class="big">${eur.format(c.parPers)} <small>/ pers.</small></span><span class="sub">${eur.format(c.total)} pour ${c.n} couverts</span></div>
+    <div><span class="lbl">Food cost</span><span class="big">${pct(c.fc)}</span><span class="sub">objectif ${n2.format(tgt)} %</span></div>
+    <div><span class="lbl">Prix conseillé</span><span class="big">${c.conseil?eur.format(c.conseil):"—"} <small>TTC</small></span><span class="sub">pour ${n2.format(tgt)} % de food cost</span></div>`;
+}
+function menuEcrire(id,doc){CM.docs.menus[id]=doc;CM.ecrire("menus",id,doc).catch(e=>setStatus(e.message,true))}
+main.addEventListener("click",e=>{
+  const al=e.target.closest("[data-alerte]");if(al){alerteAction(al.dataset.alerte,al.dataset.id,al.dataset.cle);return}
+  const t=e.target.closest("[data-menu]");if(!t)return;const a=t.dataset.menu,o=state.open;
+  if(a==="nouveau"){const id=uid();CM.docs.menus=CM.docs.menus||{};menuEcrire(id,{name:"Nouveau menu",date:"",couverts:50,prix:0,tva:10,lignes:[]});state.open={kind:"menu",id};render();document.getElementById("mn-name")?.select()}
+  else if(a==="ouvrir"){state.open={kind:"menu",id:t.dataset.id};render();window.scrollTo(0,0)}
+  else if(a==="retour"){state.open=null;render()}
+  else if(a==="retirer"&&o){const m=JSON.parse(JSON.stringify(CM.docs.menus[o.id]));m.lignes.splice(+t.dataset.k,1);menuEcrire(o.id,m);render()}
+  else if(a==="supprimer"&&o){if(!t.dataset.armed){t.dataset.armed="1";t.textContent="Confirmer la suppression";return}delete CM.docs.menus[o.id];CM.ecrire("menus",o.id,null);state.open=null;render()}
+});
+main.addEventListener("change",e=>{
+  const o=state.open;if(!o||o.kind!=="menu")return;const m=CM.docs.menus[o.id];if(!m)return;
+  if(e.target.id==="mn-add"&&e.target.value){const [t,r,k]=e.target.value.split(":");const d=JSON.parse(JSON.stringify(m));d.lignes=d.lignes||[];d.lignes.push(t==="boi"?{type:t,ref:r,k:+k,part:1}:{type:t,ref:r,part:1});menuEcrire(o.id,d);render();return}
+  const ds=e.target.dataset;if(ds.mn||ds.mnp!=null){const d=JSON.parse(JSON.stringify(m));
+    if(ds.mn)d[ds.mn]=["couverts","prix","tva"].includes(ds.mn)?num(e.target.value):e.target.value.trim();else d.lignes[+ds.mnp].part=num(e.target.value)||0;
+    menuEcrire(o.id,d);render()}
+});
+main.addEventListener("input",e=>{const o=state.open;if(!o||o.kind!=="menu")return;const ds=e.target.dataset;if(!(ds.mn==="couverts"||ds.mn==="prix"||ds.mnp!=null))return;
+  const m=JSON.parse(JSON.stringify(CM.docs.menus[o.id]));if(ds.mn)m[ds.mn]=num(e.target.value);else m.lignes[+ds.mnp].part=num(e.target.value)||0;const b=document.getElementById("mn-bilan");if(b)b.innerHTML=bilanMenu(m)});
+
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
 render();
@@ -1594,7 +1741,7 @@ render();
     }
   }catch(e){}}
   {const t=relinkAll();if(t.length){t.forEach(([k,id])=>persist(k,id));render()}}
-  setStatus(mode==="db"?(CM.lecture?CM.moi.nom+" · lecture":CM.moi.nom+" · synchronisé"):"Hors connexion",mode!=="db");if(CM.lecture&&!["service","allergenes","fiches","bfiches"].includes(state.view)){state.view="fiches";}render();
+  setStatus(mode==="db"?(CM.lecture?CM.moi.nom+" · lecture":CM.moi.nom+" · synchronisé"):"Hors connexion",mode!=="db");if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view)){state.view="fiches";}render();
   /* Suivi en direct : si les données changent ailleurs (autre appareil, Claude), la page se met à jour au lieu de les écraser */
   if(mode==="db"&&refs){
     let needRender=false;
