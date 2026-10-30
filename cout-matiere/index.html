@@ -195,6 +195,7 @@ td input[type=text]:hover,td select:hover,td input[type=text]:focus,td select:fo
 .quick{display:flex;flex-direction:column;gap:6px;margin-top:6px}
 .quick-row{display:grid;grid-template-columns:90px 100px minmax(0,1fr) auto;gap:6px;align-items:center}
 .quick-row input,.quick-row select{padding:7px 9px}
+#main [hidden]{display:none!important}
 .searchbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
 .searchbar input[type=search],.srv-top input{background:var(--fill);border:0;border-radius:12px;padding:11px 14px 11px 38px;width:100%;font-size:1rem;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5.2' fill='none' stroke='%238a8a8e' stroke-width='1.8'/%3E%3Cpath d='M11 11l3.5 3.5' stroke='%238a8a8e' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:13px center}
@@ -679,13 +680,14 @@ function render(){
   else h+=(o&&o.kind==="car"&&state.carte[o.id])?renderItem(o.id):renderCarte();
   main.innerHTML=h;
   if(state.view==="ingredients"||state.view==="bingredients")filterIngredients();
+  filtrerCarte();
 }
 function bandeauFactures(part){if(CM.lecture)return "";const n=facturesDe(part).filter(([,f])=>f.statut==="a_valider").length;if(!n)return "";
   return `<div class="banner fac-banner"><p><strong>📬 ${n} nouvelle${n>1?"s":""} facture${n>1?"s":""} à vérifier.</strong> Les prix seront mis à jour dès que tu l${n>1?"es":"a"} valides.</p><button class="btn" data-tab-go="${part==="bar"?"bingredients":"ingredients"}">Voir ${n>1?"les factures":"la facture"}</button></div>`}
 function summaryHtml(){return bandeauFactures("cuisine")+renderAlertes("cuisine")+bilanHtml()}
 function renderCarte(){
   const items=Object.entries(state.carte).filter(([,it])=>isFood(it)).map(([id,it])=>({id,it,c:calcItem(it)}));
-  let h=summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button></div></div>`+renderMenuImport()+`<div class="list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
+  let h=(items.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-car" data-cq="car" placeholder="Rechercher un plat… (ex. onglet, tarte, burger)" value="${esc(state.cq_car||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-car-n" style="margin:0;white-space:nowrap"></span></div>`:"")+summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button></div></div>`+renderMenuImport()+`<div class="list" id="cq-list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
   if(!items.length) return h+`<div class="empty">Votre carte est vide. Importez votre menu (PDF ou photo) pour créer tous vos articles d'un coup, ou ajoutez-les un par un.</div></div>`;
   FOOD_SECTIONS.forEach(sec=>{
     const g=items.filter(x=>(FOOD_SECTIONS.includes(x.it.section)?x.it.section:"Autre")===sec).sort((a,b)=>(a.it.name||"").localeCompare(b.it.name||"","fr"));
@@ -1182,11 +1184,11 @@ function srcOptions(f){
 }
 function renderBoissons(){
   const bs=Object.entries(state.boissons);
-  let h=`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button></div></div>
+  let h=(bs.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-boi" data-cq="boi" placeholder="Rechercher une boisson… (ex. spritz, merlot, pression)" value="${esc(state.cq_boi||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-boi-n" style="margin:0;white-space:nowrap"></span></div>`:"")+`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button></div></div>
   <p class="hint" style="margin:0">Chaque boisson a un ou plusieurs formats (verre, bouteille, pichet…). L'app calcule le coût de chaque format et propose un prix de vente selon le coefficient de sa famille. TVA : 20 % avec alcool, 10 % sans alcool.</p>`;
   h+=bandeauFactures("bar")+renderAlertes("bar")+bilanBar();
   if(state.coefOpen)h+=`<section class="card"><div class="coefs">${BCATS.map(c=>`<label class="f"><span class="lbl">${esc(c)}</span><span class="target"><span>×</span><input type="text" inputmode="decimal" class="n" id="coef-${esc(c)}" data-coef="${esc(c)}" value="${n2.format(coefFor(c))}"></span></label>`).join("")}</div><p class="hint">Coefficient visé = prix HT ÷ coût. Exemple : ×5 sur un cocktail qui coûte 2 € donne 10 € HT, soit 12 € TTC à 20 %.</p></section>`;
-  h+=`<div class="list">`;
+  h+=`<div class="list" id="cq-list">`;
   if(!bs.length)return h+`<div class="empty">Aucune boisson. Ajoutez vos vins, bières, softs et cocktails, ou importez la facture de votre fournisseur de boissons dans la mercuriale.</div></div>`;
   BCATS.forEach(cat=>{const g=bs.filter(([,b])=>(BCATS.includes(b.category)?b.category:"Sans alcool")===cat).sort(byName);if(!g.length)return;
     h+=`<div class="group"><span class="lbl">${esc(cat)}</span></div>`;
@@ -1691,6 +1693,29 @@ main.addEventListener("change",e=>{
 main.addEventListener("input",e=>{const o=state.open;if(!o||o.kind!=="menu")return;const ds=e.target.dataset;if(!(ds.mn==="couverts"||ds.mn==="prix"||ds.mnp!=null))return;
   const m=JSON.parse(JSON.stringify(CM.docs.menus[o.id]));if(ds.mn)m[ds.mn]=num(e.target.value);else m.lignes[+ds.mnp].part=num(e.target.value)||0;const b=document.getElementById("mn-bilan");if(b)b.innerHTML=bilanMenu(m)});
 
+
+/* ---------- Recherche dans la carte des repas et des boissons ---------- */
+const sansAccent=t=>String(t||"").toLowerCase().replace(/œ/g,"oe").replace(/æ/g,"ae").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function filtrerCarte(){
+  const box=document.querySelector("[data-cq]");if(!box)return;const k=box.dataset.cq;
+  const mots=sansAccent(state["cq_"+k]).split(/\s+/).filter(Boolean);
+  const list=document.getElementById("cq-list");if(!list)return;
+  /* Pendant une recherche, on masque le tableau de bord pour voir les résultats tout de suite */
+  for(let el=box.parentElement.nextElementSibling;el&&el!==list;el=el.nextElementSibling){if(!el.classList.contains("toolbar"))el.hidden=mots.length>0}
+  let n=0,tot=0,grp=null,vus=0;
+  const fin=()=>{if(grp)grp.hidden=mots.length>0&&!vus};
+  [...list.children].forEach(el=>{
+    if(el.classList.contains("group")){fin();grp=el;vus=0;return}
+    if(!el.matches("[data-open-item],[data-bopen]"))return;tot++;
+    const t=sansAccent(el.querySelector(".name")?.textContent);const ok=mots.every(m=>t.includes(m));
+    el.hidden=!ok;if(ok){n++;vus++}});
+  fin();
+  const hd=list.querySelector(".row.hdr");if(hd)hd.hidden=mots.length>0&&!n;
+  const c=document.getElementById("q-"+k+"-n");if(c)c.textContent=mots.length?(n?`${n} sur ${tot}`:"Aucun résultat"):"";
+}
+main.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.cq;if(!k)return;state["cq_"+k]=e.target.value;filtrerCarte()});
+main.addEventListener("keydown",e=>{if(e.key!=="Enter"||!e.target.dataset||!e.target.dataset.cq)return;
+  const r=[...document.querySelectorAll("[data-open-item],[data-bopen]")].filter(x=>!x.hidden);if(r.length===1){e.preventDefault();r[0].click()}});
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
 render();
