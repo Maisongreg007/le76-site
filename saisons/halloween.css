@@ -1,0 +1,94 @@
+/*
+ * Habillage Halloween du site (le76.fr et le76.fr/de/).
+ * Ne s'applique que si <html> a la classe « halloween », posée par le petit script de l'en-tête
+ * tant que la date de fin n'est pas passée. Ensuite, le site reprend son apparence habituelle tout seul.
+ */
+html.halloween { --rust: #ef6a12; --rust-dark: #c95406; --orange: #ff8a1f; }
+html.halloween .hero, html.halloween header.top { --gold: #ffb347; --gold-light: #ffc46b; }
+
+/* ----- Haut de page : nuit d'Halloween ----- */
+html.halloween .hero {
+  background:
+    radial-gradient(ellipse at 50% 115%, rgba(255,122,26,.30), transparent 55%),
+    radial-gradient(ellipse at 10% 0%, rgba(122,58,170,.35), transparent 50%),
+    linear-gradient(180deg, #0f0818 0%, #1e0f2e 50%, #2e1530 100%);
+  color: #f1e6ff;
+}
+html.halloween .hero::before {               /* la lune */
+  content: ""; position: absolute; z-index: 0; width: 140px; height: 140px; border-radius: 50%;
+  left: 46%; top: 96px;
+  background: radial-gradient(circle at 38% 36%, #fffaf0 0, #f6dfa0 55%, #e2b764 100%);
+  box-shadow: 0 0 60px 18px rgba(255, 214, 140, .28), 0 0 160px 60px rgba(255, 180, 90, .12);
+}
+html.halloween .hero::after {                /* étoiles */
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .7;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 28% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 62% 14%, #fff, transparent), radial-gradient(1px 1px at 78% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 88% 10%, #fff, transparent), radial-gradient(1.5px 1.5px at 38% 26%, #fff, transparent),
+    radial-gradient(1px 1px at 6% 40%, #fff, transparent), radial-gradient(1px 1px at 94% 48%, #fff, transparent);
+}
+html.halloween .logo-xl b { color: #fff8ec; }
+html.halloween .logo-xl .note { color: var(--orange); text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+html.halloween .tagline { color: #d9c6ee; }
+html.halloween .hero .lead { color: #cdb8e2; }
+html.halloween .hero .lead strong { color: #fff; }
+html.halloween .status { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); color: #f1e6ff; }
+html.halloween .hero .btn.ghost { color: #fff; border-color: rgba(255,255,255,.7); }
+html.halloween .hero .btn.ghost:hover { background: #fff; color: #1e0f2e; }
+html.halloween .hero-photo img { box-shadow: 0 0 0 6px rgba(255,122,26,.35), 0 30px 70px rgba(0,0,0,.55); }
+html.halloween .hero-photo .note { background: #1d1027; color: var(--orange); box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+
+/* ----- En-tête sur fond de nuit ----- */
+html.halloween header.top .brand { color: #fff; }
+html.halloween nav.links a { color: #eadcfb; }
+html.halloween nav.links a:hover { color: var(--orange); }
+html.halloween nav.links .btn.ghost { border-color: rgba(255,255,255,.6); }
+html.halloween header.top.scrolled { background: rgba(15, 8, 24, .95); box-shadow: 0 1px 0 rgba(255,255,255,.08); }
+html.halloween nav.links a.lang,
+html.halloween nav.links .tel-mobile { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.35); }
+html.halloween nav.links a.lang:hover { border-color: var(--orange); }
+
+/* ----- Citrouilles, chauves-souris et fantômes à la place des feuilles ----- */
+html.halloween .leaf { animation-name: hw-float; animation-duration: 5s; }
+html.halloween .leaf.bat { animation: hw-flap .35s ease-in-out infinite alternate, hw-float 6s ease-in-out infinite alternate; }
+@keyframes hw-float { from { transform: translateY(0) rotate(var(--r, 0deg)); } to { transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 6deg)); } }
+@keyframes hw-flap { from { scale: 1 1; } to { scale: 1 .55; } }
+
+/* Chauves-souris qui traversent la page de temps en temps */
+.hw-sky { position: fixed; inset: 0; pointer-events: none; z-index: 25; overflow: hidden; }
+.hw-sky svg { position: absolute; left: -80px; width: 54px; fill: #1a0f22; opacity: 0; animation: hw-cross 16s linear infinite; }
+.hw-sky svg:nth-child(2) { width: 38px; animation-delay: -6s; animation-duration: 19s; }
+.hw-sky svg:nth-child(3) { width: 30px; animation-delay: -11s; animation-duration: 23s; }
+@keyframes hw-cross {
+  0% { transform: translate(0, 0); opacity: 0; }
+  4% { opacity: .9; }
+  25% { transform: translate(28vw, -6vh); }
+  50% { transform: translate(55vw, 4vh); }
+  75% { transform: translate(82vw, -8vh); }
+  92% { opacity: .9; }
+  100% { transform: translate(115vw, 2vh); opacity: 0; }
+}
+
+/* ----- La soirée du 31 dans le haut de page ----- */
+.hw-event { margin-top: 26px; padding: 20px 22px; border-radius: 18px; background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,179,71,.35); box-shadow: 0 0 40px rgba(255,122,26,.12) inset; max-width: 34em; }
+.hw-event .quand { font: 600 .78rem/1 var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
+.hw-event h3 { font: 700 clamp(1.5rem, 3vw, 2rem)/1.15 var(--serif); color: #fff; margin: 10px 0 6px; }
+.hw-event p { margin: 0; color: #d9c6ee; font-size: 1rem; }
+.hw-event .reste { display: inline-block; margin-top: 12px; padding: 5px 13px; border-radius: 999px; font-weight: 600; font-size: .92rem;
+  background: var(--rust); color: #fff; }
+.hw-event .reste[hidden] { display: none; }
+.hero.no-photo .hw-event { margin-left: auto; margin-right: auto; }
+@media (max-width: 860px) { .hw-event { margin-left: auto; margin-right: auto; text-align: center; } }
+
+/* Le bandeau des 10 ans revient après Halloween */
+html.halloween .dix { display: none !important; }
+
+@media (max-width: 860px) {
+  html.halloween .hero::before { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.halloween .leaf, .hw-sky { animation: none !important; }
+  .hw-sky { display: none; }
+}
