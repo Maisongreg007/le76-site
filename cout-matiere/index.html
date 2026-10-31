@@ -283,6 +283,7 @@ details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;curs
 @media (max-width:560px){.row.cmp{grid-template-columns:minmax(0,1fr) 92px 32px}.row.cmp>span:nth-child(3){display:none}}
 .resto-pill{display:inline-block;font-size:.8rem;font-weight:600;background:var(--fill);color:var(--fg);border-radius:999px;padding:3px 10px;cursor:pointer;vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cm-resto-w{display:inline-block;font-family:var(--f-text,inherit);font-size:1rem;letter-spacing:0}
+.promo-l{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);margin-top:4px;justify-content:flex-end;cursor:pointer}.promo-l input{width:auto;margin:0}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -1000,7 +1001,7 @@ Exemples : carton de 6 bouteilles de 1 L à 9,00 € HT → 1,50 €/L ; sac de 
 Si seul le prix TTC apparaît, convertis-le en HT avec le taux de TVA de la ligne (5,5 % par défaut pour l'alimentaire).
 Indique les allergènes réglementaires du produit parmi : gluten, crustaces, oeufs, poissons, arachides, soja, lait, fruits_coque, celeri, moutarde, sesame, sulfites, lupin, mollusques.
 Réponds uniquement avec ce JSON :
-{"supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "qty": quantité achetée exprimée dans cette même unité de base (nombre, ex. 2 cartons de 6 × 1 L → 12), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}`;
+{"supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "qty": quantité achetée exprimée dans cette même unité de base (nombre, ex. 2 cartons de 6 × 1 L → 12), "promo": true si la ligne est une promotion, une remise sur ce produit ou un prix exceptionnel (sinon false), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}`;
 const cleanAlg=a=>(Array.isArray(a)?a:[]).filter(x=>ALGN[x]);
 const toUnit=u=>UNITS[u]?u:(/^l|litre/i.test(u||"")?"L":/pi/i.test(u||"")?"piece":"kg");
 function renderImport(){
@@ -1016,7 +1017,7 @@ function renderImport(){
     else if(m)delta=`<span class="delta">${num(m.price)>0?eur.format(num(m.price))+" / "+(UNITS[m.unit]?.label||""):"pas de prix"}</span>`;else delta=`<span class="used">nouveau</span>`;
     h+=`<tr><td><input type="checkbox" aria-label="Importer cette ligne" id="imp-on-${k}" data-imp="${k}" data-ik="on" ${l.on?"checked":""}></td>
     <td><input type="text" aria-label="Nom" id="imp-name-${k}" data-imp="${k}" data-ik="name" value="${esc(l.name)}">${l.detail?`<span class="used">${esc(l.detail)}</span>`:""}</td>
-    <td style="width:100px"><input type="text" inputmode="decimal" class="n" aria-label="Prix HT" id="imp-price-${k}" data-imp="${k}" data-ik="price" value="${n2.format(num(l.price))}"></td>
+    <td style="width:100px"><input type="text" inputmode="decimal" class="n" aria-label="Prix HT" id="imp-price-${k}" data-imp="${k}" data-ik="price" value="${n2.format(num(l.price))}"><label class="promo-l" title="Prix promotionnel : il ne remplace pas le prix habituel dans tes fiches"><input type="checkbox" data-imp="${k}" data-ik="promo" ${l.promo?"checked":""}> Promo</label></td>
     <td style="width:96px"><select aria-label="Unité" id="imp-unit-${k}" data-imp="${k}" data-ik="unit">${Object.entries(UNITS).map(([u,v])=>`<option value="${u}" ${u===l.unit?"selected":""}>/ ${v.label}</option>`).join("")}</select></td>
     <td style="width:210px"><select aria-label="Ingrédient correspondant" id="imp-match-${k}" data-imp="${k}" data-ik="match"><option value="">+ Nouvel ingrédient</option>${ings.map(([id,i])=>`<option value="${esc(id)}" ${id===l.match?"selected":""}>${esc(i.name||"Sans nom")}</option>`).join("")}</select></td>
     <td class="num">${delta}</td></tr>`});
@@ -1029,7 +1030,7 @@ async function importInvoice(file){
   state.imp={status:"reading",msg:"Claude lit la facture et calcule les prix…"};render();
   try{
     const res=await q.sample.json(q.input,Object.assign({modelTier:"default"},q.images?{images:q.images}:{}));
-    const lines=(res&&Array.isArray(res.lines)?res.lines:[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
+    const lines=(res&&Array.isArray(res.lines)?res.lines:[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),promo:!!l.promo,allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
     if(!lines.length)return fail("Aucun produit trouvé dans ce document. Est-ce bien une facture fournisseur ?");
     state.imp={status:"review",supplier:res.supplier||"",date:res.date||"",lines};render();
   }catch(e){fail(sampleErr(e,"La facture n'a pas pu être lue correctement. Essayez un fichier plus net."))}
@@ -1041,7 +1042,8 @@ function fixLinesForIngredient(ingId,touched){
 function applyImport(){
   const im=state.imp;if(!im||im.status!=="review")return;const touched=[];const _couts=photoCouts();enregistrerControle(im);
   im.lines.filter(l=>l.on&&l.name).forEach(l=>{
-    if(l.match&&state.ingredients[l.match]){const i=state.ingredients[l.match];const _avant=num(i.price);i.price=num(l.price);
+    if(l.match&&state.ingredients[l.match]&&l.promo&&num(state.ingredients[l.match].price)>0){const i=state.ingredients[l.match];i.promo={prix:num(l.price),unit:l.unit,date:(im.date||new Date().toISOString()).slice(0,10),f:im.supplier||""};if(im.supplier&&!i.supplier)i.supplier=im.supplier;touched.push(["ing",l.match]);return}
+    if(l.match&&state.ingredients[l.match]){const i=state.ingredients[l.match];const _avant=num(i.price);i.price=num(l.price);delete i.promo;
       if(num(i.packQty)>1&&l.unit===i.unit&&num(i.packPrice)>0&&Math.abs(num(l.price)-num(i.packPrice))/num(i.packPrice)<0.35){i.packPrice=num(l.price);i.price=num(l.price)/num(i.packQty)}delete i.auto;if(im.supplier)i.supplier=im.supplier;if(!(i.allergens||[]).length&&l.allergens.length)i.allergens=l.allergens;
       if(i.unit!==l.unit){i.unit=l.unit;fixLinesForIngredient(l.match,touched)}
       if(_avant>0&&Math.abs(num(i.price)-_avant)/_avant>0.001)i.hist=(i.hist||[]).concat([{d:(im.date||new Date().toISOString()).slice(0,10),de:+_avant.toFixed(4),a:+num(i.price).toFixed(4),f:im.supplier||""}]).slice(-12);
@@ -1418,7 +1420,7 @@ function onField(e,commit){
     l[ds.lf]=ds.lf==="qty"?num(el.value):el.value;refreshFiche();if(commit)queueSave("fic",o.id);return}
   if(ds.alg){const i=state.ingredients[ds.alg];if(!i||!commit)return;const s=new Set(i.allergens||[]);el.checked?s.add(ds.ak):s.delete(ds.ak);i.allergens=ALG.map(a=>a[0]).filter(k=>s.has(k));queueSave("ing",ds.alg);render();return}
   if(ds.imp!=null&&state.imp&&state.imp.lines){const l=state.imp.lines[+ds.imp];if(!l)return;
-    if(ds.ik==="on")l.on=el.checked;else if(ds.ik==="price")l.price=num(el.value);else l[ds.ik]=el.value;
+    if(ds.ik==="on")l.on=el.checked;else if(ds.ik==="promo")l.promo=el.checked;else if(ds.ik==="price")l.price=num(el.value);else l[ds.ik]=el.value;
     if(commit&&ds.ik!=="name")render();return}
   if(ds.mimp!=null&&state.menuImp&&state.menuImp.items){const x=state.menuImp.items[+ds.mimp];if(!x)return;
     if(ds.mk==="on")x.on=el.checked;else if(ds.mk==="price")x.price=num(el.value);else x[ds.mk]=el.value;
@@ -1453,7 +1455,7 @@ function renderFactures(part){
 }
 function ouvrirFacture(id){
   const f=(CM.docs.factures||{})[id];if(!f)return;
-  const lines=(f.lignes||[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
+  const lines=(f.lignes||[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),promo:!!l.promo,allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
   state.imp={status:"review",supplier:f.fournisseur||"",date:f.date||"",lines,factureId:id};render();window.scrollTo(0,0);
 }
 function marquerFacture(id,statut){const f=(CM.docs.factures||{})[id];if(!f)return;CM.ecrire("factures",id,Object.assign({},f,{statut,traitee_le:new Date().toISOString().slice(0,10)})).catch(e=>setStatus(e.message,true))}
@@ -2002,15 +2004,16 @@ document.addEventListener("change",e=>{if(e.target.id!=="modif-file")return;cons
 
 /* ---------- Contrôle des factures : prix habituel, surcoût, réclamation ---------- */
 const mediane=a=>{const b=a.filter(x=>x>0).sort((x,y)=>x-y);if(!b.length)return 0;const m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const promoEnCours=i=>!!(i&&i.promo&&i.promo.date&&(Date.now()-new Date(i.promo.date))<30*864e5);
 function prixHabituel(i){return mediane([...(i.hist||[]).slice(-5).map(h=>num(h.de)),num(i.price)])||num(i.price)}
 function equivalents(id){const i=state.ingredients[id];if(!i||!i.groupe)return [];return Object.entries(state.ingredients).filter(([k,x])=>k!==id&&x.groupe===i.groupe&&x.unit===i.unit&&num(x.price)>0)}
 function moinsCherAilleurs(id,prix,fournisseur){
-  const best=equivalents(id).filter(([,x])=>(x.supplier||"")!==(fournisseur||state.ingredients[id]?.supplier||"")).sort((a,b)=>num(a[1].price)-num(b[1].price))[0];
-  if(!best||num(best[1].price)>=prix*0.97)return "";
-  return `Moins cher chez ${best[1].supplier||"un autre fournisseur"} : ${eur4.format(num(best[1].price))} / ${UNITS[best[1].unit]?.label||""}`;
+  const best=equivalents(id).filter(([,x])=>(x.supplier||"")!==(fournisseur||state.ingredients[id]?.supplier||"")).map(([k,x])=>[k,x,prixHabituel(x)]).sort((a,b)=>a[2]-b[2])[0];
+  if(!best||best[2]>=prix*0.97)return "";
+  return `Moins cher chez ${best[1].supplier||"un autre fournisseur"} : ${eur4.format(best[2])} / ${UNITS[best[1].unit]?.label||""} (prix habituel)`;
 }
 function ecartsFacture(im){
-  return im.lines.filter(l=>l.on&&l.match&&state.ingredients[l.match]).map(l=>{const m=state.ingredients[l.match];if(m.unit!==l.unit||!(num(m.price)>0))return null;const hab=prixHabituel(m),p=num(l.price);
+  return im.lines.filter(l=>l.on&&!l.promo&&l.match&&state.ingredients[l.match]).map(l=>{const m=state.ingredients[l.match];if(m.unit!==l.unit||!(num(m.price)>0))return null;const hab=prixHabituel(m),p=num(l.price);
     if(!(p>hab*1.03))return null;return {id:l.match,name:m.name||l.name,hab:+hab.toFixed(4),prix:+p.toFixed(4),unit:l.unit,qty:num(l.qty),surcout:num(l.qty)>0?+((p-hab)*num(l.qty)).toFixed(2):null}}).filter(Boolean);
 }
 function bandeauControle(im){
@@ -2061,7 +2064,7 @@ function groupesFournisseurs(part){
   Object.entries(state.ingredients).forEach(([id,i])=>{if(!i.groupe||!(num(i.price)>0)||!ingPart(id,i)[part])return;(g[i.groupe]=g[i.groupe]||[]).push([id,i])});
   return Object.entries(g).map(([nom,xs])=>{
     const unit=Object.entries(xs.reduce((m,[,i])=>(m[i.unit]=(m[i.unit]||0)+1,m),{})).sort((a,b)=>b[1]-a[1])[0][0];
-    const items=xs.filter(([,i])=>i.unit===unit).map(([id,i])=>({id,i,prix:num(i.price),conso:conso[id]||0})).sort((a,b)=>a.prix-b.prix);
+    const items=xs.filter(([,i])=>i.unit===unit).map(([id,i])=>({id,i,prix:prixHabituel(i),conso:conso[id]||0})).sort((a,b)=>a.prix-b.prix);
     const min=items[0]?.prix||0,eco=items.reduce((s,x)=>s+x.conso*(x.prix-min),0);
     return {nom,unit,items,min,eco,fours:new Set(items.map(x=>x.i.supplier||"?")).size};
   }).filter(x=>x.items.length>1&&x.fours>1).sort((a,b)=>b.eco-a.eco||a.nom.localeCompare(b.nom,"fr"));
@@ -2075,7 +2078,7 @@ function renderComparaison(part){
   gs.forEach(g=>{const ul=UNITS[g.unit]?.label||g.unit;
     h+=`<div class="group" style="display:flex;justify-content:space-between;gap:10px"><span class="lbl">${esc(g.nom)}</span>${g.eco>0.5?`<span class="lbl" style="color:var(--ok)">économie ≈ ${eur.format(g.eco)} / mois</span>`:""}</div>`;
     g.items.forEach((x,k)=>{const d=g.min>0?x.prix/g.min-1:0;
-      h+=`<div class="row cmp"><span class="name">${esc(x.i.name||"")}<span class="sub">${esc(x.i.supplier||"Sans fournisseur")}${x.conso>0?` · ≈ ${n2.format(+x.conso.toFixed(1))} ${esc(ul)} / mois`:""}</span></span><span class="num">${eur4.format(x.prix)}<span class="sub">/ ${esc(ul)}</span></span><span>${k===0?`<span class="chip ok plain">Le moins cher</span>`:`<span class="chip ${d>0.15?"alert":"watch"} plain">+${(d*100).toFixed(0)} %</span>`}</span>${CM.lecture?"":`<button class="x" title="Ce n'est pas le même produit" aria-label="Retirer de la comparaison" data-grp="retirer" data-id="${esc(x.id)}">✕</button>`}</div>`})});
+      h+=`<div class="row cmp"><span class="name">${esc(x.i.name||"")}<span class="sub">${esc(x.i.supplier||"Sans fournisseur")}${promoEnCours(x.i)?` · <b style="color:var(--ok)">promo ${eur4.format(x.i.promo.prix)} le ${esc(new Date(x.i.promo.date).toLocaleDateString("fr-FR"))}</b>`:""}${x.conso>0?` · ≈ ${n2.format(+x.conso.toFixed(1))} ${esc(ul)} / mois`:""}</span></span><span class="num">${eur4.format(x.prix)}<span class="sub">/ ${esc(ul)}</span></span><span>${k===0?`<span class="chip ok plain">Le moins cher</span>`:`<span class="chip ${d>0.15?"alert":"watch"} plain">+${(d*100).toFixed(0)} %</span>`}</span>${CM.lecture?"":`<button class="x" title="Ce n'est pas le même produit" aria-label="Retirer de la comparaison" data-grp="retirer" data-id="${esc(x.id)}">✕</button>`}</div>`})});
   return h+`</div>`;
 }
 async function regrouperIA(t){

@@ -455,7 +455,7 @@ Si seul le prix TTC apparaît, convertis-le en HT avec le taux de TVA de la lign
 Indique les allergènes réglementaires du produit parmi : gluten, crustaces, oeufs, poissons, arachides, soja, lait, fruits_coque, celeri, moutarde, sesame, sulfites, lupin, mollusques.
 Si le document n'est pas une facture ou un bon de livraison de produits (publicité, relevé, avoir sans produits…), réponds {"facture": false}.
 Réponds uniquement avec ce JSON :
-{"facture": true, "supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "numero": "numéro de facture ou null", "total_ht": nombre ou null, "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "qty": quantité achetée exprimée dans cette même unité de base (nombre, ex. 2 cartons de 6 × 1 L → 12), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}
+{"facture": true, "supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "numero": "numéro de facture ou null", "total_ht": nombre ou null, "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "qty": quantité achetée exprimée dans cette même unité de base (nombre, ex. 2 cartons de 6 × 1 L → 12), "promo": true si la ligne est une promotion, une remise sur ce produit ou un prix exceptionnel (sinon false), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}
 TXT;
 
 /** Lit une facture enregistrée et met à jour son document. */
