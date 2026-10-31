@@ -663,6 +663,55 @@ function cm_mime_corps(string $brut): array
     return str_starts_with($type, 'text/html') ? [$corps, ''] : (str_starts_with($type, 'text/plain') ? ['', $corps] : ['', '']);
 }
 
+/**
+ * Découpe un mail en messages : le mail lui-même et chaque mail joint (.eml transféré).
+ * Rend [[sujet, html, texte], ...] ; le HTML et le texte d'un message n'incluent pas ceux de ses pièces jointes.
+ */
+function cm_mime_messages(string $brut, int $prof = 0): array
+{
+    $sep = strpos($brut, "\r\n\r\n");
+    $sep = $sep === false ? strpos($brut, "\n\n") : $sep;
+    $tete = preg_replace('/\r?\n[ \t]+/', ' ', $sep === false ? $brut : substr($brut, 0, $sep));
+    $sujet = preg_match('/^Subject:\s*(.*)$/mi', $tete, $m) ? (string) iconv_mime_decode(trim($m[1]), ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8') : '';
+    $moi = ['sujet' => $sujet, 'html' => '', 'texte' => ''];
+    $autres = [];
+    $parcourir = function (string $part) use (&$parcourir, &$moi, &$autres, $prof) {
+        $sep = strpos($part, "\r\n\r\n");
+        $sep = $sep === false ? strpos($part, "\n\n") : $sep;
+        $tete = preg_replace('/\r?\n[ \t]+/', ' ', $sep === false ? $part : substr($part, 0, $sep));
+        $corps = $sep === false ? '' : ltrim(substr($part, $sep), "\r\n");
+        $type = preg_match('/^Content-Type:\s*(.*)$/mi', $tete, $m) ? trim($m[1]) : 'text/plain';
+        $enc = preg_match('/^Content-Transfer-Encoding:\s*(\S+)/mi', $tete, $m) ? strtolower($m[1]) : '';
+        if (stripos($type, 'multipart/') === 0 && preg_match('/boundary="?([^";]+)"?/i', $type, $m)) {
+            $morceaux = explode('--' . $m[1], $corps);
+            array_shift($morceaux);
+            foreach ($morceaux as $x) {
+                if (str_starts_with($x, '--')) {
+                    break;
+                }
+                $parcourir(ltrim($x, "\r\n"));
+            }
+            return;
+        }
+        if (stripos($type, 'message/rfc822') === 0) {
+            if ($enc === 'base64') {
+                $corps = (string) base64_decode(preg_replace('/\s+/', '', $corps));
+            } elseif ($enc === 'quoted-printable') {
+                $corps = quoted_printable_decode($corps);
+            }
+            if ($prof < 3) {
+                array_push($autres, ...cm_mime_messages($corps, $prof + 1));
+            }
+            return;
+        }
+        [$h, $t] = cm_mime_corps($part);
+        $moi['html'] = $moi['html'] ?: $h;
+        $moi['texte'] = $moi['texte'] ?: $t;
+    };
+    $parcourir($brut);
+    return array_merge([$moi], $autres);
+}
+
 /** Lit un « Z quotidien » (HTML ou texte) : chiffres du jour et ventes produit par produit. */
 function cm_z_lire(string $html, string $texte, string $sujet = ''): ?array
 {
@@ -687,6 +736,9 @@ function cm_z_lire(string $html, string $texte, string $sujet = ''): ?array
             }
         }
         $texte = preg_replace('/\s+/u', ' ', $texte);
+    }
+    if (preg_match_all('/journ[ée]e du \d{4}-\d{2}-\d{2}/u', $texte) > 1) {
+        return null; // plusieurs jours collés dans le même message : on lit les Z joints un par un
     }
     $date = preg_match('/(\d{4}-\d{2}-\d{2})\)/', $sujet, $m) || preg_match('/journ[ée]e du (\d{4}-\d{2}-\d{2})/u', $texte, $m) ? $m[1] : '';
     if ($date === '') {
@@ -737,7 +789,7 @@ function cm_relever_ventes(bool $forcer = false): array
     @set_time_limit(120);
     try {
         $fp = cm_imap_ouvrir((string) ($o['z_hote'] ?? '') ?: 'imap.hostinger.com', $user, (string) $o['z_mdp']);
-        [, $r] = cm_imap_cmd($fp, 'UID SEARCH SINCE ' . date('d-M-Y', strtotime('-45 days')) . ' SUBJECT "Z quotidien"');
+        [, $r] = cm_imap_cmd($fp, 'UID SEARCH SINCE ' . date('d-M-Y', strtotime('-60 days')) . ' TEXT "Z quotidien"');
         $uids = preg_match('/\* SEARCH([\d ]*)/', $r, $m) ? array_filter(array_map('intval', explode(' ', trim($m[1])))) : [];
         [$deja] = cm_tout();
         $deja = $deja['ventes'] ?? [];
@@ -753,12 +805,13 @@ function cm_relever_ventes(bool $forcer = false): array
             if ($p === false) {
                 continue;
             }
-            [$html, $texte] = cm_mime_corps(substr($b, $p + 3));
-            $z = cm_z_lire($html, $texte, (string) $sujet);
-            if ($z && ($z['lignes'] || $z['ca_ttc'] > 0)) {
-                cm_ecrire([['coll' => 'ventes', 'id' => $z['date'], 'data' => $z]]);
-                $deja[$z['date']] = $z;
-                $nouveaux++;
+            foreach (cm_mime_messages(substr($b, $p + 3)) as $msg) {
+                $z = cm_z_lire($msg['html'], $msg['texte'], $msg['sujet'] ?: (string) $sujet);
+                if ($z && ($z['lignes'] || $z['ca_ttc'] > 0) && ($forcer || !isset($deja[$z['date']]))) {
+                    cm_ecrire([['coll' => 'ventes', 'id' => $z['date'], 'data' => $z]]);
+                    $nouveaux += isset($deja[$z['date']]) ? 0 : 1;
+                    $deja[$z['date']] = $z;
+                }
             }
         }
         cm_imap_cmd($fp, 'LOGOUT');
