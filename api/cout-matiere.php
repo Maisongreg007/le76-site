@@ -16,6 +16,7 @@ define('COOKIE', defined('DEMO') ? 'le76_equipe_demo' : 'le76_equipe');
 
 try {
     // Envoi d'un fichier par le Mac (formulaire multipart) : dossier des factures surveillé
+    cm_resto((string) ($_POST['r'] ?? $_GET['r'] ?? 'le76'));
     if (!empty($_FILES['fichier']) && ($_POST['action'] ?? '') === 'facture_deposer') {
         cm_cle_depot_ok((string) ($_POST['cle'] ?? '')) || erreur('Clé de dépôt refusée : relance l\'installation depuis les Réglages.', 403);
         $tmp = (string) ($_FILES['fichier']['tmp_name'] ?? '');
@@ -23,11 +24,14 @@ try {
         repondre(['ok' => true] + cm_facture_deposer((string) ($_FILES['fichier']['name'] ?? ''), base64_encode((string) file_get_contents($tmp))));
     }
     $q = lire_requete();
+    if (isset($q['r']) && is_string($q['r'])) {
+        cm_resto($q['r']);
+    }
     // Installateur pour le Mac : curl … | bash depuis le Terminal
     if (($q['action'] ?? '') === 'installeur') {
         cm_cle_depot_ok((string) ($q['cle'] ?? '')) || erreur('Clé refusée.', 403);
         header('Content-Type: text/plain; charset=utf-8');
-        $url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'le76.fr') . '/api/cout-matiere.php';
+        $url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'le76.fr') . '/api/cout-matiere.php' . (cm_resto() === 'le76' ? '' : '?r=' . cm_resto());
         echo str_replace(['__CLE__', '__URL__'], [(string) $q['cle'], $url], (string) file_get_contents(__DIR__ . '/lib/cout-matiere-mac.sh'));
         exit;
     }
@@ -61,7 +65,8 @@ try {
     switch ($action) {
         case 'charger':
             [$docs, $rev] = cm_tout();
-            repondre(['ok' => true, 'moi' => $public, 'docs' => $docs, 'rev' => $rev, 'options' => cm_options_publiques($admin)]);
+            repondre(['ok' => true, 'moi' => $public, 'docs' => $docs, 'rev' => $rev, 'options' => cm_options_publiques($admin),
+                'resto' => cm_resto(), 'restos' => cm_restaurants()]);
         case 'changements':
             repondre(['ok' => true] + cm_changements((int) ($q['depuis'] ?? 0)));
     }
@@ -97,6 +102,10 @@ try {
             repondre(['ok' => true] + cm_relever_ventes(!empty($q['forcer'])));
         case 'ventes_importer':
             repondre(['ok' => true, 'importes' => cm_ventes_importer(is_array($q['ventes'] ?? null) ? $q['ventes'] : [])]);
+        case 'copier_depuis':
+            repondre(['ok' => true, 'copies' => cm_copier_depuis((string) ($q['source'] ?? ''), is_array($q['colls'] ?? null) ? $q['colls'] : [])]);
+        case 'resto_creer':
+            repondre(['ok' => true] + cm_resto_creer((string) ($q['nom'] ?? '')));
         case 'facture_relire':
             repondre(['ok' => true] + cm_facture_relire((string) ($q['id'] ?? '')));
     }

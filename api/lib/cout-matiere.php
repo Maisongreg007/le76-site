@@ -30,9 +30,81 @@ function cm_utilisateur(): ?array
 /* Base                                                                */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Restaurants : chaque restaurant a ses propres données (dossier et base séparés) */
+/* ------------------------------------------------------------------ */
+
+function cm_restaurants(): array
+{
+    $f = dossier_donnees() . '/cout-matiere/restaurants.json';
+    $l = is_file($f) ? json_decode((string) file_get_contents($f), true) : null;
+    return is_array($l) && $l ? $l : [['id' => 'le76', 'nom' => 'Le 76']];
+}
+
+/** Restaurant courant (« le76 » par défaut). À choisir avant la première lecture de la base. */
+function cm_resto(?string $choix = null): string
+{
+    static $r = 'le76';
+    if ($choix !== null) {
+        $choix = $choix === '' ? 'le76' : $choix;
+        if (!in_array($choix, array_column(cm_restaurants(), 'id'), true)) {
+            erreur('Restaurant inconnu.', 404);
+        }
+        $r = $choix;
+    }
+    return $r;
+}
+
+function cm_resto_creer(string $nom): array
+{
+    $nom = trim(mb_substr($nom, 0, 60));
+    $nom !== '' || erreur('Donne un nom au restaurant.');
+    $l = cm_restaurants();
+    $base = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower((string) iconv('UTF-8', 'ASCII//TRANSLIT', $nom))), '-') ?: 'resto';
+    $id = substr($base, 0, 30);
+    for ($n = 2; in_array($id, array_column($l, 'id'), true); $n++) {
+        $id = substr($base, 0, 26) . '-' . $n;
+    }
+    $l[] = ['id' => $id, 'nom' => $nom, 'cree' => date('Y-m-d')];
+    @mkdir(dossier_donnees() . '/cout-matiere', 0750, true);
+    file_put_contents(dossier_donnees() . '/cout-matiere/restaurants.json', json_encode($l, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), LOCK_EX);
+    return ['id' => $id, 'restos' => $l];
+}
+
+/** Copie des collections d'un autre restaurant dans le restaurant courant (ex. mercuriale du 76 pour le camping). */
+function cm_copier_depuis(string $source, array $colls): int
+{
+    in_array($source, array_column(cm_restaurants(), 'id'), true) || erreur('Restaurant source inconnu.');
+    $source !== cm_resto() || erreur('Choisis un autre restaurant.');
+    $chemin = dossier_donnees() . '/cout-matiere' . ($source === 'le76' ? '' : '/restos/' . $source) . '/cout-matiere.sqlite';
+    is_file($chemin) || erreur('Ce restaurant n\'a pas encore de données.');
+    $src = new PDO('sqlite:' . $chemin, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+    $e = [];
+    foreach (array_intersect($colls, ['ingredients', 'fiches', 'carte', 'boissons']) as $c) {
+        $st = $src->prepare('SELECT id, data FROM docs WHERE coll = ? AND data IS NOT NULL');
+        $st->execute([$c]);
+        foreach ($st as $l) {
+            $d = json_decode($l['data'], true);
+            if (is_array($d)) {
+                unset($d['photo'], $d['hist']);
+                $e[] = ['coll' => $c, 'id' => $l['id'], 'data' => $d];
+            }
+        }
+    }
+    $st = $src->prepare("SELECT data FROM docs WHERE coll = 'set' AND id = 'kitchen'");
+    $st->execute();
+    $set = json_decode((string) $st->fetchColumn(), true);
+    $e[] = ['coll' => 'set', 'id' => 'kitchen', 'data' => (is_array($set) ? $set : ['target' => 28]) + ['reset' => 1]];
+    foreach (array_chunk($e, 400) as $lot) {
+        cm_ecrire($lot);
+    }
+    return count($e) - 1;
+}
+
 function cm_dossier(string $sous = ''): string
 {
-    $d = dossier_donnees() . '/cout-matiere' . ($sous !== '' ? '/' . $sous : '');
+    $r = cm_resto();
+    $d = dossier_donnees() . '/cout-matiere' . ($r === 'le76' ? '' : '/restos/' . $r) . ($sous !== '' ? '/' . $sous : '');
     if (!is_dir($d)) {
         @mkdir($d, 0750, true);
     }
@@ -262,7 +334,7 @@ function cm_photo_enregistrer(string $b64): array
     }
     $id = bin2hex(random_bytes(12)) . '.jpg';
     file_put_contents(cm_dossier('photos') . '/' . $id, $bin);
-    return ['id' => $id, 'url' => '/api/cout-matiere.php?action=photo&id=' . $id];
+    return ['id' => $id, 'url' => '/api/cout-matiere.php?action=photo&id=' . $id . (cm_resto() === 'le76' ? '' : '&r=' . cm_resto())];
 }
 
 function cm_fichier_supprimer(string $type, string $id): void

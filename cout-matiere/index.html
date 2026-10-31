@@ -281,6 +281,8 @@ details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;curs
 .menu-pop button:hover{background:var(--fill)}.menu-pop small{color:var(--muted);font-size:.76rem;padding-left:24px}.menu-pop hr{border:0;border-top:.5px solid var(--line);margin:4px 6px}
 .row.cmp{grid-template-columns:minmax(0,1fr) 120px 130px 32px;cursor:default;background-image:none}.row.cmp:hover{background-color:var(--surface)}
 @media (max-width:560px){.row.cmp{grid-template-columns:minmax(0,1fr) 92px 32px}.row.cmp>span:nth-child(3){display:none}}
+.resto-pill{display:inline-block;font-size:.8rem;font-weight:600;background:var(--fill);color:var(--fg);border-radius:999px;padding:3px 10px;cursor:pointer;vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cm-resto-w{display:inline-block;font-family:var(--f-text,inherit);font-size:1rem;letter-spacing:0}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -388,7 +390,7 @@ h1 .cm-t{color:var(--fg)}
 <header>
   <div class="wrap">
     <div class="head">
-      <h1><a href="/admin/" class="cm-back" title="Retour au portail">‹ Le 76</a> <span class="cm-t">Coût matière</span></h1>
+      <h1><a href="/admin/" class="cm-back" title="Retour au portail">‹ Le 76</a> <span class="cm-t">Coût matière</span> <span class="cm-resto-w" id="cm-resto-w"></span></h1>
       <div class="parts" role="group" aria-label="Partie"><button data-part="cuisine" aria-pressed="true">Cuisine</button><button data-part="bar" aria-pressed="false">Bar</button></div>
       <span class="status-wrap"><span class="status" id="status">Chargement…</span><button class="cm-gear" id="cm-gear" title="Réglages" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></span>
     </div>
@@ -407,10 +409,11 @@ h1 .cm-t{color:var(--fg)}
 (function(){
 'use strict';
 const API='/api/cout-matiere.php';
-const CM=window.CM={moi:null,options:{},docs:{},rev:0,listeners:{},lecture:false};
+const RESTO=(()=>{let r=new URLSearchParams(location.search).get('r');if(r){try{localStorage.setItem('cm_r',r)}catch(e){}return r}try{return localStorage.getItem('cm_r')||'le76'}catch(e){return 'le76'}})();
+const CM=window.CM={rq:()=>RESTO==='le76'?'':'&r='+encodeURIComponent(RESTO),moi:null,options:{},docs:{},rev:0,listeners:{},lecture:false};
 let pret, finPret;pret=new Promise(r=>finPret=r);
 async function post(action,data={}){
-  let r;try{r=await fetch(API,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...data})})}
+  let r;try{r=await fetch(API,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,r:RESTO,...data})})}
   catch(e){const x=new Error('Pas de connexion au serveur. Vérifie internet.');x.code='unavailable';throw x}
   let d={};try{d=await r.json()}catch(e){}
   if(!r.ok||!d.ok){const x=new Error(d.erreur||('Erreur '+r.status));x.code=r.status===401?'auth':r.status===403?'forbidden':r.status>=500?'unavailable':'error';x.status=r.status;throw x}
@@ -433,7 +436,7 @@ function ecranConnexion(msg){
     catch(e){b.disabled=false;let p=v.querySelector('.cm-err');if(!p){p=document.createElement('p');p.className='cm-err';f.insertBefore(p,f.querySelector('label'))}p.textContent=e.message}};
 }
 async function demarrer(){
-  try{const d=await post('charger');CM.moi=d.moi;CM.options=d.options||{};CM.docs=d.docs||{};CM.rev=d.rev||0;CM.lecture=!d.moi.admin;
+  try{const d=await post('charger').catch(e=>{if(e.status===404&&RESTO!=='le76'){try{localStorage.removeItem('cm_r')}catch(x){}location.href=location.pathname}throw e});CM.resto=d.resto||'le76';CM.restos=d.restos||[];CM.moi=d.moi;CM.options=d.options||{};CM.docs=d.docs||{};CM.rev=d.rev||0;CM.lecture=!d.moi.admin;
     document.documentElement.classList.toggle('lecture',CM.lecture);finPret();suivre();
     if(d.moi.admin&&CM.options.mail)setTimeout(()=>post('factures_relever').catch(()=>{}),1500);}
   catch(e){if(e.code==='auth')ecranConnexion();else{document.getElementById('status')&&(document.getElementById('status').textContent=e.message);setTimeout(demarrer,5000)}}
@@ -676,7 +679,7 @@ function renderNav(){
   const hd=document.querySelector("header");if(hd)document.documentElement.style.setProperty("--hdr",hd.offsetHeight+"px");
 }
 function render(){
-  renderNav();
+  renderNav();renderResto();
   let h="";
   if(state.noDb)h+=`<div class="banner"><p><strong>Le serveur ne répond pas.</strong> Vérifie la connexion internet puis recharge la page.</p></div>`;
   else if(state.view!=="service"&&!state.demo&&!Object.keys(state.ingredients).length&&!Object.keys(state.fiches).length&&!Object.keys(state.carte).length&&!state.imp&&!state.menuImp)
@@ -1445,7 +1448,7 @@ function renderFactures(part){
   ${fs.map(([id,f])=>`<div class="fac-row"><div style="min-width:0"><b>${esc(f.fournisseur||(f.expediteur&&f.expediteur!=="Dépôt"?f.expediteur:f.nom)||"Facture")}</b>
     <span class="sub">${f.date?"du "+esc(new Date(f.date).toLocaleDateString("fr-FR"))+" · ":""}${(f.lignes||[]).length?(f.lignes.length+" produit"+(f.lignes.length>1?"s":"")+" · "):""}reçue le ${esc(new Date((f.recu_le||"").replace(" ","T")).toLocaleDateString("fr-FR"))}${f.erreur?" · "+esc(f.erreur):""}</span></div>
     <div class="acts">${f.statut==="a_valider"?`<button class="btn sm" data-fac="ouvrir" data-id="${esc(id)}">Vérifier</button>`:f.statut==="erreur"?`<button class="btn ghost sm" data-fac="relire" data-id="${esc(id)}">Relire</button>`:`<span class="hint" style="margin:0"><span class="spin"></span>${FAC_ST[f.statut]}</span>`}
-    <a class="btn ghost sm" href="/api/cout-matiere.php?action=facture_fichier&id=${encodeURIComponent(f.fichier||"")}" target="_blank" rel="noopener">Voir</a>
+    <a class="btn ghost sm" href="/api/cout-matiere.php?action=facture_fichier&id=${encodeURIComponent(f.fichier||"")}${CM.rq()}" target="_blank" rel="noopener">Voir</a>
     <button class="btn ghost sm" data-fac="ignorer" data-id="${esc(id)}" title="Ne pas utiliser cette facture">✕</button></div></div>`).join("")}</section>`;
 }
 function ouvrirFacture(id){
@@ -1518,6 +1521,13 @@ function renderReglages(){
     <p class="hint" style="margin:0">${o.imap_dispo===false?'<span class="bad-t">L\'hébergement ne permet pas de lire les mails (IMAP).</span> ':''}Dernière relève : ${o.derniere_releve?esc(new Date(o.derniere_releve.replace(" ","T")).toLocaleString("fr-FR"))+" · "+esc(o.derniere_releve_msg||""):"jamais"}</p>
     <div class="acts"><button class="btn" data-cm="saveOpts">Enregistrer</button><button class="btn ghost" data-cm="relever">Relever maintenant</button></div>
   </section>
+  <section class="card reg"><h2>Restaurants</h2>
+    <p class="hint" style="margin:0">Chaque restaurant a ses propres données : mercuriale, fiches, cartes, factures, ventes et réglages. Tu passes de l'un à l'autre avec le sélecteur en haut, à côté de « Coût matière ».</p>
+    <div class="list" style="box-shadow:none">${(CM.restos||[]).map(r=>`<div class="row" style="cursor:default;background-image:none"><span class="name">${esc(r.nom)}${r.id===CM.resto?` <span class="chip ok plain" style="font-size:.7rem;padding:2px 8px">ouvert</span>`:""}</span>${r.id===CM.resto?"":`<button class="btn ghost sm" data-resto="${esc(r.id)}">Ouvrir</button>`}</div>`).join("")}</div>
+    <div class="fields2"><label class="f"><span class="lbl">Nouveau restaurant</span><input type="text" id="rg-resto" placeholder="ex. Restaurant du camping" autocomplete="off"></label>
+    <label class="switch" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="rg-copie" checked> Reprendre la mercuriale et les fiches de ${esc(nomResto())}</label></div>
+    <div class="acts"><button class="btn" data-cm="restoCreer">Créer ce restaurant</button></div>
+  </section>
   <section class="card reg"><h2>Ventes de la caisse (Z de L'Addition)</h2>
     <p class="hint" style="margin:0">L'Addition envoie chaque jour le « Z quotidien » à cette boîte. L'app le lit tout seul (sans toucher aux mails) pour calculer ta marge réelle et classer ta carte.</p>
     <div class="fields2"><label class="f"><span class="lbl">Adresse de la boîte</span><input type="text" id="rg-zuser" value="${esc(o.z_user||"le76@le76.fr")}" autocomplete="off"></label>
@@ -1533,7 +1543,7 @@ function renderReglages(){
   </section>
   <section class="card reg"><h2>Sauvegarde</h2>
     <p class="hint" style="margin:0">Téléchargez une copie de toutes vos données, ou remettez une sauvegarde (cela remplace la mercuriale, les fiches et les cartes actuelles).</p>
-    <div class="acts"><a class="btn ghost" href="/api/cout-matiere.php?action=exporter">Télécharger une sauvegarde</a><button class="btn ghost" data-cm="importer">Remettre une sauvegarde…</button></div>
+    <div class="acts"><a class="btn ghost" href="/api/cout-matiere.php?action=exporter${CM.rq()}">Télécharger une sauvegarde</a><button class="btn ghost" data-cm="importer">Remettre une sauvegarde…</button></div>
   </section>`;
 }
 async function cmAction(a,t){
@@ -1541,8 +1551,11 @@ async function cmAction(a,t){
     if(a==="saveOpts"){t.disabled=true;const d=await CM.post("options_ecrire",{options:{ia_cle:document.getElementById("rg-cle").value,ia_modele:document.getElementById("rg-modele").value,imap_hote:document.getElementById("rg-hote").value,imap_user:document.getElementById("rg-user").value,imap_mdp:document.getElementById("rg-mdp").value,mail_actif:document.getElementById("rg-actif").checked}});CM.options=d.options;setStatus("Réglages enregistrés");render()}
     else if(a==="relever"){t.disabled=true;t.textContent="Relève en cours…";const d=await CM.post("factures_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);render()}
     else if(a==="importer"){document.getElementById("rg-file").click()}
+    else if(a==="restoCreer"){const nom=document.getElementById("rg-resto").value.trim();if(!nom){setStatus("Donne un nom au restaurant",true);return}t.disabled=true;const copie=document.getElementById("rg-copie").checked,src=CM.resto;const d=await CM.post("resto_creer",{nom});
+      if(copie){setStatus("Copie de la mercuriale et des fiches…");const r=await fetch("/api/cout-matiere.php",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"copier_depuis",r:d.id,source:src,colls:["ingredients","fiches"]})});const j=await r.json().catch(()=>({}));if(!j.ok)setStatus(j.erreur||"Copie impossible",true)}
+      CM.restos=d.restos;changerResto(d.id)}
     else if(a==="saveZ"){t.disabled=true;t.textContent="Relève en cours…";await CM.post("options_ecrire",{options:{z_user:document.getElementById("rg-zuser").value,z_mdp:document.getElementById("rg-zmdp").value}});const d=await CM.post("ventes_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);if(d.nouveaux){const c=await CM.post("charger");CM.docs.ventes=c.docs.ventes||{}}render()}
-    else if(a==="cmdMac"||a==="nouvelleCle"){const d=await CM.post("cle_depot",{nouvelle:a==="nouvelleCle"});state.cmdMac=`curl -fsSL "${location.origin}/api/cout-matiere.php?action=installeur&cle=${d.cle}" | bash`;render();if(a==="nouvelleCle")setStatus("Nouvelle clé : relance l'installation sur le Mac")}
+    else if(a==="cmdMac"||a==="nouvelleCle"){const d=await CM.post("cle_depot",{nouvelle:a==="nouvelleCle"});state.cmdMac=`curl -fsSL "${location.origin}/api/cout-matiere.php?action=installeur&cle=${d.cle}${CM.rq()}" | bash`;render();if(a==="nouvelleCle")setStatus("Nouvelle clé : relance l'installation sur le Mac")}
     else if(a==="copierCmd"){const ta=document.getElementById("rg-cmd");try{await navigator.clipboard.writeText(ta.value);setStatus("Ligne copiée")}catch(x){ta.select();document.execCommand("copy");setStatus("Ligne copiée")}}
     else if(a==="deposer"){document.getElementById("dep-file").click()}
     else if(a==="depotOk"){state.depot=null;render()}
@@ -1571,7 +1584,7 @@ document.addEventListener("change",async e=>{if(e.target.id!=="dep-file")return;
   state.depot={fini:true,msg:`${nouv} nouvelle${nouv>1?"s":""} facture${nouv>1?"s":""}${dbl?` · ${dbl} déjà reçue${dbl>1?"s":""}, ignorée${dbl>1?"s":""}`:""}${err?` · ${err} à relire (voir ci-dessous)`:""}.`};render();
 });
 document.getElementById("cm-gear").addEventListener("click",async()=>{try{const o=await CM.post("options");CM.options=o.options}catch(e){}state.view="reglages";state.open=null;render();window.scrollTo(0,0)});
-function majTitre(){if(CM.lecture)return;const n=Object.values(CM.docs.factures||{}).filter(f=>f.statut==="a_valider").length;document.title=(n?`(${n}) `:"")+"Le 76 · Coût matière";try{if(navigator.setAppBadge)n?navigator.setAppBadge(n):navigator.clearAppBadge()}catch(e){}}
+function majTitre(){if(CM.lecture)return;const n=Object.values(CM.docs.factures||{}).filter(f=>f.statut==="a_valider").length;document.title=(n?`(${n}) `:"")+nomResto()+" · Coût matière";try{if(navigator.setAppBadge)n?navigator.setAppBadge(n):navigator.clearAppBadge()}catch(e){}}
 setInterval(majTitre,5000);
 document.addEventListener("cm-factures",()=>{majTitre();const a=document.activeElement;if(a&&main.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;if(state.imp&&state.imp.status==="review")return;render()});
 
@@ -1916,7 +1929,7 @@ function imprimerListe(ds){
   td{padding:6px;border-bottom:.5px solid #d2d2d7;vertical-align:top}td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
   tr{page-break-inside:avoid}tr.g td{font-weight:700;border-top:1.5px solid #1d1d1f;background:#f5f5f7}td.case{border-left:.5px solid #d2d2d7}.pied{margin-top:14px;color:#86868b;font-size:10px}.notes{width:110px}
   @page{size:A4 landscape;margin:12mm}</style></head><body>
-  <h1>${esc(ds.titre)}</h1><p class="sous">Restaurant Le 76${ds.sous?" · "+esc(ds.sous):""} · imprimé le ${new Date().toLocaleDateString("fr-FR")}</p>
+  <h1>${esc(ds.titre)}</h1><p class="sous">Restaurant ${esc(nomResto())}${ds.sous?" · "+esc(ds.sous):""} · imprimé le ${new Date().toLocaleDateString("fr-FR")}</p>
   <table><thead><tr>${ds.cols.map((c,k)=>cache.has(k)?"":`<th class="${nums.has(k)?"n":""}${/nouveau prix/i.test(c)?" notes":""}">${esc(c)}</th>`).join("")}${ds.sansNotes?"":`<th class="notes">À corriger</th>`}</tr></thead>
   <tbody>${ds.rows.map((r,i)=>`<tr class="${gras.has(i)?"g":""}">${r.map((v,k)=>cache.has(k)?"":`<td class="${nums.has(k)?"n":""}${/nouveau prix/i.test(ds.cols[k])?" case":""}">${esc(v)}</td>`).join("")}${ds.sansNotes?"":"<td></td>"}</tr>`).join("")}</tbody></table>
   <p class="pied">${ds.rows.length} ligne${ds.rows.length>1?"s":""} · Coût matière Le 76</p>
@@ -2026,7 +2039,7 @@ ${a.total>0?`\nSoit ${n2.format(a.total)} € HT d'écart au total.\n`:""}
 Pouvez-vous me confirmer ces tarifs ou m'établir un avoir ?
 
 Merci d'avance,
-${CM.moi&&CM.moi.nom?CM.moi.nom+"\n":""}Restaurant Le 76`;
+${CM.moi&&CM.moi.nom?CM.moi.nom+"\n":""}Restaurant ${nomResto()}`;
 }
 /* ---------- Comparaison des fournisseurs (produits équivalents) ---------- */
 function ajouteFiche(acc,f,mult,d=0){if(!f||d>6||!(mult>0))return;(f.lines||[]).forEach(l=>{if(hasFixed(l))return;
@@ -2088,6 +2101,17 @@ main.addEventListener("click",async e=>{
   if(c.dataset.ctl==="classer"){const d=Object.assign({},a,{statut:"classee"});CM.docs.alertes[c.dataset.id]=d;CM.ecrire("alertes",c.dataset.id,d).catch(x=>setStatus(x.message,true));render()}
   else{const txt=mailReclamation(a);try{await navigator.clipboard.writeText(txt);setStatus("Mail de réclamation copié : colle-le dans un mail au fournisseur")}catch(x){prompt("Copie ce texte :",txt)}}
 });
+
+/* ---------- Choix du restaurant ---------- */
+const nomResto=()=>((CM.restos||[]).find(r=>r.id===CM.resto)||{nom:"Le 76"}).nom;
+function changerResto(id){try{localStorage.setItem("cm_r",id)}catch(e){}location.href=location.pathname+(id==="le76"?"":"?r="+encodeURIComponent(id))}
+function renderResto(){
+  const w=document.getElementById("cm-resto-w");if(!w)return;const rs=CM.restos||[];
+  if(rs.length<2){w.innerHTML="";return}
+  w.innerHTML=`<details class="menu-exp resto-pick"><summary class="resto-pill">${esc(nomResto())} ▾</summary><div class="menu-pop" style="left:0;right:auto;min-width:220px">${rs.map(r=>`<button data-resto="${esc(r.id)}">${r.id===CM.resto?"✓ ":""}${esc(r.nom)}</button>`).join("")}${CM.lecture?"":`<hr><button data-tab-go="reglages">+ Ajouter un restaurant…</button>`}</div></details>`;
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-resto]");if(b){e.preventDefault();if(b.dataset.resto!==CM.resto)changerResto(b.dataset.resto);return}
+  const g=e.target.closest("#cm-resto-w [data-tab-go]");if(g){state.view="reglages";state.open=null;render()}});
 
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
