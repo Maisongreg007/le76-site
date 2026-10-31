@@ -1810,7 +1810,7 @@ function renderVentes(part){
     <div><span class="lbl">${bar?"Coût des boissons":"Food cost réel"}</span><span class="big">${pct(a.fc)}</span><span class="sub">${eur.format(a.cout)} de matière vendue</span></div>
     <div><span class="lbl">CA ${bar?"boissons":"repas"}</span><span class="big">${eur.format(a.ht)} <small>HT</small></span><span class="sub">${a.ps.reduce((s,x)=>s+x.q,0)} ventes</span></div>
     <div><span class="lbl">Calculé sur</span><span class="big">${pct(a.couv)}</span><span class="sub">du CA ${a.aRelier.length?`· ${a.aRelier.length} produit${a.aRelier.length>1?"s":""} à relier`:"· tout est relié"}</span></div></section>`;
-  if(a.aRelier.length)h+=`<section class="card fac-banner"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.05rem">${a.aRelier.length} produit${a.aRelier.length>1?"s":""} de la caisse à relier</h2><span class="hint" style="margin:2px 0 0;display:block">Dis à l'app à quel article correspond chaque nom de L'Addition. C'est à faire une seule fois.</span></div>${CM.options.ia?`<button class="btn" data-vt="ia">Relier avec l'IA</button>`:""}</div></section>`;
+  if(a.aRelier.length)h+=`<section class="card fac-banner"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.05rem">${a.aRelier.length} produit${a.aRelier.length>1?"s":""} de la caisse à relier</h2><span class="hint" style="margin:2px 0 0;display:block">Dis à l'app à quel article correspond chaque nom de L'Addition. C'est à faire une seule fois.</span></div>${CM.options.ia?(state.iaProg?`<button class="btn" disabled>${esc(state.iaProg)}</button>`:`<button class="btn" data-vt="ia">Relier avec l'IA</button>`):""}</div></section>`;
   const tri=state.vTri||"ht",ps=a.ps.slice().sort((x,y)=>tri==="q"?y.q-x.q:tri==="marge"?(y.marge??-1e9)-(x.marge??-1e9):tri==="fc"?(y.fc??-1)-(x.fc??-1):y.ht-x.ht);
   h+=`<div class="list"><div class="row hdr vt"><span class="lbl">Produit vendu</span><button class="lbl num lnk" data-vtri="q">Vendus</button><button class="lbl num lnk hide-s" data-vtri="ht">CA HT</button><button class="lbl num lnk" data-vtri="marge">Marge</button><button class="lbl num lnk hide-s" data-vtri="fc">${bar?"Coût %":"Food cost"}</button><span class="lbl">Correspondance</span></div>`;
   ps.forEach(x=>{const c=x.classe&&CLASSES[x.classe];
@@ -1827,22 +1827,23 @@ async function relierIA(t){
   const vs=Object.values(tous);if(!vs.length)return;
   const cat=[];Object.entries(state.carte).filter(([,it])=>isFood(it)).forEach(([id,it])=>cat.push(`car:${id} | ${it.name} | ${n2.format(num(it.ttc))} €`));
   Object.entries(state.boissons).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>cat.push(`boi:${id}:${k} | ${b.name}${f.label?" · "+f.label:""} | ${n2.format(num(f.ttc))} €`)));
-  t.disabled=true;t.textContent="L'IA cherche…";
-  const prompt=`Tu relies les noms de produits d'une caisse de restaurant (L'Addition) aux articles d'une application de coût matière.
+  t.disabled=true;let n=0;const lots=[];for(let k=0;k<vs.length;k+=25)lots.push(vs.slice(k,k+25));
+  try{for(let li=0;li<lots.length;li++){state.iaProg=`L'IA relie… ${Math.min((li+1)*25,vs.length)} / ${vs.length}`;t.textContent=state.iaProg;
+    const prompt=`Tu relies les noms de produits d'une caisse de restaurant (L'Addition) aux articles d'une application de coût matière.
 Produits de la caisse (catégorie | nom | prix de vente TTC unitaire) :
-${vs.map(v=>`${v.c} | ${v.p} | ${n2.format(v.prix)} €`).join("\n")}
+${lots[li].map(v=>`${v.c} | ${v.p} | ${n2.format(v.prix)} €`).join("\n")}
 
 Articles de l'application (identifiant | nom | prix TTC) :
 ${cat.join("\n")}
 
-Pour chaque produit de la caisse, donne l'identifiant de l'article qui correspond au même plat ou à la même boisson dans le même format (verre, 25 cl, 50 cl, bouteille, 1/4, 1/2…). Le prix aide à reconnaître le format. Si rien ne correspond vraiment, mets null : n'invente pas.
+Pour chaque produit de la caisse, donne l'identifiant de l'article qui correspond au même plat ou à la même boisson dans le même format (verre, 25 cl, 50 cl, bouteille, 1/4, 1/2…). Le prix aide à reconnaître le format. Si rien ne correspond vraiment (plat du jour, suggestion, menu, formule…), mets null : n'invente pas.
 Réponds uniquement en JSON : {"liens":[{"p":"nom exact de la caisse","ref":"identifiant ou null"}]}`;
-  try{const d=await CM.post("ia",{prompt});const ls=(d.resultat&&d.resultat.liens)||[];let n=0;
+    const d=await CM.post("ia",{prompt});const ls=(d.resultat&&d.resultat.liens)||[];
     ls.forEach(l=>{if(!l||!tous[l.p]||!l.ref)return;const [k,r,f]=String(l.ref).split(":");
       if(k==="car"&&state.carte[r]){ecrireLien(l.p,{kind:"car",ref:r,ia:true});n++}
-      else if(k==="boi"&&state.boissons[r]&&(state.boissons[r].formats||[])[num(f)]){ecrireLien(l.p,{kind:"boi",ref:r,k:num(f),ia:true});n++}});
-    setStatus(`${n} produit${n>1?"s":""} relié${n>1?"s":""} par l'IA : vérifie les correspondances dans la liste.`);render()}
-  catch(e){setStatus(e.message,true);t.disabled=false;t.textContent="Relier avec l'IA"}
+      else if(k==="boi"&&state.boissons[r]&&(state.boissons[r].formats||[])[num(f)]){ecrireLien(l.p,{kind:"boi",ref:r,k:num(f),ia:true});n++}})}
+    state.iaProg=null;setStatus(`${n} produit${n>1?"s":""} relié${n>1?"s":""} par l'IA sur ${vs.length} : vérifie les correspondances dans la liste.`);render()}
+  catch(e){state.iaProg=null;setStatus((n?n+" reliés, puis : ":"")+e.message,true);render()}
 }
 main.addEventListener("click",e=>{
   const p=e.target.closest("[data-vper]");if(p){state.vPer=p.dataset.vper;render();return}

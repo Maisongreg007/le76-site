@@ -279,6 +279,7 @@ function cm_fichier_supprimer(string $type, string $id): void
 /** Appel de l'API d'Anthropic. $contenu : blocs de message (texte, image, document). Renvoie le JSON demandé. */
 function cm_ia(array $contenu, int $max = 8000): array
 {
+    @set_time_limit(200);
     $o = cm_options();
     if ($o['ia_cle'] === '') {
         throw new RuntimeException("La lecture automatique n'est pas encore activée : ajoute la clé de l'IA dans Réglages.");
