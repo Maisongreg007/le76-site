@@ -279,6 +279,8 @@ details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;curs
 .menu-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;background:var(--surface);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.18),0 0 0 .5px var(--line);padding:6px;min-width:290px;display:flex;flex-direction:column}
 .menu-pop button{all:unset;cursor:pointer;padding:9px 12px;border-radius:9px;font-size:.92rem;color:var(--fg);display:flex;flex-direction:column;gap:1px}
 .menu-pop button:hover{background:var(--fill)}.menu-pop small{color:var(--muted);font-size:.76rem;padding-left:24px}.menu-pop hr{border:0;border-top:.5px solid var(--line);margin:4px 6px}
+.row.cmp{grid-template-columns:minmax(0,1fr) 120px 130px 32px;cursor:default;background-image:none}.row.cmp:hover{background-color:var(--surface)}
+@media (max-width:560px){.row.cmp{grid-template-columns:minmax(0,1fr) 92px 32px}.row.cmp>span:nth-child(3){display:none}}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -910,8 +912,10 @@ function renderFicheCalc(f){
 function renderIngredients(){
   const part=state.view==="bingredients"?"bar":"cuisine";
   const ings=Object.entries(state.ingredients).filter(([id,i])=>ingPart(id,i)[part]).sort(byName);
-  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-cm="deposer">Ajouter des factures</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button>${ings.length?boutonsExport(part==="bar"?"bingredients":"ingredients"):""}</div></div>
+  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-cm="deposer">Ajouter des factures</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button><button class="btn ghost" data-cmp="1">${state.cmp?"‹ Mercuriale":"Comparer les fournisseurs"}</button>${ings.length?boutonsExport(part==="bar"?"bingredients":"ingredients"):""}</div></div>
   <p class="hint" style="margin:0">Prix d'achat HT. La perte (épluchage, parage, cuisson) augmente le coût réel de ce que vous servez. Elle se remplit toute seule avec vos fiches et vos factures ; vous n'avez qu'à vérifier. Les allergènes saisis ici remontent dans toutes les fiches.</p>`+renderImport()+(state.imp?"":renderFactures(part));
+  h+=renderControles(part);
+  if(state.cmp)return h+renderComparaison(part);
   if(!ings.length) return h+`<div class="list"><div class="empty">Aucun ingrédient. Importez une facture fournisseur pour remplir la mercuriale automatiquement.</div></div>`;
   const sups=[...new Set(ings.map(([,i])=>i.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   h+=`<div class="searchbar"><input type="search" id="ing-search" placeholder="Rechercher un produit… (ex. onglet, mozza, crème)" value="${esc(state.q||"")}" aria-label="Rechercher dans la mercuriale" autocomplete="off">
@@ -993,7 +997,7 @@ Exemples : carton de 6 bouteilles de 1 L à 9,00 € HT → 1,50 €/L ; sac de 
 Si seul le prix TTC apparaît, convertis-le en HT avec le taux de TVA de la ligne (5,5 % par défaut pour l'alimentaire).
 Indique les allergènes réglementaires du produit parmi : gluten, crustaces, oeufs, poissons, arachides, soja, lait, fruits_coque, celeri, moutarde, sesame, sulfites, lupin, mollusques.
 Réponds uniquement avec ce JSON :
-{"supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}`;
+{"supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "qty": quantité achetée exprimée dans cette même unité de base (nombre, ex. 2 cartons de 6 × 1 L → 12), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}`;
 const cleanAlg=a=>(Array.isArray(a)?a:[]).filter(x=>ALGN[x]);
 const toUnit=u=>UNITS[u]?u:(/^l|litre/i.test(u||"")?"L":/pi/i.test(u||"")?"piece":"kg");
 function renderImport(){
@@ -1003,9 +1007,9 @@ function renderImport(){
   const ings=Object.entries(state.ingredients).sort(byName);const on=im.lines.filter(l=>l.on).length;
   let h=`<section class="card imp"><div class="toolbar"><h2>Facture ${esc(im.supplier||"")}${im.date?" du "+esc(new Date(im.date).toLocaleDateString("fr-FR")):""}</h2><span class="hint" style="margin:0">${im.lines.length} produit${im.lines.length>1?"s":""}</span></div>
   <p class="hint" style="margin:0">Vérifiez les prix ramenés au kg, au litre ou à la pièce, et l'ingrédient à mettre à jour. Rien n'est modifié avant de cliquer sur « Mettre à jour ».</p>
-  <div class="tablewrap"><table><thead><tr><th></th><th>Produit</th><th style="text-align:right">Prix HT</th><th>Unité</th><th>Dans la mercuriale</th><th style="text-align:right">Ancien prix</th></tr></thead><tbody>`;
+  ${bandeauControle(im)}<div class="tablewrap"><table><thead><tr><th></th><th>Produit</th><th style="text-align:right">Prix HT</th><th>Unité</th><th>Dans la mercuriale</th><th style="text-align:right">Habituel</th></tr></thead><tbody>`;
   im.lines.forEach((l,k)=>{const m=state.ingredients[l.match];let delta;
-    if(m&&num(m.price)>0&&m.unit===l.unit){const d=(num(l.price)-num(m.price))/num(m.price);delta=`<span class="delta ${d>0.005?"up":d<-0.005?"down":""}">${eur.format(num(m.price))} ${d>0?"+":""}${(d*100).toFixed(1).replace(".",",")} %</span>`}
+    if(m&&num(m.price)>0&&m.unit===l.unit){const hab=prixHabituel(m),d=(num(l.price)-hab)/hab,ail=moinsCherAilleurs(l.match,num(l.price),im.supplier);delta=`<span class="delta ${d>0.03?"up":d<-0.03?"down":""}" title="Prix habituel : médiane des derniers prix">${eur.format(hab)} ${d>0?"+":""}${(d*100).toFixed(1).replace(".",",")} %</span>${ail?`<span class="used warn-t">${esc(ail)}</span>`:""}`}
     else if(m)delta=`<span class="delta">${num(m.price)>0?eur.format(num(m.price))+" / "+(UNITS[m.unit]?.label||""):"pas de prix"}</span>`;else delta=`<span class="used">nouveau</span>`;
     h+=`<tr><td><input type="checkbox" aria-label="Importer cette ligne" id="imp-on-${k}" data-imp="${k}" data-ik="on" ${l.on?"checked":""}></td>
     <td><input type="text" aria-label="Nom" id="imp-name-${k}" data-imp="${k}" data-ik="name" value="${esc(l.name)}">${l.detail?`<span class="used">${esc(l.detail)}</span>`:""}</td>
@@ -1022,7 +1026,7 @@ async function importInvoice(file){
   state.imp={status:"reading",msg:"Claude lit la facture et calcule les prix…"};render();
   try{
     const res=await q.sample.json(q.input,Object.assign({modelTier:"default"},q.images?{images:q.images}:{}));
-    const lines=(res&&Array.isArray(res.lines)?res.lines:[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
+    const lines=(res&&Array.isArray(res.lines)?res.lines:[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
     if(!lines.length)return fail("Aucun produit trouvé dans ce document. Est-ce bien une facture fournisseur ?");
     state.imp={status:"review",supplier:res.supplier||"",date:res.date||"",lines};render();
   }catch(e){fail(sampleErr(e,"La facture n'a pas pu être lue correctement. Essayez un fichier plus net."))}
@@ -1032,7 +1036,7 @@ function fixLinesForIngredient(ingId,touched){
   if(true)return;Object.entries(state.fiches).forEach(([fid,f])=>{let ch=false;(f.lines||[]).forEach(x=>{if(x.type!=="f"&&x.ref===ingId&&u[x.unit]==null){x.unit=defaultUnit(u);ch=true}});if(ch)touched.push(["fic",fid])});
 }
 function applyImport(){
-  const im=state.imp;if(!im||im.status!=="review")return;const touched=[];const _couts=photoCouts();
+  const im=state.imp;if(!im||im.status!=="review")return;const touched=[];const _couts=photoCouts();enregistrerControle(im);
   im.lines.filter(l=>l.on&&l.name).forEach(l=>{
     if(l.match&&state.ingredients[l.match]){const i=state.ingredients[l.match];const _avant=num(i.price);i.price=num(l.price);
       if(num(i.packQty)>1&&l.unit===i.unit&&num(i.packPrice)>0&&Math.abs(num(l.price)-num(i.packPrice))/num(i.packPrice)<0.35){i.packPrice=num(l.price);i.price=num(l.price)/num(i.packQty)}delete i.auto;if(im.supplier)i.supplier=im.supplier;if(!(i.allergens||[]).length&&l.allergens.length)i.allergens=l.allergens;
@@ -1446,7 +1450,7 @@ function renderFactures(part){
 }
 function ouvrirFacture(id){
   const f=(CM.docs.factures||{})[id];if(!f)return;
-  const lines=(f.lignes||[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
+  const lines=(f.lignes||[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
   state.imp={status:"review",supplier:f.fournisseur||"",date:f.date||"",lines,factureId:id};render();window.scrollTo(0,0);
 }
 function marquerFacture(id,statut){const f=(CM.docs.factures||{})[id];if(!f)return;CM.ecrire("factures",id,Object.assign({},f,{statut,traitee_le:new Date().toISOString().slice(0,10)})).catch(e=>setStatus(e.message,true))}
@@ -1982,6 +1986,108 @@ function appliquerModifs(txt){
 document.addEventListener("change",e=>{if(e.target.id!=="modif-file")return;const f=e.target.files[0];e.target.value="";if(!f)return;
   if(/\.xlsx?$/i.test(f.name)){setStatus("Enregistre d'abord le fichier au format CSV (Fichier → Exporter → CSV), puis réessaie.",true);return}
   const r=new FileReader();r.onload=()=>appliquerModifs(String(r.result));r.readAsText(f,"utf-8")});
+
+/* ---------- Contrôle des factures : prix habituel, surcoût, réclamation ---------- */
+const mediane=a=>{const b=a.filter(x=>x>0).sort((x,y)=>x-y);if(!b.length)return 0;const m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2};
+function prixHabituel(i){return mediane([...(i.hist||[]).slice(-5).map(h=>num(h.de)),num(i.price)])||num(i.price)}
+function equivalents(id){const i=state.ingredients[id];if(!i||!i.groupe)return [];return Object.entries(state.ingredients).filter(([k,x])=>k!==id&&x.groupe===i.groupe&&x.unit===i.unit&&num(x.price)>0)}
+function moinsCherAilleurs(id,prix,fournisseur){
+  const best=equivalents(id).filter(([,x])=>(x.supplier||"")!==(fournisseur||state.ingredients[id]?.supplier||"")).sort((a,b)=>num(a[1].price)-num(b[1].price))[0];
+  if(!best||num(best[1].price)>=prix*0.97)return "";
+  return `Moins cher chez ${best[1].supplier||"un autre fournisseur"} : ${eur4.format(num(best[1].price))} / ${UNITS[best[1].unit]?.label||""}`;
+}
+function ecartsFacture(im){
+  return im.lines.filter(l=>l.on&&l.match&&state.ingredients[l.match]).map(l=>{const m=state.ingredients[l.match];if(m.unit!==l.unit||!(num(m.price)>0))return null;const hab=prixHabituel(m),p=num(l.price);
+    if(!(p>hab*1.03))return null;return {id:l.match,name:m.name||l.name,hab:+hab.toFixed(4),prix:+p.toFixed(4),unit:l.unit,qty:num(l.qty),surcout:num(l.qty)>0?+((p-hab)*num(l.qty)).toFixed(2):null}}).filter(Boolean);
+}
+function bandeauControle(im){
+  const e=ecartsFacture(im);if(!e.length)return "";const tot=e.reduce((s,x)=>s+(x.surcout||0),0);
+  return `<div class="banner" style="background:var(--warn-bg);margin:8px 0"><p><strong>⚠️ ${e.length} produit${e.length>1?"s":""} facturé${e.length>1?"s":""} plus cher que d'habitude${tot>0?` · ${eur.format(tot)} HT de plus sur cette facture`:""}</strong><br>${e.map(x=>`${esc(x.name)} : ${eur4.format(x.prix)} au lieu de ${eur4.format(x.hab)} (+${((x.prix/x.hab-1)*100).toFixed(1).replace(".",",")} %)`).join(" · ")}<br><span class="hint" style="margin:0">En validant, l'app garde une fiche de contrôle avec un mail de réclamation prêt à envoyer.</span></p></div>`;
+}
+function enregistrerControle(im){
+  const e=ecartsFacture(im);if(!e.length)return;const fac=im.factureId?(CM.docs.factures||{})[im.factureId]:null;
+  const doc={type:"facture",date:new Date().toISOString().slice(0,10),date_facture:im.date||"",numero:fac&&fac.numero||"",fournisseur:im.supplier||"",lignes:e,total:+e.reduce((s,x)=>s+(x.surcout||0),0).toFixed(2),statut:"ouverte"};
+  const id=uid();CM.docs.alertes=CM.docs.alertes||{};CM.docs.alertes[id]=doc;CM.ecrire("alertes",id,doc).catch(x=>setStatus(x.message,true));
+}
+function controlesOuverts(part){return Object.entries(CM.docs.alertes||{}).filter(([,a])=>a&&a.type==="facture"&&a.statut==="ouverte"&&(a.lignes||[]).some(l=>{const i=state.ingredients[l.id];return !i||ingPart(l.id,i)[part]})).sort((a,b)=>(b[1].date||"").localeCompare(a[1].date||""))}
+function renderControles(part){
+  if(CM.lecture)return "";const cs=controlesOuverts(part);if(!cs.length)return "";
+  return cs.map(([id,a])=>`<section class="list fac alerte-prix"><div class="fac-head"><div><h2 style="font-size:1.05rem">🧾 Contrôle facture ${esc(a.fournisseur||"")}${a.date_facture?" du "+esc(new Date(a.date_facture).toLocaleDateString("fr-FR")):""}</h2><span class="hint" style="margin:2px 0 0;display:block">${a.lignes.length} produit${a.lignes.length>1?"s":""} plus cher${a.lignes.length>1?"s":""} que d'habitude${a.total>0?` · <b>${eur.format(a.total)} HT</b> de plus`:""}</span></div>
+    <div class="acts"><button class="btn sm" data-ctl="mail" data-id="${esc(id)}">Copier la réclamation</button><button class="btn ghost sm" data-ctl="classer" data-id="${esc(id)}">Classer</button></div></div>
+    ${a.lignes.map(l=>`<div class="fac-row"><div style="min-width:0"><b>${esc(l.name)}</b><span class="sub">${eur4.format(l.prix)} au lieu de ${eur4.format(l.hab)} / ${esc(UNITS[l.unit]?.label||l.unit)} <span class="delta up">+${((l.prix/l.hab-1)*100).toFixed(1).replace(".",",")} %</span>${l.qty?` · ${n2.format(l.qty)} ${esc(UNITS[l.unit]?.label||"")} achetés`:""}</span></div><div class="num"><b>${l.surcout!=null?"+"+eur.format(l.surcout):""}</b></div></div>`).join("")}</section>`).join("");
+}
+function mailReclamation(a){
+  const u=l=>UNITS[l.unit]?.label||l.unit,f=v=>n2.format(+v.toFixed(3));
+  return `Bonjour,
+
+Sur votre facture${a.numero?" n° "+a.numero:""}${a.date_facture?" du "+new Date(a.date_facture).toLocaleDateString("fr-FR"):""}, je constate des prix plus élevés que nos tarifs habituels :
+${a.lignes.map(l=>`- ${l.name} : ${f(l.prix)} € / ${u(l)} au lieu de ${f(l.hab)} € / ${u(l)}${l.surcout?` (soit ${n2.format(l.surcout)} € HT de plus)`:""}`).join("\n")}
+${a.total>0?`\nSoit ${n2.format(a.total)} € HT d'écart au total.\n`:""}
+Pouvez-vous me confirmer ces tarifs ou m'établir un avoir ?
+
+Merci d'avance,
+${CM.moi&&CM.moi.nom?CM.moi.nom+"\n":""}Restaurant Le 76`;
+}
+/* ---------- Comparaison des fournisseurs (produits équivalents) ---------- */
+function ajouteFiche(acc,f,mult,d=0){if(!f||d>6||!(mult>0))return;(f.lines||[]).forEach(l=>{if(hasFixed(l))return;
+  if(l.type==="f"){const sf=state.fiches[l.ref];const u=lineUnits(l);if(!sf||!u||u[l.unit]==null)return;ajouteFiche(acc,sf,mult*num(l.qty)*u[l.unit]/Math.max(num(sf.yield),0.0001),d+1)}
+  else{const i=state.ingredients[l.ref];if(!i)return;const b=baseQty(l,i);if(b==null)return;const perte=Math.min(Math.max(num(i.loss),0),95)/100;acc[l.ref]=(acc[l.ref]||0)+b*mult/(1-perte)}})}
+function multFiche(f,qty,unit){const u=YIELD[f.yieldUnit||"portion"].lines;return num(qty)*(u[unit]??Object.values(u)[0])/Math.max(num(f.yield),0.0001)}
+function consoMensuelle(){
+  const js=ventesJours();if(!js.length)return null;const der=js[js.length-1].date,lim=new Date(der);lim.setDate(lim.getDate()-29);const ls=lim.toISOString().slice(0,10);
+  const sel=js.filter(j=>j.date>=ls),span=(new Date(der)-new Date(sel[0].date))/864e5+1,acc={};
+  sel.forEach(j=>(j.lignes||[]).forEach(x=>{const l=lienDe(x.p),q=num(x.q);if(!l||!(q>0))return;
+    if(l.kind==="car"){const it=state.carte[l.ref],f=it&&state.fiches[it.fiche];if(f)ajouteFiche(acc,f,multFiche(f,it.qty,it.unit)*q)}
+    else if(l.kind==="boi"){const b=state.boissons[l.ref],fm=b&&(b.formats||[])[num(l.k)];if(!fm)return;
+      if(fm.type==="f"){const f=state.fiches[fm.ref];if(f)ajouteFiche(acc,f,multFiche(f,fm.qty,fm.unit)*q)}
+      else{const i=state.ingredients[fm.ref];if(i){const bq=baseQty(fm,i);if(bq!=null)acc[fm.ref]=(acc[fm.ref]||0)+bq*q}}}}));
+  const k=30/Math.max(span,7);Object.keys(acc).forEach(id=>acc[id]*=k);return acc;
+}
+function groupesFournisseurs(part){
+  const conso=consoMensuelle()||{},g={};
+  Object.entries(state.ingredients).forEach(([id,i])=>{if(!i.groupe||!(num(i.price)>0)||!ingPart(id,i)[part])return;(g[i.groupe]=g[i.groupe]||[]).push([id,i])});
+  return Object.entries(g).map(([nom,xs])=>{
+    const unit=Object.entries(xs.reduce((m,[,i])=>(m[i.unit]=(m[i.unit]||0)+1,m),{})).sort((a,b)=>b[1]-a[1])[0][0];
+    const items=xs.filter(([,i])=>i.unit===unit).map(([id,i])=>({id,i,prix:num(i.price),conso:conso[id]||0})).sort((a,b)=>a.prix-b.prix);
+    const min=items[0]?.prix||0,eco=items.reduce((s,x)=>s+x.conso*(x.prix-min),0);
+    return {nom,unit,items,min,eco,fours:new Set(items.map(x=>x.i.supplier||"?")).size};
+  }).filter(x=>x.items.length>1&&x.fours>1).sort((a,b)=>b.eco-a.eco||a.nom.localeCompare(b.nom,"fr"));
+}
+function renderComparaison(part){
+  const gs=groupesFournisseurs(part),tot=gs.reduce((s,x)=>s+x.eco,0),aConso=!!ventesJours().length;
+  let h=`<section class="card"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.1rem">Comparer les fournisseurs</h2><span class="hint" style="margin:2px 0 0;display:block">Le même produit chez plusieurs fournisseurs, au prix ramené au kg, au litre ou à la pièce.${aConso?" L'économie est estimée sur ta consommation des 30 derniers jours (ventes × fiches techniques).":""}</span></div>${CM.options.ia&&!CM.lecture?(state.grpProg?`<button class="btn" disabled>${esc(state.grpProg)}</button>`:`<button class="btn" data-grp="ia">${gs.length?"Relancer le regroupement":"Trouver les produits équivalents"}</button>`):""}</div></section>`;
+  if(!gs.length)return h+`<div class="list"><div class="empty">Aucun produit comparé pour l'instant. Clique sur « Trouver les produits équivalents » : l'IA repère les mêmes produits chez des fournisseurs différents (ex. crème 30 % chez Romaf et chez VLG).</div></div>`;
+  if(tot>0.5)h+=`<section class="bilan"><div class="hl"><span class="lbl">Économie possible</span><span class="big">${eur.format(tot)} <small>HT / mois</small></span><span class="sub">en prenant chaque produit chez le moins cher</span></div><div><span class="lbl">Produits comparés</span><span class="big">${gs.length}</span><span class="sub">chez au moins deux fournisseurs</span></div></section>`;
+  h+=`<div class="list">`;
+  gs.forEach(g=>{const ul=UNITS[g.unit]?.label||g.unit;
+    h+=`<div class="group" style="display:flex;justify-content:space-between;gap:10px"><span class="lbl">${esc(g.nom)}</span>${g.eco>0.5?`<span class="lbl" style="color:var(--ok)">économie ≈ ${eur.format(g.eco)} / mois</span>`:""}</div>`;
+    g.items.forEach((x,k)=>{const d=g.min>0?x.prix/g.min-1:0;
+      h+=`<div class="row cmp"><span class="name">${esc(x.i.name||"")}<span class="sub">${esc(x.i.supplier||"Sans fournisseur")}${x.conso>0?` · ≈ ${n2.format(+x.conso.toFixed(1))} ${esc(ul)} / mois`:""}</span></span><span class="num">${eur4.format(x.prix)}<span class="sub">/ ${esc(ul)}</span></span><span>${k===0?`<span class="chip ok plain">Le moins cher</span>`:`<span class="chip ${d>0.15?"alert":"watch"} plain">+${(d*100).toFixed(0)} %</span>`}</span>${CM.lecture?"":`<button class="x" title="Ce n'est pas le même produit" aria-label="Retirer de la comparaison" data-grp="retirer" data-id="${esc(x.id)}">✕</button>`}</div>`})});
+  return h+`</div>`;
+}
+async function regrouperIA(t){
+  const parUnite={};Object.entries(state.ingredients).forEach(([id,i])=>{if(num(i.price)>0&&i.name)(parUnite[i.unit]=parUnite[i.unit]||[]).push([id,i])});
+  const touched=[];let ng=0;
+  try{for(const [u,xs] of Object.entries(parUnite)){if(xs.length<2)continue;
+      state.grpProg=`L'IA compare les produits au ${UNITS[u]?.label||u}…`;render();
+      const prompt=`Voici les produits achetés par un restaurant, tous vendus au ${UNITS[u]?.label||u} (numéro | nom | fournisseur) :
+${xs.map(([,i],k)=>`${k} | ${i.name} | ${i.supplier||"?"}`).join("\n")}
+
+Regroupe les produits ÉQUIVALENTS, c'est-à-dire qu'on peut acheter l'un à la place de l'autre pour la même recette : même aliment, même type (ex. crème liquide 30 % ≈ crème UHT 35 % ; champignons de Paris frais ≈ champignons de Paris frais ; mais PAS crème liquide ≠ crème épaisse, PAS beurre doux ≠ beurre demi-sel, PAS frites surgelées ≠ pommes de terre). Le conditionnement peut différer.
+Ne garde que les groupes d'au moins deux produits dont au moins deux fournisseurs différents. Donne à chaque groupe un nom court et générique en français.
+Réponds uniquement en JSON : {"groupes":[{"nom":"Crème liquide 30-35 %","n":[3,17]}]}`;
+      const d=await CM.post("ia",{prompt});(d.resultat&&d.resultat.groupes||[]).forEach(g=>{const ids=(g.n||[]).map(k=>xs[+k]&&xs[+k][0]).filter(Boolean);if(ids.length<2||!g.nom)return;ng++;
+        ids.forEach(id=>{if(state.ingredients[id].groupe!==g.nom){state.ingredients[id].groupe=String(g.nom).slice(0,60);touched.push(["ing",id])}})})}
+    state.grpProg=null;if(touched.length)commitMany(touched);render();setStatus(`${ng} produit${ng>1?"s":""} trouvé${ng>1?"s":""} chez plusieurs fournisseurs`)}
+  catch(e){state.grpProg=null;if(touched.length)commitMany(touched);render();setStatus(e.message,true)}
+}
+main.addEventListener("click",async e=>{
+  if(e.target.closest("[data-cmp]")){state.cmp=!state.cmp;render();return}
+  const g=e.target.closest("[data-grp]");if(g){if(g.dataset.grp==="ia")regrouperIA(g);else{const i=state.ingredients[g.dataset.id];if(i){delete i.groupe;commitMany([["ing",g.dataset.id]]);render()}}return}
+  const c=e.target.closest("[data-ctl]");if(!c)return;const a=(CM.docs.alertes||{})[c.dataset.id];if(!a)return;
+  if(c.dataset.ctl==="classer"){const d=Object.assign({},a,{statut:"classee"});CM.docs.alertes[c.dataset.id]=d;CM.ecrire("alertes",c.dataset.id,d).catch(x=>setStatus(x.message,true));render()}
+  else{const txt=mailReclamation(a);try{await navigator.clipboard.writeText(txt);setStatus("Mail de réclamation copié : colle-le dans un mail au fournisseur")}catch(x){prompt("Copie ce texte :",txt)}}
+});
 
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
