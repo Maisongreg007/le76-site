@@ -275,6 +275,10 @@ select.a-relier{box-shadow:0 0 0 2px var(--warn-bg);color:var(--warn)}
 .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;text-transform:inherit;letter-spacing:inherit}
 button.lnk[data-tab-go]{color:var(--accent);text-decoration:underline}
 @media (max-width:720px){.row.vt{grid-template-columns:minmax(0,1fr) 44px 80px}.vt-lien{grid-column:1/-1}}
+details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;cursor:pointer}details.menu-exp>summary::-webkit-details-marker{display:none}
+.menu-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;background:var(--surface);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.18),0 0 0 .5px var(--line);padding:6px;min-width:290px;display:flex;flex-direction:column}
+.menu-pop button{all:unset;cursor:pointer;padding:9px 12px;border-radius:9px;font-size:.92rem;color:var(--fg);display:flex;flex-direction:column;gap:1px}
+.menu-pop button:hover{background:var(--fill)}.menu-pop small{color:var(--muted);font-size:.76rem;padding-left:24px}.menu-pop hr{border:0;border-top:.5px solid var(--line);margin:4px 6px}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -394,7 +398,7 @@ h1 .cm-t{color:var(--fg)}
 <input type="file" id="menu-file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
 <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
 <input type="file" id="rg-file" accept="application/json,.json" hidden>
-<input type="file" id="dep-file" accept="application/pdf,image/jpeg,image/png" multiple hidden>
+<input type="file" id="modif-file" accept=".csv,text/csv,.txt" hidden><input type="file" id="dep-file" accept="application/pdf,image/jpeg,image/png" multiple hidden>
 
 <script>
 /* ===== Pont serveur le76.fr : remplace le stockage de Claude par l'API du 76 ===== */
@@ -696,7 +700,7 @@ function bandeauFactures(part){if(CM.lecture)return "";const n=facturesDe(part).
 function summaryHtml(){return bandeauFactures("cuisine")+renderAlertes("cuisine")+bilanHtml()}
 function renderCarte(){
   const items=Object.entries(state.carte).filter(([,it])=>isFood(it)).map(([id,it])=>({id,it,c:calcItem(it)}));
-  let h=(items.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-car" data-cq="car" placeholder="Rechercher un plat… (ex. onglet, tarte, burger)" value="${esc(state.cq_car||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-car-n" style="margin:0;white-space:nowrap"></span></div>`:"")+summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button>${items.length?boutonsExport("carte"):""}</div></div>`+renderMenuImport()+`<div class="list" id="cq-list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
+  let h=(items.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-car" data-cq="car" placeholder="Rechercher un plat… (ex. onglet, tarte, burger)" value="${esc(state.cq_car||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-car-n" style="margin:0;white-space:nowrap"></span></div>`:"")+summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button>${items.length?boutonsExport("carte",`<hr><button data-exp="carted:csv">📋 Carte détaillée pour Excel<small>chaque plat avec ses ingrédients et une colonne « Nouveau prix »</small></button><button data-exp="carted:print">🖨️ Imprimer la carte détaillée</button><hr><button data-modif="1">⬆️ Importer les nouveaux prix…<small>le fichier rempli, enregistré en CSV</small></button>`):""}</div></div>`+renderMenuImport()+`<div class="list" id="cq-list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
   if(!items.length) return h+`<div class="empty">Votre carte est vide. Importez votre menu (PDF ou photo) pour créer tous vos articles d'un coup, ou ajoutez-les un par un.</div></div>`;
   FOOD_SECTIONS.forEach(sec=>{
     const g=items.filter(x=>(FOOD_SECTIONS.includes(x.it.section)?x.it.section:"Autre")===sec).sort((a,b)=>(a.it.name||"").localeCompare(b.it.name||"","fr"));
@@ -741,8 +745,9 @@ function yieldTxt(f){const y=num(f.yield);return n2.format(y)+" "+(f.yieldUnit==
 function renderFicheList(){
   const bar=state.view==="bfiches";
   const fs=Object.entries(state.fiches).filter(([,f])=>(f.category==="Boisson")===bar);
-  let h=bar?`<div class="toolbar"><h2>Recettes boissons</h2><button class="btn" data-act="newFiche">+ Nouvelle recette</button></div>
-  <p class="hint" style="margin:0">Cocktails, kirs, cafés, bières panachées… Chaque recette se relie à une boisson de la carte des boissons, qui calcule son coût.</p><div class="list">`:`<div class="toolbar"><h2>Fiches techniques</h2><button class="btn" data-act="newFiche">+ Nouvelle fiche</button></div>
+  const exp=fs.length?boutonsExport(bar?"bfiches":"fiches",CM.lecture?"":`<hr><button data-modif="1">⬆️ Importer les nouveaux prix…<small>le fichier rempli, enregistré en CSV</small></button>`):"";
+  let h=bar?`<div class="toolbar"><h2>Recettes boissons</h2><div class="acts"><button class="btn" data-act="newFiche">+ Nouvelle recette</button>${exp}</div></div>
+  <p class="hint" style="margin:0">Cocktails, kirs, cafés, bières panachées… Chaque recette se relie à une boisson de la carte des boissons, qui calcule son coût.</p><div class="list">`:`<div class="toolbar"><h2>Fiches techniques</h2><div class="acts"><button class="btn" data-act="newFiche">+ Nouvelle fiche</button>${exp}</div></div>
   <p class="hint" style="margin:0">Une fiche par recette, avec grammages, étapes et photo. Les bases (frites, sauces, pâtes) se réutilisent dans d'autres fiches.</p><div class="list">`;
   if(!fs.length)return h+`<div class="empty">${bar?"Aucune recette boisson.":"Aucune fiche. Créez-en une, ou importez votre carte pour obtenir des fiches proposées à vérifier."}</div></div>`;
   FCATS.forEach(cat=>{
@@ -1899,26 +1904,84 @@ function exporterCSV(ds){
 }
 function imprimerListe(ds){
   const w=window.open("","_blank");if(!w){setStatus("Autorise les fenêtres pop-up pour imprimer",true);return}
-  const nums=new Set(ds.num||[]);
+  const nums=new Set(ds.num||[]),cache=new Set(ds.cacher||[]),gras=new Set(ds.gras||[]);
   w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(ds.titre)} · Le 76</title><style>
   body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:#1d1d1f;margin:28px;font-size:11.5px}
   h1{font-size:20px;margin:0 0 2px;letter-spacing:-.02em}.sous{color:#6e6e73;margin:0 0 14px}
   table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#6e6e73;border-bottom:1.5px solid #1d1d1f;padding:6px 6px}
   td{padding:6px;border-bottom:.5px solid #d2d2d7;vertical-align:top}td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-  tr{page-break-inside:avoid}.pied{margin-top:14px;color:#86868b;font-size:10px}.notes{width:110px}
+  tr{page-break-inside:avoid}tr.g td{font-weight:700;border-top:1.5px solid #1d1d1f;background:#f5f5f7}td.case{border-left:.5px solid #d2d2d7}.pied{margin-top:14px;color:#86868b;font-size:10px}.notes{width:110px}
   @page{size:A4 landscape;margin:12mm}</style></head><body>
   <h1>${esc(ds.titre)}</h1><p class="sous">Restaurant Le 76${ds.sous?" · "+esc(ds.sous):""} · imprimé le ${new Date().toLocaleDateString("fr-FR")}</p>
-  <table><thead><tr>${ds.cols.map((c,k)=>`<th class="${nums.has(k)?"n":""}">${esc(c)}</th>`).join("")}<th class="notes">À corriger</th></tr></thead>
-  <tbody>${ds.rows.map(r=>`<tr>${r.map((v,k)=>`<td class="${nums.has(k)?"n":""}">${esc(v)}</td>`).join("")}<td></td></tr>`).join("")}</tbody></table>
+  <table><thead><tr>${ds.cols.map((c,k)=>cache.has(k)?"":`<th class="${nums.has(k)?"n":""}${/nouveau prix/i.test(c)?" notes":""}">${esc(c)}</th>`).join("")}${ds.sansNotes?"":`<th class="notes">À corriger</th>`}</tr></thead>
+  <tbody>${ds.rows.map((r,i)=>`<tr class="${gras.has(i)?"g":""}">${r.map((v,k)=>cache.has(k)?"":`<td class="${nums.has(k)?"n":""}${/nouveau prix/i.test(ds.cols[k])?" case":""}">${esc(v)}</td>`).join("")}${ds.sansNotes?"":"<td></td>"}</tr>`).join("")}</tbody></table>
   <p class="pied">${ds.rows.length} ligne${ds.rows.length>1?"s":""} · Coût matière Le 76</p>
   <script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script></body></html>`);
   w.document.close();
 }
-const boutonsExport=k=>`<button class="btn ghost" data-exp="${k}:csv" title="Télécharger pour Excel ou Numbers">Excel</button><button class="btn ghost" data-exp="${k}:print">Imprimer</button>`;
-main.addEventListener("click",e=>{const b=e.target.closest("[data-exp]");if(!b)return;const [k,how]=b.dataset.exp.split(":");
-  const ds=k==="ventes"?dsVentes("cuisine"):k==="bventes"?dsVentes("bar"):k==="carte"?dsCarte():k==="boissons"?dsBoissons():k==="ingredients"?dsMercuriale("cuisine"):dsMercuriale("bar");
+const boutonsExport=(k,plus="")=>`<details class="menu-exp"><summary class="btn ghost">Exporter</summary><div class="menu-pop"><button data-exp="${k}:csv">📊 Liste pour Excel / Numbers</button><button data-exp="${k}:print">🖨️ Imprimer la liste</button>${plus}</div></details>`;
+document.addEventListener("click",e=>{document.querySelectorAll("details.menu-exp[open]").forEach(d=>{if(!d.contains(e.target)||e.target.closest(".menu-pop button"))d.open=false})});
+main.addEventListener("click",e=>{if(e.target.closest("[data-modif]")){document.getElementById("modif-file").click();return}const b=e.target.closest("[data-exp]");if(!b)return;const [k,how]=b.dataset.exp.split(":");
+  const ds=k==="ventes"?dsVentes("cuisine"):k==="bventes"?dsVentes("bar"):k==="carte"?dsCarte():k==="carted"?dsCarteDetail():k==="fiches"?dsFiches(false):k==="bfiches"?dsFiches(true):k==="boissons"?dsBoissons():k==="ingredients"?dsMercuriale("cuisine"):dsMercuriale("bar");
   if(!ds.rows.length){setStatus("Rien à exporter pour l'instant",true);return}
   how==="csv"?exporterCSV(ds):imprimerListe(ds)});
+
+/* ---------- Carte détaillée et fiches techniques : export avec colonne « Nouveau prix » et réimport ---------- */
+const COLS_DET=["Type","Rubrique","Plat / ingrédient","Quantité","Unité","Prix d'achat HT","Par","Coût","Prix de vente TTC","Food cost","Nouveau prix","Réf"];
+function lignesFiche(f,rub){
+  return (f.lines||[]).map(l=>{
+    if(l.type==="f"){const sf=state.fiches[l.ref];return ["  Sous-fiche",rub,sf?sf.name:"fiche supprimée",xn(num(l.qty),3),l.unit||"","","",xn(lineCost(l)),"","","",""]}
+    const i=state.ingredients[l.ref];
+    if(!i)return ["  Ingrédient",rub,"ingrédient supprimé",xn(num(l.qty),3),l.unit||"","","",hasFixed(l)?xn(num(l.fixed)):"","","","",""];
+    return ["  Ingrédient",rub,i.name||"",xn(num(l.qty),3),l.unit||"",xn(num(i.price),4),UNITS[i.unit]?.label||i.unit||"",xn(lineCost(l)),"","","","ing:"+l.ref]});
+}
+function dsCarteDetail(){
+  const rows=[],gras=[];
+  FOOD_SECTIONS.forEach(sec=>Object.entries(state.carte).filter(([,it])=>isFood(it)&&(FOOD_SECTIONS.includes(it.section)?it.section:"Autre")===sec).sort(byName).forEach(([id,it])=>{
+    const c=calcItem(it),f=state.fiches[it.fiche];gras.push(rows.length);
+    rows.push(["Plat",sec,it.name||"",f?xn(num(it.qty),3):"",f?(it.unit||"portion"):"","","",xn(c.cp),xn(num(it.ttc)),xp(c.fc),"","car:"+id]);
+    if(f)lignesFiche(f,sec).forEach(r=>rows.push(r))}));
+  return {titre:"Carte des repas détaillée",fichier:"carte-detaillee",sous:"Nouveau prix : prix de vente TTC sur la ligne du plat, prix d'achat HT (même unité) sur la ligne d'un ingrédient",cols:COLS_DET,num:[3,5,7,8,9],rows,gras,cacher:[11],sansNotes:true};
+}
+function dsFiches(bar){
+  const rows=[],gras=[];
+  Object.entries(state.fiches).filter(([,f])=>(f.category==="Boisson")===!!bar).sort(byName).forEach(([id,f])=>{
+    gras.push(rows.length);rows.push(["Fiche",f.category||"",f.name||"",xn(num(f.yield),2),f.yieldUnit==="portion"||!f.yieldUnit?"portion(s)":f.yieldUnit,"","",xn(ficheTotal(f)),"","","",""]);
+    lignesFiche(f,f.category||"").forEach(r=>rows.push(r));
+    rows.push(["  Coût par "+(f.yieldUnit==="portion"||!f.yieldUnit?"portion":f.yieldUnit),"","","","","","",xn(ficheUnitCost(f)),"","","",""])});
+  return {titre:bar?"Recettes boissons":"Fiches techniques",fichier:bar?"recettes-boissons":"fiches-techniques",sous:"Nouveau prix : prix d'achat HT de l'ingrédient, dans l'unité indiquée (€/kg, €/L ou €/pièce)",cols:COLS_DET.map((c,k)=>k===2?"Fiche / ingrédient":k===3?"Quantité / rendement":c),num:[3,5,7],rows,gras,cacher:[8,9,11],sansNotes:true};
+}
+/* Lecture d'un CSV (point-virgule ou virgule, guillemets) */
+function lireCSV(txt){
+  txt=txt.replace(/^﻿/,"");const premiere=txt.split(/\r?\n/)[0]||"";const sep=(premiere.match(/;/g)||[]).length>=(premiere.match(/,/g)||[]).length?";":premiere.includes("\t")?"\t":",";
+  const rows=[];let r=[],v="",q=false;
+  for(let k=0;k<txt.length;k++){const ch=txt[k];
+    if(q){if(ch==='"'){if(txt[k+1]==='"'){v+='"';k++}else q=false}else v+=ch;continue}
+    if(ch==='"')q=true;else if(ch===sep){r.push(v);v=""}else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&txt[k+1]==="\n")k++;r.push(v);rows.push(r);r=[];v=""}else v+=ch}
+  if(v!==""||r.length){r.push(v);rows.push(r)}
+  return rows;
+}
+function appliquerModifs(txt){
+  const rows=lireCSV(txt),tete=(rows[0]||[]).map(x=>sansAccent(x).trim());
+  const cP=tete.findIndex(x=>x.startsWith("nouveau prix")),cR=tete.findIndex(x=>x==="ref");
+  if(cP<0||cR<0){setStatus("Ce fichier n'a pas les colonnes « Nouveau prix » et « Réf » : exporte d'abord la carte détaillée ou les fiches.",true);return}
+  const avant=photoCouts(),touched=[],vus={};let nv=0,na=0,ign=0;const conflits=[],suspects=[];
+  rows.slice(1).forEach(r=>{const brut=String(r[cP]||"").replace(/[€\s]/g,"").replace(",",".");if(brut==="")return;const v=parseFloat(brut);const ref=String(r[cR]||"").trim();
+    if(!(v>0)||!ref){ign++;return}
+    if(vus[ref]!=null&&vus[ref]!==v){conflits.push(ref);return}vus[ref]=v;
+    const [t,id]=ref.split(":");
+    if(t==="car"&&state.carte[id]){if(num(state.carte[id].ttc)!==v){state.carte[id].ttc=v;touched.push(["car",id]);nv++}}
+    else if(t==="ing"&&state.ingredients[id]){const i=state.ingredients[id],de=num(i.price);if(de>0&&(v>de*3||v<de/3)){suspects.push(i.name);return}if(Math.abs(de-v)>1e-6){i.price=v;if(num(i.packQty)>1)i.packPrice=+(v*num(i.packQty)).toFixed(2);
+      if(de>0)i.hist=(i.hist||[]).concat([{d:new Date().toISOString().slice(0,10),de:+de.toFixed(4),a:+v.toFixed(4),f:"Modification équipe"}]).slice(-12);touched.push(["ing",id]);na++}}
+    else ign++});
+  if(touched.length){commitMany(touched);creerAlerte(avant,{supplier:"Modification de prix"})}
+  render();
+  const msg=`${nv} prix de vente et ${na} prix d'achat mis à jour${ign?` · ${ign} ligne${ign>1?"s":""} ignorée${ign>1?"s":""}`:""}${conflits.length?` · ${conflits.length} ingrédient${conflits.length>1?"s":""} avec deux prix différents, non modifié${conflits.length>1?"s":""}`:""}${suspects.length?` · prix refusé${suspects.length>1?"s":""} (trop loin de l'actuel, vérifie l'unité) : ${suspects.slice(0,3).join(", ")}${suspects.length>3?"…":""}`:""}`;
+  const err=!!(conflits.length||suspects.length);setStatus(msg,err);setTimeout(()=>setStatus(msg,err),1500);setTimeout(()=>setStatus(msg,err),4000);
+}
+document.addEventListener("change",e=>{if(e.target.id!=="modif-file")return;const f=e.target.files[0];e.target.value="";if(!f)return;
+  if(/\.xlsx?$/i.test(f.name)){setStatus("Enregistre d'abord le fichier au format CSV (Fichier → Exporter → CSV), puis réessaie.",true);return}
+  const r=new FileReader();r.onload=()=>appliquerModifs(String(r.result));r.readAsText(f,"utf-8")});
 
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
