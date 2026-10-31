@@ -93,6 +93,10 @@ try {
             repondre(['ok' => true] + cm_facture_deposer((string) ($q['nom'] ?? ''), (string) ($q['donnees'] ?? '')));
         case 'cle_depot':
             repondre(['ok' => true, 'cle' => cm_cle_depot(!empty($q['nouvelle']))]);
+        case 'ventes_relever':
+            repondre(['ok' => true] + cm_relever_ventes(!empty($q['forcer'])));
+        case 'ventes_importer':
+            repondre(['ok' => true, 'importes' => cm_ventes_importer(is_array($q['ventes'] ?? null) ? $q['ventes'] : [])]);
         case 'facture_relire':
             repondre(['ok' => true] + cm_facture_relire((string) ($q['id'] ?? '')));
     }

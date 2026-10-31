@@ -267,6 +267,13 @@ nav button{position:relative}
 .nav-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:.7rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
 @media (max-width:720px){.nav-badge{position:absolute;top:0;left:calc(50% + 6px)}}
 .fac-banner{box-shadow:0 0 0 2px var(--accent-soft),var(--shadow)}
+.row.vt{grid-template-columns:minmax(0,1fr) 64px 96px 100px 84px minmax(150px,230px);cursor:default;background-image:none}
+.row.vt:hover{background-color:var(--surface)}
+.vt-lien{display:flex;gap:6px}.vt-lien select{padding:6px 8px;font-size:.82rem}.vt-lien input{width:70px;padding:6px 8px}
+select.a-relier{box-shadow:0 0 0 2px var(--warn-bg);color:var(--warn)}
+.lnk{background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;text-transform:inherit;letter-spacing:inherit}
+button.lnk[data-tab-go]{color:var(--accent);text-decoration:underline}
+@media (max-width:720px){.row.vt{grid-template-columns:minmax(0,1fr) 44px 80px}.vt-lien{grid-column:1/-1}}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -432,7 +439,7 @@ function suivre(){
       if(d.changements&&d.changements.length){const parColl={};
         d.changements.forEach(c=>{(CM.docs[c.coll]=CM.docs[c.coll]||{});if(c.data===null)delete CM.docs[c.coll][c.id];else CM.docs[c.coll][c.id]=c.data;(parColl[c.coll]=parColl[c.coll]||[]).push(c)});
         Object.entries(parColl).forEach(([coll,list])=>{(CM.listeners[coll]||[]).forEach(cb=>{try{cb({metadata:{hasPendingWrites:false},docChanges:()=>list.map(c=>({type:c.data===null?'removed':'modified',doc:{id:c.id,data:()=>c.data}}))})}catch(e){}})});
-        if(parColl.factures||parColl.menus||parColl.alertes)document.dispatchEvent(new CustomEvent('cm-factures'));}
+        if(parColl.factures||parColl.menus||parColl.alertes||parColl.ventes||parColl.liens)document.dispatchEvent(new CustomEvent('cm-factures'));}
       CM.rev=Math.max(CM.rev,d.rev||0);}catch(e){}};
   suivi=setInterval(()=>{if(!document.hidden)tick()},12000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
@@ -640,7 +647,7 @@ function migrate(d){
 }
 
 /* ---------- Rendu ---------- */
-const PARTS={cuisine:[["carte","Carte des repas","Carte"],["fiches","Fiches techniques","Fiches"],["menus","Menus & soirées","Menus"],["ingredients","Mercuriale","Mercuriale"]],bar:[["boissons","Carte des boissons","Carte"],["bfiches","Recettes boissons","Recettes"],["bingredients","Mercuriale bar","Mercuriale"]]};
+const PARTS={cuisine:[["carte","Carte des repas","Carte"],["fiches","Fiches techniques","Fiches"],["menus","Menus & soirées","Menus"],["ingredients","Mercuriale","Mercuriale"],["ventes","Ventes","Ventes"]],bar:[["boissons","Carte des boissons","Carte"],["bfiches","Recettes boissons","Recettes"],["bingredients","Mercuriale bar","Mercuriale"],["bventes","Ventes bar","Ventes"]]};
 const partOf=v=>PARTS.bar.some(([k])=>k===v)?"bar":(v==="service"||v==="allergenes"||v==="reglages")?(state.lastPart||"cuisine"):"cuisine";
 const FOOD_SECTIONS=SECTIONS.filter(s=>s!=="Boissons");
 const isFood=it=>it.section!=="Boissons";
@@ -652,7 +659,7 @@ function ingPart(id,i){
   const ds=i.dept==="bar"||DRINK_SUP.test(i.supplier||"");
   return {cuisine:food||(!ds&&!bar),bar:bar||ds};
 }
-const ICONS={"carte": "<path d=\"M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z\"/><path d=\"M9 9h6M9 13h6\"/>", "fiches": "<path d=\"M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "ingredients": "<path d=\"M4 9h16l-1.5 10.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 9z\"/><path d=\"M8.5 9l3.5-5 3.5 5\"/>", "boissons": "<path d=\"M7 3h10l-.8 6.5A4.2 4.2 0 0 1 12 13.2a4.2 4.2 0 0 1-4.2-3.7L7 3z\"/><path d=\"M12 13.2V20M8.5 21h7M7.4 6.5h9.2\"/>", "bfiches": "<path d=\"M8 8h8l-1.2 12.2a1 1 0 0 1-1 .8h-3.6a1 1 0 0 1-1-.8L8 8z\"/><path d=\"M9.5 8V5.5A2.5 2.5 0 0 1 12 3a2.5 2.5 0 0 1 2.5 2.5V8M8.6 12.5h6.8\"/>", "bingredients": "<path d=\"M3.5 8h17v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V8z\"/><path d=\"M3.5 8l2-4h13l2 4M9 12h6\"/>", "service": "<path d=\"M4 18h16M5.5 18a6.5 6.5 0 0 1 13 0\"/><path d=\"M12 9.5V8M10.5 6.5h3\"/>", "allergenes": "<path d=\"M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7l8-4z\"/><path d=\"M12 8v5M12 16.5v.01\"/>", "menus": "<path d=\"M6 3v18M6 3c2.5 0 4 1.6 4 4.5S8.5 12 6 12\"/><path d=\"M15 3v6a3 3 0 0 0 6 0V3M18 3v18\"/>"};
+const ICONS={"carte": "<path d=\"M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z\"/><path d=\"M9 9h6M9 13h6\"/>", "fiches": "<path d=\"M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "ingredients": "<path d=\"M4 9h16l-1.5 10.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 9z\"/><path d=\"M8.5 9l3.5-5 3.5 5\"/>", "boissons": "<path d=\"M7 3h10l-.8 6.5A4.2 4.2 0 0 1 12 13.2a4.2 4.2 0 0 1-4.2-3.7L7 3z\"/><path d=\"M12 13.2V20M8.5 21h7M7.4 6.5h9.2\"/>", "bfiches": "<path d=\"M8 8h8l-1.2 12.2a1 1 0 0 1-1 .8h-3.6a1 1 0 0 1-1-.8L8 8z\"/><path d=\"M9.5 8V5.5A2.5 2.5 0 0 1 12 3a2.5 2.5 0 0 1 2.5 2.5V8M8.6 12.5h6.8\"/>", "bingredients": "<path d=\"M3.5 8h17v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V8z\"/><path d=\"M3.5 8l2-4h13l2 4M9 12h6\"/>", "service": "<path d=\"M4 18h16M5.5 18a6.5 6.5 0 0 1 13 0\"/><path d=\"M12 9.5V8M10.5 6.5h3\"/>", "allergenes": "<path d=\"M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7l8-4z\"/><path d=\"M12 8v5M12 16.5v.01\"/>", "menus": "<path d=\"M6 3v18M6 3c2.5 0 4 1.6 4 4.5S8.5 12 6 12\"/><path d=\"M15 3v6a3 3 0 0 0 6 0V3M18 3v18\"/>", "ventes": "<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/>", "bventes": "<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/>"};
 const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
 function renderNav(){
   const part=partOf(state.view);if(state.view!=="service"&&state.view!=="allergenes")state.lastPart=part;
@@ -672,6 +679,7 @@ function render(){
   if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view))state.view=state.view==="boissons"||state.view==="bingredients"?"bfiches":"fiches";
   if(state.view==="reglages"){main.innerHTML=renderReglages();return}
   if(state.view==="menus"){main.innerHTML=renderMenus();return}
+  if(state.view==="ventes"||state.view==="bventes"){main.innerHTML=renderVentes(state.view==="bventes"?"bar":"cuisine");return}
   if(state.view==="service"){main.innerHTML=renderService();filterService();return}
   if(state.view==="allergenes"){main.innerHTML=renderAllergens();return}
   if(state.view==="boissons") h+=(o&&o.kind==="boi"&&state.boissons[o.id])?renderBoisson(o.id):renderBoissons();
@@ -1500,6 +1508,13 @@ function renderReglages(){
     <p class="hint" style="margin:0">${o.imap_dispo===false?'<span class="bad-t">L\'hébergement ne permet pas de lire les mails (IMAP).</span> ':''}Dernière relève : ${o.derniere_releve?esc(new Date(o.derniere_releve.replace(" ","T")).toLocaleString("fr-FR"))+" · "+esc(o.derniere_releve_msg||""):"jamais"}</p>
     <div class="acts"><button class="btn" data-cm="saveOpts">Enregistrer</button><button class="btn ghost" data-cm="relever">Relever maintenant</button></div>
   </section>
+  <section class="card reg"><h2>Ventes de la caisse (Z de L'Addition)</h2>
+    <p class="hint" style="margin:0">L'Addition envoie chaque jour le « Z quotidien » à cette boîte. L'app le lit tout seul (sans toucher aux mails) pour calculer ta marge réelle et classer ta carte.</p>
+    <div class="fields2"><label class="f"><span class="lbl">Adresse de la boîte</span><input type="text" id="rg-zuser" value="${esc(o.z_user||"le76@le76.fr")}" autocomplete="off"></label>
+    <label class="f"><span class="lbl">Mot de passe de la boîte</span><input type="password" id="rg-zmdp" placeholder="${o.z_mdp?"déjà enregistré (laisser vide pour le garder)":"mot de passe de la boîte mail"}" autocomplete="new-password"></label></div>
+    <p class="hint" style="margin:0">${o.z_msg?"Dernière relève : "+esc(o.z_msg):"Jamais relevée."}</p>
+    <div class="acts"><button class="btn" data-cm="saveZ">Enregistrer et relever</button></div>
+  </section>
   <section class="card reg"><h2>Dossier des factures sur le Mac</h2>
     <p class="hint" style="margin:0">Pose un PDF ou une photo de facture dans ton dossier : il part tout seul, est lu par l'IA et arrive dans « Factures reçues », prêt à vérifier. Le Mac doit rester allumé (l'iMac du bureau est parfait). Les factures déjà présentes dans le dossier au moment de l'installation ne sont pas renvoyées.</p>
     ${state.cmdMac?`<p class="hint" style="margin:0">Sur l'iMac, ouvre l'app <b>Terminal</b>, colle cette ligne puis appuie sur Entrée. Une fenêtre te demandera de choisir ton dossier des factures.</p>
@@ -1516,6 +1531,7 @@ async function cmAction(a,t){
     if(a==="saveOpts"){t.disabled=true;const d=await CM.post("options_ecrire",{options:{ia_cle:document.getElementById("rg-cle").value,ia_modele:document.getElementById("rg-modele").value,imap_hote:document.getElementById("rg-hote").value,imap_user:document.getElementById("rg-user").value,imap_mdp:document.getElementById("rg-mdp").value,mail_actif:document.getElementById("rg-actif").checked}});CM.options=d.options;setStatus("Réglages enregistrés");render()}
     else if(a==="relever"){t.disabled=true;t.textContent="Relève en cours…";const d=await CM.post("factures_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);render()}
     else if(a==="importer"){document.getElementById("rg-file").click()}
+    else if(a==="saveZ"){t.disabled=true;t.textContent="Relève en cours…";await CM.post("options_ecrire",{options:{z_user:document.getElementById("rg-zuser").value,z_mdp:document.getElementById("rg-zmdp").value}});const d=await CM.post("ventes_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);if(d.nouveaux){const c=await CM.post("charger");CM.docs.ventes=c.docs.ventes||{}}render()}
     else if(a==="cmdMac"||a==="nouvelleCle"){const d=await CM.post("cle_depot",{nouvelle:a==="nouvelleCle"});state.cmdMac=`curl -fsSL "${location.origin}/api/cout-matiere.php?action=installeur&cle=${d.cle}" | bash`;render();if(a==="nouvelleCle")setStatus("Nouvelle clé : relance l'installation sur le Mac")}
     else if(a==="copierCmd"){const ta=document.getElementById("rg-cmd");try{await navigator.clipboard.writeText(ta.value);setStatus("Ligne copiée")}catch(x){ta.select();document.execCommand("copy");setStatus("Ligne copiée")}}
     else if(a==="deposer"){document.getElementById("dep-file").click()}
@@ -1716,6 +1732,135 @@ function filtrerCarte(){
 main.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.cq;if(!k)return;state["cq_"+k]=e.target.value;filtrerCarte()});
 main.addEventListener("keydown",e=>{if(e.key!=="Enter"||!e.target.dataset||!e.target.dataset.cq)return;
   const r=[...document.querySelectorAll("[data-open-item],[data-bopen]")].filter(x=>!x.hidden);if(r.length===1){e.preventDefault();r[0].click()}});
+/* ---------- Ventes de la caisse (Z quotidien de L'Addition) ---------- */
+const CAT_BOISSON=/ap[ée]t?ri?tif|ap[ée]titif|\bvins?\b|soft|bi[eè]res?|cocktail|digestif|boi?ss?ons?|chaudes?|caf[ée]s?\b|\bbar\b/i;
+const NOM_BOISSON=/\b(expresso|caf[ée]|cappuccino|d[ée]ca|th[ée]|eau|bi[eè]re|vins?|rouge|ros[ée]|blanc|limonade|coca|jus|sirop|pression)\b|1\/[24]|\d+ ?cl\b|^grd |^pdj ?\w+$/i;
+const cleLien=p=>"l_"+sansAccent(p).replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"").slice(0,70);
+const lienDe=p=>(CM.docs.liens||{})[cleLien(p)]||null;
+function coutLien(l){
+  if(!l)return null;
+  if(l.kind==="car"){const it=state.carte[l.ref];return it?itemCost(it):null}
+  if(l.kind==="boi"){const b=state.boissons[l.ref],f=b&&(b.formats||[])[num(l.k)];return f?calcFormat(b,f).cost:null}
+  if(l.kind==="fixe")return num(l.cout);
+  return null;
+}
+function nomLien(l){
+  if(!l)return "";
+  if(l.kind==="car")return state.carte[l.ref]?.name||"article supprimé";
+  if(l.kind==="boi"){const b=state.boissons[l.ref],f=b&&(b.formats||[])[num(l.k)];return b?b.name+(f&&f.label?" · "+f.label:""):"boisson supprimée"}
+  if(l.kind==="fixe")return "coût fixe "+eur.format(num(l.cout));
+  return "";
+}
+function partVente(x,l){
+  if(l&&l.kind==="car")return "cuisine";if(l&&l.kind==="boi")return "bar";if(l&&l.part)return l.part;
+  const c=sansAccent(x.c),n=sansAccent(x.p);
+  if(CAT_BOISSON.test(c))return "bar";
+  if(/plat du jour|formule|menu|divers/.test(c)&&!/^(plat du jour|suggestions?)$/.test(n)&&NOM_BOISSON.test(n))return "bar";
+  return "cuisine";
+}
+const ventesJours=()=>Object.values(CM.docs.ventes||{}).filter(v=>v&&v.date).sort((a,b)=>a.date.localeCompare(b.date));
+const PERIODES=[["jour","Dernier jour"],["7","7 jours"],["mois","Ce mois"],["mprec","Mois dernier"],["tout","Tout"]];
+function joursPeriode(){
+  const js=ventesJours();if(!js.length)return [];const p=state.vPer||"mois",der=js[js.length-1].date,auj=new Date();
+  const ym=d=>d.toISOString().slice(0,7);
+  if(p==="jour")return js.filter(j=>j.date===der);
+  if(p==="7"){const lim=new Date(der);lim.setDate(lim.getDate()-6);const l=lim.toISOString().slice(0,10);return js.filter(j=>j.date>=l)}
+  if(p==="mois")return js.filter(j=>j.date.startsWith(ym(auj)));
+  if(p==="mprec"){const d=new Date(auj.getFullYear(),auj.getMonth()-1,15);return js.filter(j=>j.date.startsWith(ym(d)))}
+  return js;
+}
+function analyseVentes(part){
+  const js=joursPeriode(),prod={};
+  js.forEach(j=>(j.lignes||[]).forEach(x=>{const l=lienDe(x.p);if(partVente(x,l)!==part)return;
+    const o=prod[x.p]=prod[x.p]||{p:x.p,c:x.c,q:0,ht:0,ttc:0,l};o.q+=num(x.q);o.ht+=num(x.h);o.ttc+=num(x.t)}));
+  const ps=Object.values(prod);let ht=0,htc=0,cout=0;
+  ps.forEach(o=>{o.cu=o.l&&o.l.kind==="ignore"?null:coutLien(o.l);o.cout=o.cu!=null?o.cu*o.q:null;ht+=o.ht;if(o.cout!=null){htc+=o.ht;cout+=o.cout}
+    o.mu=o.cu!=null&&o.q>0?o.ht/o.q-o.cu:null;o.marge=o.cout!=null?o.ht-o.cout:null;o.fc=o.cout!=null&&o.ht>0?o.cout/o.ht:null});
+  /* Classement de la carte : popularité × marge unitaire, sur les produits vendus et chiffrés */
+  const cl=ps.filter(o=>o.mu!=null&&o.ht>0),sq=cl.reduce((s,o)=>s+o.q,0),mm=sq?cl.reduce((s,o)=>s+o.mu*o.q,0)/sq:0,seuil=cl.length?0.7/cl.length:0;
+  cl.forEach(o=>{const pop=o.q/sq>=seuil,mar=o.mu>=mm;o.classe=pop&&mar?"star":pop?"labour":mar?"enigme":"mort"});
+  const Z=js.reduce((a,j)=>{a.ttc+=num(j.ca_ttc);a.ht+=num(j.ca_ht);a.couv+=num(j.couverts);a.annul+=num(j.annul)+num(j.corr_apres);return a},{ttc:0,ht:0,couv:0,annul:0});
+  return {js,ps,ht,htc,cout,fc:htc>0?cout/htc:null,marge:htc-cout,couv:htc&&ht?htc/ht:0,mm,Z,aRelier:ps.filter(o=>!o.l).sort((a,b)=>b.ht-a.ht)};
+}
+const CLASSES={star:["Star","ok","Se vend bien et rapporte bien : mets-le en avant."],labour:["Cheval de labour","watch","Se vend bien mais rapporte peu : revois le prix ou la recette."],enigme:["Énigme","nd","Rapporte bien mais se vend peu : à mieux présenter ou conseiller."],mort:["Poids mort","alert","Se vend peu et rapporte peu : à remplacer ?"]};
+function alerteAnnulations(){
+  const js=ventesJours();if(!js.length)return "";const d=js[js.length-1],x=num(d.annul)+num(d.corr_apres);
+  const av=js.slice(0,-1).slice(-14),moy=av.length?av.reduce((s,j)=>s+num(j.annul)+num(j.corr_apres),0)/av.length:0;
+  if(x<30||(av.length>=3&&x<moy*1.5))return "";
+  return `<div class="banner" style="background:var(--warn-bg)"><p><strong>⚠️ ${eur.format(x)} d'annulations et corrections après envoi en cuisine</strong> le ${esc(new Date(d.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}))} (${eur.format(num(d.corr_apres))} corrigés après envoi, ${eur.format(num(d.annul))} annulés après ticket)${av.length>=3?`, contre ${eur.format(moy)} en moyenne`:""}. Ça vaut le coup d'en parler avec l'équipe.</p></div>`;
+}
+function optionsLien(sel){
+  const car=Object.entries(state.carte).filter(([,it])=>isFood(it)).sort(byName).map(([id,it])=>`<option value="car:${esc(id)}" ${sel==="car:"+id?"selected":""}>${esc(it.name)}</option>`).join("");
+  const boi=[];Object.entries(state.boissons).sort(byName).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>boi.push(`<option value="boi:${esc(id)}:${k}" ${sel==="boi:"+id+":"+k?"selected":""}>${esc(b.name+(f.label?" · "+f.label:""))}</option>`)));
+  return `<option value="">À relier…</option><option value="fixe" ${sel==="fixe"?"selected":""}>Coût fixe (plat du jour, suggestion…)</option><option value="ignore" ${sel==="ignore"?"selected":""}>Ne pas compter</option><optgroup label="Carte des repas">${car}</optgroup><optgroup label="Boissons">${boi.join("")}</optgroup>`;
+}
+const valLien=l=>!l?"":l.kind==="car"?"car:"+l.ref:l.kind==="boi"?"boi:"+l.ref+":"+num(l.k):l.kind;
+function renderVentes(part){
+  const o=CM.options||{},js=ventesJours();
+  if(!state.zTente&&o.z_mdp){state.zTente=true;CM.post("ventes_relever",{}).then(d=>{if(d.nouveaux)setStatus(d.message)}).catch(()=>{})}
+  let h=`<div class="toolbar"><h2>Ventes & marge réelle</h2><div class="acts"><button class="btn ghost" data-vt="relever">Relever les Z</button></div></div>`;
+  if(!js.length)return h+`<section class="card"><p style="margin:0">Les ventes arrivent toutes seules avec le « Z quotidien » que L'Addition envoie chaque jour à <b>${esc(o.z_user||"le76@le76.fr")}</b>.</p><p class="hint">${o.z_mdp?esc(o.z_msg||"En attente du premier Z."):`Pour commencer, indique le mot de passe de cette boîte dans les <button class="lnk" data-tab-go="reglages">Réglages</button>.`}</p></section>`;
+  const a=analyseVentes(part),bar=part==="bar",per=PERIODES.find(p=>p[0]===(state.vPer||"mois"))[1];
+  const d1=a.js[0]?.date,d2=a.js[a.js.length-1]?.date,fd=d=>new Date(d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+  h+=`<div class="chips" style="margin:0">${PERIODES.map(([k,l])=>`<button class="chipb ${(state.vPer||"mois")===k?"on":""}" data-vper="${k}">${l}</button>`).join("")}</div>
+  <p class="hint" style="margin:0">${a.js.length?`${a.js.length} jour${a.js.length>1?"s":""} de service${d1===d2?" · "+fd(d1):` · du ${fd(d1)} au ${fd(d2)}`} · CA total ${eur.format(a.Z.ttc)} TTC · ${n2.format(a.Z.couv)} couverts${a.Z.couv?` · panier moyen ${eur.format(a.Z.ttc/a.Z.couv)}`:""}`:"Aucune vente sur cette période."}</p>`;
+  h+=alerteAnnulations();
+  if(!a.js.length)return h;
+  h+=`<section class="bilan"><div class="hl"><span class="lbl">Marge brute réelle</span><span class="big">${a.htc?eur.format(a.marge):"—"} <small>HT</small></span><span class="sub">${bar?"boissons":"repas"} · ${per.toLowerCase()}</span></div>
+    <div><span class="lbl">${bar?"Coût des boissons":"Food cost réel"}</span><span class="big">${pct(a.fc)}</span><span class="sub">${eur.format(a.cout)} de matière vendue</span></div>
+    <div><span class="lbl">CA ${bar?"boissons":"repas"}</span><span class="big">${eur.format(a.ht)} <small>HT</small></span><span class="sub">${a.ps.reduce((s,x)=>s+x.q,0)} ventes</span></div>
+    <div><span class="lbl">Calculé sur</span><span class="big">${pct(a.couv)}</span><span class="sub">du CA ${a.aRelier.length?`· ${a.aRelier.length} produit${a.aRelier.length>1?"s":""} à relier`:"· tout est relié"}</span></div></section>`;
+  if(a.aRelier.length)h+=`<section class="card fac-banner"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.05rem">${a.aRelier.length} produit${a.aRelier.length>1?"s":""} de la caisse à relier</h2><span class="hint" style="margin:2px 0 0;display:block">Dis à l'app à quel article correspond chaque nom de L'Addition. C'est à faire une seule fois.</span></div>${CM.options.ia?`<button class="btn" data-vt="ia">Relier avec l'IA</button>`:""}</div></section>`;
+  const tri=state.vTri||"ht",ps=a.ps.slice().sort((x,y)=>tri==="q"?y.q-x.q:tri==="marge"?(y.marge??-1e9)-(x.marge??-1e9):tri==="fc"?(y.fc??-1)-(x.fc??-1):y.ht-x.ht);
+  h+=`<div class="list"><div class="row hdr vt"><span class="lbl">Produit vendu</span><button class="lbl num lnk" data-vtri="q">Vendus</button><button class="lbl num lnk hide-s" data-vtri="ht">CA HT</button><button class="lbl num lnk" data-vtri="marge">Marge</button><button class="lbl num lnk hide-s" data-vtri="fc">${bar?"Coût %":"Food cost"}</button><span class="lbl">Correspondance</span></div>`;
+  ps.forEach(x=>{const c=x.classe&&CLASSES[x.classe];
+    h+=`<div class="row vt"><span class="name">${esc(x.p)}${c?` <span class="chip ${c[1]} plain" title="${esc(c[2])}" style="font-size:.7rem;padding:2px 8px">${c[0]}</span>`:""}<span class="sub">${esc(x.c)}${x.cu!=null?` · coût ${eur.format(x.cu)} · marge ${eur.format(x.mu)} / vente`:""}</span></span>
+      <span class="num">${n2.format(x.q)}</span><span class="num hide-s">${eur.format(x.ht)}</span><span class="num"><b>${x.marge!=null?eur.format(x.marge):"—"}</b></span><span class="num hide-s">${pct(x.fc)}</span>
+      <span class="vt-lien"><select data-lien="${esc(x.p)}" aria-label="Correspondance de ${esc(x.p)}" class="${x.l?"":"a-relier"}">${optionsLien(valLien(x.l))}</select>${x.l&&x.l.kind==="fixe"?`<input type="text" inputmode="decimal" class="n" data-lcout="${esc(x.p)}" value="${n2.format(num(x.l.cout))}" aria-label="Coût unitaire" title="Coût matière moyen par vente">`:""}</span></div>`});
+  h+=`</div><p class="hint" style="margin:0">Marge = CA HT − coût matière des quantités vendues. Classement : <b>Star</b> se vend bien et rapporte bien, <b>Cheval de labour</b> se vend bien mais rapporte peu, <b>Énigme</b> rapporte bien mais se vend peu, <b>Poids mort</b> ni l'un ni l'autre. Les produits à 0 € (inclus dans une formule) comptent leur coût sans chiffre d'affaires.</p>`;
+  h+=`<details class="card"><summary><b>Détail par jour</b></summary><table class="qtytbl" style="width:100%;margin-top:8px"><thead><tr><th>Jour</th><th class="num">CA TTC</th><th class="num">Couverts</th><th class="num">Panier</th><th class="num">Annul. & corr.</th></tr></thead><tbody>${a.js.slice().reverse().map(j=>`<tr><td>${esc(new Date(j.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}))}</td><td class="num">${eur.format(num(j.ca_ttc))}</td><td class="num">${n2.format(num(j.couverts))}</td><td class="num">${num(j.couverts)?eur.format(num(j.ca_ttc)/num(j.couverts)):"—"}</td><td class="num">${eur.format(num(j.annul)+num(j.corr_apres))}</td></tr>`).join("")}</tbody></table></details>`;
+  return h;
+}
+function ecrireLien(p,data){CM.docs.liens=CM.docs.liens||{};const id=cleLien(p);if(data){data.p=p;CM.docs.liens[id]=data}else delete CM.docs.liens[id];CM.ecrire("liens",id,data).catch(e=>setStatus(e.message,true))}
+async function relierIA(t){
+  const tous={};ventesJours().forEach(j=>(j.lignes||[]).forEach(x=>{if(!lienDe(x.p))tous[x.p]=tous[x.p]||{p:x.p,c:x.c,prix:num(x.q)?num(x.t)/num(x.q):0}}));
+  const vs=Object.values(tous);if(!vs.length)return;
+  const cat=[];Object.entries(state.carte).filter(([,it])=>isFood(it)).forEach(([id,it])=>cat.push(`car:${id} | ${it.name} | ${n2.format(num(it.ttc))} €`));
+  Object.entries(state.boissons).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>cat.push(`boi:${id}:${k} | ${b.name}${f.label?" · "+f.label:""} | ${n2.format(num(f.ttc))} €`)));
+  t.disabled=true;t.textContent="L'IA cherche…";
+  const prompt=`Tu relies les noms de produits d'une caisse de restaurant (L'Addition) aux articles d'une application de coût matière.
+Produits de la caisse (catégorie | nom | prix de vente TTC unitaire) :
+${vs.map(v=>`${v.c} | ${v.p} | ${n2.format(v.prix)} €`).join("\n")}
+
+Articles de l'application (identifiant | nom | prix TTC) :
+${cat.join("\n")}
+
+Pour chaque produit de la caisse, donne l'identifiant de l'article qui correspond au même plat ou à la même boisson dans le même format (verre, 25 cl, 50 cl, bouteille, 1/4, 1/2…). Le prix aide à reconnaître le format. Si rien ne correspond vraiment, mets null : n'invente pas.
+Réponds uniquement en JSON : {"liens":[{"p":"nom exact de la caisse","ref":"identifiant ou null"}]}`;
+  try{const d=await CM.post("ia",{prompt});const ls=(d.resultat&&d.resultat.liens)||[];let n=0;
+    ls.forEach(l=>{if(!l||!tous[l.p]||!l.ref)return;const [k,r,f]=String(l.ref).split(":");
+      if(k==="car"&&state.carte[r]){ecrireLien(l.p,{kind:"car",ref:r,ia:true});n++}
+      else if(k==="boi"&&state.boissons[r]&&(state.boissons[r].formats||[])[num(f)]){ecrireLien(l.p,{kind:"boi",ref:r,k:num(f),ia:true});n++}});
+    setStatus(`${n} produit${n>1?"s":""} relié${n>1?"s":""} par l'IA : vérifie les correspondances dans la liste.`);render()}
+  catch(e){setStatus(e.message,true);t.disabled=false;t.textContent="Relier avec l'IA"}
+}
+main.addEventListener("click",e=>{
+  const p=e.target.closest("[data-vper]");if(p){state.vPer=p.dataset.vper;render();return}
+  const tr=e.target.closest("[data-vtri]");if(tr){state.vTri=tr.dataset.vtri;render();return}
+  const v=e.target.closest("[data-vt]");if(!v)return;
+  if(v.dataset.vt==="ia")relierIA(v);
+  if(v.dataset.vt==="relever"){v.disabled=true;v.textContent="Relève en cours…";CM.post("ventes_relever",{forcer:true}).then(async d=>{setStatus(d.message||"Relève terminée",!d.releve);const c=await CM.post("charger");CM.docs.ventes=c.docs.ventes||{};CM.docs.liens=c.docs.liens||{};render()}).catch(err=>{setStatus(err.message,true);render()})}
+});
+main.addEventListener("change",e=>{
+  const s=e.target.dataset;
+  if(s.lien!=null){const v=e.target.value,p=s.lien,ancien=lienDe(p);
+    if(!v)ecrireLien(p,null);
+    else if(v==="fixe"||v==="ignore"){const x=ventesJours().flatMap(j=>j.lignes||[]).find(y=>y.p===p)||{c:"",p};ecrireLien(p,{kind:v,cout:v==="fixe"?num(ancien&&ancien.cout):0,part:partVente(x,ancien&&ancien.kind!=="car"&&ancien.kind!=="boi"?ancien:null)})}
+    else{const [k,r,f]=v.split(":");ecrireLien(p,k==="car"?{kind:"car",ref:r}:{kind:"boi",ref:r,k:num(f)})}
+    render();return}
+  if(s.lcout!=null){const l=lienDe(s.lcout);if(l){ecrireLien(s.lcout,Object.assign({},l,{cout:num(e.target.value)}));render()}}
+});
+
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
 render();

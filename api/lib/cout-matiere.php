@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-const CM_COLLECTIONS = ['ingredients', 'fiches', 'carte', 'boissons', 'factures', 'set', 'menus', 'alertes'];
+const CM_COLLECTIONS = ['ingredients', 'fiches', 'carte', 'boissons', 'factures', 'set', 'menus', 'alertes', 'ventes', 'liens'];
 const CM_MODELES = ['claude-sonnet-5-5', 'claude-sonnet-4-5', 'claude-3-5-sonnet-latest'];
 
 /* ------------------------------------------------------------------ */
@@ -177,7 +177,8 @@ function cm_importer(array $s): int
 function cm_options(): array
 {
     $o = ['ia_cle' => '', 'ia_modele' => '', 'imap_hote' => 'imap.hostinger.com', 'imap_user' => '', 'imap_mdp' => '',
-        'mail_actif' => false, 'derniere_releve' => '', 'derniere_releve_msg' => ''];
+        'mail_actif' => false, 'derniere_releve' => '', 'derniere_releve_msg' => '',
+        'z_hote' => 'imap.hostinger.com', 'z_user' => 'le76@le76.fr', 'z_mdp' => '', 'z_derniere' => '', 'z_msg' => ''];
     foreach (cm_db()->query('SELECT cle, valeur FROM options') as $l) {
         $o[$l['cle']] = json_decode($l['valeur'], true);
     }
@@ -201,6 +202,7 @@ function cm_options_publiques(bool $admin): array
             'imap_hote' => $o['imap_hote'], 'imap_user' => $o['imap_user'], 'imap_mdp' => $o['imap_mdp'] !== '',
             'mail_actif' => (bool) $o['mail_actif'],
             'derniere_releve' => $o['derniere_releve'], 'derniere_releve_msg' => $o['derniere_releve_msg'],
+            'z_user' => $o['z_user'], 'z_mdp' => $o['z_mdp'] !== '', 'z_msg' => $o['z_msg'],
             'imap_dispo' => function_exists('imap_open'), 'curl_dispo' => function_exists('curl_init'),
         ];
     }
@@ -212,13 +214,17 @@ function cm_options_enregistrer(array $n): void
     if (isset($n['ia_cle']) && is_string($n['ia_cle']) && !str_starts_with($n['ia_cle'], '••••')) {
         cm_option('ia_cle', trim($n['ia_cle']));
     }
-    foreach (['ia_modele', 'imap_hote', 'imap_user'] as $k) {
+    foreach (['ia_modele', 'imap_hote', 'imap_user', 'z_user'] as $k) {
         if (isset($n[$k]) && is_string($n[$k])) {
             cm_option($k, trim($n[$k]));
         }
     }
     if (isset($n['imap_mdp']) && is_string($n['imap_mdp']) && $n['imap_mdp'] !== '') {
         cm_option('imap_mdp', $n['imap_mdp']);
+    }
+    if (isset($n['z_mdp']) && is_string($n['z_mdp']) && $n['z_mdp'] !== '') {
+        cm_option('z_mdp', $n['z_mdp']);
+        cm_option('z_derniere', '');
     }
     if (isset($n['mail_actif'])) {
         cm_option('mail_actif', (bool) $n['mail_actif']);
@@ -565,4 +571,217 @@ function cm_facture_deposer(string $nom, string $b64): array
     cm_ecrire([['coll' => 'factures', 'id' => $id, 'data' => $f]]);
     $f = cm_lire_facture($id, $f);
     return ['doublon' => false, 'id' => $id, 'facture' => $f];
+}
+
+/* ------------------------------------------------------------------ */
+/* Ventes : « Z quotidien » de L'Addition reçu sur le76@le76.fr        */
+/* ------------------------------------------------------------------ */
+
+/** Petit client IMAP (SSL) sans l'extension imap de PHP, pour lire la boîte des Z. */
+function cm_imap_ouvrir(string $hote, string $user, string $mdp)
+{
+    $fp = @stream_socket_client('ssl://' . $hote . ':993', $no, $err, 20, STREAM_CLIENT_CONNECT,
+        stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]));
+    if (!$fp) {
+        throw new RuntimeException("Connexion au serveur mail impossible ($err).");
+    }
+    stream_set_timeout($fp, 30);
+    fgets($fp);
+    $q = fn(string $s) => '"' . addcslashes($s, "\\\"") . '"';
+    [$ok] = cm_imap_cmd($fp, 'LOGIN ' . $q($user) . ' ' . $q($mdp));
+    if (!$ok) {
+        fclose($fp);
+        throw new RuntimeException('La boîte mail refuse l\'identifiant ou le mot de passe.');
+    }
+    [$ok] = cm_imap_cmd($fp, 'EXAMINE INBOX');
+    if (!$ok) {
+        throw new RuntimeException('Impossible d\'ouvrir la boîte de réception.');
+    }
+    return $fp;
+}
+
+/** Envoie une commande et rend [ok, réponse brute] (les blocs {n} sont lus en entier). */
+function cm_imap_cmd($fp, string $cmd): array
+{
+    static $n = 0;
+    $tag = 'A' . (++$n);
+    fwrite($fp, "$tag $cmd\r\n");
+    $rep = '';
+    while (($l = fgets($fp)) !== false) {
+        if (preg_match('/\{(\d+)\}\r\n$/', $l, $m)) {
+            $rep .= $l;
+            $reste = (int) $m[1];
+            while ($reste > 0 && !feof($fp)) {
+                $b = fread($fp, min(65536, $reste));
+                if ($b === false || $b === '') {
+                    break;
+                }
+                $rep .= $b;
+                $reste -= strlen($b);
+            }
+            continue;
+        }
+        if (str_starts_with($l, "$tag ")) {
+            return [(bool) preg_match('/^' . $tag . ' OK/i', $l), $rep];
+        }
+        $rep .= $l;
+    }
+    return [false, $rep];
+}
+
+/** Extrait la partie HTML (ou texte) d'un message brut, décodée en UTF-8. */
+function cm_mime_corps(string $brut): array
+{
+    $sep = strpos($brut, "\r\n\r\n");
+    $sep = $sep === false ? strpos($brut, "\n\n") : $sep;
+    $tete = $sep === false ? $brut : substr($brut, 0, $sep);
+    $corps = $sep === false ? '' : ltrim(substr($brut, $sep), "\r\n");
+    $tete = preg_replace('/\r?\n[ \t]+/', ' ', $tete);
+    $h = fn(string $nom) => preg_match('/^' . $nom . ':\s*(.*)$/mi', $tete, $m) ? trim($m[1]) : '';
+    $type = strtolower($h('Content-Type') ?: 'text/plain');
+    if (str_starts_with($type, 'multipart/') && preg_match('/boundary="?([^";]+)"?/i', $h('Content-Type'), $m)) {
+        $html = $texte = '';
+        foreach (explode('--' . $m[1], $corps) as $part) {
+            if (trim($part) === '' || str_starts_with($part, '--')) {
+                continue;
+            }
+            [$ph, $pt] = cm_mime_corps(ltrim($part, "\r\n"));
+            $html = $html ?: $ph;
+            $texte = $texte ?: $pt;
+        }
+        return [$html, $texte];
+    }
+    $enc = strtolower($h('Content-Transfer-Encoding'));
+    if ($enc === 'base64') {
+        $corps = (string) base64_decode(preg_replace('/\s+/', '', $corps));
+    } elseif ($enc === 'quoted-printable') {
+        $corps = quoted_printable_decode($corps);
+    }
+    if (preg_match('/charset="?([\w-]+)"?/i', $type, $m) && strtolower($m[1]) !== 'utf-8') {
+        $corps = (string) @mb_convert_encoding($corps, 'UTF-8', $m[1]);
+    }
+    return str_starts_with($type, 'text/html') ? [$corps, ''] : (str_starts_with($type, 'text/plain') ? ['', $corps] : ['', '']);
+}
+
+/** Lit un « Z quotidien » (HTML ou texte) : chiffres du jour et ventes produit par produit. */
+function cm_z_lire(string $html, string $texte, string $sujet = ''): ?array
+{
+    $lignes = [];
+    if ($html !== '') {
+        $d = new DOMDocument();
+        @$d->loadHTML('<?xml encoding="utf-8"?>' . $html);
+        foreach ($d->getElementsByTagName('tr') as $tr) {
+            $c = [];
+            foreach ($tr->childNodes as $td) {
+                if ($td instanceof DOMElement && in_array(strtolower($td->tagName), ['td', 'th'], true)) {
+                    $c[] = trim(preg_replace('/\s+/u', ' ', $td->textContent));
+                }
+            }
+            $lignes[] = $c;
+        }
+        $texte = trim(preg_replace('/\s+/u', ' ', $d->textContent));
+    } else {
+        foreach (preg_split('/\r?\n/', $texte) as $l) {
+            if (str_contains($l, '|')) {
+                $lignes[] = array_map('trim', array_slice(explode('|', trim(trim($l), '|')), 0));
+            }
+        }
+        $texte = preg_replace('/\s+/u', ' ', $texte);
+    }
+    $date = preg_match('/(\d{4}-\d{2}-\d{2})\)/', $sujet, $m) || preg_match('/journ[ée]e du (\d{4}-\d{2}-\d{2})/u', $texte, $m) ? $m[1] : '';
+    if ($date === '') {
+        return null;
+    }
+    $nb = function (string $etiquette) use ($texte): float {
+        return preg_match('/' . $etiquette . '\s*:\s*(-?[\d  \x{202F}]*\d(?:[.,]\d+)?)/u', $texte, $m)
+            ? (float) str_replace([' ', ' ', "\u{202F}", ','], ['', '', '', '.'], $m[1]) : 0.0;
+    };
+    $ventes = [];
+    $dans = false;
+    foreach ($lignes as $c) {
+        $c = array_values(array_filter($c, fn($x) => $x !== '' || true));
+        if (count($c) >= 3 && preg_match('/^Produit/i', $c[1] ?? '')) {
+            $dans = count($c) >= 5 && !preg_match('/200 max/i', $c[1]);
+            continue;
+        }
+        if (!$dans || count($c) < 5) {
+            continue;
+        }
+        $num = fn($x) => (float) str_replace([' ', ' ', ','], ['', '', '.'], $x);
+        if (!is_numeric(str_replace([' ', ' ', ','], ['', '', '.'], $c[2]))) {
+            continue;
+        }
+        $ventes[] = ['c' => $c[0], 'p' => $c[1], 'q' => $num($c[2]), 't' => $num($c[3]), 'h' => $num($c[4])];
+    }
+    return [
+        'date' => $date, 'ca_ttc' => $nb('CA TTC'), 'ca_ht' => $nb('CA HT'), 'couverts' => $nb('Couvert\(s\)'),
+        'panier' => $nb('Panier moyen'), 'ticket' => $nb('Ticket moyen'), 'remises' => $nb('Remises'), 'offerts' => $nb('Offerts'),
+        'corr_avant' => $nb('Corrections avant envoi en cuisine'), 'corr_apres' => $nb('Corrections après envoi en cuisine'),
+        'annul' => $nb('Annulations cuisine après ticket de caisse \/ fermeture de commande'),
+        'lignes' => $ventes, 'recu' => maintenant(),
+    ];
+}
+
+/** Relève les Z des 45 derniers jours absents de l'appli. Au plus toutes les 30 minutes, sauf demande explicite. */
+function cm_relever_ventes(bool $forcer = false): array
+{
+    $o = cm_options();
+    $user = (string) ($o['z_user'] ?? '') ?: 'le76@le76.fr';
+    if (($o['z_mdp'] ?? '') === '') {
+        return ['releve' => false, 'message' => 'Indique le mot de passe de la boîte ' . $user . ' dans les Réglages.'];
+    }
+    if (!$forcer && ($o['z_derniere'] ?? '') !== '' && strtotime($o['z_derniere']) > time() - 1800) {
+        return ['releve' => false, 'message' => (string) ($o['z_msg'] ?? '')];
+    }
+    cm_option('z_derniere', maintenant());
+    @set_time_limit(120);
+    try {
+        $fp = cm_imap_ouvrir((string) ($o['z_hote'] ?? '') ?: 'imap.hostinger.com', $user, (string) $o['z_mdp']);
+        [, $r] = cm_imap_cmd($fp, 'UID SEARCH SINCE ' . date('d-M-Y', strtotime('-45 days')) . ' SUBJECT "Z quotidien"');
+        $uids = preg_match('/\* SEARCH([\d ]*)/', $r, $m) ? array_filter(array_map('intval', explode(' ', trim($m[1])))) : [];
+        [$deja] = cm_tout();
+        $deja = $deja['ventes'] ?? [];
+        $nouveaux = 0;
+        foreach (array_reverse($uids) as $uid) {
+            [, $t] = cm_imap_cmd($fp, "UID FETCH $uid (BODY.PEEK[HEADER.FIELDS (SUBJECT)])");
+            $sujet = preg_match('/Subject:\s*(.+)/i', $t, $m) ? iconv_mime_decode(trim($m[1]), ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8') : '';
+            if (preg_match('/(\d{4}-\d{2}-\d{2})\)/', (string) $sujet, $m) && isset($deja[$m[1]]) && !$forcer) {
+                continue;
+            }
+            [, $b] = cm_imap_cmd($fp, "UID FETCH $uid (BODY.PEEK[])");
+            $p = strpos($b, "}\r\n");
+            if ($p === false) {
+                continue;
+            }
+            [$html, $texte] = cm_mime_corps(substr($b, $p + 3));
+            $z = cm_z_lire($html, $texte, (string) $sujet);
+            if ($z && ($z['lignes'] || $z['ca_ttc'] > 0)) {
+                cm_ecrire([['coll' => 'ventes', 'id' => $z['date'], 'data' => $z]]);
+                $deja[$z['date']] = $z;
+                $nouveaux++;
+            }
+        }
+        cm_imap_cmd($fp, 'LOGOUT');
+        fclose($fp);
+        $msg = $nouveaux ? "$nouveaux journée" . ($nouveaux > 1 ? 's' : '') . ' de ventes ajoutée' . ($nouveaux > 1 ? 's' : '') . '.' : 'Aucun nouveau Z.';
+    } catch (Throwable $e) {
+        $msg = $e->getMessage();
+        cm_option('z_msg', $msg);
+        return ['releve' => false, 'message' => $msg];
+    }
+    cm_option('z_msg', $msg . ' (' . date('d/m H:i') . ')');
+    return ['releve' => true, 'nouveaux' => $nouveaux, 'message' => $msg];
+}
+
+/** Ajoute des journées de ventes depuis un fichier (reprise de l'historique). */
+function cm_ventes_importer(array $v): int
+{
+    $e = [];
+    foreach ($v as $id => $d) {
+        if (is_array($d) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $id) && isset($d['lignes'])) {
+            $e[] = ['coll' => 'ventes', 'id' => (string) $id, 'data' => $d];
+        }
+    }
+    $e && cm_ecrire($e);
+    return count($e);
 }
