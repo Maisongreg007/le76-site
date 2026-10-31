@@ -19,6 +19,9 @@
 <!-- Habillage Halloween : s'enlève tout seul le dimanche 1er novembre à midi -->
 <link rel="stylesheet" href="/saisons/halloween.css?v=1">
 <script>if (Date.now() < Date.parse("2026-11-01T12:00:00+01:00") || /[?&]halloween\b/.test(location.search)) document.documentElement.classList.add("halloween");</script>
+<!-- Habillage de novembre « 10 ans » : du dimanche 1er novembre midi au 28 novembre minuit (aperçu : ?novembre) -->
+<link rel="stylesheet" href="/saisons/novembre.css?v=1">
+<script>(function () { var n = Date.now(), q = location.search; if ((!/[?&]halloween\b/.test(q) && n >= Date.parse("2026-11-01T12:00:00+01:00") && n < Date.parse("2026-11-29T00:00:00+01:00")) || /[?&]novembre\b/.test(q)) { document.documentElement.classList.add("novembre"); document.documentElement.classList.remove("halloween"); } })();</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232b1d16'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='32' font-weight='700' fill='%23d4953f' text-anchor='middle'%3E76%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -681,5 +684,6 @@
   })();
 </script>
 <script src="/saisons/halloween.js?v=1" defer></script>
+<script src="/saisons/novembre.js?v=1" defer></script>
 </body>
 </html>

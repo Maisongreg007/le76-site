@@ -1,0 +1,66 @@
+/*
+ * Habillage de novembre « Le 76 fête ses 10 ans » (le76.fr et le76.fr/de/).
+ * Ne s'applique que si <html> a la classe « novembre », posée par le petit script de l'en-tête
+ * du dimanche 1er novembre à midi (fin d'Halloween) au samedi 28 novembre à minuit.
+ * Ensuite, le site reprend son apparence habituelle tout seul.
+ * Aperçu à tout moment : le76.fr/?novembre
+ */
+html.novembre {
+  --rust: #8c6420;        /* boutons et titres : doré foncé */
+  --rust-dark: #6c4c16;
+  --orange: #a8782a;
+  --gold: #b8892f;
+  --gold-light: #e2bd6e;
+}
+
+/* ----- Haut de page : crème plus chaud, lumière dorée ----- */
+html.novembre .hero {
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(226,189,110,.22), transparent 55%),
+    radial-gradient(ellipse at 88% 92%, rgba(140,100,32,.12), transparent 50%),
+    #fbf4e6;
+}
+html.novembre .logo-xl .note { color: var(--rust); }
+html.novembre .logo-xl span {
+  background: linear-gradient(180deg, #e9c87e 0%, #b8892f 55%, #8c6420 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Les feuilles d'automne deviennent dorées et plus discrètes */
+html.novembre .hero .leaves svg { opacity: .55; }
+
+/* ----- Le tampon « Depuis 2016 · 10 ans » ----- */
+.nv-sceau { position: absolute; z-index: 3; width: 132px; height: 132px; top: -34px; right: -30px; pointer-events: none;
+  filter: drop-shadow(0 10px 22px rgba(74,44,29,.28)); }
+.nv-sceau .tourne { transform-origin: 50% 50%; animation: nv-tourne 40s linear infinite; }
+.nv-sceau.seul { position: relative; top: auto; right: auto; display: block; margin: 18px 0 0; width: 112px; height: 112px; }
+.hero.no-photo .nv-sceau.seul { margin-left: auto; margin-right: auto; }
+@keyframes nv-tourne { to { transform: rotate(360deg); } }
+@media (max-width: 860px) { .nv-sceau { width: 104px; height: 104px; top: -26px; right: -14px; } }
+
+/* ----- Paillettes dorées qui tombent doucement dans le haut de page ----- */
+.nv-paillettes { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.nv-paillettes i { position: absolute; top: -12px; display: block; border-radius: 50%;
+  background: radial-gradient(circle, #fff6dc 0, #e2bd6e 45%, rgba(184,137,47,0) 72%);
+  animation: nv-tombe linear infinite; opacity: 0; }
+.nv-paillettes i.losange { border-radius: 2px; transform: rotate(45deg);
+  background: linear-gradient(135deg, #f3dc9f, #b8892f); }
+@keyframes nv-tombe {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: .9; }
+  85% { opacity: .75; }
+  100% { transform: translate(var(--dx, 20px), 92vh) rotate(220deg); opacity: 0; }
+}
+
+/* ----- Le bandeau des 10 ans : un liseré doré qui brille ----- */
+html.novembre .dix .box { box-shadow: 0 24px 60px rgba(74,44,29,.22); }
+html.novembre .dix .box::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(226,189,110,.16) 50%, transparent 65%);
+  background-size: 250% 100%; animation: nv-reflet 6s ease-in-out infinite; }
+@keyframes nv-reflet { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+html.novembre .dix .box > * { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nv-paillettes { display: none; }
+  .nv-sceau .tourne, html.novembre .dix .box::before { animation: none !important; }
+}
