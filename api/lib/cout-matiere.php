@@ -792,7 +792,7 @@ function cm_relever_ventes(bool $forcer = false): array
         [, $r] = cm_imap_cmd($fp, 'UID SEARCH SINCE ' . date('d-M-Y', strtotime('-60 days')) . ' TEXT "Z quotidien"');
         $uids = preg_match('/\* SEARCH([\d ]*)/', $r, $m) ? array_filter(array_map('intval', explode(' ', trim($m[1])))) : [];
         [$deja] = cm_tout();
-        $deja = $deja['ventes'] ?? [];
+        $deja = (array) ($deja['ventes'] ?? []);
         $nouveaux = 0;
         foreach (array_reverse($uids) as $uid) {
             [, $t] = cm_imap_cmd($fp, "UID FETCH $uid (BODY.PEEK[HEADER.FIELDS (SUBJECT)])");
