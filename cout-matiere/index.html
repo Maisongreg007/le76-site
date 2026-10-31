@@ -696,7 +696,7 @@ function bandeauFactures(part){if(CM.lecture)return "";const n=facturesDe(part).
 function summaryHtml(){return bandeauFactures("cuisine")+renderAlertes("cuisine")+bilanHtml()}
 function renderCarte(){
   const items=Object.entries(state.carte).filter(([,it])=>isFood(it)).map(([id,it])=>({id,it,c:calcItem(it)}));
-  let h=(items.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-car" data-cq="car" placeholder="Rechercher un plat… (ex. onglet, tarte, burger)" value="${esc(state.cq_car||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-car-n" style="margin:0;white-space:nowrap"></span></div>`:"")+summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button></div></div>`+renderMenuImport()+`<div class="list" id="cq-list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
+  let h=(items.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-car" data-cq="car" placeholder="Rechercher un plat… (ex. onglet, tarte, burger)" value="${esc(state.cq_car||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-car-n" style="margin:0;white-space:nowrap"></span></div>`:"")+summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button>${items.length?boutonsExport("carte"):""}</div></div>`+renderMenuImport()+`<div class="list" id="cq-list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
   if(!items.length) return h+`<div class="empty">Votre carte est vide. Importez votre menu (PDF ou photo) pour créer tous vos articles d'un coup, ou ajoutez-les un par un.</div></div>`;
   FOOD_SECTIONS.forEach(sec=>{
     const g=items.filter(x=>(FOOD_SECTIONS.includes(x.it.section)?x.it.section:"Autre")===sec).sort((a,b)=>(a.it.name||"").localeCompare(b.it.name||"","fr"));
@@ -905,7 +905,7 @@ function renderFicheCalc(f){
 function renderIngredients(){
   const part=state.view==="bingredients"?"bar":"cuisine";
   const ings=Object.entries(state.ingredients).filter(([id,i])=>ingPart(id,i)[part]).sort(byName);
-  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-cm="deposer">Ajouter des factures</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button></div></div>
+  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-cm="deposer">Ajouter des factures</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button>${ings.length?boutonsExport(part==="bar"?"bingredients":"ingredients"):""}</div></div>
   <p class="hint" style="margin:0">Prix d'achat HT. La perte (épluchage, parage, cuisson) augmente le coût réel de ce que vous servez. Elle se remplit toute seule avec vos fiches et vos factures ; vous n'avez qu'à vérifier. Les allergènes saisis ici remontent dans toutes les fiches.</p>`+renderImport()+(state.imp?"":renderFactures(part));
   if(!ings.length) return h+`<div class="list"><div class="empty">Aucun ingrédient. Importez une facture fournisseur pour remplir la mercuriale automatiquement.</div></div>`;
   const sups=[...new Set(ings.map(([,i])=>i.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
@@ -1193,7 +1193,7 @@ function srcOptions(f){
 }
 function renderBoissons(){
   const bs=Object.entries(state.boissons);
-  let h=(bs.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-boi" data-cq="boi" placeholder="Rechercher une boisson… (ex. spritz, merlot, pression)" value="${esc(state.cq_boi||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-boi-n" style="margin:0;white-space:nowrap"></span></div>`:"")+`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button></div></div>
+  let h=(bs.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-boi" data-cq="boi" placeholder="Rechercher une boisson… (ex. spritz, merlot, pression)" value="${esc(state.cq_boi||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-boi-n" style="margin:0;white-space:nowrap"></span></div>`:"")+`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button>${bs.length?boutonsExport("boissons"):""}</div></div>
   <p class="hint" style="margin:0">Chaque boisson a un ou plusieurs formats (verre, bouteille, pichet…). L'app calcule le coût de chaque format et propose un prix de vente selon le coefficient de sa famille. TVA : 20 % avec alcool, 10 % sans alcool.</p>`;
   h+=bandeauFactures("bar")+renderAlertes("bar")+bilanBar();
   if(state.coefOpen)h+=`<section class="card"><div class="coefs">${BCATS.map(c=>`<label class="f"><span class="lbl">${esc(c)}</span><span class="target"><span>×</span><input type="text" inputmode="decimal" class="n" id="coef-${esc(c)}" data-coef="${esc(c)}" value="${n2.format(coefFor(c))}"></span></label>`).join("")}</div><p class="hint">Coefficient visé = prix HT ÷ coût. Exemple : ×5 sur un cocktail qui coûte 2 € donne 10 € HT, soit 12 € TTC à 20 %.</p></section>`;
@@ -1799,7 +1799,7 @@ const valLien=l=>!l?"":l.kind==="car"?"car:"+l.ref:l.kind==="boi"?"boi:"+l.ref+"
 function renderVentes(part){
   const o=CM.options||{},js=ventesJours();
   if(!state.zTente&&o.z_mdp){state.zTente=true;CM.post("ventes_relever",{}).then(d=>{if(d.nouveaux)setStatus(d.message)}).catch(()=>{})}
-  let h=`<div class="toolbar"><h2>Ventes & marge réelle</h2><div class="acts"><button class="btn ghost" data-vt="relever">Relever les Z</button></div></div>`;
+  let h=`<div class="toolbar"><h2>Ventes & marge réelle</h2><div class="acts">${js.length?boutonsExport(part==="bar"?"bventes":"ventes"):""}<button class="btn ghost" data-vt="relever">Relever les Z</button></div></div>`;
   if(!js.length)return h+`<section class="card"><p style="margin:0">Les ventes arrivent toutes seules avec le « Z quotidien » que L'Addition envoie chaque jour à <b>${esc(o.z_user||"le76@le76.fr")}</b>.</p><p class="hint">${o.z_mdp?esc(o.z_msg||"En attente du premier Z."):`Pour commencer, indique le mot de passe de cette boîte dans les <button class="lnk" data-tab-go="reglages">Réglages</button>.`}</p></section>`;
   const a=analyseVentes(part),bar=part==="bar",per=PERIODES.find(p=>p[0]===(state.vPer||"mois"))[1];
   const d1=a.js[0]?.date,d2=a.js[a.js.length-1]?.date,fd=d=>new Date(d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
@@ -1862,6 +1862,63 @@ main.addEventListener("change",e=>{
     render();return}
   if(s.lcout!=null){const l=lienDe(s.lcout);if(l){ecrireLien(s.lcout,Object.assign({},l,{cout:num(e.target.value)}));render()}}
 });
+
+/* ---------- Exports : Excel (CSV) et impression pour l'équipe ---------- */
+const xn=(v,d=2)=>v==null||!isFinite(v)?"":(+v).toFixed(d).replace(".",",");
+const xp=v=>v==null||!isFinite(v)?"":(v*100).toFixed(1).replace(".",",")+" %";
+function dsVentes(part){
+  const a=analyseVentes(part),per=PERIODES.find(p=>p[0]===(state.vPer||"mois"))[1];
+  const d1=a.js[0]?.date,d2=a.js[a.js.length-1]?.date,fd=d=>d?new Date(d).toLocaleDateString("fr-FR"):"";
+  return {titre:`Ventes ${part==="bar"?"bar":"repas"} · ${per.toLowerCase()}${d1?` (${fd(d1)} au ${fd(d2)})`:""}`,fichier:`ventes-${part==="bar"?"bar":"repas"}`,
+    sous:`Marge brute ${eur.format(a.marge)} HT · ${part==="bar"?"coût des boissons":"food cost réel"} ${pct(a.fc)} · CA ${eur.format(a.ht)} HT`,
+    cols:["Produit","Catégorie caisse","Correspond à","Vendus","CA HT","Coût / vente","Marge / vente","Marge totale",part==="bar"?"Coût %":"Food cost","Classement","Conseil"],
+    num:[3,4,5,6,7,8],
+    rows:a.ps.slice().sort((x,y)=>(y.marge??-1e9)-(x.marge??-1e9)).map(x=>{const c=x.classe&&CLASSES[x.classe];
+      return [x.p,x.c,nomLien(x.l)||(x.l&&x.l.kind==="ignore"?"non compté":"à relier"),xn(x.q,0),xn(x.ht),xn(x.cu),xn(x.mu),xn(x.marge),xp(x.fc),c?c[0]:"",c?c[2]:""]})};
+}
+function dsCarte(){
+  const rows=[];FOOD_SECTIONS.forEach(sec=>Object.values(state.carte).filter(it=>isFood(it)&&(FOOD_SECTIONS.includes(it.section)?it.section:"Autre")===sec).sort((a,b)=>(a.name||"").localeCompare(b.name||"","fr")).forEach(it=>{const c=calcItem(it),f=state.fiches[it.fiche];
+    rows.push([sec,it.name||"",f?f.name:"",xn(c.cp),xn(num(it.ttc)),xn(num(it.tva),1)+" %",c.coef?xn(c.coef):"",xp(c.fc),ST[c.st]||""])}));
+  return {titre:"Carte des repas",fichier:"carte-des-repas",sous:`Objectif food cost ${n2.format(num(state.settings.target))} %`,cols:["Rubrique","Article","Fiche technique","Coût matière","Prix TTC","TVA","Coef.","Food cost","État"],num:[3,4,6,7],rows};
+}
+function dsBoissons(){
+  const rows=[];BCATS.forEach(cat=>Object.values(state.boissons).filter(b=>(BCATS.includes(b.category)?b.category:"Sans alcool")===cat).sort((a,b)=>(a.name||"").localeCompare(b.name||"","fr")).forEach(b=>(b.formats||[]).forEach(f=>{const c=calcFormat(b,f);
+    rows.push([cat,b.name||"",f.label||"",xn(c.cost),xn(num(f.ttc)),c.tva+" %",c.coef?xn(c.coef):"",xn(c.target),c.sugg?xn(c.sugg):"",BST[c.st]||""])})));
+  return {titre:"Carte des boissons",fichier:"carte-des-boissons",sous:"",cols:["Famille","Boisson","Format","Coût","Prix TTC","TVA","Coef.","Coef. visé","Prix conseillé","État"],num:[3,4,6,7,8],rows};
+}
+function dsMercuriale(part){
+  const rows=Object.entries(state.ingredients).filter(([id,i])=>ingPart(id,i)[part]).sort(byName).map(([,i])=>[i.name||"",i.supplier||"",xn(num(i.price),4),"€ / "+(UNITS[i.unit]?.label||i.unit||""),num(i.packQty)>1?xn(num(i.packQty),2):"",num(i.packPrice)>0?xn(num(i.packPrice)):"",num(i.loss)?xn(num(i.loss),0)+" %":"",(i.allergens||[]).join(", ")]);
+  return {titre:part==="bar"?"Mercuriale bar":"Mercuriale cuisine",fichier:part==="bar"?"mercuriale-bar":"mercuriale-cuisine",sous:"Prix d'achat HT",cols:["Produit","Fournisseur","Prix HT","Unité","Colis (qté)","Prix du colis","Perte","Allergènes"],num:[2,4,5],rows};
+}
+function exporterCSV(ds){
+  const q=v=>{const s=String(v??"");return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const txt="﻿"+[ds.cols,...ds.rows].map(r=>r.map(q).join(";")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"}));
+  a.download=`${ds.fichier}-le76-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+  setStatus("Fichier téléchargé : il s'ouvre dans Excel ou Numbers");
+}
+function imprimerListe(ds){
+  const w=window.open("","_blank");if(!w){setStatus("Autorise les fenêtres pop-up pour imprimer",true);return}
+  const nums=new Set(ds.num||[]);
+  w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(ds.titre)} · Le 76</title><style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:#1d1d1f;margin:28px;font-size:11.5px}
+  h1{font-size:20px;margin:0 0 2px;letter-spacing:-.02em}.sous{color:#6e6e73;margin:0 0 14px}
+  table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#6e6e73;border-bottom:1.5px solid #1d1d1f;padding:6px 6px}
+  td{padding:6px;border-bottom:.5px solid #d2d2d7;vertical-align:top}td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  tr{page-break-inside:avoid}.pied{margin-top:14px;color:#86868b;font-size:10px}.notes{width:110px}
+  @page{size:A4 landscape;margin:12mm}</style></head><body>
+  <h1>${esc(ds.titre)}</h1><p class="sous">Restaurant Le 76${ds.sous?" · "+esc(ds.sous):""} · imprimé le ${new Date().toLocaleDateString("fr-FR")}</p>
+  <table><thead><tr>${ds.cols.map((c,k)=>`<th class="${nums.has(k)?"n":""}">${esc(c)}</th>`).join("")}<th class="notes">À corriger</th></tr></thead>
+  <tbody>${ds.rows.map(r=>`<tr>${r.map((v,k)=>`<td class="${nums.has(k)?"n":""}">${esc(v)}</td>`).join("")}<td></td></tr>`).join("")}</tbody></table>
+  <p class="pied">${ds.rows.length} ligne${ds.rows.length>1?"s":""} · Coût matière Le 76</p>
+  <script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script></body></html>`);
+  w.document.close();
+}
+const boutonsExport=k=>`<button class="btn ghost" data-exp="${k}:csv" title="Télécharger pour Excel ou Numbers">Excel</button><button class="btn ghost" data-exp="${k}:print">Imprimer</button>`;
+main.addEventListener("click",e=>{const b=e.target.closest("[data-exp]");if(!b)return;const [k,how]=b.dataset.exp.split(":");
+  const ds=k==="ventes"?dsVentes("cuisine"):k==="bventes"?dsVentes("bar"):k==="carte"?dsCarte():k==="boissons"?dsBoissons():k==="ingredients"?dsMercuriale("cuisine"):dsMercuriale("bar");
+  if(!ds.rows.length){setStatus("Rien à exporter pour l'instant",true);return}
+  how==="csv"?exporterCSV(ds):imprimerListe(ds)});
 
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
