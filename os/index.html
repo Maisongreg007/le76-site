@@ -192,6 +192,11 @@ input[type=range]{width:100%;accent-color:var(--btn);margin:2px 0 6px}
 .tcard{text-align:left;font:inherit;color:inherit;cursor:pointer;transition:border-color .2s,box-shadow .2s}
 .tcard:hover{border-color:var(--accent)}
 .tcard.feat{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.story{margin-top:34px;padding:26px;border-radius:22px;background:#fff;box-shadow:0 2px 18px rgba(0,0,0,.08)}
+.story p{font-size:17px;line-height:1.55;margin:12px 0}
+.story-calc{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+.story-calc>div{flex:1 1 150px;background:var(--bg2);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.story-calc b{font-size:26px;letter-spacing:-.02em}
 .shots{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin:14px 0 18px}
 .shot{margin:0;background:#fff;border-radius:18px;box-shadow:0 2px 18px rgba(0,0,0,.10);overflow:hidden;border:1px solid rgba(0,0,0,.06)}
 .shot.d{flex:1 1 460px;max-width:100%}.shot.p{flex:0 1 250px;max-width:100%}
@@ -1047,6 +1052,17 @@ function realHTML(id){
    +'<div class="shots">'+r.s.map(x=>'<figure class="shot '+(x[1]==='d'?'d':'p')+'"><img src="/os/img/'+x[0]+'.jpg" alt="'+x[2]+'"><figcaption>'+x[2]+'</figcaption></figure>').join('')+'</div>'
    +'<a class="btn" href="'+r.u+'" target="_blank" rel="noopener">Essayer le vrai module ↗</a>';
 }
+function storyHTML(id){
+  if(id!=='cout') return '';
+  return '<div class="story"><p class="eyebrow">Une histoire de restaurateur</p><h2 class="tp-h" style="margin-top:6px">Marc ne perdait pas d’argent. Il ne savait pas où il en perdait.</h2>'
+   +'<p>Marc tient un restaurant de 45 couverts. Il dépense environ 7 500 € de marchandises par mois, soit 90 000 € par an. Sa carte n’a pas bougé depuis deux ans, mais ses fournisseurs, eux, ont augmenté de 6 % en douceur, une facture après l’autre. Personne ne lui a envoyé d’alerte.</p>'
+   +'<p>Il saisit ses plats dans l’outil coût matière et fixe son food cost cible à 30 %. Le premier soir, il voit que ses plats les plus vendus sont passés à 33 %, et l’outil lui propose le nouveau prix à la carte pour chacun. Il corrige quelques prix de 0,50 à 1 €, pas plus. Aucun client ne s’en plaint.</p>'
+   +'<div class="story-calc"><div><span class="sub">Perdu en un an sans rien changer</span><b>5 400 €</b><span class="sub">6 % de 90 000 €</span></div>'
+   +'<div><span class="sub">Récupéré avec les nouveaux prix</span><b>≈ 5 400 €</b><span class="sub">si les ventes restent stables</span></div>'
+   +'<div><span class="sub">Coût de l’outil</span><b>250 €</b><span class="sub">par an, formule annuelle</span></div></div>'
+   +'<p><b>Au final, Marc garde environ 5 150 € de plus par an.</b> Et la prochaine augmentation, il la voit le jour même, pas deux ans après.</p>'
+   +'<p class="sub fic">Exemple illustratif : restaurant fictif, chiffres calculés avec les hypothèses ci-dessus (6 % d’augmentation, ventes stables). Ce n’est pas un témoignage client. Vos chiffres dépendent de votre carte.</p></div>';
+}
 function toolPage(id){
   const t=TOOLS.find(x=>x.id===id), m=MODS[id], on=SEL.has(id);
   let extra='';
@@ -1056,6 +1072,7 @@ function toolPage(id){
    +'<button type="button" class="back" data-go="home" data-scroll="#outils">‹ Tous les outils</button>'
    +'<div class="tp-head"><p class="eyebrow">'+CAT_NAME[CAT_OF[id]]+'</p><h1 class="tp-title">'+m.name+'</h1>'+(m.ai?'<span class="pill ai">IA incluse</span>':'')+'<p class="lead2">'+t.intro+'</p></div>'
    +extra
+   +storyHTML(id)
    +realHTML(id)
    +'<h2 class="tp-h">Comment ça marche</h2><ol class="steps">'+t.how.map(x=>'<li>'+x+'</li>').join('')+'</ol>'
    +'<h2 class="tp-h">Ce que ça change</h2><ul class="inc">'+t.gain.map(x=>'<li>'+x+'</li>').join('')+'</ul>'
