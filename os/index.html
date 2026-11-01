@@ -185,6 +185,11 @@ input[type=range]{width:100%;accent-color:var(--btn);margin:2px 0 6px}
 .tcard{text-align:left;font:inherit;color:inherit;cursor:pointer;transition:border-color .2s,box-shadow .2s}
 .tcard:hover{border-color:var(--accent)}
 .tcard.feat{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.shots{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin:14px 0 18px}
+.shot{margin:0;background:#fff;border-radius:18px;box-shadow:0 2px 18px rgba(0,0,0,.10);overflow:hidden;border:1px solid rgba(0,0,0,.06)}
+.shot.d{flex:1 1 460px;max-width:100%}.shot.p{flex:0 1 250px;max-width:100%}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{font-size:13px;color:#6e6e73;padding:9px 12px}
 .demo-box{margin-top:28px}
 .dm{display:grid;gap:14px;grid-template-columns:1fr}
 @media (min-width:820px){.dm.two{grid-template-columns:1fr 1fr}}
@@ -1018,6 +1023,23 @@ DEMOS.pain={intro:'Précommandez comme un campeur : vous recevez un bon à prés
    +'<p class="sub">Récapitulée chaque soir : plus de pertes, plus de queue.</p></div></div>';
  }};
 
+const REAL={
+ cout:{u:'/demo/cout-matiere/',s:[['cout','p','Carte des repas : food cost de chaque plat']]},
+ scan:{u:'/demo/scan/',s:[['scan','p','Photographier, classer, retrouver']]},
+ resa:{u:'/demo/reserver/',s:[['resa','p','Page client'],['carnet','p','Carnet de l’équipe']]},
+ club:{u:'/demo/club/',s:[['club','p','Carte du club du client']]},
+ haccp:{u:'/demo/hygiene/',s:[['hygiene','d','Registre hygiène du jour']]},
+ planning:{u:'/demo/personnel/admin.php',s:[['planning','d','Tableau du jour et demandes de congé'],['pointeuse','d','Pointeuse de l’équipe']]},
+ caisse:{u:'/demo/caisse/',s:[['caisse','d','Journal de caisse']]},
+ golf:{u:'/demo/camping/',s:[['golf','p','Commande du campeur']]},
+ pain:{u:'/demo/pain/',s:[['pain','p','Commande client'],['pain-equipe','d','Espace équipe']]}
+};
+function realHTML(id){
+  const r=REAL[id]; if(!r) return '';
+  return '<h2 class="tp-h">Le vrai module, en action</h2><p class="sub">Captures de l’application telle qu’elle tourne, avec des données fictives.</p>'
+   +'<div class="shots">'+r.s.map(x=>'<figure class="shot '+(x[1]==='d'?'d':'p')+'"><img src="/os/img/'+x[0]+'.jpg" alt="'+x[2]+'" loading="lazy"><figcaption>'+x[2]+'</figcaption></figure>').join('')+'</div>'
+   +'<a class="btn" href="'+r.u+'" target="_blank" rel="noopener">Essayer le vrai module ↗</a>';
+}
 function toolPage(id){
   const t=TOOLS.find(x=>x.id===id), m=MODS[id], on=SEL.has(id);
   let extra='';
@@ -1027,6 +1049,7 @@ function toolPage(id){
    +'<button type="button" class="back" data-go="home" data-scroll="#outils">‹ Tous les outils</button>'
    +'<div class="tp-head"><p class="eyebrow">'+CAT_NAME[CAT_OF[id]]+'</p><h1 class="tp-title">'+m.name+'</h1>'+(m.ai?'<span class="pill ai">IA incluse</span>':'')+'<p class="lead2">'+t.intro+'</p></div>'
    +extra
+   +realHTML(id)
    +'<h2 class="tp-h">Comment ça marche</h2><ol class="steps">'+t.how.map(x=>'<li>'+x+'</li>').join('')+'</ol>'
    +'<h2 class="tp-h">Ce que ça change</h2><ul class="inc">'+t.gain.map(x=>'<li>'+x+'</li>').join('')+'</ul>'
    +'<h2 class="tp-h">À associer avec</h2><div class="chips">'+t.links.map(l=>'<button type="button" class="chip" data-tool="'+l+'">'+MODS[l].name+'</button>').join('')+'</div>'
