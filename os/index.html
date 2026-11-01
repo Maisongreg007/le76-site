@@ -186,6 +186,53 @@ input[type=range]{width:100%;accent-color:var(--btn);margin:2px 0 6px}
 .tcard:hover{border-color:var(--accent)}
 .tcard.feat{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .demo-box{margin-top:28px}
+.dm{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:820px){.dm.two{grid-template-columns:1fr 1fr}}
+.dm .panel{gap:12px}
+.dm h4{margin:0;font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1px solid var(--line);background:transparent;border-radius:980px;padding:8px 16px;font-size:15px;cursor:pointer}
+.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt:disabled{opacity:.4;cursor:default}
+.paper{background:#fff;color:#1d1d1f;border-radius:10px;padding:18px;font-family:var(--mono);font-size:13px;box-shadow:0 2px 14px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:6px}
+.paper hr{border:0;border-top:1px dashed #bbb;margin:4px 0;width:100%}
+.paper .r{display:flex;justify-content:space-between;gap:12px}
+.stepper{display:inline-flex;align-items:center;gap:12px}
+.stepper button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;font-size:20px;line-height:1;cursor:pointer}
+.stepper b{min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
+.line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:15px}
+.line:last-of-type{border-bottom:0}
+.dots{display:flex;gap:10px}
+.dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--line)}
+.dot.on{background:var(--accent);border-color:var(--accent)}
+.mail{border:1px solid var(--line);border-radius:12px;padding:14px;font-size:15px;background:var(--bg2)}
+.mail b{display:block;margin-bottom:6px}
+.trk{display:flex;flex-direction:column;gap:10px}
+.trk .s{display:flex;gap:10px;align-items:center;color:var(--muted)}
+.trk .s i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);flex:none}
+.trk .s.done{color:var(--fg)}
+.trk .s.done i{background:var(--good);border-color:var(--good)}
+.trk .s.cur{color:var(--fg);font-weight:600}
+.trk .s.cur i{border-color:var(--accent);background:var(--soft)}
+.qr{display:grid;grid-template-columns:repeat(9,1fr);width:132px;aspect-ratio:1;background:#fff;padding:8px;border-radius:8px}
+.qr i{background:#fff}
+.qr i.k{background:#000}
+table.pl{width:100%;border-collapse:collapse;font-size:14px}
+table.pl th,table.pl td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line-soft)}
+table.pl th:first-child,table.pl td:first-child{text-align:left}
+table.pl th{color:var(--muted);font-weight:500;font-size:13px}
+.cell{width:100%;min-width:62px;border:1px solid var(--line);background:transparent;border-radius:8px;padding:6px 4px;font-size:12.5px;cursor:pointer;min-height:34px}
+.cell.on{background:var(--soft);border-color:var(--accent);color:var(--accent)}
+.ck{display:flex;gap:12px;align-items:center;cursor:pointer;padding:9px 0;font-size:15px;border:0;background:none;text-align:left;width:100%;border-bottom:1px solid var(--line-soft)}
+.ck i{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:14px;color:#fff}
+.ck.on i{background:var(--good);border-color:var(--good)}
+.big2{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.deminp{background:var(--soft);border:1px solid transparent;border-radius:12px;padding:10px 12px;font-size:16px;outline:none;width:100%;color:var(--fg)}
+.deminp:focus{border-color:var(--accent)}
+.derr{color:var(--bad);font-size:14px;font-weight:600}
+.derr:empty{display:none}
+.demo-box .sub.fic{margin-top:10px}
+
 .tcard .tshort{font-size:15px;color:var(--muted);line-height:1.4}
 .back{background:none;border:0;color:var(--accent);font-size:17px;cursor:pointer;padding:0;margin-bottom:28px}
 .back:hover{text-decoration:underline}
@@ -768,9 +815,214 @@ function demoHTML(px){
   return '<div class="demo-box"><p class="demo-intro">Essayez avec vos plats : tapez ce que le plat vous coûte et son prix, choisissez le food cost que vous visez, puis faites glisser la tirette.</p><div class="demo3">'
     +card('a','Entrecôte, frites et salade','6,20','22','30')+card('b','Tarte flambée','2,10','11,50','25')+'</div></div>';
 }
+const escH=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dbtn=(d,v,label,pressed,cls,dis)=>'<button type="button" class="'+(cls||'opt')+'" data-d="'+d+'" data-v="'+escH(v)+'"'+(pressed!==undefined&&pressed!==null?' aria-pressed="'+pressed+'"':'')+(dis?' disabled':'')+'>'+label+'</button>';
+const stepper=(d,key,val,unit)=>'<span class="stepper">'+dbtn(d,key+'|-1','−',null,'opt')+'<b>'+val+'</b>'+dbtn(d,key+'|1','+',null,'opt')+(unit?'<span class="sub">'+unit+'</span>':'')+'</span>';
+const DEMOS={};
+
+/* Scan des factures */
+DEMOS.scan={intro:'Voici une facture d’exemple. Touchez la catégorie pour la classer.',base:{'Viande':12,'Boissons':9,'Épicerie':7,'Charges':15},
+ reset(){this.s=null;},
+ act(a,v){this.s=v;},
+ html(){
+  const cats=Object.keys(this.base);
+  return '<div class="dm two"><div class="paper"><b>BOUCHERIE MARTIN</b><span>Facture n° 2417 · 14 mars</span><hr>'
+   +'<div class="r"><span>Entrecôte, 6 kg</span><span>156,00</span></div><div class="r"><span>Lardons fumés, 3 kg</span><span>28,50</span></div><hr>'
+   +'<div class="r"><b>Total HT</b><b>184,50 €</b></div></div>'
+   +'<div class="panel"><h4>1. Touchez la catégorie</h4><div class="opts">'+cats.map(c=>dbtn('scan:cat',c,c,this.s===c)).join('')+'</div>'
+   +'<h4>2. Le document est classé</h4><div>'
+   +cats.map(c=>'<div class="line"><span>'+c+'</span><span>'+(this.base[c]+(this.s===c?1:0))+' documents'+(this.s===c?' <span class="pill good">nouveau</span>':'')+'</span></div>').join('')
+   +'</div><p class="sub">'+(this.s?'Classée dans « '+this.s+' », visible par toute l’équipe.':'En attente de classement.')+'</p></div></div>';
+ }};
+
+/* Réservations */
+DEMOS.resa={intro:'Choisissez un jour, un service et le nombre de couverts : la demande arrive dans le carnet de l’équipe.',
+ hours:{Midi:['12:00','12:30','13:00'],Soir:['19:00','19:30','20:00']},base:{Midi:64,Soir:96},cap:140,
+ reset(){this.s={jour:'Ven',serv:'Soir',n:2,h:'19:30',sent:false,ok:false};},
+ act(a,v){
+  const s=this.s, chg=()=>{s.sent=false;s.ok=false;};
+  if(a==='jour'){s.jour=v;chg();}
+  else if(a==='serv'){s.serv=v;s.h=this.hours[v][1];chg();}
+  else if(a==='h'){s.h=v;chg();}
+  else if(a==='n'){s.n=Math.max(1,Math.min(12,s.n+parseInt(v.split('|')[1],10)));chg();}
+  else if(a==='send'){s.sent=true;s.ok=false;}
+  else if(a==='ok'){s.ok=true;}
+ },
+ html(){
+  const s=this.s, used=this.base[s.serv]+(s.ok?s.n:0);
+  return '<div class="dm two"><div class="panel"><h4>Côté client</h4>'
+   +'<div class="opts">'+['Jeu','Ven','Sam'].map(d=>dbtn('resa:jour',d,d,s.jour===d)).join('')+'</div>'
+   +'<div class="opts">'+['Midi','Soir'].map(d=>dbtn('resa:serv',d,d,s.serv===d)).join('')+'</div>'
+   +'<div class="opts">'+this.hours[s.serv].map(d=>dbtn('resa:h',d,d,s.h===d)).join('')+'</div>'
+   +'<div class="line"><span>Couverts</span>'+stepper('resa:n','n',s.n,'')+'</div>'
+   +dbtn('resa:send','x',s.sent?'Demande envoyée':'Demander une table',null,'btn',s.sent)+'</div>'
+   +'<div class="panel"><h4>Carnet de l’équipe · '+s.jour+' '+s.serv.toLowerCase()+'</h4>'
+   +'<div class="line"><span>Schmitt · 4 couverts · '+this.hours[s.serv][0]+'</span><span class="pill good">Confirmée</span></div>'
+   +'<div class="line"><span>Dupont · 2 couverts · '+this.hours[s.serv][2]+'</span><span class="pill good">Confirmée</span></div>'
+   +(s.sent?'<div class="line"><span><b>Nouvelle demande</b> · '+s.n+' couvert'+(s.n>1?'s':'')+' · '+s.h+'</span>'+(s.ok?'<span class="pill good">Confirmée</span>':dbtn('resa:ok','x','Valider',null,'btn sm'))+'</div>':'')
+   +(s.ok?'<p class="sub">Le client reçoit sa confirmation par e-mail.</p>':(s.sent?'<p class="sub">Une sonnerie prévient l’équipe. Touchez « Valider ».</p>':'<p class="sub">Aucune nouvelle demande.</p>'))
+   +'<div class="line"><span>Couverts du service</span><b>'+used+' / '+this.cap+'</b></div></div></div>';
+ }};
+
+/* Le Club */
+DEMOS.club={intro:'La carte de fidélité de Marc. Ajoutez ses visites une à une.',
+ reset(){this.s={v:4,mail:false};},
+ act(a){
+  if(a==='add'&&this.s.v<6){this.s.v++;this.s.mail=false;}
+  else if(a==='mail'){this.s.mail=true;}
+  else if(a==='again'){this.reset();}
+ },
+ html(){
+  const s=this.s, done=s.v>=6;
+  return '<div class="dm two"><div class="panel"><h4>Carte fidélité · Marc</h4>'
+   +'<div class="dots">'+[1,2,3,4,5,6].map(i=>'<span class="dot'+(i<=s.v?' on':'')+'"></span>').join('')+'</div>'
+   +'<p><b>'+(done?'Dessert offert !':'Encore '+(6-s.v)+' visite'+(6-s.v>1?'s':'')+' avant le dessert offert')+'</b></p>'
+   +'<div class="opts">'+dbtn('club:add','x','Ajouter une visite',null,'btn',done)+(done?dbtn('club:again','x','Recommencer',null,'btn soft'):'')+'</div>'
+   +'<p class="sub">Règle d’exemple : 6 visites, un dessert. Vous fixez la vôtre.</p></div>'
+   +'<div class="panel"><h4>E-mail aux clients</h4>'
+   +(s.mail?'<div class="mail">'+(done?'<b>Marc, votre dessert vous attend</b>Merci pour votre fidélité. Votre dessert est offert à votre prochaine visite au 76.':'<b>Mardi midi : un café offert</b>Le service est calme mardi : passez déjeuner et votre café est offert.')+'</div><p class="sub">Vous relisez, puis vous envoyez. Pas de SMS, pas de frais.</p>'
+     :'<p class="sub">Un service calme, ou une carte complète ? Préparez le message.</p>'+dbtn('club:mail','x',done?'Préparer l’e-mail du dessert':'Préparer une offre pour un service calme',null,'btn soft'))
+   +'</div></div>';
+ }};
+
+/* Registre hygiène */
+DEMOS.haccp={intro:'Le registre du jour : réglez les températures, cochez les tâches.',
+ fr:[['Frigo viandes',0,4],['Frigo légumes',0,4],['Congélateur',-40,-18]],
+ tasks:['Nettoyer le plan de travail','Désinfecter la plonge','Contrôler les dates limites','Sortir les poubelles'],
+ reset(){this.s={t:[3,4,-19],c:[true,false,false,false]};},
+ act(a,v){
+  if(a==='t'){const [i,d]=v.split('|').map(Number);this.s.t[i]+=d;}
+  else if(a==='c'){const i=+v;this.s.c[i]=!this.s.c[i];}
+ },
+ html(){
+  const s=this.s, tOk=this.fr.map((f,i)=>s.t[i]>=f[1]&&s.t[i]<=f[2]), nT=tOk.filter(Boolean).length, nC=s.c.filter(Boolean).length;
+  const ready=nT===3&&nC===4;
+  return '<div class="dm two"><div class="panel"><h4>Températures</h4>'
+   +this.fr.map((f,i)=>'<div class="line"><span>'+f[0]+'</span><span style="display:flex;align-items:center;gap:10px">'+stepper('haccp:t',String(i),s.t[i]+' °C','')+'<span class="pill '+(tOk[i]?'good':'bad')+'">'+(tOk[i]?'OK':'Hors limite')+'</span></span></div>').join('')
+   +'</div><div class="panel"><h4>Tâches du jour</h4>'
+   +this.tasks.map((t,i)=>'<button type="button" class="ck'+(s.c[i]?' on':'')+'" data-d="haccp:c" data-v="'+i+'" role="checkbox" aria-checked="'+s.c[i]+'"><i>'+(s.c[i]?'✓':'')+'</i>'+t+'</button>').join('')
+   +'<div class="line"><span>Registre du jour</span><span class="pill '+(ready?'good':'warn')+'">'+(ready?'À jour':'Incomplet')+'</span></div>'
+   +'<p class="sub">'+nC+'/4 tâches · '+nT+'/3 températures conformes'+(nT<3?'. Une valeur hors limite est à signaler.':'.')+'</p></div></div>';
+ }};
+
+/* Planning et pointeuse */
+DEMOS.planning={intro:'Touchez une case pour changer le service. Les heures et les montants se calculent seuls.',
+ days:['Jeu','Ven','Sam','Dim'],people:[{n:'Camille',t:'Fixe'},{n:'Julie',t:'Extra',r:13},{n:'Lucas',t:'Extra',r:13}],
+ H:{'':0,'Midi':4.5,'Soir':3.5,'Midi + soir':8},cyc:['','Midi','Soir','Midi + soir'],
+ reset(){this.s={Camille:['Midi','Soir','Midi + soir','Soir'],Julie:['','Soir','Midi + soir',''],Lucas:['','','Soir','Midi']};},
+ act(a,v){const [p,i]=v.split('|');const c=this.s[p][+i];this.s[p][+i]=this.cyc[(this.cyc.indexOf(c)+1)%4];},
+ html(){
+  let tot=0,totE=0;
+  const rows=this.people.map(p=>{
+    const h=this.s[p.n].reduce((t,c)=>t+this.H[c],0); tot+=h; if(p.r) totE+=h*p.r;
+    return '<tr><td><b>'+p.n+'</b><br><span class="sub">'+p.t+'</span></td>'
+     +this.s[p.n].map((c,i)=>'<td><button type="button" class="cell'+(c?' on':'')+'" data-d="planning:c" data-v="'+p.n+'|'+i+'">'+(c||'—')+'</button></td>').join('')
+     +'<td>'+num(h,1)+' h</td><td>'+(p.r?m2(h*p.r):'au mois')+'</td></tr>';
+  }).join('');
+  return '<div class="panel"><div style="overflow-x:auto"><table class="pl"><tr><th></th>'+this.days.map(d=>'<th>'+d+'</th>').join('')+'<th>Heures</th><th>À payer</th></tr>'+rows+'</table></div>'
+   +'<div class="line"><span>Heures de l’équipe cette semaine</span><b>'+num(tot,1)+' h</b></div>'
+   +'<div class="line"><span>Extras à payer</span><b>'+m2(totE)+'</b></div>'
+   +'<p class="sub">Midi = 4 h 30, soir = 3 h 30. Les fixes sont payés au mois, les extras à l’heure ('+13+' € dans cet exemple).</p></div>';
+ }};
+
+/* Comptacaisse */
+DEMOS.caisse={intro:'Saisissez un montant : un encaissement ou une dépense. Le solde se met à jour.',
+ cats:{in:['Espèces','Carte','Chèques'],out:['Marchandises','Frais','Banque']},
+ reset(){this.s={type:'in',cat:'Espèces',amt:'',ops:[{t:'in',c:'Carte',a:512},{t:'out',c:'Marchandises',a:45},{t:'in',c:'Espèces',a:320}],closed:false,err:''};},
+ act(a,v){
+  const s=this.s;
+  if(a==='type'){s.type=v;s.cat=this.cats[v][0];}
+  else if(a==='cat'){s.cat=v;}
+  else if(a==='add'){const x=parseNum(s.amt);if(!x){s.err='Entrez un montant.';return;}s.ops.unshift({t:s.type,c:s.cat,a:x});s.amt='';s.err='';s.closed=false;}
+  else if(a==='close'){s.closed=true;}
+ },
+ inp(n,v){this.s.amt=v;},
+ html(){
+  const s=this.s, ins=s.ops.filter(o=>o.t==='in').reduce((t,o)=>t+o.a,0), outs=s.ops.filter(o=>o.t==='out').reduce((t,o)=>t+o.a,0);
+  return '<div class="dm two"><div class="panel"><h4>Nouvelle opération</h4>'
+   +'<div class="opts">'+dbtn('caisse:type','in','Encaissement',null,'opt').replace('class="opt"','class="opt" aria-pressed="'+(s.type==='in')+'"')+dbtn('caisse:type','out','Dépense',null,'opt').replace('class="opt"','class="opt" aria-pressed="'+(s.type==='out')+'"')+'</div>'
+   +'<div class="opts">'+this.cats[s.type].map(c=>dbtn('caisse:cat',c,c,s.cat===c)).join('')+'</div>'
+   +'<input class="deminp" data-di="caisse:amt" inputmode="decimal" placeholder="Montant en €" value="'+escH(s.amt)+'" aria-label="Montant">'
+   +'<p class="derr" role="alert">'+s.err+'</p>'
+   +dbtn('caisse:add','x','Ajouter',null,'btn')+'</div>'
+   +'<div class="panel"><h4>Solde de la caisse</h4><span class="big2">'+m2(ins-outs)+'</span>'
+   +'<div>'+s.ops.slice(0,4).map(o=>'<div class="line"><span>'+o.c+'</span><span style="color:var(--'+(o.t==='in'?'good':'bad')+')">'+(o.t==='in'?'+':'−')+m2(o.a)+'</span></div>').join('')+'</div>'
+   +(s.closed?'<div class="mail"><b>Mois clôturé</b>Entrées '+m2(ins)+' · Sorties '+m2(outs)+' · Solde '+m2(ins-outs)+'. Export prêt pour votre comptable.</div>':dbtn('caisse:close','x','Clôturer le mois',null,'btn soft'))
+   +'</div></div>';
+ }};
+
+/* Livraison en golfette */
+DEMOS.golf={intro:'Commandez comme un campeur, puis suivez la commande de la cuisine jusqu’à la golfette.',
+ P:{Burger:9,Frites:4,Boisson:3},steps:['Commande reçue','Ticket imprimé en cuisine','Commande prête','En livraison en golfette','Livrée'],
+ acts:['Cuisine : lancer la préparation','Cuisine : commande prête','Livreur : partir en golfette','Livreur : marquer livrée'],
+ reset(){this.s={q:{Burger:1,Frites:1,Boisson:0},emp:'42',step:-1};},
+ act(a,v){
+  const s=this.s;
+  if(a==='q'){const [k,d]=v.split('|');s.q[k]=Math.max(0,Math.min(9,s.q[k]+parseInt(d,10)));}
+  else if(a==='emp'){s.emp=v;}
+  else if(a==='order'){if(Object.values(s.q).some(x=>x>0)) s.step=0;}
+  else if(a==='next'){if(s.step<4)s.step++;}
+  else if(a==='new'){this.reset();}
+ },
+ html(){
+  const s=this.s, total=Object.entries(s.q).reduce((t,[k,n])=>t+n*this.P[k],0);
+  if(s.step<0) return '<div class="panel"><h4>Votre commande</h4>'
+    +Object.keys(this.P).map(k=>'<div class="line"><span>'+k+' · '+m2(this.P[k])+'</span>'+stepper('golf:q',k,s.q[k],'')+'</div>').join('')
+    +'<div class="opts"><span class="sub" style="align-self:center">Emplacement</span>'+['12','27','42','58'].map(e=>dbtn('golf:emp',e,e,s.emp===e)).join('')+'</div>'
+    +'<div class="line"><span>Livraison en golfette</span><b>Gratuite</b></div>'
+    +dbtn('golf:order','x','Commander · '+m2(total),null,'btn',total===0)+'</div>';
+  return '<div class="dm two"><div class="panel"><h4>Ticket en cuisine</h4>'
+   +'<div class="paper"><b>EMPLACEMENT '+s.emp+'</b><hr>'+Object.entries(s.q).filter(([k,n])=>n>0).map(([k,n])=>'<div class="r"><span>'+n+' × '+k+'</span><span>'+m2(n*this.P[k])+'</span></div>').join('')+'<hr><div class="r"><b>Total</b><b>'+m2(total)+'</b></div></div></div>'
+   +'<div class="panel"><h4>Suivi de la commande</h4><div class="trk">'
+   +this.steps.map((t,i)=>'<div class="s'+(i<s.step?' done':(i===s.step?' cur':''))+'"><i></i><span>'+t+(i===3&&s.step>=3?' · Tom, golfette 2':'')+'</span></div>').join('')+'</div>'
+   +(s.step<4?dbtn('golf:next','x',this.acts[s.step],null,'btn'):'<p class="sub">Livrée à l’emplacement '+s.emp+'. Le livreur est de nouveau disponible pour la commande suivante.</p>'+dbtn('golf:new','x','Nouvelle commande',null,'btn soft'))
+   +'</div></div>';
+ }};
+
+/* Précommande de pain */
+DEMOS.pain={intro:'Précommandez comme un campeur : vous recevez un bon à présenter demain matin.',
+ P:{'Baguette':1.2,'Croissant':1.3,'Pain au chocolat':1.4},B:{'Baguette':118,'Croissant':76,'Pain au chocolat':94},
+ reset(){this.s={q:{'Baguette':2,'Croissant':2,'Pain au chocolat':0},nom:'',emp:'',err:'',ok:false};},
+ act(a,v){
+  const s=this.s;
+  if(a==='q'){const [k,d]=v.split('|');s.q[k]=Math.max(0,Math.min(20,s.q[k]+parseInt(d,10)));}
+  else if(a==='order'){
+    if(!Object.values(s.q).some(x=>x>0)){s.err='Choisissez au moins un produit.';return;}
+    if(!s.nom.trim()||!s.emp.trim()){s.err='Indiquez votre prénom et votre emplacement.';return;}
+    s.err='';s.ok=true;
+  }
+  else if(a==='new'){this.reset();}
+ },
+ inp(n,v){this.s[n]=v;},
+ qr(seed){
+  let h=0;for(const ch of seed) h=(h*31+ch.charCodeAt(0))>>>0;
+  let out='';
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+    h=(h*1103515245+12345)>>>0;
+    const corner=(r<3&&c<3)||(r<3&&c>5)||(r>5&&c<3);
+    out+='<i'+((corner||((h>>>16)&1))?' class="k"':'')+'></i>';
+  }
+  return '<div class="qr" aria-label="Bon avec QR code">'+out+'</div>';
+ },
+ html(){
+  const s=this.s, total=Object.entries(s.q).reduce((t,[k,n])=>t+n*this.P[k],0);
+  if(!s.ok) return '<div class="panel"><h4>Votre précommande</h4>'
+    +Object.keys(this.P).map(k=>'<div class="line"><span>'+k+' · '+m2(this.P[k])+'</span>'+stepper('pain:q',k,s.q[k],'')+'</div>').join('')
+    +'<div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input class="deminp" data-di="pain:nom" placeholder="Prénom" value="'+escH(s.nom)+'" aria-label="Prénom" autocomplete="off"><input class="deminp" data-di="pain:emp" placeholder="Emplacement" value="'+escH(s.emp)+'" aria-label="Emplacement" autocomplete="off"></div>'
+    +'<p class="derr" role="alert">'+s.err+'</p>'+dbtn('pain:order','x','Commander · '+m2(total),null,'btn')+'</div>';
+  return '<div class="dm two"><div class="panel"><h4>Votre bon</h4><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'+this.qr(s.nom+s.emp)
+   +'<div><b>'+escH(s.nom)+' · emplacement '+escH(s.emp)+'</b><br>'+Object.entries(s.q).filter(([k,n])=>n>0).map(([k,n])=>n+' × '+k).join('<br>')+'<br><span class="sub">À retirer demain, de 8 h à 12 h</span></div></div>'
+   +'<p class="sub">Le bon s’imprime en cuisine et reste enregistré sur le téléphone.</p>'+dbtn('pain:new','x','Nouvelle commande',null,'btn soft')+'</div>'
+   +'<div class="panel"><h4>Commande au boulanger · 20 h</h4>'
+   +Object.keys(this.B).map(k=>'<div class="line"><span>'+k+'</span><b>'+(this.B[k]+s.q[k])+'</b></div>').join('')
+   +'<p class="sub">Récapitulée chaque soir : plus de pertes, plus de queue.</p></div></div>';
+ }};
+
 function toolPage(id){
   const t=TOOLS.find(x=>x.id===id), m=MODS[id], on=SEL.has(id);
-  const extra=t.extra==='demo'?demoHTML('t'):'';
+  let extra='';
+  if(t.extra==='demo') extra=demoHTML('t');
+  else if(DEMOS[id]){ DEMOS[id].reset(); extra='<div class="demo-box"><p class="demo-intro">'+DEMOS[id].intro+'</p><div id="dm-'+id+'">'+DEMOS[id].html()+'</div><p class="sub fic">Exemple avec des données fictives.</p></div>'; }
   return '<section class="sec tp"><div class="wrap">'
    +'<button type="button" class="back" data-go="home" data-scroll="#outils">‹ Tous les outils</button>'
    +'<div class="tp-head"><p class="eyebrow">'+CAT_NAME[CAT_OF[id]]+'</p><h1 class="tp-title">'+m.name+'</h1>'+(m.ai?'<span class="pill ai">IA incluse</span>':'')+'<p class="lead2">'+t.intro+'</p></div>'
@@ -832,6 +1084,16 @@ function keepFocus(btn){
 }
 document.addEventListener('click',e=>{
   const t=e.target;
+  const dd=t.closest('[data-d]');
+  if(dd){
+    const k=dd.dataset.d.split(':')[0], a=dd.dataset.d.split(':')[1], D=DEMOS[k];
+    if(D){
+      D.act(a,dd.dataset.v);
+      const box=document.getElementById('dm-'+k); if(box) box.innerHTML=D.html();
+      const n=document.querySelector('[data-d="'+dd.dataset.d+'"][data-v="'+(dd.dataset.v||'').replace(/"/g,'&quot;')+'"]'); if(n&&!n.disabled) n.focus({preventScroll:true});
+      return;
+    }
+  }
   const gb=t.closest('[data-go]');
   if(gb){e.preventDefault();go(gb.dataset.go,null,gb.dataset.scroll);return;}
   const tb=t.closest('[data-tool]');
@@ -900,6 +1162,7 @@ document.addEventListener('submit',async e=>{
   if(fm){for(const [k,val] of Object.entries(keep)) if(fm.elements[k]) fm.elements[k].value=val; if(orderState.error){const d=document.querySelector('.recapbox'); if(d) d.open=true;}}
 });
 document.addEventListener('input',e=>{
+  if(e.target.matches('[data-di]')){const [k,n]=e.target.dataset.di.split(':');if(DEMOS[k]&&DEMOS[k].inp) DEMOS[k].inp(n,e.target.value);return;}
   if(e.target.matches('[data-sl],[data-in]')) renderSim();
 });
 
