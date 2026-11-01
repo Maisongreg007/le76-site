@@ -1,6 +1,16 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Démo · Coût matière</title><meta name="robots" content="noindex, nofollow">
-<meta name="claude:viewport-fit-sides" content="cover">
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Démo · Coût matière</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f2f2f7">
+<link rel="apple-touch-icon" href="/cout-matiere/icone-180.png">
+<link rel="icon" href="/cout-matiere/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coût matière">
 <style>
 /* Layout: iOS-style app — translucent header with Cuisine/Bar switch, large page titles, inset grouped lists; bottom tab bar on phones */
 :root{
@@ -34,12 +44,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
 /* En-tête translucide */
-header{position:sticky;top:calc(env(safe-area-inset-top,0px) + 31px);z-index:5;isolation:isolate;border-bottom:.5px solid var(--line)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;isolation:isolate;border-bottom:.5px solid var(--line)}
 header::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
-.head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding-block:10px}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding-block:10px}
+.head>*{min-width:0}
 h1{font-family:var(--f-display);font-weight:600;font-size:1.05rem;letter-spacing:-.02em;margin:0;white-space:nowrap}
 h1 span{color:var(--muted)}
-.status{font-size:.78rem;color:var(--muted);justify-self:end;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.status{font-size:.78rem;color:var(--muted);justify-self:end;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-width:0}
 .status.err{color:var(--bad)}
 .parts{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:0;position:relative}
 .parts button{font:inherit;font-size:.92rem;font-weight:600;border:0;background:none;border-radius:8px;padding:6px 22px;color:var(--fg);cursor:pointer;transition:background .2s,box-shadow .2s}
@@ -93,7 +104,7 @@ h2{font-family:var(--f-display);font-weight:700;font-size:1.2rem;letter-spacing:
 .row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 92px 92px 70px 128px;gap:12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:0;padding:12px 34px 12px 16px;cursor:pointer;transition:background .12s;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='13' viewBox='0 0 8 13'%3E%3Cpath d='M1.5 1.5l5 5-5 5' fill='none' stroke='%23b4b4b9' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 .row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
-.row.f{grid-template-columns:minmax(0,1fr) 110px 110px 104px}
+.row.f{display:grid;flex-direction:initial;grid-template-columns:minmax(0,1fr) 110px 110px 104px}
 .row:hover{background-color:var(--field)}
 .row:active{background-color:var(--fill)}
 .row .name{font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -116,8 +127,8 @@ h2{font-family:var(--f-display);font-weight:700;font-size:1.2rem;letter-spacing:
 .fields{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:14px}
 .fields.f3{grid-template-columns:2fr 1.2fr 1fr 1fr}
 .f{display:flex;flex-direction:column;gap:6px;min-width:0}
-input[type=text],input[type=search],select,textarea{background:var(--field);border:0;border-radius:10px;padding:9px 12px;width:100%;min-width:0;outline:none;transition:box-shadow .15s}
-input[type=text]:focus,input[type=search]:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=text],input[type=search],input[type=password],input[type=date],select,textarea{background:var(--field);border:0;border-radius:10px;padding:9px 12px;width:100%;min-width:0;outline:none;transition:box-shadow .15s}
+input[type=text]:focus,input[type=search]:focus,input[type=password]:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px var(--accent-soft)}
 select{-webkit-appearance:none;appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a8a8e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
 textarea{min-height:150px;resize:vertical;line-height:1.5}
 input.n{font-family:var(--f-num);text-align:right;font-variant-numeric:tabular-nums}
@@ -184,6 +195,7 @@ td input[type=text]:hover,td select:hover,td input[type=text]:focus,td select:fo
 .quick{display:flex;flex-direction:column;gap:6px;margin-top:6px}
 .quick-row{display:grid;grid-template-columns:90px 100px minmax(0,1fr) auto;gap:6px;align-items:center}
 .quick-row input,.quick-row select{padding:7px 9px}
+#main [hidden]{display:none!important}
 .searchbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
 .searchbar input[type=search],.srv-top input{background:var(--fill);border:0;border-radius:12px;padding:11px 14px 11px 38px;width:100%;font-size:1rem;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5.2' fill='none' stroke='%238a8a8e' stroke-width='1.8'/%3E%3Cpath d='M11 11l3.5 3.5' stroke='%238a8a8e' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:13px center}
@@ -249,6 +261,85 @@ tr:hover .al-c,tr:hover .al-name{background-color:var(--field)}
 .al-bad .al-n{color:var(--muted)}.al-bad .al-name{box-shadow:inset 3px 0 0 var(--bad)}.al-bad .al-s{color:var(--bad);font-weight:600}
 .al-nofiche .al-s{color:var(--warn)}
 @media (max-width:720px){.al-name{min-width:150px;max-width:170px;padding:9px 10px!important}.al-h{width:34px;height:104px}}
+
+/* Portail du 76 */
+nav button{position:relative}
+.nav-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:.7rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
+@media (max-width:720px){.nav-badge{position:absolute;top:0;left:calc(50% + 6px)}}
+.fac-banner{box-shadow:0 0 0 2px var(--accent-soft),var(--shadow)}
+.row.vt{grid-template-columns:minmax(0,1fr) 64px 96px 100px 84px minmax(150px,230px);cursor:default;background-image:none}
+.row.vt:hover{background-color:var(--surface)}
+.vt-lien{display:flex;gap:6px}.vt-lien select{padding:6px 8px;font-size:.82rem}.vt-lien input{width:70px;padding:6px 8px}
+select.a-relier{box-shadow:0 0 0 2px var(--warn-bg);color:var(--warn)}
+.lnk{background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;text-transform:inherit;letter-spacing:inherit}
+button.lnk[data-tab-go]{color:var(--accent);text-decoration:underline}
+@media (max-width:720px){.row.vt{grid-template-columns:minmax(0,1fr) 44px 80px}.vt-lien{grid-column:1/-1}}
+details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;cursor:pointer}details.menu-exp>summary::-webkit-details-marker{display:none}
+.menu-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;background:var(--surface);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.18),0 0 0 .5px var(--line);padding:6px;min-width:290px;display:flex;flex-direction:column}
+.menu-pop button{all:unset;cursor:pointer;padding:9px 12px;border-radius:9px;font-size:.92rem;color:var(--fg);display:flex;flex-direction:column;gap:1px}
+.menu-pop button:hover{background:var(--fill)}.menu-pop small{color:var(--muted);font-size:.76rem;padding-left:24px}.menu-pop hr{border:0;border-top:.5px solid var(--line);margin:4px 6px}
+.row.cmp{grid-template-columns:minmax(0,1fr) 120px 130px 32px;cursor:default;background-image:none}.row.cmp:hover{background-color:var(--surface)}
+@media (max-width:560px){.row.cmp{grid-template-columns:minmax(0,1fr) 92px 32px}.row.cmp>span:nth-child(3){display:none}}
+.resto-pill{display:inline-block;font-size:.8rem;font-weight:600;background:var(--fill);color:var(--fg);border-radius:999px;padding:3px 10px;cursor:pointer;vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cm-resto-w{display:inline-block;font-family:var(--f-text,inherit);font-size:1rem;letter-spacing:0}
+.promo-l{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);margin-top:4px;justify-content:flex-end;cursor:pointer}.promo-l input{width:auto;margin:0}
+.alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
+@media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+td:first-child input[data-if="name"]{min-width:240px}
+h1 a.cm-back{color:var(--accent);text-decoration:none;font-weight:600}
+h1 .cm-t{color:var(--fg)}
+.status-wrap{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.cm-gear{border:0;background:var(--fill);color:var(--muted2);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
+.cm-gear svg{width:18px;height:18px}
+.lecture .cm-gear{display:none}
+.cm-login{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px));background:var(--bg)}
+.cm-box{width:100%;max-width:380px;background:var(--surface);border-radius:22px;padding:28px 22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.cm-box label{display:flex;flex-direction:column;gap:6px;font-size:.82rem;color:var(--muted2);font-weight:500}
+.cm-box input{background:var(--field);border:0;border-radius:10px;padding:12px;font-size:17px}
+.cm-box .btn{padding:13px;font-size:1rem}
+.cm-logo{font:800 2.6rem/1 var(--f-display);text-align:center;letter-spacing:-.03em}.cm-logo span{color:var(--accent)}
+.cm-lead{text-align:center;color:var(--muted);margin:0 0 6px}
+.cm-err{color:var(--bad);background:var(--bad-bg);border-radius:10px;padding:10px 12px;margin:0;font-size:.9rem}
+.cm-small{text-align:center;color:var(--muted);font-size:.8rem;margin:4px 0 0}
+/* Lecture seule (équipe) */
+.lecture [data-act="editFiche"],.lecture [data-act="newFiche"],.lecture [data-act="pickInvoice"],.lecture [data-act="pickMenu"],.lecture [data-act="newItem"],.lecture [data-act="newIng"],.lecture [data-bact="newB"]{display:none!important}
+/* Factures reçues */
+.fac{display:flex;flex-direction:column;gap:0}
+.fac-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 16px;position:relative}
+.fac-row+.fac-row::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.fac-row b{font-weight:600}.fac-row .sub{display:block;font-size:.82rem;color:var(--muted)}
+.fac-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px 6px}
+/* Bilan des marges */
+.bilan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.bilan>div{background:var(--surface);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow);min-width:0}
+.bilan .big small{font-size:.85rem;font-weight:500;color:var(--muted2);letter-spacing:0}
+.bilan .sub{font-size:.8rem;color:var(--muted)}
+.bilan .hl{background:var(--accent);color:var(--accent-ink)}.bilan .hl .lbl,.bilan .hl .sub,.bilan .hl small{color:rgba(255,255,255,.82)!important}
+.bil-tbl{width:100%;min-width:560px;border-collapse:collapse}
+.bil-tbl th,.bil-tbl td{padding:10px 14px;border-bottom:.5px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.bil-tbl th:first-child,.bil-tbl td:first-child{text-align:left}
+.bil-tbl tr:last-child td{border-bottom:0}
+.bil-tbl tfoot td{font-weight:700;background:var(--field)}
+.hausses .fac-row .delta{font-weight:700}
+@media (max-width:720px){.bilan{grid-template-columns:1fr 1fr;gap:10px}}
+/* Réglages */
+.reg{display:flex;flex-direction:column;gap:14px}
+.reg .fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.reg .fields2{grid-template-columns:1fr}}
+.ok-t{color:var(--ok);font-weight:600}.bad-t{color:var(--bad);font-weight:600}
+.switch{display:inline-flex;align-items:center;gap:10px;font-weight:500;cursor:pointer}
+.switch input{width:22px;height:22px;accent-color:var(--accent)}
+/* Impression */
+@media print{
+  header,nav,.back,.acts,.btn,.cm-gear,.scaler,.al-pick,.hint{display:none!important}
+  body,main{background:#fff!important;color:#000!important}
+  main{padding:0!important}
+  .card,.list,.tablewrap,.bilan>div{box-shadow:none!important;border:1px solid #ccc}
+  .al-wrap{max-height:none!important;overflow:visible!important}
+  .al-tbl thead th,.al-name{position:static!important}
+  .sheet{gap:10px}.photo{max-height:220px}
+}
 /* Écran Service */
 .srv{display:flex;flex-direction:column;gap:18px;max-width:680px;margin:0 auto;width:100%}
 .srv-top{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdr));z-index:3;background:var(--bg);padding-block:8px;display:flex;flex-direction:column;gap:10px;margin-top:-8px}
@@ -294,13 +385,30 @@ tr:hover .al-c,tr:hover .al-name{background-color:var(--field)}
 }
 @media (prefers-reduced-motion:reduce){.spin{animation:none}*{transition:none!important}}
 </style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:#5a4fcf;color:#fff;font:600 13px/1.3 -apple-system,BlinkMacSystemFont,sans-serif"><span>Démo · restaurant fictif, enregistré seulement dans ce navigateur</span><span style="display:flex;gap:6px"><a href="../" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Accueil démo</a><button onclick="window.__cmReset()" style="color:#fff;background:rgba(255,255,255,.18);border:0;border-radius:99px;padding:4px 11px;font:inherit;cursor:pointer">Réinitialiser</button></span></div>
+<header>
+  <div class="wrap">
+    <div class="head">
+      <h1><a href="/admin/" class="cm-back" title="Retour au portail">‹ Le 76</a> <span class="cm-t">Coût matière</span> <span class="cm-resto-w" id="cm-resto-w"></span></h1>
+      <div class="parts" role="group" aria-label="Partie"><button data-part="cuisine" aria-pressed="true">Cuisine</button><button data-part="bar" aria-pressed="false">Bar</button></div>
+      <span class="status-wrap"><span class="status" id="status">Chargement…</span><button class="cm-gear" id="cm-gear" title="Réglages" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></span>
+    </div>
+    <nav role="tablist" id="nav"></nav>
+  </div>
+</header>
+<main class="wrap" id="main"></main>
+<input type="file" id="invoice-file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
+<input type="file" id="menu-file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
+<input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
+<input type="file" id="rg-file" accept="application/json,.json" hidden>
+<input type="file" id="modif-file" accept=".csv,text/csv,.txt" hidden><input type="file" id="dep-file" accept="application/pdf,image/jpeg,image/png" multiple hidden>
 
 <script>
-/* DÉMO : données d'exemple (restaurant fictif), enregistrées seulement dans ce navigateur */
+/* DÉMO : même application que la vraie, branchée sur un faux serveur dans le navigateur (restaurant fictif) */
 (function(){
-  var KEY='coutmatiere.v2', FLAG='cm-demo-v1';
-  window.__cmReset=function(){try{localStorage.removeItem(KEY);localStorage.removeItem(FLAG)}catch(e){}location.reload()};
-  try{ if(localStorage.getItem(FLAG)) return; }catch(e){ return; }
+  var KEY='cm-demo-docs-v3';
   var I={}, add=function(id,name,supplier,price,unit,loss,al,dept){I[id]={name:name,supplier:supplier,price:price,unit:unit,loss:loss,allergens:al||[]};if(dept)I[id].dept=dept};
   add('farine','Farine T55','Métro',0.95,'kg',0,['gluten']);
   add('fromblanc','Fromage blanc 20 %','Métro',3.4,'kg',0,['lait']);
@@ -359,25 +467,121 @@ tr:hover .al-c,tr:hover .al-name{background-color:var(--field)}
     b3:{name:'Spritz',category:'Cocktails',alcohol:true,desc:'',formats:[{label:'Verre',type:'f',ref:'spritz',qty:1,unit:'portion',ttc:8}]},
     b4:{name:'Café',category:'Boissons chaudes',alcohol:false,desc:'',formats:[{label:'Expresso',type:'i',ref:'cafe',qty:8,unit:'g',ttc:2}]}
   };
-  try{localStorage.setItem(KEY,JSON.stringify({ingredients:I,fiches:F,carte:C,boissons:B,settings:{target:28,reset:1}}));localStorage.setItem(FLAG,'1')}catch(e){}
+
+  var seed={set:{kitchen:{target:28,reset:1}},ingredients:I,fiches:F,carte:C,boissons:B};
+  window.__cmReset=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+  var docs=null;try{docs=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(!docs)docs=JSON.parse(JSON.stringify(seed));
+  var rev=0;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(docs))}catch(e){}}
+  var realFetch=window.fetch.bind(window);
+  function json(o,s){return Promise.resolve(new Response(JSON.stringify(o),{status:s||200,headers:{'Content-Type':'application/json'}}))}
+  window.fetch=function(url,opt){
+    if(typeof url==='string'&&url.indexOf('/api/cout-matiere.php')===0&&opt&&opt.method==='POST'){
+      var q={};try{q=JSON.parse(opt.body)}catch(e){}
+      switch(q.action){
+        case 'charger':return json({ok:true,resto:'le76',restos:[],moi:{admin:true,nom:'Démo'},options:{},docs:docs,rev:rev});
+        case 'ecrire':(q.ecritures||[]).forEach(function(e){docs[e.coll]=docs[e.coll]||{};if(e.data===null)delete docs[e.coll][e.id];else docs[e.coll][e.id]=e.data});save();return json({ok:true,rev:++rev});
+        case 'changements':return json({ok:true,changements:[],rev:rev});
+        case 'options':return json({ok:true,options:{}});
+        default:return json({ok:true});
+      }
+    }
+    return realFetch(url,opt);
+  };
 })();
 </script>
-<div style="position:sticky;top:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:#5a4fcf;color:#fff;font:600 13px/1.3 -apple-system,BlinkMacSystemFont,sans-serif"><span>Démo · restaurant fictif, enregistré seulement dans ce navigateur</span><span style="display:flex;gap:6px"><a href="../" style="color:#fff;background:rgba(255,255,255,.18);border-radius:99px;padding:4px 11px;text-decoration:none">Accueil démo</a><button onclick="window.__cmReset()" style="color:#fff;background:rgba(255,255,255,.18);border:0;border-radius:99px;padding:4px 11px;font:inherit;cursor:pointer">Réinitialiser</button></span></div>
-<header>
-  <div class="wrap">
-    <div class="head">
-      <h1>Coût <span>matière</span></h1>
-      <div class="parts" role="group" aria-label="Partie"><button data-part="cuisine" aria-pressed="true">Cuisine</button><button data-part="bar" aria-pressed="false">Bar</button></div>
-      <span class="status" id="status">Chargement…</span>
-    </div>
-    <nav role="tablist" id="nav"></nav>
-  </div>
-</header>
-<main class="wrap" id="main"></main>
-<input type="file" id="invoice-file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
-<input type="file" id="menu-file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
-<input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
+<script>
+/* ===== Pont serveur le76.fr : remplace le stockage de Claude par l'API du 76 ===== */
+(function(){
+'use strict';
+const API='/api/cout-matiere.php';
+const RESTO=(()=>{let r=new URLSearchParams(location.search).get('r');if(r){try{localStorage.setItem('cm_r',r)}catch(e){}return r}try{return localStorage.getItem('cm_r')||'le76'}catch(e){return 'le76'}})();
+const CM=window.CM={rq:()=>RESTO==='le76'?'':'&r='+encodeURIComponent(RESTO),moi:null,options:{},docs:{},rev:0,listeners:{},lecture:false};
+let pret, finPret;pret=new Promise(r=>finPret=r);
+async function post(action,data={}){
+  let r;try{r=await fetch(API,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,r:RESTO,...data})})}
+  catch(e){const x=new Error('Pas de connexion au serveur. Vérifie internet.');x.code='unavailable';throw x}
+  let d={};try{d=await r.json()}catch(e){}
+  if(!r.ok||!d.ok){const x=new Error(d.erreur||('Erreur '+r.status));x.code=r.status===401?'auth':r.status===403?'forbidden':r.status>=500?'unavailable':'error';x.status=r.status;throw x}
+  return d;
+}
+CM.post=post;
+/* ---------- Connexion (mêmes comptes que le portail) ---------- */
+function ecranConnexion(msg){
+  const v=document.createElement('div');v.className='cm-login';v.innerHTML=`<form class="cm-box" id="cm-cnx">
+    <div class="cm-logo">Le <span>76</span></div><p class="cm-lead">Coût matière</p>
+    ${msg?`<p class="cm-err">${msg}</p>`:''}
+    <label>Identifiant<input name="identifiant" id="cm-id" required autocapitalize="none" autocomplete="username"></label>
+    <label>Mot de passe<input name="mdp" id="cm-mdp" type="password" required autocomplete="current-password"></label>
+    <button class="btn" type="submit">Se connecter</button>
+    <p class="cm-small">Mêmes identifiants que le portail et les réservations.</p></form>`;
+  document.body.appendChild(v);
+  v.querySelector('form').onsubmit=async ev=>{ev.preventDefault();const f=ev.target;const b=f.querySelector('button');b.disabled=true;
+    try{const r=await fetch('/api/equipe.php',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'connexion',identifiant:f.identifiant.value.trim(),mdp:f.mdp.value})});
+      const d=await r.json();if(!d.ok)throw new Error(d.erreur||'Identifiants refusés.');v.remove();demarrer()}
+    catch(e){b.disabled=false;let p=v.querySelector('.cm-err');if(!p){p=document.createElement('p');p.className='cm-err';f.insertBefore(p,f.querySelector('label'))}p.textContent=e.message}};
+}
+async function demarrer(){
+  try{const d=await post('charger').catch(e=>{if(e.status===404&&RESTO!=='le76'){try{localStorage.removeItem('cm_r')}catch(x){}location.href=location.pathname}throw e});CM.resto=d.resto||'le76';CM.restos=d.restos||[];CM.moi=d.moi;CM.options=d.options||{};CM.docs=d.docs||{};CM.rev=d.rev||0;CM.lecture=!d.moi.admin;
+    document.documentElement.classList.toggle('lecture',CM.lecture);finPret();suivre();
+    if(d.moi.admin&&CM.options.mail)setTimeout(()=>post('factures_relever').catch(()=>{}),1500);}
+  catch(e){if(e.code==='auth')ecranConnexion();else{document.getElementById('status')&&(document.getElementById('status').textContent=e.message);setTimeout(demarrer,5000)}}
+}
+/* ---------- Suivi des changements faits ailleurs (autre appareil, relève des factures) ---------- */
+let suivi=null;
+function suivre(){
+  if(suivi)return;
+  const tick=async()=>{try{const d=await post('changements',{depuis:CM.rev});
+      if(d.changements&&d.changements.length){const parColl={};
+        d.changements.forEach(c=>{(CM.docs[c.coll]=CM.docs[c.coll]||{});if(c.data===null)delete CM.docs[c.coll][c.id];else CM.docs[c.coll][c.id]=c.data;(parColl[c.coll]=parColl[c.coll]||[]).push(c)});
+        Object.entries(parColl).forEach(([coll,list])=>{(CM.listeners[coll]||[]).forEach(cb=>{try{cb({metadata:{hasPendingWrites:false},docChanges:()=>list.map(c=>({type:c.data===null?'removed':'modified',doc:{id:c.id,data:()=>c.data}}))})}catch(e){}})});
+        if(parColl.factures||parColl.menus||parColl.alertes||parColl.ventes||parColl.liens)document.dispatchEvent(new CustomEvent('cm-factures'));}
+      CM.rev=Math.max(CM.rev,d.rev||0);}catch(e){}};
+  suivi=setInterval(()=>{if(!document.hidden)tick()},12000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+}
+/* ---------- Écritures groupées ---------- */
+let file=[],timer=null,attente=[];
+function ecrire(coll,id,data){
+  if(CM.lecture){const x=new Error('Lecture seule');x.code='forbidden';return Promise.reject(x)}
+  if(data===null)delete (CM.docs[coll]||{})[id];else (CM.docs[coll]=CM.docs[coll]||{})[id]=data;
+  file=file.filter(e=>!(e.coll===coll&&e.id===id));file.push({coll,id,data});
+  return new Promise((res,rej)=>{attente.push({res,rej});clearTimeout(timer);timer=setTimeout(vider,250)});
+}
+async function vider(){
+  const lot=file,cb=attente;file=[];attente=[];
+  try{for(let i=0;i<lot.length;i+=400)await post('ecrire',{ecritures:lot.slice(i,i+400)});cb.forEach(c=>c.res())}
+  catch(e){cb.forEach(c=>c.rej(e))}
+}
+CM.ecrire=ecrire;
+/* ---------- Adaptateurs pour l'appli ---------- */
+const snap=coll=>({docs:Object.entries(CM.docs[coll]||{}).map(([id,d])=>({id,data:()=>JSON.parse(JSON.stringify(d))}))});
+function docRef(coll,id){return {
+  get:async()=>{const d=(CM.docs[coll]||{})[id];return {exists:!!d,data:()=>d?JSON.parse(JSON.stringify(d)):undefined}},
+  set:o=>ecrire(coll,id,JSON.parse(JSON.stringify(o))),
+  delete:()=>ecrire(coll,id,null),
+  collection:c=>collRef(c)}}
+function collRef(coll){return {get:async()=>snap(coll),doc:id=>docRef(coll,id),onSnapshot:(cb)=>{(CM.listeners[coll]=CM.listeners[coll]||[]).push(cb);return ()=>{}}}}
+const db={doc:p=>/\/kitchen$/.test(p)?docRef('set','kitchen'):{get:async()=>({exists:false,data:()=>undefined})}};
+const enBase64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)});
+async function reduire(blob){
+  try{if(!/^image\//.test(blob.type||'image/jpeg'))return await enBase64(blob);
+    const bmp=await createImageBitmap(blob);const s=Math.min(1,2200/Math.max(bmp.width,bmp.height));
+    const c=document.createElement('canvas');c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    return c.toDataURL('image/jpeg',0.85)}catch(e){return enBase64(blob)}
+}
+CM.reduire=reduire;
+const sample={limits:async()=>({images:{maxCount:5}}),
+  json:async(prompt,opt={})=>{const images=[];for(const b of (opt.images||[]))images.push(await reduire(b));
+    const d=await post('ia',{prompt,images});return d.resultat}};
+const assets={upload:async blob=>{const d=await post('photo_envoyer',{donnees:await reduire(blob)});return {id:d.id,url:d.url}},
+  delete:id=>post('photo_supprimer',{id})};
+window.claude={use:async nom=>{await pret;if(nom==='db')return db;if(nom==='user')return {id:async()=>'le76'};if(nom==='sample')return CM.options.ia?sample:null;if(nom==='assets')return assets;return null}};
+document.addEventListener('DOMContentLoaded',demarrer);
+})();
 
+</script>
 <script>
 (function(){
 /* ---------- Référentiels ---------- */
@@ -519,7 +723,7 @@ function persistAll(){
   oldIds.forEach(id=>persist("old",id));oldIds=[];
   persist("set");
 }
-function saveLocal(){try{localStorage.setItem("coutmatiere.v2",JSON.stringify({ingredients:state.ingredients,fiches:state.fiches,carte:state.carte,boissons:state.boissons,settings:Object.assign({},state.settings,{reset:1})}));setStatus("Enregistré sur cet appareil")}catch(e){setStatus("Impossible d'enregistrer sur cet appareil",true)}}
+function saveLocal(){try{localStorage.setItem("coutmatiere.v2",JSON.stringify({ingredients:state.ingredients,fiches:state.fiches,carte:state.carte,settings:state.settings}));setStatus("Enregistré sur cet appareil")}catch(e){setStatus("Impossible d'enregistrer sur cet appareil",true)}}
 function loadLocal(){try{const v2=localStorage.getItem("coutmatiere.v2");if(v2)return JSON.parse(v2);const v1=localStorage.getItem("coutmatiere.v1");return v1?JSON.parse(v1):null}catch(e){return null}}
 function adopt(){state.demo=false;persistAll();render()}
 function startEmpty(){state.ingredients={};state.fiches={};state.carte={};state.demo=false;state.open=null;persist("set");render()}
@@ -540,8 +744,8 @@ function migrate(d){
 }
 
 /* ---------- Rendu ---------- */
-const PARTS={cuisine:[["carte","Carte des repas","Carte"],["fiches","Fiches techniques","Fiches"],["ingredients","Mercuriale","Mercuriale"]],bar:[["boissons","Carte des boissons","Carte"],["bfiches","Recettes boissons","Recettes"],["bingredients","Mercuriale bar","Mercuriale"]]};
-const partOf=v=>PARTS.bar.some(([k])=>k===v)?"bar":(v==="service"||v==="allergenes")?(state.lastPart||"cuisine"):"cuisine";
+const PARTS={cuisine:[["carte","Carte des repas","Carte"],["fiches","Fiches techniques","Fiches"],["menus","Menus & soirées","Menus"],["ingredients","Mercuriale","Mercuriale"],["ventes","Ventes","Ventes"]],bar:[["boissons","Carte des boissons","Carte"],["bfiches","Recettes boissons","Recettes"],["bingredients","Mercuriale bar","Mercuriale"],["bventes","Ventes bar","Ventes"]]};
+const partOf=v=>PARTS.bar.some(([k])=>k===v)?"bar":(v==="service"||v==="allergenes"||v==="reglages")?(state.lastPart||"cuisine"):"cuisine";
 const FOOD_SECTIONS=SECTIONS.filter(s=>s!=="Boissons");
 const isFood=it=>it.section!=="Boissons";
 const DRINK_SUP=/adam boissons|rega|cleebourg|forbach|folliet/i;
@@ -552,23 +756,27 @@ function ingPart(id,i){
   const ds=i.dept==="bar"||DRINK_SUP.test(i.supplier||"");
   return {cuisine:food||(!ds&&!bar),bar:bar||ds};
 }
-const ICONS={"carte": "<path d=\"M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z\"/><path d=\"M9 9h6M9 13h6\"/>", "fiches": "<path d=\"M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "ingredients": "<path d=\"M4 9h16l-1.5 10.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 9z\"/><path d=\"M8.5 9l3.5-5 3.5 5\"/>", "boissons": "<path d=\"M7 3h10l-.8 6.5A4.2 4.2 0 0 1 12 13.2a4.2 4.2 0 0 1-4.2-3.7L7 3z\"/><path d=\"M12 13.2V20M8.5 21h7M7.4 6.5h9.2\"/>", "bfiches": "<path d=\"M8 8h8l-1.2 12.2a1 1 0 0 1-1 .8h-3.6a1 1 0 0 1-1-.8L8 8z\"/><path d=\"M9.5 8V5.5A2.5 2.5 0 0 1 12 3a2.5 2.5 0 0 1 2.5 2.5V8M8.6 12.5h6.8\"/>", "bingredients": "<path d=\"M3.5 8h17v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V8z\"/><path d=\"M3.5 8l2-4h13l2 4M9 12h6\"/>", "service": "<path d=\"M4 18h16M5.5 18a6.5 6.5 0 0 1 13 0\"/><path d=\"M12 9.5V8M10.5 6.5h3\"/>", "allergenes": "<path d=\"M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7l8-4z\"/><path d=\"M12 8v5M12 16.5v.01\"/>"};
+const ICONS={"carte": "<path d=\"M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z\"/><path d=\"M9 9h6M9 13h6\"/>", "fiches": "<path d=\"M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M14 3v5h5M9 13h7M9 17h5\"/>", "ingredients": "<path d=\"M4 9h16l-1.5 10.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 9z\"/><path d=\"M8.5 9l3.5-5 3.5 5\"/>", "boissons": "<path d=\"M7 3h10l-.8 6.5A4.2 4.2 0 0 1 12 13.2a4.2 4.2 0 0 1-4.2-3.7L7 3z\"/><path d=\"M12 13.2V20M8.5 21h7M7.4 6.5h9.2\"/>", "bfiches": "<path d=\"M8 8h8l-1.2 12.2a1 1 0 0 1-1 .8h-3.6a1 1 0 0 1-1-.8L8 8z\"/><path d=\"M9.5 8V5.5A2.5 2.5 0 0 1 12 3a2.5 2.5 0 0 1 2.5 2.5V8M8.6 12.5h6.8\"/>", "bingredients": "<path d=\"M3.5 8h17v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V8z\"/><path d=\"M3.5 8l2-4h13l2 4M9 12h6\"/>", "service": "<path d=\"M4 18h16M5.5 18a6.5 6.5 0 0 1 13 0\"/><path d=\"M12 9.5V8M10.5 6.5h3\"/>", "allergenes": "<path d=\"M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7l8-4z\"/><path d=\"M12 8v5M12 16.5v.01\"/>", "menus": "<path d=\"M6 3v18M6 3c2.5 0 4 1.6 4 4.5S8.5 12 6 12\"/><path d=\"M15 3v6a3 3 0 0 0 6 0V3M18 3v18\"/>", "ventes": "<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/>", "bventes": "<path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"/>"};
 const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
 function renderNav(){
   const part=partOf(state.view);if(state.view!=="service"&&state.view!=="allergenes")state.lastPart=part;
   document.querySelectorAll("[data-part]").forEach(b=>b.setAttribute("aria-pressed",String(state.view!=="service"&&state.view!=="allergenes"&&b.dataset.part===part)));
   const nav=document.getElementById("nav");if(!nav)return;
-  nav.innerHTML=PARTS[part].map(([k,l,sh])=>`<button role="tab" aria-selected="${k===state.view}" data-tab="${k}">${ico(k)}<span class="tl">${l}</span><span class="ts">${sh}</span></button>`).join("")+`<button role="tab" aria-selected="${state.view==="allergenes"}" data-tab="allergenes">${ico("allergenes")}<span class="tl">Allergènes</span><span class="ts">Allergènes</span></button>`+`<button role="tab" aria-selected="${state.view==="service"}" data-tab="service">${ico("service")}<span class="tl">Service</span><span class="ts">Service</span></button>`;
+  nav.innerHTML=PARTS[part].filter(([k])=>!CM.lecture||k==="fiches"||k==="bfiches"||k==="menus").map(([k,l,sh])=>`<button role="tab" aria-selected="${k===state.view}" data-tab="${k}">${ico(k)}<span class="tl">${l}</span><span class="ts">${sh}</span>${(k==="ingredients"||k==="bingredients")&&!CM.lecture&&facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length?`<span class="nav-badge">${facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length}</span>`:""}</button>`).join("")+`<button role="tab" aria-selected="${state.view==="allergenes"}" data-tab="allergenes">${ico("allergenes")}<span class="tl">Allergènes</span><span class="ts">Allergènes</span></button>`+`<button role="tab" aria-selected="${state.view==="service"}" data-tab="service">${ico("service")}<span class="tl">Service</span><span class="ts">Service</span></button>`;
   const hd=document.querySelector("header");if(hd)document.documentElement.style.setProperty("--hdr",hd.offsetHeight+"px");
 }
 function render(){
-  renderNav();
+  renderNav();renderResto();
   let h="";
-  if(false&&state.noDb)h+=`<div class="banner" style="box-shadow:0 0 0 2px var(--warn-bg)"><p><strong>Vos données ne sont pas chargées ici.</strong> Cette fenêtre n'a pas accès à votre espace Claude, donc l'app s'affiche vide. Ouvrez-la depuis claude.ai dans Safari ou Chrome, connecté à votre compte, et acceptez l'accès aux données si on vous le demande.</p></div>`;
+  if(state.noDb)h+=`<div class="banner"><p><strong>Le serveur ne répond pas.</strong> Vérifie la connexion internet puis recharge la page.</p></div>`;
   else if(state.view!=="service"&&!state.demo&&!Object.keys(state.ingredients).length&&!Object.keys(state.fiches).length&&!Object.keys(state.carte).length&&!state.imp&&!state.menuImp)
-    h+=`<div class="banner"><p><strong>Bienvenue.</strong> Commencez par importer vos factures fournisseurs : la mercuriale se remplit toute seule. Écrivez ensuite vos fiches techniques et importez votre carte.</p><div class="acts"><button class="btn" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="pickMenu">Importer ma carte</button></div></div>`;
+    h+=`<div class="banner"><p><strong>Bienvenue.</strong> Commencez par importer vos factures fournisseurs : la mercuriale se remplit toute seule. Écrivez ensuite vos fiches techniques et importez votre carte.</p><div class="acts">${CM.lecture?"":`<button class="btn" data-cm="importer">Remettre ma sauvegarde</button>`}<button class="btn ghost" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="pickMenu">Importer ma carte</button></div></div>`;
   if(state.demo) h+=`<div class="banner"><p><strong>Ce sont des exemples.</strong> Modifiez-les pour commencer avec, ou repartez d'une page blanche et importez votre carte et vos factures.</p><div class="acts"><button class="btn" data-act="adopt">Garder les exemples</button><button class="btn ghost" data-act="empty">Partir de zéro</button></div></div>`;
   const o=state.open;
+  if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view))state.view=state.view==="boissons"||state.view==="bingredients"?"bfiches":"fiches";
+  if(state.view==="reglages"){main.innerHTML=renderReglages();return}
+  if(state.view==="menus"){main.innerHTML=renderMenus();return}
+  if(state.view==="ventes"||state.view==="bventes"){main.innerHTML=renderVentes(state.view==="bventes"?"bar":"cuisine");return}
   if(state.view==="service"){main.innerHTML=renderService();filterService();return}
   if(state.view==="allergenes"){main.innerHTML=renderAllergens();return}
   if(state.view==="boissons") h+=(o&&o.kind==="boi"&&state.boissons[o.id])?renderBoisson(o.id):renderBoissons();
@@ -577,22 +785,14 @@ function render(){
   else h+=(o&&o.kind==="car"&&state.carte[o.id])?renderItem(o.id):renderCarte();
   main.innerHTML=h;
   if(state.view==="ingredients"||state.view==="bingredients")filterIngredients();
+  filtrerCarte();
 }
-function summaryHtml(){
-  const rs=Object.values(state.carte).filter(isFood).map(calcItem);
-  const priced=rs.filter(c=>c.fc!=null&&(c.st==="ok"||c.st==="watch"||c.st==="alert"));
-  const avg=priced.length?priced.reduce((s,c)=>s+c.fc,0)/priced.length:null;
-  const bad=rs.filter(c=>c.st==="alert").length, watch=rs.filter(c=>c.st==="watch").length, todo=rs.filter(c=>c.st==="nofiche"||c.st==="missing").length;
-  return `<section class="summary" aria-label="Synthèse">
-    <div><span class="lbl">Articles à la carte</span><span class="big">${rs.length}</span></div>
-    <div><span class="lbl">Food cost moyen</span><span class="big">${pct(avg)}</span></div>
-    <div><span class="lbl">À revoir</span><span class="big">${bad} <small style="font-size:.8rem;color:var(--muted)">+ ${watch} à surveiller${todo?` · ${todo} incomplet${todo>1?"s":""}`:""}</small></span></div>
-    <div><label class="lbl" for="target">Objectif food cost</label><span class="target"><input type="text" inputmode="decimal" class="n" id="target" data-set="target" value="${n2.format(num(state.settings.target))}"> <span>%</span></span></div>
-  </section>`;
-}
+function bandeauFactures(part){if(CM.lecture)return "";const n=facturesDe(part).filter(([,f])=>f.statut==="a_valider").length;if(!n)return "";
+  return `<div class="banner fac-banner"><p><strong>📬 ${n} nouvelle${n>1?"s":""} facture${n>1?"s":""} à vérifier.</strong> Les prix seront mis à jour dès que tu l${n>1?"es":"a"} valides.</p><button class="btn" data-tab-go="${part==="bar"?"bingredients":"ingredients"}">Voir ${n>1?"les factures":"la facture"}</button></div>`}
+function summaryHtml(){return bandeauFactures("cuisine")+renderAlertes("cuisine")+bilanHtml()}
 function renderCarte(){
   const items=Object.entries(state.carte).filter(([,it])=>isFood(it)).map(([id,it])=>({id,it,c:calcItem(it)}));
-  let h=summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button></div></div>`+renderMenuImport()+`<div class="list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
+  let h=(items.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-car" data-cq="car" placeholder="Rechercher un plat… (ex. onglet, tarte, burger)" value="${esc(state.cq_car||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-car-n" style="margin:0;white-space:nowrap"></span></div>`:"")+summaryHtml()+`<div class="toolbar"><h2>Carte des repas</h2><div class="acts"><button class="btn" data-act="pickMenu">Importer ma carte</button><button class="btn ghost" data-act="newItem">+ Nouvel article</button>${items.length?boutonsExport("carte",`<hr><button data-exp="carted:csv">📋 Carte détaillée pour Excel<small>chaque plat avec ses ingrédients et une colonne « Nouveau prix »</small></button><button data-exp="carted:print">🖨️ Imprimer la carte détaillée</button><hr><button data-modif="1">⬆️ Importer les nouveaux prix…<small>le fichier rempli, enregistré en CSV</small></button>`):""}</div></div>`+renderMenuImport()+`<div class="list" id="cq-list">`+(items.length?`<div class="row hdr"><span class="lbl">Article</span><span class="lbl num" title="Ce que coûtent les ingrédients d'une portion">Coût matière</span><span class="lbl num" title="Prix affiché sur la carte">Prix TTC</span><span class="lbl num" title="Prix HT divisé par le coût matière">Coef.</span><span class="lbl" style="text-align:right" title="Part du prix HT qui part dans les ingrédients">Food cost</span></div>`:"");
   if(!items.length) return h+`<div class="empty">Votre carte est vide. Importez votre menu (PDF ou photo) pour créer tous vos articles d'un coup, ou ajoutez-les un par un.</div></div>`;
   FOOD_SECTIONS.forEach(sec=>{
     const g=items.filter(x=>(FOOD_SECTIONS.includes(x.it.section)?x.it.section:"Autre")===sec).sort((a,b)=>(a.it.name||"").localeCompare(b.it.name||"","fr"));
@@ -637,8 +837,9 @@ function yieldTxt(f){const y=num(f.yield);return n2.format(y)+" "+(f.yieldUnit==
 function renderFicheList(){
   const bar=state.view==="bfiches";
   const fs=Object.entries(state.fiches).filter(([,f])=>(f.category==="Boisson")===bar);
-  let h=bar?`<div class="toolbar"><h2>Recettes boissons</h2><button class="btn" data-act="newFiche">+ Nouvelle recette</button></div>
-  <p class="hint" style="margin:0">Cocktails, kirs, cafés, bières panachées… Chaque recette se relie à une boisson de la carte des boissons, qui calcule son coût.</p><div class="list">`:`<div class="toolbar"><h2>Fiches techniques</h2><button class="btn" data-act="newFiche">+ Nouvelle fiche</button></div>
+  const exp=fs.length?boutonsExport(bar?"bfiches":"fiches",CM.lecture?"":`<hr><button data-modif="1">⬆️ Importer les nouveaux prix…<small>le fichier rempli, enregistré en CSV</small></button>`):"";
+  let h=bar?`<div class="toolbar"><h2>Recettes boissons</h2><div class="acts"><button class="btn" data-act="newFiche">+ Nouvelle recette</button>${exp}</div></div>
+  <p class="hint" style="margin:0">Cocktails, kirs, cafés, bières panachées… Chaque recette se relie à une boisson de la carte des boissons, qui calcule son coût.</p><div class="list">`:`<div class="toolbar"><h2>Fiches techniques</h2><div class="acts"><button class="btn" data-act="newFiche">+ Nouvelle fiche</button>${exp}</div></div>
   <p class="hint" style="margin:0">Une fiche par recette, avec grammages, étapes et photo. Les bases (frites, sauces, pâtes) se réutilisent dans d'autres fiches.</p><div class="list">`;
   if(!fs.length)return h+`<div class="empty">${bar?"Aucune recette boisson.":"Aucune fiche. Créez-en une, ou importez votre carte pour obtenir des fiches proposées à vérifier."}</div></div>`;
   FCATS.forEach(cat=>{
@@ -657,7 +858,7 @@ function renderFicheRead(id){
   const uName=f.yieldUnit==="portion"||!f.yieldUnit?"portion(s)":YIELD[f.yieldUnit].label;
   let h=`<button class="back" data-act="back">‹ ${f.category==="Boisson"?"Recettes boissons":"Fiches techniques"}</button>
   <section class="card sheet">
-    <div class="toolbar"><div><span class="lbl">${esc(f.category||"")}</span><h2 class="big-title">${esc(f.name||"Sans nom")}</h2></div><div class="acts">${f.toCheck?`<span class="tag">Proposée par Claude, à vérifier</span>`:""}<button class="btn" data-act="editFiche">Modifier</button></div></div>
+    <div class="toolbar"><div><span class="lbl">${esc(f.category||"")}</span><h2 class="big-title">${esc(f.name||"Sans nom")}</h2></div><div class="acts">${f.toCheck?`<span class="tag">Proposée par Claude, à vérifier</span>`:""}<button class="btn ghost" data-act="imprimer">Imprimer</button><button class="btn" data-act="editFiche">Modifier</button></div></div>
     ${f.photo&&f.photo.url?`<img class="photo" src="${esc(f.photo.url)}" alt="Dressage : ${esc(f.name)}">`:""}
     <div class="scaler"><label for="scale">Quantités pour</label><input type="text" inputmode="decimal" class="n" id="scale" data-scale="${esc(id)}" value="${n2.format(want)}"><span>${uName}</span><span class="hint" style="margin:0">(recette de base : ${yieldTxt(f)})</span></div>
     <div class="cols"><div><span class="lbl">Ingrédients</span><table class="qtytbl" id="qtytbl"><tbody>${qtyRows(f,k)}</tbody></table></div>
@@ -801,8 +1002,10 @@ function renderFicheCalc(f){
 function renderIngredients(){
   const part=state.view==="bingredients"?"bar":"cuisine";
   const ings=Object.entries(state.ingredients).filter(([id,i])=>ingPart(id,i)[part]).sort(byName);
-  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button></div></div>
-  <p class="hint" style="margin:0">Prix d'achat HT. La perte (épluchage, parage, cuisson) augmente le coût réel de ce que vous servez. Elle se remplit toute seule avec vos fiches et vos factures ; vous n'avez qu'à vérifier. Les allergènes saisis ici remontent dans toutes les fiches.</p>`+renderImport();
+  let h=`<div class="toolbar"><h2>${part==="bar"?"Mercuriale bar":"Mercuriale cuisine"}</h2><div class="acts"><button class="btn" data-cm="deposer">Ajouter des factures</button><button class="btn ghost" data-act="newIng">+ Nouvel ingrédient</button><button class="btn ghost" data-cmp="1">${state.cmp?"‹ Mercuriale":"Comparer les fournisseurs"}</button>${ings.length?boutonsExport(part==="bar"?"bingredients":"ingredients"):""}</div></div>
+  <p class="hint" style="margin:0">Prix d'achat HT. La perte (épluchage, parage, cuisson) augmente le coût réel de ce que vous servez. Elle se remplit toute seule avec vos fiches et vos factures ; vous n'avez qu'à vérifier. Les allergènes saisis ici remontent dans toutes les fiches.</p>`+renderImport()+(state.imp?"":renderFactures(part));
+  h+=renderControles(part);
+  if(state.cmp)return h+renderComparaison(part);
   if(!ings.length) return h+`<div class="list"><div class="empty">Aucun ingrédient. Importez une facture fournisseur pour remplir la mercuriale automatiquement.</div></div>`;
   const sups=[...new Set(ings.map(([,i])=>i.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   h+=`<div class="searchbar"><input type="search" id="ing-search" placeholder="Rechercher un produit… (ex. onglet, mozza, crème)" value="${esc(state.q||"")}" aria-label="Rechercher dans la mercuriale" autocomplete="off">
@@ -867,10 +1070,10 @@ async function readDoc(file,sample){
   if(!lim||!lim.images)throw "La lecture de photos n'est pas disponible ici. Essayez avec un PDF.";
   return {images:[file]};
 }
-function sampleErr(e,fallback){const c=e&&e.code;return c==="not_granted"?"Autorisez l'app à utiliser Claude pour lire vos documents, puis réessayez.":c==="rate_limited"?"Limite d'utilisation atteinte. Réessayez un peu plus tard.":c==="invalid_json"?fallback:"La lecture a échoué. Réessayez dans un instant."}
+function sampleErr(e,fallback){const c=e&&e.code;if(e&&e.message&&c!=="invalid_json")return e.message;return c==="not_granted"?"Autorisez l'app à utiliser Claude pour lire vos documents, puis réessayez.":c==="rate_limited"?"Limite d'utilisation atteinte. Réessayez un peu plus tard.":c==="invalid_json"?fallback:"La lecture a échoué. Réessayez dans un instant."}
 async function askDoc(prompt,file,onFail){
   const sample=await getSample();
-  if(!sample){onFail("Dans la vraie version, Claude lit la facture ou la carte (PDF ou photo) et remplit tout seul la mercuriale et les fiches. Cette lecture est désactivée dans la démo.");return null}
+  if(!sample){onFail(CM.lecture?"Réservé au responsable.":"La lecture automatique n'est pas encore activée : ajoute la clé de l'IA dans Réglages (roue dentée en haut).");return null}
   let doc;
   try{doc=await readDoc(file,sample)}catch(e){onFail(typeof e==="string"?e:"Impossible d'ouvrir ce fichier. Vérifiez qu'il s'agit bien d'un PDF ou d'une photo.");return null}
   return {sample,input:prompt+(doc.text?"\n\nTexte du document :\n"+doc.text:"\n\nLe document est en image jointe."),images:doc.images};
@@ -884,7 +1087,7 @@ Exemples : carton de 6 bouteilles de 1 L à 9,00 € HT → 1,50 €/L ; sac de 
 Si seul le prix TTC apparaît, convertis-le en HT avec le taux de TVA de la ligne (5,5 % par défaut pour l'alimentaire).
 Indique les allergènes réglementaires du produit parmi : gluten, crustaces, oeufs, poissons, arachides, soja, lait, fruits_coque, celeri, moutarde, sesame, sulfites, lupin, mollusques.
 Réponds uniquement avec ce JSON :
-{"supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}`;
+{"supplier": "nom du fournisseur ou null", "date": "AAAA-MM-JJ ou null", "lines": [{"name": "nom court et clair du produit en français, sans code article", "unit": "kg" | "L" | "piece", "price": prix HT par unité de base (nombre), "qty": quantité achetée exprimée dans cette même unité de base (nombre, ex. 2 cartons de 6 × 1 L → 12), "promo": true si la ligne est une promotion, une remise sur ce produit ou un prix exceptionnel (sinon false), "allergens": ["lait"], "detail": "conditionnement et prix d'origine, très court"}]}`;
 const cleanAlg=a=>(Array.isArray(a)?a:[]).filter(x=>ALGN[x]);
 const toUnit=u=>UNITS[u]?u:(/^l|litre/i.test(u||"")?"L":/pi/i.test(u||"")?"piece":"kg");
 function renderImport(){
@@ -894,13 +1097,13 @@ function renderImport(){
   const ings=Object.entries(state.ingredients).sort(byName);const on=im.lines.filter(l=>l.on).length;
   let h=`<section class="card imp"><div class="toolbar"><h2>Facture ${esc(im.supplier||"")}${im.date?" du "+esc(new Date(im.date).toLocaleDateString("fr-FR")):""}</h2><span class="hint" style="margin:0">${im.lines.length} produit${im.lines.length>1?"s":""}</span></div>
   <p class="hint" style="margin:0">Vérifiez les prix ramenés au kg, au litre ou à la pièce, et l'ingrédient à mettre à jour. Rien n'est modifié avant de cliquer sur « Mettre à jour ».</p>
-  <div class="tablewrap"><table><thead><tr><th></th><th>Produit</th><th style="text-align:right">Prix HT</th><th>Unité</th><th>Dans la mercuriale</th><th style="text-align:right">Ancien prix</th></tr></thead><tbody>`;
+  ${bandeauControle(im)}<div class="tablewrap"><table><thead><tr><th></th><th>Produit</th><th style="text-align:right">Prix HT</th><th>Unité</th><th>Dans la mercuriale</th><th style="text-align:right">Habituel</th></tr></thead><tbody>`;
   im.lines.forEach((l,k)=>{const m=state.ingredients[l.match];let delta;
-    if(m&&num(m.price)>0&&m.unit===l.unit){const d=(num(l.price)-num(m.price))/num(m.price);delta=`<span class="delta ${d>0.005?"up":d<-0.005?"down":""}">${eur.format(num(m.price))} ${d>0?"+":""}${(d*100).toFixed(1).replace(".",",")} %</span>`}
+    if(m&&num(m.price)>0&&m.unit===l.unit){const hab=prixHabituel(m),d=(num(l.price)-hab)/hab,ail=moinsCherAilleurs(l.match,num(l.price),im.supplier);delta=`<span class="delta ${d>0.03?"up":d<-0.03?"down":""}" title="Prix habituel : médiane des derniers prix">${eur.format(hab)} ${d>0?"+":""}${(d*100).toFixed(1).replace(".",",")} %</span>${ail?`<span class="used warn-t">${esc(ail)}</span>`:""}`}
     else if(m)delta=`<span class="delta">${num(m.price)>0?eur.format(num(m.price))+" / "+(UNITS[m.unit]?.label||""):"pas de prix"}</span>`;else delta=`<span class="used">nouveau</span>`;
     h+=`<tr><td><input type="checkbox" aria-label="Importer cette ligne" id="imp-on-${k}" data-imp="${k}" data-ik="on" ${l.on?"checked":""}></td>
     <td><input type="text" aria-label="Nom" id="imp-name-${k}" data-imp="${k}" data-ik="name" value="${esc(l.name)}">${l.detail?`<span class="used">${esc(l.detail)}</span>`:""}</td>
-    <td style="width:100px"><input type="text" inputmode="decimal" class="n" aria-label="Prix HT" id="imp-price-${k}" data-imp="${k}" data-ik="price" value="${n2.format(num(l.price))}"></td>
+    <td style="width:100px"><input type="text" inputmode="decimal" class="n" aria-label="Prix HT" id="imp-price-${k}" data-imp="${k}" data-ik="price" value="${n2.format(num(l.price))}"><label class="promo-l" title="Prix promotionnel : il ne remplace pas le prix habituel dans tes fiches"><input type="checkbox" data-imp="${k}" data-ik="promo" ${l.promo?"checked":""}> Promo</label></td>
     <td style="width:96px"><select aria-label="Unité" id="imp-unit-${k}" data-imp="${k}" data-ik="unit">${Object.entries(UNITS).map(([u,v])=>`<option value="${u}" ${u===l.unit?"selected":""}>/ ${v.label}</option>`).join("")}</select></td>
     <td style="width:210px"><select aria-label="Ingrédient correspondant" id="imp-match-${k}" data-imp="${k}" data-ik="match"><option value="">+ Nouvel ingrédient</option>${ings.map(([id,i])=>`<option value="${esc(id)}" ${id===l.match?"selected":""}>${esc(i.name||"Sans nom")}</option>`).join("")}</select></td>
     <td class="num">${delta}</td></tr>`});
@@ -913,7 +1116,7 @@ async function importInvoice(file){
   state.imp={status:"reading",msg:"Claude lit la facture et calcule les prix…"};render();
   try{
     const res=await q.sample.json(q.input,Object.assign({modelTier:"default"},q.images?{images:q.images}:{}));
-    const lines=(res&&Array.isArray(res.lines)?res.lines:[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
+    const lines=(res&&Array.isArray(res.lines)?res.lines:[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),promo:!!l.promo,allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
     if(!lines.length)return fail("Aucun produit trouvé dans ce document. Est-ce bien une facture fournisseur ?");
     state.imp={status:"review",supplier:res.supplier||"",date:res.date||"",lines};render();
   }catch(e){fail(sampleErr(e,"La facture n'a pas pu être lue correctement. Essayez un fichier plus net."))}
@@ -923,14 +1126,18 @@ function fixLinesForIngredient(ingId,touched){
   if(true)return;Object.entries(state.fiches).forEach(([fid,f])=>{let ch=false;(f.lines||[]).forEach(x=>{if(x.type!=="f"&&x.ref===ingId&&u[x.unit]==null){x.unit=defaultUnit(u);ch=true}});if(ch)touched.push(["fic",fid])});
 }
 function applyImport(){
-  const im=state.imp;if(!im||im.status!=="review")return;const touched=[];
+  const im=state.imp;if(!im||im.status!=="review")return;const touched=[];const _couts=photoCouts();enregistrerControle(im);
   im.lines.filter(l=>l.on&&l.name).forEach(l=>{
-    if(l.match&&state.ingredients[l.match]){const i=state.ingredients[l.match];i.price=num(l.price);
+    if(l.match&&state.ingredients[l.match]&&l.promo&&num(state.ingredients[l.match].price)>0){const i=state.ingredients[l.match];i.promo={prix:num(l.price),unit:l.unit,date:(im.date||new Date().toISOString()).slice(0,10),f:im.supplier||""};if(im.supplier&&!i.supplier)i.supplier=im.supplier;touched.push(["ing",l.match]);return}
+    if(l.match&&state.ingredients[l.match]){const i=state.ingredients[l.match];const _avant=num(i.price);i.price=num(l.price);delete i.promo;
       if(num(i.packQty)>1&&l.unit===i.unit&&num(i.packPrice)>0&&Math.abs(num(l.price)-num(i.packPrice))/num(i.packPrice)<0.35){i.packPrice=num(l.price);i.price=num(l.price)/num(i.packQty)}delete i.auto;if(im.supplier)i.supplier=im.supplier;if(!(i.allergens||[]).length&&l.allergens.length)i.allergens=l.allergens;
-      if(i.unit!==l.unit){i.unit=l.unit;fixLinesForIngredient(l.match,touched)}touched.push(["ing",l.match])}
+      if(i.unit!==l.unit){i.unit=l.unit;fixLinesForIngredient(l.match,touched)}
+      if(_avant>0&&Math.abs(num(i.price)-_avant)/_avant>0.001)i.hist=(i.hist||[]).concat([{d:(im.date||new Date().toISOString()).slice(0,10),de:+_avant.toFixed(4),a:+num(i.price).toFixed(4),f:im.supplier||""}]).slice(-12);
+      touched.push(["ing",l.match])}
     else{const id=uid();state.ingredients[id]={name:l.name,supplier:im.supplier||"",price:num(l.price),unit:l.unit,loss:0,allergens:l.allergens};touched.push(["ing",id])}
   });
-  state.imp=null;touched.push(...relinkAll());commitMany(touched);render();
+  if(im.factureId)marquerFacture(im.factureId,"traitee");
+  state.imp=null;touched.push(...relinkAll());commitMany(touched);creerAlerte(_couts,im);render();
 }
 
 /* ---------- Import de la carte ---------- */
@@ -1086,10 +1293,11 @@ function srcOptions(f){
 }
 function renderBoissons(){
   const bs=Object.entries(state.boissons);
-  let h=`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button></div></div>
+  let h=(bs.length?`<div class="searchbar" style="margin-bottom:4px"><input type="search" id="q-boi" data-cq="boi" placeholder="Rechercher une boisson… (ex. spritz, merlot, pression)" value="${esc(state.cq_boi||"")}" aria-label="Rechercher un article" autocomplete="off"><span class="hint" id="q-boi-n" style="margin:0;white-space:nowrap"></span></div>`:"")+`<div class="toolbar"><h2>Carte des boissons</h2><div class="acts"><button class="btn" data-bact="newB">+ Nouvelle boisson</button><button class="btn ghost" data-bact="toggleCoef">Coefficients</button>${bs.length?boutonsExport("boissons"):""}</div></div>
   <p class="hint" style="margin:0">Chaque boisson a un ou plusieurs formats (verre, bouteille, pichet…). L'app calcule le coût de chaque format et propose un prix de vente selon le coefficient de sa famille. TVA : 20 % avec alcool, 10 % sans alcool.</p>`;
+  h+=bandeauFactures("bar")+renderAlertes("bar")+bilanBar();
   if(state.coefOpen)h+=`<section class="card"><div class="coefs">${BCATS.map(c=>`<label class="f"><span class="lbl">${esc(c)}</span><span class="target"><span>×</span><input type="text" inputmode="decimal" class="n" id="coef-${esc(c)}" data-coef="${esc(c)}" value="${n2.format(coefFor(c))}"></span></label>`).join("")}</div><p class="hint">Coefficient visé = prix HT ÷ coût. Exemple : ×5 sur un cocktail qui coûte 2 € donne 10 € HT, soit 12 € TTC à 20 %.</p></section>`;
-  h+=`<div class="list">`;
+  h+=`<div class="list" id="cq-list">`;
   if(!bs.length)return h+`<div class="empty">Aucune boisson. Ajoutez vos vins, bières, softs et cocktails, ou importez la facture de votre fournisseur de boissons dans la mercuriale.</div></div>`;
   BCATS.forEach(cat=>{const g=bs.filter(([,b])=>(BCATS.includes(b.category)?b.category:"Sans alcool")===cat).sort(byName);if(!g.length)return;
     h+=`<div class="group"><span class="lbl">${esc(cat)}</span></div>`;
@@ -1139,7 +1347,7 @@ function renderAllergens(){
   const used=new Set();Object.values(state.carte).filter(isFood).forEach(it=>ingsOf(state.fiches[it.fiche],used));
   const blank=[...used].filter(id=>!(state.ingredients[id].allergens||[]).length).length;
   const keys=ALG.map(([k])=>k);
-  let h=`<div class="toolbar"><div><h2>Allergènes</h2><p class="hint" style="margin-top:6px">Les 14 allergènes à déclarer, calculés depuis vos fiches et votre mercuriale.</p></div></div>
+  let h=`<div class="toolbar"><div><h2>Allergènes</h2><p class="hint" style="margin-top:6px">Les 14 allergènes à déclarer, calculés depuis vos fiches et votre mercuriale.</p></div><div class="acts"><button class="btn ghost" data-al-print="1">Imprimer le tableau</button></div></div>
   <section class="card al-pick"><span class="lbl">Le client est allergique à…</span><div class="al-chips">${ALG.map(([k,v])=>`<button class="al-chip ${sel.includes(k)?"on":""}" data-al="${k}" aria-pressed="${sel.includes(k)}">${v}</button>`).join("")}${sel.length?`<button class="lnk" data-al="__clear" style="padding:6px 4px">Effacer</button>`:""}</div>
   ${sel.length?`<p class="hint" style="margin-top:10px">Les plats en vert ne contiennent aucun allergène sélectionné d'après vos fiches. Vérifiez toujours en cuisine.</p>`:""}</section>`;
   if(!groups.length)return h+`<div class="list"><div class="empty">Ajoutez des articles à la carte et reliez-les à leurs fiches pour voir leurs allergènes.</div></div>`;
@@ -1223,7 +1431,8 @@ main.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;const act=t.dataset.act;const o=state.open;
   if(act==="adopt")adopt();
   else if(act==="empty")startEmpty();
-  else if(act==="back"){state.open=null;state.edit=false;render()}
+  else if(act==="back"){if(state.view==="reglages")state.view=PARTS[state.lastPart||"cuisine"][0][0];state.open=null;state.edit=false;render()}
+  else if(act==="imprimer"){window.print()}
   else if(t.dataset.openItem){state.open={kind:"car",id:t.dataset.openItem};render();window.scrollTo(0,0)}
   else if(t.dataset.openFiche)openFiche(t.dataset.openFiche,false);
   else if(act==="gotoFiche")openFiche(t.dataset.id,false);
@@ -1297,7 +1506,7 @@ function onField(e,commit){
     l[ds.lf]=ds.lf==="qty"?num(el.value):el.value;refreshFiche();if(commit)queueSave("fic",o.id);return}
   if(ds.alg){const i=state.ingredients[ds.alg];if(!i||!commit)return;const s=new Set(i.allergens||[]);el.checked?s.add(ds.ak):s.delete(ds.ak);i.allergens=ALG.map(a=>a[0]).filter(k=>s.has(k));queueSave("ing",ds.alg);render();return}
   if(ds.imp!=null&&state.imp&&state.imp.lines){const l=state.imp.lines[+ds.imp];if(!l)return;
-    if(ds.ik==="on")l.on=el.checked;else if(ds.ik==="price")l.price=num(el.value);else l[ds.ik]=el.value;
+    if(ds.ik==="on")l.on=el.checked;else if(ds.ik==="promo")l.promo=el.checked;else if(ds.ik==="price")l.price=num(el.value);else l[ds.ik]=el.value;
     if(commit&&ds.ik!=="name")render();return}
   if(ds.mimp!=null&&state.menuImp&&state.menuImp.items){const x=state.menuImp.items[+ds.mimp];if(!x)return;
     if(ds.mk==="on")x.on=el.checked;else if(ds.mk==="price")x.price=num(el.value);else x[ds.mk]=el.value;
@@ -1310,6 +1519,688 @@ function onField(e,commit){
 }
 main.addEventListener("input",e=>{const pk=e.target.id&&e.target.id.match(/^pk-(?:price|qty)-(.+)$/);if(pk){updatePackRes(pk[1]);return}if(e.target.id==="ing-search"){state.q=e.target.value;filterIngredients();return}if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")onField(e,false)});
 main.addEventListener("change",e=>{if(/^pk-unit-/.test(e.target.id||"")){updatePackRes(e.target.id.slice(8));return}if(e.target.id==="ing-search"||/^pk-/.test(e.target.id||""))return;if(e.target.id==="ing-sup"){state.qs=e.target.value;filterIngredients();return}onField(e,true)});
+
+/* ---------- Factures reçues par mail ---------- */
+const FAC_ST={a_valider:"À vérifier",erreur:"Erreur de lecture",lecture:"Lecture en cours…",ignoree:"Ignorée",traitee:"Traitée"};
+function facturesDe(part){
+  return Object.entries(CM.docs.factures||{}).filter(([,f])=>["a_valider","erreur","lecture"].includes(f.statut))
+    .filter(([,f])=>{const bar=DRINK_SUP.test((f.fournisseur||"")+" "+(f.expediteur||""));return part==="bar"?bar:!bar})
+    .sort((a,b)=>(b[1].recu_le||"").localeCompare(a[1].recu_le||""));
+}
+function renderFactures(part){
+  if(CM.lecture)return "";
+  const fs=facturesDe(part);const dp=state.depot;
+  const prog=dp?`<section class="card imp"><p class="msg">${dp.fini?"":'<span class="spin" aria-hidden="true"></span>'}${esc(dp.msg)}</p>${dp.fini?`<div class="acts"><button class="btn ghost sm" data-cm="depotOk">Fermer</button></div>`:""}</section>`:"";
+  if(!fs.length)return prog+`<p class="hint" style="margin:0">Touchez « Ajouter des factures » et sélectionnez tous les PDF ou photos de votre dossier de factures : celles déjà reçues sont reconnues et ignorées, les nouvelles sont lues et arrivent ici, prêtes à vérifier.</p>`;
+  return prog+`<section class="list fac"><div class="fac-head"><h2 style="font-size:1.05rem">Factures reçues <span class="chip watch plain" style="margin-left:6px">${fs.length}</span></h2></div>
+  ${fs.map(([id,f])=>`<div class="fac-row"><div style="min-width:0"><b>${esc(f.fournisseur||(f.expediteur&&f.expediteur!=="Dépôt"?f.expediteur:f.nom)||"Facture")}</b>
+    <span class="sub">${f.date?"du "+esc(new Date(f.date).toLocaleDateString("fr-FR"))+" · ":""}${(f.lignes||[]).length?(f.lignes.length+" produit"+(f.lignes.length>1?"s":"")+" · "):""}reçue le ${esc(new Date((f.recu_le||"").replace(" ","T")).toLocaleDateString("fr-FR"))}${f.erreur?" · "+esc(f.erreur):""}</span></div>
+    <div class="acts">${f.statut==="a_valider"?`<button class="btn sm" data-fac="ouvrir" data-id="${esc(id)}">Vérifier</button>`:f.statut==="erreur"?`<button class="btn ghost sm" data-fac="relire" data-id="${esc(id)}">Relire</button>`:`<span class="hint" style="margin:0"><span class="spin"></span>${FAC_ST[f.statut]}</span>`}
+    <a class="btn ghost sm" href="/api/cout-matiere.php?action=facture_fichier&id=${encodeURIComponent(f.fichier||"")}${CM.rq()}" target="_blank" rel="noopener">Voir</a>
+    <button class="btn ghost sm" data-fac="ignorer" data-id="${esc(id)}" title="Ne pas utiliser cette facture">✕</button></div></div>`).join("")}</section>`;
+}
+function ouvrirFacture(id){
+  const f=(CM.docs.factures||{})[id];if(!f)return;
+  const lines=(f.lignes||[]).filter(l=>l&&l.name).map(l=>({on:true,name:String(l.name),unit:toUnit(l.unit),price:num(l.price),qty:num(l.qty),promo:!!l.promo,allergens:cleanAlg(l.allergens),detail:String(l.detail||""),match:bestMatch(l.name,state.ingredients)}));
+  state.imp={status:"review",supplier:f.fournisseur||"",date:f.date||"",lines,factureId:id};render();window.scrollTo(0,0);
+}
+function marquerFacture(id,statut){const f=(CM.docs.factures||{})[id];if(!f)return;CM.ecrire("factures",id,Object.assign({},f,{statut,traitee_le:new Date().toISOString().slice(0,10)})).catch(e=>setStatus(e.message,true))}
+
+/* ---------- Bilan des marges ---------- */
+const moy=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+function hausses(){
+  const lim=Date.now()-60*86400000,out=[];
+  Object.entries(state.ingredients).forEach(([id,i])=>{const h=(i.hist||[]).filter(x=>new Date(x.d).getTime()>=lim&&num(x.de)>0);if(!h.length)return;
+    const x=h[h.length-1],d=(num(x.a)-num(x.de))/num(x.de);if(d>0.03)out.push({id,i,x,d,u:ingUsers(id)})});
+  return out.sort((a,b)=>b.d-a.d).slice(0,6);
+}
+function bilanHtml(){
+  const rows=Object.values(state.carte).filter(isFood).map(it=>({it,c:calcItem(it)}));
+  const ok=rows.filter(r=>["ok","watch","alert"].includes(r.c.st)&&r.c.cp>0&&r.c.ht>0);
+  const fc=moy(ok.map(r=>r.c.fc)),marge=moy(ok.map(r=>r.c.marge)),coef=moy(ok.map(r=>r.c.coef)),ttc=moy(ok.map(r=>num(r.it.ttc)));
+  const bad=rows.filter(r=>r.c.st==="alert").length,watch=rows.filter(r=>r.c.st==="watch").length,todo=rows.filter(r=>r.c.st==="nofiche"||r.c.st==="missing").length;
+  const tgt=num(state.settings.target);
+  let h=`<section class="bilan" aria-label="Bilan de la carte">
+    <div class="hl"><span class="lbl">Marge brute moyenne</span><span class="big">${marge!=null?eur.format(marge):"—"} <small>HT / plat</small></span><span class="sub">${fc!=null?pct(1-fc)+" du prix de vente HT":"—"}</span></div>
+    <div><span class="lbl">Food cost moyen</span><span class="big">${pct(fc)}</span><span class="sub">${fc!=null?(fc*100<=tgt?"Dans l'objectif de ":"Au-dessus de l'objectif de ")+n2.format(tgt)+" %":""}</span></div>
+    <div><span class="lbl">Coefficient moyen</span><span class="big">${coefTxt(coef)}</span><span class="sub">Prix moyen ${ttc!=null?eur.format(ttc)+" TTC":"—"}</span></div>
+    <div><label class="lbl" for="target">Objectif food cost</label><span class="target"><input type="text" inputmode="decimal" class="n" id="target" data-set="target" value="${n2.format(tgt)}"> <span>%</span></span><span class="sub">${bad} trop cher${bad>1?"s":""} · ${watch} à surveiller${todo?` · ${todo} incomplet${todo>1?"s":""}`:""}</span></div>
+  </section>`;
+  const secs=FOOD_SECTIONS.map(sec=>{const g=ok.filter(r=>(FOOD_SECTIONS.includes(r.it.section)?r.it.section:"Autre")===sec);return [sec,g]}).filter(([,g])=>g.length);
+  if(secs.length){
+    const line=(nom,g,tag="td")=>{const f=moy(g.map(r=>r.c.fc));return `<tr><${tag}>${esc(nom)}</${tag}><td>${g.length}</td><td>${eur.format(moy(g.map(r=>num(r.it.ttc))))}</td><td>${eur.format(moy(g.map(r=>r.c.cp)))}</td><td><b>${eur.format(moy(g.map(r=>r.c.marge)))}</b></td><td>${pct(1-f)}</td><td><span class="chip ${f*100<=tgt?"ok":f*100<=tgt+7?"watch":"alert"}">${pct(f)}</span></td></tr>`};
+    h+=`<div class="tablewrap"><table class="bil-tbl"><thead><tr><th>Rubrique</th><th>Plats</th><th>Prix moyen TTC</th><th>Coût moyen</th><th>Marge moyenne HT</th><th>Marge %</th><th>Food cost</th></tr></thead><tbody>${secs.map(([n,g])=>line(n,g)).join("")}</tbody><tfoot>${line("Toute la carte",ok)}</tfoot></table></div>
+    <p class="hint" style="margin:-8px 0 0">Moyennes par plat, calculées sur ${ok.length} plat${ok.length>1?"s":""} complet${ok.length>1?"s":""}, sans tenir compte des quantités vendues.</p>`;
+  }
+  const hs=hausses();
+  if(hs.length&&!CM.lecture)h+=`<section class="list fac hausses"><div class="fac-head"><h2 style="font-size:1.05rem">Hausses de prix récentes</h2></div>${hs.map(x=>`<div class="fac-row"><div style="min-width:0"><b>${esc(x.i.name)}</b><span class="sub">${eur.format(num(x.x.de))} → ${eur.format(num(x.x.a))} / ${UNITS[x.i.unit]?.label||""} · ${esc(new Date(x.x.d).toLocaleDateString("fr-FR"))}${x.u?` · dans ${x.u} fiche${x.u>1?"s":""}`:""}</span></div><span class="delta up">+${(x.d*100).toFixed(1).replace(".",",")} %</span></div>`).join("")}</section>`;
+  return h;
+}
+function bilanBar(){
+  const rows=[];Object.values(state.boissons).forEach(b=>(b.formats||[]).forEach(f=>{if(num(f.ttc)>0){const c=calcFormat(b,f);if(c.st!=="missing"&&c.cost>0)rows.push({b,f,c,cat:BCATS.includes(b.category)?b.category:"Sans alcool"})}}));
+  if(!rows.length)return "";
+  const m=g=>({marge:moy(g.map(r=>r.c.ht-r.c.cost)),pc:moy(g.map(r=>r.c.cost/r.c.ht)),coef:moy(g.map(r=>r.c.coef)),ttc:moy(g.map(r=>num(r.f.ttc))),cost:moy(g.map(r=>r.c.cost))});
+  const t=m(rows);
+  const line=(nom,g,tag="td")=>{const x=m(g);return `<tr><${tag}>${esc(nom)}</${tag}><td>${g.length}</td><td>${eur.format(x.ttc)}</td><td>${eur.format(x.cost)}</td><td><b>${eur.format(x.marge)}</b></td><td>${pct(1-x.pc)}</td><td>${coefTxt(x.coef)}</td></tr>`};
+  return `<section class="bilan"><div class="hl"><span class="lbl">Marge brute moyenne</span><span class="big">${eur.format(t.marge)} <small>HT / service</small></span><span class="sub">${pct(1-t.pc)} du prix de vente HT</span></div>
+    <div><span class="lbl">Coût moyen</span><span class="big">${pct(t.pc)}</span><span class="sub">du prix de vente HT</span></div>
+    <div><span class="lbl">Coefficient moyen</span><span class="big">${coefTxt(t.coef)}</span><span class="sub">Prix moyen ${eur.format(t.ttc)} TTC</span></div>
+    <div><span class="lbl">Formats calculés</span><span class="big">${rows.length}</span><span class="sub">verres, bouteilles, pichets…</span></div></section>
+  <div class="tablewrap"><table class="bil-tbl"><thead><tr><th>Famille</th><th>Formats</th><th>Prix moyen TTC</th><th>Coût moyen</th><th>Marge moyenne HT</th><th>Marge %</th><th>Coef.</th></tr></thead><tbody>${BCATS.map(c=>[c,rows.filter(r=>r.cat===c)]).filter(([,g])=>g.length).map(([c,g])=>line(c,g)).join("")}</tbody><tfoot>${line("Tout le bar",rows)}</tfoot></table></div>`;
+}
+
+/* ---------- Réglages (responsable) ---------- */
+function renderReglages(){
+  const o=CM.options||{};
+  return `<button class="back" data-act="back" data-reg-back="1">‹ Retour</button>
+  <div class="toolbar"><h2>Réglages</h2></div>
+  <section class="card reg"><h2>Lecture automatique des factures (IA)</h2>
+    <p class="hint" style="margin:0">L'IA lit vos factures PDF ou photos et calcule les prix au kg, au litre ou à la pièce. Elle a besoin d'une clé d'accès Anthropic (console.anthropic.com → API Keys). Comptez quelques centimes par facture.</p>
+    <div class="fields2"><label class="f"><span class="lbl">Clé d'accès</span><input type="text" id="rg-cle" autocomplete="off" placeholder="sk-ant-…" value="${esc(o.ia_cle||"")}"></label>
+    <label class="f"><span class="lbl">Modèle (laisser vide = automatique)</span><input type="text" id="rg-modele" value="${esc(o.ia_modele||"")}" placeholder="automatique"></label></div>
+    <p class="hint" style="margin:0">État : ${o.ia?'<span class="ok-t">activée</span>':'<span class="bad-t">pas encore activée</span>'}${o.curl_dispo===false?' · <span class="bad-t">l\'hébergement bloque les appels (curl)</span>':''}</p>
+  </section>
+  <section class="card reg"><h2>Factures reçues par mail</h2>
+    <p class="hint" style="margin:0">Les PDF et photos qui arrivent dans cette boîte mail sont lus tout seuls et apparaissent dans la Mercuriale, prêts à vérifier. Les mails ne sont ni supprimés ni marqués comme lus.</p>
+    <div class="fields2"><label class="f"><span class="lbl">Serveur</span><input type="text" id="rg-hote" value="${esc(o.imap_hote||"imap.hostinger.com")}"></label>
+    <label class="f"><span class="lbl">Adresse de la boîte</span><input type="text" id="rg-user" value="${esc(o.imap_user||"")}" placeholder="facturation@le76.fr" autocomplete="off"></label>
+    <label class="f"><span class="lbl">Mot de passe de la boîte</span><input type="password" id="rg-mdp" placeholder="${o.imap_mdp?"déjà enregistré (laisser vide pour le garder)":"mot de passe"}" autocomplete="new-password"></label>
+    <label class="switch" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="rg-actif" ${o.mail_actif?"checked":""}> Relever automatiquement</label></div>
+    <p class="hint" style="margin:0">${o.imap_dispo===false?'<span class="bad-t">L\'hébergement ne permet pas de lire les mails (IMAP).</span> ':''}Dernière relève : ${o.derniere_releve?esc(new Date(o.derniere_releve.replace(" ","T")).toLocaleString("fr-FR"))+" · "+esc(o.derniere_releve_msg||""):"jamais"}</p>
+    <div class="acts"><button class="btn" data-cm="saveOpts">Enregistrer</button><button class="btn ghost" data-cm="relever">Relever maintenant</button></div>
+  </section>
+  <section class="card reg"><h2>Restaurants</h2>
+    <p class="hint" style="margin:0">Chaque restaurant a ses propres données : mercuriale, fiches, cartes, factures, ventes et réglages. Tu passes de l'un à l'autre avec le sélecteur en haut, à côté de « Coût matière ».</p>
+    <div class="list" style="box-shadow:none">${(CM.restos||[]).map(r=>`<div class="row" style="cursor:default;background-image:none"><span class="name">${esc(r.nom)}${r.id===CM.resto?` <span class="chip ok plain" style="font-size:.7rem;padding:2px 8px">ouvert</span>`:""}</span>${r.id===CM.resto?"":`<button class="btn ghost sm" data-resto="${esc(r.id)}">Ouvrir</button>`}</div>`).join("")}</div>
+    <div class="fields2"><label class="f"><span class="lbl">Nouveau restaurant</span><input type="text" id="rg-resto" placeholder="ex. Restaurant du camping" autocomplete="off"></label>
+    <label class="switch" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="rg-copie" checked> Reprendre la mercuriale et les fiches de ${esc(nomResto())}</label></div>
+    <div class="acts"><button class="btn" data-cm="restoCreer">Créer ce restaurant</button></div>
+  </section>
+  <section class="card reg"><h2>Ventes de la caisse (Z de L'Addition)</h2>
+    <p class="hint" style="margin:0">L'Addition envoie chaque jour le « Z quotidien » à cette boîte. L'app le lit tout seul (sans toucher aux mails) pour calculer ta marge réelle et classer ta carte.</p>
+    <div class="fields2"><label class="f"><span class="lbl">Adresse de la boîte</span><input type="text" id="rg-zuser" value="${esc(o.z_user||"le76@le76.fr")}" autocomplete="off"></label>
+    <label class="f"><span class="lbl">Mot de passe de la boîte</span><input type="password" id="rg-zmdp" placeholder="${o.z_mdp?"déjà enregistré (laisser vide pour le garder)":"mot de passe de la boîte mail"}" autocomplete="new-password"></label></div>
+    <p class="hint" style="margin:0">${o.z_msg?"Dernière relève : "+esc(o.z_msg):"Jamais relevée."}</p>
+    <div class="acts"><button class="btn" data-cm="saveZ">Enregistrer et relever</button></div>
+  </section>
+  <section class="card reg"><h2>Dossier des factures sur le Mac</h2>
+    <p class="hint" style="margin:0">Pose un PDF ou une photo de facture dans ton dossier : il part tout seul, est lu par l'IA et arrive dans « Factures reçues », prêt à vérifier. Le Mac doit rester allumé (l'iMac du bureau est parfait). Les factures déjà présentes dans le dossier au moment de l'installation ne sont pas renvoyées.</p>
+    ${state.cmdMac?`<p class="hint" style="margin:0">Sur l'iMac, ouvre l'app <b>Terminal</b>, colle cette ligne puis appuie sur Entrée. Une fenêtre te demandera de choisir ton dossier des factures.</p>
+    <textarea id="rg-cmd" readonly style="min-height:70px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem">${esc(state.cmdMac)}</textarea>
+    <div class="acts"><button class="btn" data-cm="copierCmd">Copier la ligne</button><button class="btn ghost" data-cm="nouvelleCle">Changer la clé</button></div>`:`<div class="acts"><button class="btn" data-cm="cmdMac">Installer sur le Mac</button></div>`}
+  </section>
+  <section class="card reg"><h2>Sauvegarde</h2>
+    <p class="hint" style="margin:0">Téléchargez une copie de toutes vos données, ou remettez une sauvegarde (cela remplace la mercuriale, les fiches et les cartes actuelles).</p>
+    <div class="acts"><a class="btn ghost" href="/api/cout-matiere.php?action=exporter${CM.rq()}">Télécharger une sauvegarde</a><button class="btn ghost" data-cm="importer">Remettre une sauvegarde…</button></div>
+  </section>`;
+}
+async function cmAction(a,t){
+  try{
+    if(a==="saveOpts"){t.disabled=true;const d=await CM.post("options_ecrire",{options:{ia_cle:document.getElementById("rg-cle").value,ia_modele:document.getElementById("rg-modele").value,imap_hote:document.getElementById("rg-hote").value,imap_user:document.getElementById("rg-user").value,imap_mdp:document.getElementById("rg-mdp").value,mail_actif:document.getElementById("rg-actif").checked}});CM.options=d.options;setStatus("Réglages enregistrés");render()}
+    else if(a==="relever"){t.disabled=true;t.textContent="Relève en cours…";const d=await CM.post("factures_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);render()}
+    else if(a==="importer"){document.getElementById("rg-file").click()}
+    else if(a==="restoCreer"){const nom=document.getElementById("rg-resto").value.trim();if(!nom){setStatus("Donne un nom au restaurant",true);return}t.disabled=true;const copie=document.getElementById("rg-copie").checked,src=CM.resto;const d=await CM.post("resto_creer",{nom});
+      if(copie){setStatus("Copie de la mercuriale et des fiches…");const r=await fetch("/api/cout-matiere.php",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"copier_depuis",r:d.id,source:src,colls:["ingredients","fiches"]})});const j=await r.json().catch(()=>({}));if(!j.ok)setStatus(j.erreur||"Copie impossible",true)}
+      CM.restos=d.restos;changerResto(d.id)}
+    else if(a==="saveZ"){t.disabled=true;t.textContent="Relève en cours…";await CM.post("options_ecrire",{options:{z_user:document.getElementById("rg-zuser").value,z_mdp:document.getElementById("rg-zmdp").value}});const d=await CM.post("ventes_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);if(d.nouveaux){const c=await CM.post("charger");CM.docs.ventes=c.docs.ventes||{}}render()}
+    else if(a==="cmdMac"||a==="nouvelleCle"){const d=await CM.post("cle_depot",{nouvelle:a==="nouvelleCle"});state.cmdMac=`curl -fsSL "${location.origin}/api/cout-matiere.php?action=installeur&cle=${d.cle}${CM.rq()}" | bash`;render();if(a==="nouvelleCle")setStatus("Nouvelle clé : relance l'installation sur le Mac")}
+    else if(a==="copierCmd"){const ta=document.getElementById("rg-cmd");try{await navigator.clipboard.writeText(ta.value);setStatus("Ligne copiée")}catch(x){ta.select();document.execCommand("copy");setStatus("Ligne copiée")}}
+    else if(a==="deposer"){document.getElementById("dep-file").click()}
+    else if(a==="depotOk"){state.depot=null;render()}
+  }catch(e){setStatus(e.message,true);t.disabled=false}
+}
+main.addEventListener("click",e=>{
+  const g=e.target.closest("[data-tab-go]");if(g){state.view=g.dataset.tabGo;state.open=null;render();window.scrollTo(0,0);return}
+  const t=e.target.closest("[data-cm],[data-fac],[data-al-print]");if(!t)return;
+  if(t.dataset.alPrint){window.print();return}
+  if(t.dataset.cm){cmAction(t.dataset.cm,t);return}
+  const id=t.dataset.id,a=t.dataset.fac;
+  if(a==="ouvrir")ouvrirFacture(id);
+  else if(a==="ignorer"){marquerFacture(id,"ignoree");render()}
+  else if(a==="relire"){t.disabled=true;CM.post("facture_relire",{id}).then(d=>{CM.docs.factures[id]=d.facture;render()}).catch(err=>{setStatus(err.message,true);t.disabled=false})}
+});
+document.addEventListener("change",e=>{if(e.target.id!=="rg-file")return;const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=async()=>{try{const s=JSON.parse(r.result);setStatus("Import en cours…");const d=await CM.post("importer",{sauvegarde:s});setStatus(d.importes+" éléments importés");setTimeout(()=>location.reload(),800)}catch(err){setStatus(err.message||"Fichier illisible",true)}};r.readAsText(f)},true);
+
+document.addEventListener("change",async e=>{if(e.target.id!=="dep-file")return;const files=[...e.target.files];e.target.value="";if(!files.length)return;
+  let nouv=0,dbl=0,err=0;state.imp=null;
+  for(let k=0;k<files.length;k++){const f=files[k];state.depot={msg:`Lecture de ${f.name} (${k+1} sur ${files.length})…`};render();
+    try{const donnees=/^image\//.test(f.type)?await CM.reduire(f):await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+      const d=await CM.post("facture_deposer",{nom:f.name,donnees});
+      if(d.doublon)dbl++;else{nouv++;if(d.facture){(CM.docs.factures=CM.docs.factures||{})[d.id]=d.facture;if(d.facture.statut==="erreur")err++}}}
+    catch(x){err++;setStatus(x.message,true)}}
+  state.depot={fini:true,msg:`${nouv} nouvelle${nouv>1?"s":""} facture${nouv>1?"s":""}${dbl?` · ${dbl} déjà reçue${dbl>1?"s":""}, ignorée${dbl>1?"s":""}`:""}${err?` · ${err} à relire (voir ci-dessous)`:""}.`};render();
+});
+document.getElementById("cm-gear").addEventListener("click",async()=>{try{const o=await CM.post("options");CM.options=o.options}catch(e){}state.view="reglages";state.open=null;render();window.scrollTo(0,0)});
+function majTitre(){if(CM.lecture)return;const n=Object.values(CM.docs.factures||{}).filter(f=>f.statut==="a_valider").length;document.title=(n?`(${n}) `:"")+nomResto()+" · Coût matière";try{if(navigator.setAppBadge)n?navigator.setAppBadge(n):navigator.clearAppBadge()}catch(e){}}
+setInterval(majTitre,5000);
+document.addEventListener("cm-factures",()=>{majTitre();const a=document.activeElement;if(a&&main.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;if(state.imp&&state.imp.status==="review")return;render()});
+
+/* ---------- Alertes de prix : plats touchés par une hausse ---------- */
+function photoCouts(){
+  const o={};
+  Object.entries(state.carte).forEach(([id,it])=>{if(!isFood(it))return;const c=calcItem(it);if(c.cp>0)o["car:"+id]={cp:c.cp,ttc:num(it.ttc),tva:num(it.tva)||10,name:it.name}});
+  Object.entries(state.boissons).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>{const c=calcFormat(b,f);if(c.cost>0&&num(f.ttc)>0)o["boi:"+id+":"+k]={cp:c.cost,ttc:num(f.ttc),tva:c.tva,name:b.name+(f.label?" · "+f.label:"")}}));
+  return o;
+}
+const arrondiPrix=(v,boisson)=>boisson?Math.ceil(v*10-1e-9)/10:Math.ceil(v*2-1e-9)/2;
+function creerAlerte(avant,im){
+  const apres=photoCouts(),plats=[];
+  Object.entries(apres).forEach(([k,x])=>{const a=avant[k];if(!a||x.cp<=a.cp*1.005)return;
+    const ht=x.ttc/(1+x.tva/100),fcAvant=a.cp/(a.ttc/(1+a.tva/100)),boisson=k.startsWith("boi:");
+    const conseil=arrondiPrix(x.cp/fcAvant*(1+x.tva/100),boisson);
+    plats.push({cle:k,name:x.name,avant:+a.cp.toFixed(4),apres:+x.cp.toFixed(4),ttc:x.ttc,fcAvant:+fcAvant.toFixed(4),fcApres:+(x.cp/ht).toFixed(4),conseil:conseil>x.ttc+0.04?conseil:null,perte:+(x.cp-a.cp).toFixed(4)})});
+  if(!plats.length)return;
+  plats.sort((p,q)=>q.perte-p.perte);
+  const id=uid();
+  CM.ecrire("alertes",id,{date:new Date().toISOString().slice(0,10),fournisseur:im.supplier||"",plats,statut:"ouverte"}).catch(e=>setStatus(e.message,true));
+}
+function alertesOuvertes(part){
+  return Object.entries(CM.docs.alertes||{}).filter(([,a])=>a.statut==="ouverte").map(([id,a])=>[id,a,(a.plats||[]).filter(p=>(part==="bar")===p.cle.startsWith("boi:")&&!p.fait)]).filter(([,,ps])=>ps.length).sort((x,y)=>(y[1].date||"").localeCompare(x[1].date||""));
+}
+function renderAlertes(part){
+  if(CM.lecture)return "";
+  const al=alertesOuvertes(part);if(!al.length)return "";
+  const tgt=num(state.settings.target)/100;
+  return al.map(([id,a,ps])=>`<section class="list fac alerte-prix"><div class="fac-head"><div><h2 style="font-size:1.05rem">⚠️ Hausse de prix${a.fournisseur?" · "+esc(a.fournisseur):""}</h2><span class="hint" style="margin:2px 0 0;display:block">${ps.length} ${part==="bar"?"boisson":"plat"}${ps.length>1?"s":""} touché${part==="bar"?"e":""}${ps.length>1?"s":""} par la facture du ${esc(new Date(a.date).toLocaleDateString("fr-FR"))}. Le prix conseillé garde ta marge en % d'avant la hausse.</span></div><button class="btn ghost sm" data-alerte="fermer" data-id="${esc(id)}">Tout ignorer</button></div>
+    ${ps.map(p=>`<div class="fac-row"><div style="min-width:0"><b>${esc(p.name)}</b><span class="sub">Coût ${eur.format(p.avant)} → ${eur.format(p.apres)} <span class="delta up">+${eur.format(p.perte)}</span> · food cost ${pct(p.fcAvant)} → <span class="${p.fcApres>tgt?"bad-t":""}">${pct(p.fcApres)}</span> · vendu ${eur.format(p.ttc)}</span></div>
+      <div class="acts">${p.conseil?`<button class="btn sm" data-alerte="appliquer" data-id="${esc(id)}" data-cle="${esc(p.cle)}">Passer à ${eur.format(p.conseil)}</button>`:`<span class="hint" style="margin:0">Hausse absorbée</span>`}<button class="btn ghost sm" data-alerte="garder" data-id="${esc(id)}" data-cle="${esc(p.cle)}" title="Garder le prix actuel">Garder</button></div></div>`).join("")}</section>`).join("");
+}
+function alerteAction(a,id,cle){
+  const al=(CM.docs.alertes||{})[id];if(!al)return;const doc=JSON.parse(JSON.stringify(al));
+  if(a==="fermer")doc.statut="fermee";
+  else{const p=doc.plats.find(x=>x.cle===cle);if(!p)return;p.fait=a;
+    if(a==="appliquer"&&p.conseil){const [t,i,k]=cle.split(":");
+      if(t==="car"&&state.carte[i]){state.carte[i].ttc=p.conseil;queueSave("car",i)}
+      else if(t==="boi"&&state.boissons[i]&&state.boissons[i].formats[+k]){state.boissons[i].formats[+k].ttc=p.conseil;queueSave("boi",i)}
+      setStatus(p.name+" passe à "+eur.format(p.conseil))}
+    if(doc.plats.every(x=>x.fait))doc.statut="fermee";}
+  CM.docs.alertes[id]=doc;CM.ecrire("alertes",id,doc).catch(e=>setStatus(e.message,true));render();
+}
+
+/* ---------- Menus de soirée et liste de courses ---------- */
+function menusListe(){return Object.entries(CM.docs.menus||{}).sort((a,b)=>(b[1].date||"").localeCompare(a[1].date||""))}
+/* Source d'une ligne de menu : un article de la carte, une fiche, ou un format de boisson */
+function srcMenu(l){
+  if(l.type==="car"){const it=state.carte[l.ref];if(!it)return null;const f=state.fiches[it.fiche];return {name:it.name,cout:itemCost(it),fiche:f,mult:f?num(it.qty)*((YIELD[f.yieldUnit||"portion"].lines)[it.unit]??1)/Math.max(num(f.yield),0.0001):0,tva:num(it.tva)||10}}
+  if(l.type==="fic"){const f=state.fiches[l.ref];if(!f)return null;return {name:f.name,cout:ficheUnitCost(f),fiche:f,mult:1/Math.max(num(f.yield),0.0001),tva:f.category==="Boisson"?20:10}}
+  if(l.type==="boi"){const b=state.boissons[l.ref];const fm=b&&(b.formats||[])[num(l.k)];if(!fm)return null;const c=calcFormat(b,fm);return {name:b.name+(fm.label?" · "+fm.label:""),cout:c.cost,format:fm,tva:c.tva}}
+  return null;
+}
+function menuCalc(m){
+  const n=Math.max(num(m.couverts),0),parPers=(m.lignes||[]).reduce((s,l)=>{const x=srcMenu(l);return s+(x?x.cout*num(l.part||1):0)},0);
+  const tva=num(m.tva)||10,ttc=num(m.prix),ht=ttc/(1+tva/100),tgt=num(state.settings.target)/100||0.28;
+  return {n,parPers,total:parPers*n,ht,ca:ht*n,marge:(ht-parPers)*n,fc:ht>0?parPers/ht:null,conseil:parPers>0?Math.ceil(parPers/tgt*(1+tva/100)):null};
+}
+/* Développe un menu en ingrédients à acheter (unité d'achat), pertes comprises */
+function courses(m){
+  const acc={},ajoute=(id,q)=>{if(!(q>0))return;acc[id]=(acc[id]||0)+q};
+  const deplier=(f,mult,d=0)=>{if(!f||d>6)return;(f.lines||[]).forEach(l=>{
+    if(hasFixed(l))return;
+    if(l.type==="f"){const sf=state.fiches[l.ref];const u=lineUnits(l);if(!sf||!u||u[l.unit]==null)return;deplier(sf,mult*num(l.qty)*u[l.unit]/Math.max(num(sf.yield),0.0001),d+1)}
+    else{const i=state.ingredients[l.ref];if(!i)return;const b=baseQty(l,i);if(b==null)return;const perte=Math.min(Math.max(num(i.loss),0),95)/100;ajoute(l.ref,b*mult/(1-perte))}})};
+  const n=Math.max(num(m.couverts),0);
+  (m.lignes||[]).forEach(l=>{const x=srcMenu(l);if(!x)return;const q=n*num(l.part||1);
+    if(x.fiche)deplier(x.fiche,x.mult*q);
+    else if(x.format){const fm=x.format;if(fm.type==="f")deplier(state.fiches[fm.ref],num(fm.qty)*((YIELD[(state.fiches[fm.ref]||{}).yieldUnit||"portion"].lines)[fm.unit]??1)/Math.max(num((state.fiches[fm.ref]||{}).yield),0.0001)*q);
+      else{const i=state.ingredients[fm.ref];if(i){const b=baseQty(fm,i);if(b!=null)ajoute(fm.ref,b*q)}}}});
+  const parFour={};
+  Object.entries(acc).forEach(([id,q])=>{const i=state.ingredients[id];const sup=i.supplier||"Sans fournisseur";
+    const colis=num(i.packQty)>1?Math.ceil(q/num(i.packQty)-1e-9):null;
+    (parFour[sup]=parFour[sup]||[]).push({id,name:i.name,q,unit:i.unit,cout:q*num(i.price),colis,packQty:num(i.packQty),sansPrix:!(num(i.price)>0)})});
+  Object.values(parFour).forEach(l=>l.sort((a,b)=>a.name.localeCompare(b.name,"fr")));
+  return Object.entries(parFour).sort((a,b)=>a[0].localeCompare(b[0],"fr"));
+}
+const fmtQ=(q,u)=>u==="piece"?`${Math.ceil(q-1e-9)} pièce${Math.ceil(q-1e-9)>1?"s":""}`:u==="kg"?(q<1?`${Math.ceil(q*1000)} g`:`${n2.format(Math.ceil(q*10)/10)} kg`):(q<1?`${Math.ceil(q*100)} cl`:`${n2.format(Math.ceil(q*10)/10)} L`);
+function renderMenus(){
+  const o=state.open;if(o&&o.kind==="menu"&&(CM.docs.menus||{})[o.id])return renderMenu(o.id);
+  const ms=menusListe();
+  let h=`<div class="toolbar"><h2>Menus & soirées</h2>${CM.lecture?"":`<button class="btn" data-menu="nouveau">+ Nouveau menu</button>`}</div>
+  <p class="hint" style="margin:0">Compose un menu de soirée, de groupe ou d'événement à partir de ta carte et de tes fiches : l'app calcule le coût par personne, la marge totale, le prix conseillé et la liste de courses par fournisseur.</p><div class="list">`;
+  if(!ms.length)return h+`<div class="empty">Aucun menu pour l'instant. Crée le premier, par exemple celui de la soirée des 10 ans du 76.</div></div>`;
+  ms.forEach(([id,m])=>{const c=menuCalc(m);h+=`<button class="row f" data-menu="ouvrir" data-id="${esc(id)}"><span class="name">${esc(m.name||"Menu sans nom")}<span class="sub">${m.date?esc(new Date(m.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}))+" · ":""}${c.n} couvert${c.n>1?"s":""} · ${(m.lignes||[]).length} plat${(m.lignes||[]).length>1?"s":""}</span></span><span class="num hide-s">${eur.format(c.parPers)}<span class="sub">coût / pers.</span></span><span class="num hide-s">${num(m.prix)>0?eur.format(num(m.prix)):"—"}<span class="sub">prix / pers.</span></span><span class="chip ${c.fc==null?"nd":c.fc<=num(state.settings.target)/100?"ok":c.fc<=num(state.settings.target)/100+0.07?"watch":"alert"}">${c.fc!=null?pct(c.fc):"Prix ?"}</span></button>`});
+  return h+`</div>`;
+}
+function optionsMenu(){
+  const car=Object.entries(state.carte).filter(([,it])=>isFood(it)).sort(byName).map(([id,it])=>`<option value="car:${esc(id)}">${esc(it.name)}</option>`).join("");
+  const boi=[];Object.entries(state.boissons).sort(byName).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>boi.push(`<option value="boi:${esc(id)}:${k}">${esc(b.name+(f.label?" · "+f.label:""))}</option>`)));
+  const fic=Object.entries(state.fiches).sort(byName).map(([id,f])=>`<option value="fic:${esc(id)}">${esc(f.name)}</option>`).join("");
+  return `<option value="">+ Ajouter un plat ou une boisson…</option><optgroup label="Carte des repas">${car}</optgroup><optgroup label="Boissons">${boi.join("")}</optgroup><optgroup label="Fiches techniques">${fic}</optgroup>`;
+}
+function renderMenu(id){
+  const m=CM.docs.menus[id],c=menuCalc(m),ro=CM.lecture,tgt=num(state.settings.target);
+  const cs=courses(m);const totalCourses=cs.reduce((s,[,l])=>s+l.reduce((t,x)=>t+x.cout,0),0);
+  let h=`<button class="back" data-menu="retour">‹ Menus & soirées</button>
+  <section class="card"><div class="fields">
+    <div class="f"><label class="lbl" for="mn-name">Nom du menu</label><input type="text" id="mn-name" class="title-in" data-mn="name" value="${esc(m.name||"")}" ${ro?"readonly":""} placeholder="Soirée des 10 ans"></div>
+    <div class="f"><label class="lbl" for="mn-date">Date</label><input type="date" id="mn-date" data-mn="date" value="${esc(m.date||"")}" ${ro?"readonly":""}></div>
+    <div class="f"><label class="lbl" for="mn-couv">Couverts</label><input type="text" inputmode="numeric" class="n" id="mn-couv" data-mn="couverts" value="${esc(m.couverts||"")}" ${ro?"readonly":""}></div>
+    <div class="f"><label class="lbl" for="mn-prix">Prix / pers. TTC</label><input type="text" inputmode="decimal" class="n" id="mn-prix" data-mn="prix" value="${num(m.prix)?n2.format(num(m.prix)):""}" ${ro?"readonly":""}></div>
+    <div class="f"><label class="lbl" for="mn-tva">TVA</label><select id="mn-tva" data-mn="tva" ${ro?"disabled":""}>${[10,20].map(t=>`<option value="${t}" ${(num(m.tva)||10)===t?"selected":""}>${t} %</option>`).join("")}</select></div>
+  </div></section>
+  <section class="bilan" id="mn-bilan">${bilanMenu(m)}</section>
+  <section class="card"><h2 style="margin-bottom:8px">Composition</h2><p class="hint" style="margin:0 0 6px">« Part par convive » : 1 si chacun en prend, 0,5 si les convives choisissent entre deux plats, 0,25 pour une bouteille de vin pour quatre…</p>
+    <div class="ingrs">${(m.lignes||[]).map((l,k)=>{const x=srcMenu(l);return `<div class="ingr"><div class="ingr-name"><span class="ingr-sub">${x?esc(x.name):'<span class="bad-t">Élément supprimé</span>'}</span></div>
+      <div class="ingr-ctl"><input type="text" inputmode="decimal" class="n" id="mn-part-${k}" data-mnp="${k}" value="${n2.format(num(l.part||1))}" aria-label="Part par convive" ${ro?"readonly":""}><span class="hint" style="margin:0;width:70px">par conv.</span>
+      <div class="ingr-cost"><span>${x?eur.format(x.cout*num(l.part||1)):"—"}</span><span class="hint" style="margin:0;font-size:.7rem">/ pers.</span></div>${ro?"":`<button class="x" aria-label="Retirer" data-menu="retirer" data-k="${k}">✕</button>`}</div></div>`}).join("")}</div>
+    ${ro?"":`<select id="mn-add" style="margin-top:12px">${optionsMenu()}</select>`}
+  </section>
+  <section class="card"><div class="toolbar"><h2>Liste de courses · ${c.n} couverts</h2><div class="acts"><button class="btn ghost sm" data-act="imprimer">Imprimer</button></div></div>
+    <p class="hint" style="margin:6px 0 10px">Quantités totales à acheter, pertes comprises, arrondies au-dessus. Coût estimé : <b>${eur.format(totalCourses)} HT</b>.</p>
+    ${cs.length?cs.map(([sup,l])=>`<div class="group" style="border-radius:10px;margin-top:8px"><span class="lbl">${esc(sup)} · ${eur.format(l.reduce((t,x)=>t+x.cout,0))}</span></div>
+      <table class="qtytbl" style="width:100%"><tbody>${l.map(x=>`<tr><td>${esc(x.name)}${x.sansPrix?' <span class="used warn-t" style="display:inline">sans prix</span>':""}</td><td class="num" style="white-space:nowrap">${fmtQ(x.q,x.unit)}${x.colis?`<span class="used">${x.colis} colis de ${n2.format(x.packQty)}</span>`:""}</td><td class="num" style="white-space:nowrap;width:90px">${eur.format(x.cout)}</td></tr>`).join("")}</tbody></table>`).join(""):`<p class="empty" style="padding:10px">Ajoute des plats et le nombre de couverts.</p>`}
+  </section>
+  ${ro?"":`<div class="foot"><span></span><button class="btn danger" data-menu="supprimer">Supprimer ce menu</button></div>`}`;
+  return h;
+}
+function bilanMenu(m){
+  const c=menuCalc(m),tgt=num(state.settings.target);
+  return `<div class="hl"><span class="lbl">Marge totale</span><span class="big">${num(m.prix)>0?eur.format(c.marge):"—"} <small>HT</small></span><span class="sub">${num(m.prix)>0?eur.format(c.ht-c.parPers)+" par personne":"Indique le prix par personne"}</span></div>
+    <div><span class="lbl">Coût matière</span><span class="big">${eur.format(c.parPers)} <small>/ pers.</small></span><span class="sub">${eur.format(c.total)} pour ${c.n} couverts</span></div>
+    <div><span class="lbl">Food cost</span><span class="big">${pct(c.fc)}</span><span class="sub">objectif ${n2.format(tgt)} %</span></div>
+    <div><span class="lbl">Prix conseillé</span><span class="big">${c.conseil?eur.format(c.conseil):"—"} <small>TTC</small></span><span class="sub">pour ${n2.format(tgt)} % de food cost</span></div>`;
+}
+function menuEcrire(id,doc){CM.docs.menus[id]=doc;CM.ecrire("menus",id,doc).catch(e=>setStatus(e.message,true))}
+main.addEventListener("click",e=>{
+  const al=e.target.closest("[data-alerte]");if(al){alerteAction(al.dataset.alerte,al.dataset.id,al.dataset.cle);return}
+  const t=e.target.closest("[data-menu]");if(!t)return;const a=t.dataset.menu,o=state.open;
+  if(a==="nouveau"){const id=uid();CM.docs.menus=CM.docs.menus||{};menuEcrire(id,{name:"Nouveau menu",date:"",couverts:50,prix:0,tva:10,lignes:[]});state.open={kind:"menu",id};render();document.getElementById("mn-name")?.select()}
+  else if(a==="ouvrir"){state.open={kind:"menu",id:t.dataset.id};render();window.scrollTo(0,0)}
+  else if(a==="retour"){state.open=null;render()}
+  else if(a==="retirer"&&o){const m=JSON.parse(JSON.stringify(CM.docs.menus[o.id]));m.lignes.splice(+t.dataset.k,1);menuEcrire(o.id,m);render()}
+  else if(a==="supprimer"&&o){if(!t.dataset.armed){t.dataset.armed="1";t.textContent="Confirmer la suppression";return}delete CM.docs.menus[o.id];CM.ecrire("menus",o.id,null);state.open=null;render()}
+});
+main.addEventListener("change",e=>{
+  const o=state.open;if(!o||o.kind!=="menu")return;const m=CM.docs.menus[o.id];if(!m)return;
+  if(e.target.id==="mn-add"&&e.target.value){const [t,r,k]=e.target.value.split(":");const d=JSON.parse(JSON.stringify(m));d.lignes=d.lignes||[];d.lignes.push(t==="boi"?{type:t,ref:r,k:+k,part:1}:{type:t,ref:r,part:1});menuEcrire(o.id,d);render();return}
+  const ds=e.target.dataset;if(ds.mn||ds.mnp!=null){const d=JSON.parse(JSON.stringify(m));
+    if(ds.mn)d[ds.mn]=["couverts","prix","tva"].includes(ds.mn)?num(e.target.value):e.target.value.trim();else d.lignes[+ds.mnp].part=num(e.target.value)||0;
+    menuEcrire(o.id,d);render()}
+});
+main.addEventListener("input",e=>{const o=state.open;if(!o||o.kind!=="menu")return;const ds=e.target.dataset;if(!(ds.mn==="couverts"||ds.mn==="prix"||ds.mnp!=null))return;
+  const m=JSON.parse(JSON.stringify(CM.docs.menus[o.id]));if(ds.mn)m[ds.mn]=num(e.target.value);else m.lignes[+ds.mnp].part=num(e.target.value)||0;const b=document.getElementById("mn-bilan");if(b)b.innerHTML=bilanMenu(m)});
+
+
+/* ---------- Recherche dans la carte des repas et des boissons ---------- */
+const sansAccent=t=>String(t||"").toLowerCase().replace(/œ/g,"oe").replace(/æ/g,"ae").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function filtrerCarte(){
+  const box=document.querySelector("[data-cq]");if(!box)return;const k=box.dataset.cq;
+  const mots=sansAccent(state["cq_"+k]).split(/\s+/).filter(Boolean);
+  const list=document.getElementById("cq-list");if(!list)return;
+  /* Pendant une recherche, on masque le tableau de bord pour voir les résultats tout de suite */
+  for(let el=box.parentElement.nextElementSibling;el&&el!==list;el=el.nextElementSibling){if(!el.classList.contains("toolbar"))el.hidden=mots.length>0}
+  let n=0,tot=0,grp=null,vus=0;
+  const fin=()=>{if(grp)grp.hidden=mots.length>0&&!vus};
+  [...list.children].forEach(el=>{
+    if(el.classList.contains("group")){fin();grp=el;vus=0;return}
+    if(!el.matches("[data-open-item],[data-bopen]"))return;tot++;
+    const t=sansAccent(el.querySelector(".name")?.textContent);const ok=mots.every(m=>t.includes(m));
+    el.hidden=!ok;if(ok){n++;vus++}});
+  fin();
+  const hd=list.querySelector(".row.hdr");if(hd)hd.hidden=mots.length>0&&!n;
+  const c=document.getElementById("q-"+k+"-n");if(c)c.textContent=mots.length?(n?`${n} sur ${tot}`:"Aucun résultat"):"";
+}
+main.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.cq;if(!k)return;state["cq_"+k]=e.target.value;filtrerCarte()});
+main.addEventListener("keydown",e=>{if(e.key!=="Enter"||!e.target.dataset||!e.target.dataset.cq)return;
+  const r=[...document.querySelectorAll("[data-open-item],[data-bopen]")].filter(x=>!x.hidden);if(r.length===1){e.preventDefault();r[0].click()}});
+/* ---------- Ventes de la caisse (Z quotidien de L'Addition) ---------- */
+const CAT_BOISSON=/ap[ée]t?ri?tif|ap[ée]titif|\bvins?\b|soft|bi[eè]res?|cocktail|digestif|boi?ss?ons?|chaudes?|caf[ée]s?\b|\bbar\b/i;
+const NOM_BOISSON=/\b(expresso|caf[ée]|cappuccino|d[ée]ca|th[ée]|eau|bi[eè]re|vins?|rouge|ros[ée]|blanc|limonade|coca|jus|sirop|pression)\b|1\/[24]|\d+ ?cl\b|^grd |^pdj ?\w+$/i;
+const cleLien=p=>"l_"+sansAccent(p).replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"").slice(0,70);
+const lienDe=p=>(CM.docs.liens||{})[cleLien(p)]||null;
+function coutLien(l){
+  if(!l)return null;
+  if(l.kind==="car"){const it=state.carte[l.ref];return it?itemCost(it):null}
+  if(l.kind==="boi"){const b=state.boissons[l.ref],f=b&&(b.formats||[])[num(l.k)];return f?calcFormat(b,f).cost:null}
+  if(l.kind==="fixe")return num(l.cout);
+  return null;
+}
+function nomLien(l){
+  if(!l)return "";
+  if(l.kind==="car")return state.carte[l.ref]?.name||"article supprimé";
+  if(l.kind==="boi"){const b=state.boissons[l.ref],f=b&&(b.formats||[])[num(l.k)];return b?b.name+(f&&f.label?" · "+f.label:""):"boisson supprimée"}
+  if(l.kind==="fixe")return "coût fixe "+eur.format(num(l.cout));
+  return "";
+}
+function partVente(x,l){
+  if(l&&l.kind==="car")return "cuisine";if(l&&l.kind==="boi")return "bar";if(l&&l.part)return l.part;
+  const c=sansAccent(x.c),n=sansAccent(x.p);
+  if(CAT_BOISSON.test(c))return "bar";
+  if(/plat du jour|formule|menu|divers/.test(c)&&!/^(plat du jour|suggestions?)$/.test(n)&&NOM_BOISSON.test(n))return "bar";
+  return "cuisine";
+}
+const ventesJours=()=>Object.values(CM.docs.ventes||{}).filter(v=>v&&v.date).sort((a,b)=>a.date.localeCompare(b.date));
+const PERIODES=[["jour","Dernier jour"],["7","7 jours"],["mois","Ce mois"],["mprec","Mois dernier"],["tout","Tout"]];
+function joursPeriode(){
+  const js=ventesJours();if(!js.length)return [];const p=state.vPer||"mois",der=js[js.length-1].date,auj=new Date();
+  const ym=d=>d.toISOString().slice(0,7);
+  if(p==="jour")return js.filter(j=>j.date===der);
+  if(p==="7"){const lim=new Date(der);lim.setDate(lim.getDate()-6);const l=lim.toISOString().slice(0,10);return js.filter(j=>j.date>=l)}
+  if(p==="mois")return js.filter(j=>j.date.startsWith(ym(auj)));
+  if(p==="mprec"){const d=new Date(auj.getFullYear(),auj.getMonth()-1,15);return js.filter(j=>j.date.startsWith(ym(d)))}
+  return js;
+}
+function analyseVentes(part){
+  const js=joursPeriode(),prod={};
+  js.forEach(j=>(j.lignes||[]).forEach(x=>{const l=lienDe(x.p);if(partVente(x,l)!==part)return;
+    const o=prod[x.p]=prod[x.p]||{p:x.p,c:x.c,q:0,ht:0,ttc:0,l};o.q+=num(x.q);o.ht+=num(x.h);o.ttc+=num(x.t)}));
+  const ps=Object.values(prod);let ht=0,htc=0,cout=0;
+  ps.forEach(o=>{o.cu=o.l&&o.l.kind==="ignore"?null:coutLien(o.l);o.cout=o.cu!=null?o.cu*o.q:null;ht+=o.ht;if(o.cout!=null){htc+=o.ht;cout+=o.cout}
+    o.mu=o.cu!=null&&o.q>0?o.ht/o.q-o.cu:null;o.marge=o.cout!=null?o.ht-o.cout:null;o.fc=o.cout!=null&&o.ht>0?o.cout/o.ht:null});
+  /* Classement de la carte : popularité × marge unitaire, sur les produits vendus et chiffrés */
+  const cl=ps.filter(o=>o.mu!=null&&o.ht>0),sq=cl.reduce((s,o)=>s+o.q,0),mm=sq?cl.reduce((s,o)=>s+o.mu*o.q,0)/sq:0,seuil=cl.length?0.7/cl.length:0;
+  cl.forEach(o=>{const pop=o.q/sq>=seuil,mar=o.mu>=mm;o.classe=pop&&mar?"star":pop?"labour":mar?"enigme":"mort"});
+  const Z=js.reduce((a,j)=>{a.ttc+=num(j.ca_ttc);a.ht+=num(j.ca_ht);a.couv+=num(j.couverts);a.annul+=num(j.annul)+num(j.corr_apres);return a},{ttc:0,ht:0,couv:0,annul:0});
+  return {js,ps,ht,htc,cout,fc:htc>0?cout/htc:null,marge:htc-cout,couv:htc&&ht?htc/ht:0,mm,Z,aRelier:ps.filter(o=>!o.l).sort((a,b)=>b.ht-a.ht)};
+}
+const CLASSES={star:["Star","ok","Se vend bien et rapporte bien : mets-le en avant."],labour:["Cheval de labour","watch","Se vend bien mais rapporte peu : revois le prix ou la recette."],enigme:["Énigme","nd","Rapporte bien mais se vend peu : à mieux présenter ou conseiller."],mort:["Poids mort","alert","Se vend peu et rapporte peu : à remplacer ?"]};
+function alerteAnnulations(){
+  const js=ventesJours();if(!js.length)return "";const d=js[js.length-1],x=num(d.annul)+num(d.corr_apres);
+  const av=js.slice(0,-1).slice(-14),moy=av.length?av.reduce((s,j)=>s+num(j.annul)+num(j.corr_apres),0)/av.length:0;
+  if(x<30||(av.length>=3&&x<moy*1.5))return "";
+  return `<div class="banner" style="background:var(--warn-bg)"><p><strong>⚠️ ${eur.format(x)} d'annulations et corrections après envoi en cuisine</strong> le ${esc(new Date(d.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}))} (${eur.format(num(d.corr_apres))} corrigés après envoi, ${eur.format(num(d.annul))} annulés après ticket)${av.length>=3?`, contre ${eur.format(moy)} en moyenne`:""}. Ça vaut le coup d'en parler avec l'équipe.</p></div>`;
+}
+function optionsLien(sel){
+  const car=Object.entries(state.carte).filter(([,it])=>isFood(it)).sort(byName).map(([id,it])=>`<option value="car:${esc(id)}" ${sel==="car:"+id?"selected":""}>${esc(it.name)}</option>`).join("");
+  const boi=[];Object.entries(state.boissons).sort(byName).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>boi.push(`<option value="boi:${esc(id)}:${k}" ${sel==="boi:"+id+":"+k?"selected":""}>${esc(b.name+(f.label?" · "+f.label:""))}</option>`)));
+  return `<option value="">À relier…</option><option value="fixe" ${sel==="fixe"?"selected":""}>Coût fixe (plat du jour, suggestion…)</option><option value="ignore" ${sel==="ignore"?"selected":""}>Ne pas compter</option><optgroup label="Carte des repas">${car}</optgroup><optgroup label="Boissons">${boi.join("")}</optgroup>`;
+}
+const valLien=l=>!l?"":l.kind==="car"?"car:"+l.ref:l.kind==="boi"?"boi:"+l.ref+":"+num(l.k):l.kind;
+function renderVentes(part){
+  const o=CM.options||{},js=ventesJours();
+  if(!state.zTente&&o.z_mdp){state.zTente=true;CM.post("ventes_relever",{}).then(d=>{if(d.nouveaux)setStatus(d.message)}).catch(()=>{})}
+  let h=`<div class="toolbar"><h2>Ventes & marge réelle</h2><div class="acts">${js.length?boutonsExport(part==="bar"?"bventes":"ventes"):""}<button class="btn ghost" data-vt="relever">Relever les Z</button></div></div>`;
+  if(!js.length)return h+`<section class="card"><p style="margin:0">Les ventes arrivent toutes seules avec le « Z quotidien » que L'Addition envoie chaque jour à <b>${esc(o.z_user||"le76@le76.fr")}</b>.</p><p class="hint">${o.z_mdp?esc(o.z_msg||"En attente du premier Z."):`Pour commencer, indique le mot de passe de cette boîte dans les <button class="lnk" data-tab-go="reglages">Réglages</button>.`}</p></section>`;
+  const a=analyseVentes(part),bar=part==="bar",per=PERIODES.find(p=>p[0]===(state.vPer||"mois"))[1];
+  const d1=a.js[0]?.date,d2=a.js[a.js.length-1]?.date,fd=d=>new Date(d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+  h+=`<div class="chips" style="margin:0">${PERIODES.map(([k,l])=>`<button class="chipb ${(state.vPer||"mois")===k?"on":""}" data-vper="${k}">${l}</button>`).join("")}</div>
+  <p class="hint" style="margin:0">${a.js.length?`${a.js.length} jour${a.js.length>1?"s":""} de service${d1===d2?" · "+fd(d1):` · du ${fd(d1)} au ${fd(d2)}`} · CA total ${eur.format(a.Z.ttc)} TTC · ${n2.format(a.Z.couv)} couverts${a.Z.couv?` · panier moyen ${eur.format(a.Z.ttc/a.Z.couv)}`:""}`:"Aucune vente sur cette période."}</p>`;
+  h+=alerteAnnulations();
+  if(!a.js.length)return h;
+  h+=`<section class="bilan"><div class="hl"><span class="lbl">Marge brute réelle</span><span class="big">${a.htc?eur.format(a.marge):"—"} <small>HT</small></span><span class="sub">${bar?"boissons":"repas"} · ${per.toLowerCase()}</span></div>
+    <div><span class="lbl">${bar?"Coût des boissons":"Food cost réel"}</span><span class="big">${pct(a.fc)}</span><span class="sub">${eur.format(a.cout)} de matière vendue</span></div>
+    <div><span class="lbl">CA ${bar?"boissons":"repas"}</span><span class="big">${eur.format(a.ht)} <small>HT</small></span><span class="sub">${a.ps.reduce((s,x)=>s+x.q,0)} ventes</span></div>
+    <div><span class="lbl">Calculé sur</span><span class="big">${pct(a.couv)}</span><span class="sub">du CA ${a.aRelier.length?`· ${a.aRelier.length} produit${a.aRelier.length>1?"s":""} à relier`:"· tout est relié"}</span></div></section>`;
+  if(a.aRelier.length)h+=`<section class="card fac-banner"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.05rem">${a.aRelier.length} produit${a.aRelier.length>1?"s":""} de la caisse à relier</h2><span class="hint" style="margin:2px 0 0;display:block">Dis à l'app à quel article correspond chaque nom de L'Addition. C'est à faire une seule fois.</span></div>${CM.options.ia?(state.iaProg?`<button class="btn" disabled>${esc(state.iaProg)}</button>`:`<button class="btn" data-vt="ia">Relier avec l'IA</button>`):""}</div></section>`;
+  const tri=state.vTri||"ht",ps=a.ps.slice().sort((x,y)=>tri==="q"?y.q-x.q:tri==="marge"?(y.marge??-1e9)-(x.marge??-1e9):tri==="fc"?(y.fc??-1)-(x.fc??-1):y.ht-x.ht);
+  h+=`<div class="list"><div class="row hdr vt"><span class="lbl">Produit vendu</span><button class="lbl num lnk" data-vtri="q">Vendus</button><button class="lbl num lnk hide-s" data-vtri="ht">CA HT</button><button class="lbl num lnk" data-vtri="marge">Marge</button><button class="lbl num lnk hide-s" data-vtri="fc">${bar?"Coût %":"Food cost"}</button><span class="lbl">Correspondance</span></div>`;
+  ps.forEach(x=>{const c=x.classe&&CLASSES[x.classe];
+    h+=`<div class="row vt"><span class="name">${esc(x.p)}${c?` <span class="chip ${c[1]} plain" title="${esc(c[2])}" style="font-size:.7rem;padding:2px 8px">${c[0]}</span>`:""}<span class="sub">${esc(x.c)}${x.cu!=null?` · coût ${eur.format(x.cu)} · marge ${eur.format(x.mu)} / vente`:""}</span></span>
+      <span class="num">${n2.format(x.q)}</span><span class="num hide-s">${eur.format(x.ht)}</span><span class="num"><b>${x.marge!=null?eur.format(x.marge):"—"}</b></span><span class="num hide-s">${pct(x.fc)}</span>
+      <span class="vt-lien"><select data-lien="${esc(x.p)}" aria-label="Correspondance de ${esc(x.p)}" class="${x.l?"":"a-relier"}">${optionsLien(valLien(x.l))}</select>${x.l&&x.l.kind==="fixe"?`<input type="text" inputmode="decimal" class="n" data-lcout="${esc(x.p)}" value="${n2.format(num(x.l.cout))}" aria-label="Coût unitaire" title="Coût matière moyen par vente">`:""}</span></div>`});
+  h+=`</div><p class="hint" style="margin:0">Marge = CA HT − coût matière des quantités vendues. Classement : <b>Star</b> se vend bien et rapporte bien, <b>Cheval de labour</b> se vend bien mais rapporte peu, <b>Énigme</b> rapporte bien mais se vend peu, <b>Poids mort</b> ni l'un ni l'autre. Les produits à 0 € (inclus dans une formule) comptent leur coût sans chiffre d'affaires.</p>`;
+  h+=`<details class="card"><summary><b>Détail par jour</b></summary><table class="qtytbl" style="width:100%;margin-top:8px"><thead><tr><th>Jour</th><th class="num">CA TTC</th><th class="num">Couverts</th><th class="num">Panier</th><th class="num">Annul. & corr.</th></tr></thead><tbody>${a.js.slice().reverse().map(j=>`<tr><td>${esc(new Date(j.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}))}</td><td class="num">${eur.format(num(j.ca_ttc))}</td><td class="num">${n2.format(num(j.couverts))}</td><td class="num">${num(j.couverts)?eur.format(num(j.ca_ttc)/num(j.couverts)):"—"}</td><td class="num">${eur.format(num(j.annul)+num(j.corr_apres))}</td></tr>`).join("")}</tbody></table></details>`;
+  return h;
+}
+function ecrireLien(p,data){CM.docs.liens=CM.docs.liens||{};const id=cleLien(p);if(data){data.p=p;CM.docs.liens[id]=data}else delete CM.docs.liens[id];CM.ecrire("liens",id,data).catch(e=>setStatus(e.message,true))}
+async function relierIA(t){
+  const tous={};ventesJours().forEach(j=>(j.lignes||[]).forEach(x=>{if(!lienDe(x.p))tous[x.p]=tous[x.p]||{p:x.p,c:x.c,prix:num(x.q)?num(x.t)/num(x.q):0}}));
+  const vs=Object.values(tous);if(!vs.length)return;
+  const cat=[];Object.entries(state.carte).filter(([,it])=>isFood(it)).forEach(([id,it])=>cat.push(`car:${id} | ${it.name} | ${n2.format(num(it.ttc))} €`));
+  Object.entries(state.boissons).forEach(([id,b])=>(b.formats||[]).forEach((f,k)=>cat.push(`boi:${id}:${k} | ${b.name}${f.label?" · "+f.label:""} | ${n2.format(num(f.ttc))} €`)));
+  t.disabled=true;let n=0;const lots=[];for(let k=0;k<vs.length;k+=25)lots.push(vs.slice(k,k+25));
+  try{for(let li=0;li<lots.length;li++){state.iaProg=`L'IA relie… ${Math.min((li+1)*25,vs.length)} / ${vs.length}`;t.textContent=state.iaProg;
+    const prompt=`Tu relies les noms de produits d'une caisse de restaurant (L'Addition) aux articles d'une application de coût matière.
+Produits de la caisse (catégorie | nom | prix de vente TTC unitaire) :
+${lots[li].map(v=>`${v.c} | ${v.p} | ${n2.format(v.prix)} €`).join("\n")}
+
+Articles de l'application (identifiant | nom | prix TTC) :
+${cat.join("\n")}
+
+Pour chaque produit de la caisse, donne l'identifiant de l'article qui correspond au même plat ou à la même boisson dans le même format (verre, 25 cl, 50 cl, bouteille, 1/4, 1/2…). Le prix aide à reconnaître le format. Si rien ne correspond vraiment (plat du jour, suggestion, menu, formule…), mets null : n'invente pas.
+Réponds uniquement en JSON : {"liens":[{"p":"nom exact de la caisse","ref":"identifiant ou null"}]}`;
+    const d=await CM.post("ia",{prompt});const ls=(d.resultat&&d.resultat.liens)||[];
+    ls.forEach(l=>{if(!l||!tous[l.p]||!l.ref)return;const [k,r,f]=String(l.ref).split(":");
+      if(k==="car"&&state.carte[r]){ecrireLien(l.p,{kind:"car",ref:r,ia:true});n++}
+      else if(k==="boi"&&state.boissons[r]&&(state.boissons[r].formats||[])[num(f)]){ecrireLien(l.p,{kind:"boi",ref:r,k:num(f),ia:true});n++}})}
+    state.iaProg=null;setStatus(`${n} produit${n>1?"s":""} relié${n>1?"s":""} par l'IA sur ${vs.length} : vérifie les correspondances dans la liste.`);render()}
+  catch(e){state.iaProg=null;setStatus((n?n+" reliés, puis : ":"")+e.message,true);render()}
+}
+main.addEventListener("click",e=>{
+  const p=e.target.closest("[data-vper]");if(p){state.vPer=p.dataset.vper;render();return}
+  const tr=e.target.closest("[data-vtri]");if(tr){state.vTri=tr.dataset.vtri;render();return}
+  const v=e.target.closest("[data-vt]");if(!v)return;
+  if(v.dataset.vt==="ia")relierIA(v);
+  if(v.dataset.vt==="relever"){v.disabled=true;v.textContent="Relève en cours…";CM.post("ventes_relever",{forcer:true}).then(async d=>{setStatus(d.message||"Relève terminée",!d.releve);const c=await CM.post("charger");CM.docs.ventes=c.docs.ventes||{};CM.docs.liens=c.docs.liens||{};render()}).catch(err=>{setStatus(err.message,true);render()})}
+});
+main.addEventListener("change",e=>{
+  const s=e.target.dataset;
+  if(s.lien!=null){const v=e.target.value,p=s.lien,ancien=lienDe(p);
+    if(!v)ecrireLien(p,null);
+    else if(v==="fixe"||v==="ignore"){const x=ventesJours().flatMap(j=>j.lignes||[]).find(y=>y.p===p)||{c:"",p};ecrireLien(p,{kind:v,cout:v==="fixe"?num(ancien&&ancien.cout):0,part:partVente(x,ancien&&ancien.kind!=="car"&&ancien.kind!=="boi"?ancien:null)})}
+    else{const [k,r,f]=v.split(":");ecrireLien(p,k==="car"?{kind:"car",ref:r}:{kind:"boi",ref:r,k:num(f)})}
+    render();return}
+  if(s.lcout!=null){const l=lienDe(s.lcout);if(l){ecrireLien(s.lcout,Object.assign({},l,{cout:num(e.target.value)}));render()}}
+});
+
+/* ---------- Exports : Excel (CSV) et impression pour l'équipe ---------- */
+const xn=(v,d=2)=>v==null||!isFinite(v)?"":(+v).toFixed(d).replace(".",",");
+const xp=v=>v==null||!isFinite(v)?"":(v*100).toFixed(1).replace(".",",")+" %";
+function dsVentes(part){
+  const a=analyseVentes(part),per=PERIODES.find(p=>p[0]===(state.vPer||"mois"))[1];
+  const d1=a.js[0]?.date,d2=a.js[a.js.length-1]?.date,fd=d=>d?new Date(d).toLocaleDateString("fr-FR"):"";
+  return {titre:`Ventes ${part==="bar"?"bar":"repas"} · ${per.toLowerCase()}${d1?` (${fd(d1)} au ${fd(d2)})`:""}`,fichier:`ventes-${part==="bar"?"bar":"repas"}`,
+    sous:`Marge brute ${eur.format(a.marge)} HT · ${part==="bar"?"coût des boissons":"food cost réel"} ${pct(a.fc)} · CA ${eur.format(a.ht)} HT`,
+    cols:["Produit","Catégorie caisse","Correspond à","Vendus","CA HT","Coût / vente","Marge / vente","Marge totale",part==="bar"?"Coût %":"Food cost","Classement","Conseil"],
+    num:[3,4,5,6,7,8],
+    rows:a.ps.slice().sort((x,y)=>(y.marge??-1e9)-(x.marge??-1e9)).map(x=>{const c=x.classe&&CLASSES[x.classe];
+      return [x.p,x.c,nomLien(x.l)||(x.l&&x.l.kind==="ignore"?"non compté":"à relier"),xn(x.q,0),xn(x.ht),xn(x.cu),xn(x.mu),xn(x.marge),xp(x.fc),c?c[0]:"",c?c[2]:""]})};
+}
+function dsCarte(){
+  const rows=[];FOOD_SECTIONS.forEach(sec=>Object.values(state.carte).filter(it=>isFood(it)&&(FOOD_SECTIONS.includes(it.section)?it.section:"Autre")===sec).sort((a,b)=>(a.name||"").localeCompare(b.name||"","fr")).forEach(it=>{const c=calcItem(it),f=state.fiches[it.fiche];
+    rows.push([sec,it.name||"",f?f.name:"",xn(c.cp),xn(num(it.ttc)),xn(num(it.tva),1)+" %",c.coef?xn(c.coef):"",xp(c.fc),ST[c.st]||""])}));
+  return {titre:"Carte des repas",fichier:"carte-des-repas",sous:`Objectif food cost ${n2.format(num(state.settings.target))} %`,cols:["Rubrique","Article","Fiche technique","Coût matière","Prix TTC","TVA","Coef.","Food cost","État"],num:[3,4,6,7],rows};
+}
+function dsBoissons(){
+  const rows=[];BCATS.forEach(cat=>Object.values(state.boissons).filter(b=>(BCATS.includes(b.category)?b.category:"Sans alcool")===cat).sort((a,b)=>(a.name||"").localeCompare(b.name||"","fr")).forEach(b=>(b.formats||[]).forEach(f=>{const c=calcFormat(b,f);
+    rows.push([cat,b.name||"",f.label||"",xn(c.cost),xn(num(f.ttc)),c.tva+" %",c.coef?xn(c.coef):"",xn(c.target),c.sugg?xn(c.sugg):"",BST[c.st]||""])})));
+  return {titre:"Carte des boissons",fichier:"carte-des-boissons",sous:"",cols:["Famille","Boisson","Format","Coût","Prix TTC","TVA","Coef.","Coef. visé","Prix conseillé","État"],num:[3,4,6,7,8],rows};
+}
+function dsMercuriale(part){
+  const rows=Object.entries(state.ingredients).filter(([id,i])=>ingPart(id,i)[part]).sort(byName).map(([,i])=>[i.name||"",i.supplier||"",xn(num(i.price),4),"€ / "+(UNITS[i.unit]?.label||i.unit||""),num(i.packQty)>1?xn(num(i.packQty),2):"",num(i.packPrice)>0?xn(num(i.packPrice)):"",num(i.loss)?xn(num(i.loss),0)+" %":"",(i.allergens||[]).join(", ")]);
+  return {titre:part==="bar"?"Mercuriale bar":"Mercuriale cuisine",fichier:part==="bar"?"mercuriale-bar":"mercuriale-cuisine",sous:"Prix d'achat HT",cols:["Produit","Fournisseur","Prix HT","Unité","Colis (qté)","Prix du colis","Perte","Allergènes"],num:[2,4,5],rows};
+}
+function exporterCSV(ds){
+  const q=v=>{const s=String(v??"");return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const txt="﻿"+[ds.cols,...ds.rows].map(r=>r.map(q).join(";")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv;charset=utf-8"}));
+  a.download=`${ds.fichier}-le76-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+  setStatus("Fichier téléchargé : il s'ouvre dans Excel ou Numbers");
+}
+function imprimerListe(ds){
+  const w=window.open("","_blank");if(!w){setStatus("Autorise les fenêtres pop-up pour imprimer",true);return}
+  const nums=new Set(ds.num||[]),cache=new Set(ds.cacher||[]),gras=new Set(ds.gras||[]);
+  w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(ds.titre)} · Le 76</title><style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:#1d1d1f;margin:28px;font-size:11.5px}
+  h1{font-size:20px;margin:0 0 2px;letter-spacing:-.02em}.sous{color:#6e6e73;margin:0 0 14px}
+  table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#6e6e73;border-bottom:1.5px solid #1d1d1f;padding:6px 6px}
+  td{padding:6px;border-bottom:.5px solid #d2d2d7;vertical-align:top}td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  tr{page-break-inside:avoid}tr.g td{font-weight:700;border-top:1.5px solid #1d1d1f;background:#f5f5f7}td.case{border-left:.5px solid #d2d2d7}.pied{margin-top:14px;color:#86868b;font-size:10px}.notes{width:110px}
+  @page{size:A4 landscape;margin:12mm}</style></head><body>
+  <h1>${esc(ds.titre)}</h1><p class="sous">Restaurant ${esc(nomResto())}${ds.sous?" · "+esc(ds.sous):""} · imprimé le ${new Date().toLocaleDateString("fr-FR")}</p>
+  <table><thead><tr>${ds.cols.map((c,k)=>cache.has(k)?"":`<th class="${nums.has(k)?"n":""}${/nouveau prix/i.test(c)?" notes":""}">${esc(c)}</th>`).join("")}${ds.sansNotes?"":`<th class="notes">À corriger</th>`}</tr></thead>
+  <tbody>${ds.rows.map((r,i)=>`<tr class="${gras.has(i)?"g":""}">${r.map((v,k)=>cache.has(k)?"":`<td class="${nums.has(k)?"n":""}${/nouveau prix/i.test(ds.cols[k])?" case":""}">${esc(v)}</td>`).join("")}${ds.sansNotes?"":"<td></td>"}</tr>`).join("")}</tbody></table>
+  <p class="pied">${ds.rows.length} ligne${ds.rows.length>1?"s":""} · Coût matière Le 76</p>
+  <script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script></body></html>`);
+  w.document.close();
+}
+const boutonsExport=(k,plus="")=>`<details class="menu-exp"><summary class="btn ghost">Exporter</summary><div class="menu-pop"><button data-exp="${k}:csv">📊 Liste pour Excel / Numbers</button><button data-exp="${k}:print">🖨️ Imprimer la liste</button>${plus}</div></details>`;
+document.addEventListener("click",e=>{document.querySelectorAll("details.menu-exp[open]").forEach(d=>{if(!d.contains(e.target)||e.target.closest(".menu-pop button"))d.open=false})});
+main.addEventListener("click",e=>{if(e.target.closest("[data-modif]")){document.getElementById("modif-file").click();return}const b=e.target.closest("[data-exp]");if(!b)return;const [k,how]=b.dataset.exp.split(":");
+  const ds=k==="ventes"?dsVentes("cuisine"):k==="bventes"?dsVentes("bar"):k==="carte"?dsCarte():k==="carted"?dsCarteDetail():k==="fiches"?dsFiches(false):k==="bfiches"?dsFiches(true):k==="boissons"?dsBoissons():k==="ingredients"?dsMercuriale("cuisine"):dsMercuriale("bar");
+  if(!ds.rows.length){setStatus("Rien à exporter pour l'instant",true);return}
+  how==="csv"?exporterCSV(ds):imprimerListe(ds)});
+
+/* ---------- Carte détaillée et fiches techniques : export avec colonne « Nouveau prix » et réimport ---------- */
+const COLS_DET=["Type","Rubrique","Plat / ingrédient","Quantité","Unité","Prix d'achat HT","Par","Coût","Prix de vente TTC","Food cost","Nouveau prix","Réf"];
+function lignesFiche(f,rub){
+  return (f.lines||[]).map(l=>{
+    if(l.type==="f"){const sf=state.fiches[l.ref];return ["  Sous-fiche",rub,sf?sf.name:"fiche supprimée",xn(num(l.qty),3),l.unit||"","","",xn(lineCost(l)),"","","",""]}
+    const i=state.ingredients[l.ref];
+    if(!i)return ["  Ingrédient",rub,"ingrédient supprimé",xn(num(l.qty),3),l.unit||"","","",hasFixed(l)?xn(num(l.fixed)):"","","","",""];
+    return ["  Ingrédient",rub,i.name||"",xn(num(l.qty),3),l.unit||"",xn(num(i.price),4),UNITS[i.unit]?.label||i.unit||"",xn(lineCost(l)),"","","","ing:"+l.ref]});
+}
+function dsCarteDetail(){
+  const rows=[],gras=[];
+  FOOD_SECTIONS.forEach(sec=>Object.entries(state.carte).filter(([,it])=>isFood(it)&&(FOOD_SECTIONS.includes(it.section)?it.section:"Autre")===sec).sort(byName).forEach(([id,it])=>{
+    const c=calcItem(it),f=state.fiches[it.fiche];gras.push(rows.length);
+    rows.push(["Plat",sec,it.name||"",f?xn(num(it.qty),3):"",f?(it.unit||"portion"):"","","",xn(c.cp),xn(num(it.ttc)),xp(c.fc),"","car:"+id]);
+    if(f)lignesFiche(f,sec).forEach(r=>rows.push(r))}));
+  return {titre:"Carte des repas détaillée",fichier:"carte-detaillee",sous:"Nouveau prix : prix de vente TTC sur la ligne du plat, prix d'achat HT (même unité) sur la ligne d'un ingrédient",cols:COLS_DET,num:[3,5,7,8,9],rows,gras,cacher:[11],sansNotes:true};
+}
+function dsFiches(bar){
+  const rows=[],gras=[];
+  Object.entries(state.fiches).filter(([,f])=>(f.category==="Boisson")===!!bar).sort(byName).forEach(([id,f])=>{
+    gras.push(rows.length);rows.push(["Fiche",f.category||"",f.name||"",xn(num(f.yield),2),f.yieldUnit==="portion"||!f.yieldUnit?"portion(s)":f.yieldUnit,"","",xn(ficheTotal(f)),"","","",""]);
+    lignesFiche(f,f.category||"").forEach(r=>rows.push(r));
+    rows.push(["  Coût par "+(f.yieldUnit==="portion"||!f.yieldUnit?"portion":f.yieldUnit),"","","","","","",xn(ficheUnitCost(f)),"","","",""])});
+  return {titre:bar?"Recettes boissons":"Fiches techniques",fichier:bar?"recettes-boissons":"fiches-techniques",sous:"Nouveau prix : prix d'achat HT de l'ingrédient, dans l'unité indiquée (€/kg, €/L ou €/pièce)",cols:COLS_DET.map((c,k)=>k===2?"Fiche / ingrédient":k===3?"Quantité / rendement":c),num:[3,5,7],rows,gras,cacher:[8,9,11],sansNotes:true};
+}
+/* Lecture d'un CSV (point-virgule ou virgule, guillemets) */
+function lireCSV(txt){
+  txt=txt.replace(/^﻿/,"");const premiere=txt.split(/\r?\n/)[0]||"";const sep=(premiere.match(/;/g)||[]).length>=(premiere.match(/,/g)||[]).length?";":premiere.includes("\t")?"\t":",";
+  const rows=[];let r=[],v="",q=false;
+  for(let k=0;k<txt.length;k++){const ch=txt[k];
+    if(q){if(ch==='"'){if(txt[k+1]==='"'){v+='"';k++}else q=false}else v+=ch;continue}
+    if(ch==='"')q=true;else if(ch===sep){r.push(v);v=""}else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&txt[k+1]==="\n")k++;r.push(v);rows.push(r);r=[];v=""}else v+=ch}
+  if(v!==""||r.length){r.push(v);rows.push(r)}
+  return rows;
+}
+function appliquerModifs(txt){
+  const rows=lireCSV(txt),tete=(rows[0]||[]).map(x=>sansAccent(x).trim());
+  const cP=tete.findIndex(x=>x.startsWith("nouveau prix")),cR=tete.findIndex(x=>x==="ref");
+  if(cP<0||cR<0){setStatus("Ce fichier n'a pas les colonnes « Nouveau prix » et « Réf » : exporte d'abord la carte détaillée ou les fiches.",true);return}
+  const avant=photoCouts(),touched=[],vus={};let nv=0,na=0,ign=0;const conflits=[],suspects=[];
+  rows.slice(1).forEach(r=>{const brut=String(r[cP]||"").replace(/[€\s]/g,"").replace(",",".");if(brut==="")return;const v=parseFloat(brut);const ref=String(r[cR]||"").trim();
+    if(!(v>0)||!ref){ign++;return}
+    if(vus[ref]!=null&&vus[ref]!==v){conflits.push(ref);return}vus[ref]=v;
+    const [t,id]=ref.split(":");
+    if(t==="car"&&state.carte[id]){if(num(state.carte[id].ttc)!==v){state.carte[id].ttc=v;touched.push(["car",id]);nv++}}
+    else if(t==="ing"&&state.ingredients[id]){const i=state.ingredients[id],de=num(i.price);if(de>0&&(v>de*3||v<de/3)){suspects.push(i.name);return}if(Math.abs(de-v)>1e-6){i.price=v;if(num(i.packQty)>1)i.packPrice=+(v*num(i.packQty)).toFixed(2);
+      if(de>0)i.hist=(i.hist||[]).concat([{d:new Date().toISOString().slice(0,10),de:+de.toFixed(4),a:+v.toFixed(4),f:"Modification équipe"}]).slice(-12);touched.push(["ing",id]);na++}}
+    else ign++});
+  if(touched.length){commitMany(touched);creerAlerte(avant,{supplier:"Modification de prix"})}
+  render();
+  const msg=`${nv} prix de vente et ${na} prix d'achat mis à jour${ign?` · ${ign} ligne${ign>1?"s":""} ignorée${ign>1?"s":""}`:""}${conflits.length?` · ${conflits.length} ingrédient${conflits.length>1?"s":""} avec deux prix différents, non modifié${conflits.length>1?"s":""}`:""}${suspects.length?` · prix refusé${suspects.length>1?"s":""} (trop loin de l'actuel, vérifie l'unité) : ${suspects.slice(0,3).join(", ")}${suspects.length>3?"…":""}`:""}`;
+  const err=!!(conflits.length||suspects.length);setStatus(msg,err);setTimeout(()=>setStatus(msg,err),1500);setTimeout(()=>setStatus(msg,err),4000);
+}
+document.addEventListener("change",e=>{if(e.target.id!=="modif-file")return;const f=e.target.files[0];e.target.value="";if(!f)return;
+  if(/\.xlsx?$/i.test(f.name)){setStatus("Enregistre d'abord le fichier au format CSV (Fichier → Exporter → CSV), puis réessaie.",true);return}
+  const r=new FileReader();r.onload=()=>appliquerModifs(String(r.result));r.readAsText(f,"utf-8")});
+
+/* ---------- Contrôle des factures : prix habituel, surcoût, réclamation ---------- */
+const mediane=a=>{const b=a.filter(x=>x>0).sort((x,y)=>x-y);if(!b.length)return 0;const m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const promoEnCours=i=>!!(i&&i.promo&&i.promo.date&&(Date.now()-new Date(i.promo.date))<30*864e5);
+function prixHabituel(i){return mediane([...(i.hist||[]).slice(-5).map(h=>num(h.de)),num(i.price)])||num(i.price)}
+function equivalents(id){const i=state.ingredients[id];if(!i||!i.groupe)return [];return Object.entries(state.ingredients).filter(([k,x])=>k!==id&&x.groupe===i.groupe&&x.unit===i.unit&&num(x.price)>0)}
+function moinsCherAilleurs(id,prix,fournisseur){
+  const best=equivalents(id).filter(([,x])=>(x.supplier||"")!==(fournisseur||state.ingredients[id]?.supplier||"")).map(([k,x])=>[k,x,prixHabituel(x)]).sort((a,b)=>a[2]-b[2])[0];
+  if(!best||best[2]>=prix*0.97)return "";
+  return `Moins cher chez ${best[1].supplier||"un autre fournisseur"} : ${eur4.format(best[2])} / ${UNITS[best[1].unit]?.label||""} (prix habituel)`;
+}
+function ecartsFacture(im){
+  return im.lines.filter(l=>l.on&&!l.promo&&l.match&&state.ingredients[l.match]).map(l=>{const m=state.ingredients[l.match];if(m.unit!==l.unit||!(num(m.price)>0))return null;const hab=prixHabituel(m),p=num(l.price);
+    if(!(p>hab*1.03))return null;return {id:l.match,name:m.name||l.name,hab:+hab.toFixed(4),prix:+p.toFixed(4),unit:l.unit,qty:num(l.qty),surcout:num(l.qty)>0?+((p-hab)*num(l.qty)).toFixed(2):null}}).filter(Boolean);
+}
+function bandeauControle(im){
+  const e=ecartsFacture(im);if(!e.length)return "";const tot=e.reduce((s,x)=>s+(x.surcout||0),0);
+  return `<div class="banner" style="background:var(--warn-bg);margin:8px 0"><p><strong>⚠️ ${e.length} produit${e.length>1?"s":""} facturé${e.length>1?"s":""} plus cher que d'habitude${tot>0?` · ${eur.format(tot)} HT de plus sur cette facture`:""}</strong><br>${e.map(x=>`${esc(x.name)} : ${eur4.format(x.prix)} au lieu de ${eur4.format(x.hab)} (+${((x.prix/x.hab-1)*100).toFixed(1).replace(".",",")} %)`).join(" · ")}<br><span class="hint" style="margin:0">En validant, l'app garde une fiche de contrôle avec un mail de réclamation prêt à envoyer.</span></p></div>`;
+}
+function enregistrerControle(im){
+  const e=ecartsFacture(im);if(!e.length)return;const fac=im.factureId?(CM.docs.factures||{})[im.factureId]:null;
+  const doc={type:"facture",date:new Date().toISOString().slice(0,10),date_facture:im.date||"",numero:fac&&fac.numero||"",fournisseur:im.supplier||"",lignes:e,total:+e.reduce((s,x)=>s+(x.surcout||0),0).toFixed(2),statut:"ouverte"};
+  const id=uid();CM.docs.alertes=CM.docs.alertes||{};CM.docs.alertes[id]=doc;CM.ecrire("alertes",id,doc).catch(x=>setStatus(x.message,true));
+}
+function controlesOuverts(part){return Object.entries(CM.docs.alertes||{}).filter(([,a])=>a&&a.type==="facture"&&a.statut==="ouverte"&&(a.lignes||[]).some(l=>{const i=state.ingredients[l.id];return !i||ingPart(l.id,i)[part]})).sort((a,b)=>(b[1].date||"").localeCompare(a[1].date||""))}
+function renderControles(part){
+  if(CM.lecture)return "";const cs=controlesOuverts(part);if(!cs.length)return "";
+  return cs.map(([id,a])=>`<section class="list fac alerte-prix"><div class="fac-head"><div><h2 style="font-size:1.05rem">🧾 Contrôle facture ${esc(a.fournisseur||"")}${a.date_facture?" du "+esc(new Date(a.date_facture).toLocaleDateString("fr-FR")):""}</h2><span class="hint" style="margin:2px 0 0;display:block">${a.lignes.length} produit${a.lignes.length>1?"s":""} plus cher${a.lignes.length>1?"s":""} que d'habitude${a.total>0?` · <b>${eur.format(a.total)} HT</b> de plus`:""}</span></div>
+    <div class="acts"><button class="btn sm" data-ctl="mail" data-id="${esc(id)}">Copier la réclamation</button><button class="btn ghost sm" data-ctl="classer" data-id="${esc(id)}">Classer</button></div></div>
+    ${a.lignes.map(l=>`<div class="fac-row"><div style="min-width:0"><b>${esc(l.name)}</b><span class="sub">${eur4.format(l.prix)} au lieu de ${eur4.format(l.hab)} / ${esc(UNITS[l.unit]?.label||l.unit)} <span class="delta up">+${((l.prix/l.hab-1)*100).toFixed(1).replace(".",",")} %</span>${l.qty?` · ${n2.format(l.qty)} ${esc(UNITS[l.unit]?.label||"")} achetés`:""}</span></div><div class="num"><b>${l.surcout!=null?"+"+eur.format(l.surcout):""}</b></div></div>`).join("")}</section>`).join("");
+}
+function mailReclamation(a){
+  const u=l=>UNITS[l.unit]?.label||l.unit,f=v=>n2.format(+v.toFixed(3));
+  return `Bonjour,
+
+Sur votre facture${a.numero?" n° "+a.numero:""}${a.date_facture?" du "+new Date(a.date_facture).toLocaleDateString("fr-FR"):""}, je constate des prix plus élevés que nos tarifs habituels :
+${a.lignes.map(l=>`- ${l.name} : ${f(l.prix)} € / ${u(l)} au lieu de ${f(l.hab)} € / ${u(l)}${l.surcout?` (soit ${n2.format(l.surcout)} € HT de plus)`:""}`).join("\n")}
+${a.total>0?`\nSoit ${n2.format(a.total)} € HT d'écart au total.\n`:""}
+Pouvez-vous me confirmer ces tarifs ou m'établir un avoir ?
+
+Merci d'avance,
+${CM.moi&&CM.moi.nom?CM.moi.nom+"\n":""}Restaurant ${nomResto()}`;
+}
+/* ---------- Comparaison des fournisseurs (produits équivalents) ---------- */
+function ajouteFiche(acc,f,mult,d=0){if(!f||d>6||!(mult>0))return;(f.lines||[]).forEach(l=>{if(hasFixed(l))return;
+  if(l.type==="f"){const sf=state.fiches[l.ref];const u=lineUnits(l);if(!sf||!u||u[l.unit]==null)return;ajouteFiche(acc,sf,mult*num(l.qty)*u[l.unit]/Math.max(num(sf.yield),0.0001),d+1)}
+  else{const i=state.ingredients[l.ref];if(!i)return;const b=baseQty(l,i);if(b==null)return;const perte=Math.min(Math.max(num(i.loss),0),95)/100;acc[l.ref]=(acc[l.ref]||0)+b*mult/(1-perte)}})}
+function multFiche(f,qty,unit){const u=YIELD[f.yieldUnit||"portion"].lines;return num(qty)*(u[unit]??Object.values(u)[0])/Math.max(num(f.yield),0.0001)}
+function consoMensuelle(){
+  const js=ventesJours();if(!js.length)return null;const der=js[js.length-1].date,lim=new Date(der);lim.setDate(lim.getDate()-29);const ls=lim.toISOString().slice(0,10);
+  const sel=js.filter(j=>j.date>=ls),span=(new Date(der)-new Date(sel[0].date))/864e5+1,acc={};
+  sel.forEach(j=>(j.lignes||[]).forEach(x=>{const l=lienDe(x.p),q=num(x.q);if(!l||!(q>0))return;
+    if(l.kind==="car"){const it=state.carte[l.ref],f=it&&state.fiches[it.fiche];if(f)ajouteFiche(acc,f,multFiche(f,it.qty,it.unit)*q)}
+    else if(l.kind==="boi"){const b=state.boissons[l.ref],fm=b&&(b.formats||[])[num(l.k)];if(!fm)return;
+      if(fm.type==="f"){const f=state.fiches[fm.ref];if(f)ajouteFiche(acc,f,multFiche(f,fm.qty,fm.unit)*q)}
+      else{const i=state.ingredients[fm.ref];if(i){const bq=baseQty(fm,i);if(bq!=null)acc[fm.ref]=(acc[fm.ref]||0)+bq*q}}}}));
+  const k=30/Math.max(span,7);Object.keys(acc).forEach(id=>acc[id]*=k);return acc;
+}
+function groupesFournisseurs(part){
+  const conso=consoMensuelle()||{},g={};
+  Object.entries(state.ingredients).forEach(([id,i])=>{if(!i.groupe||!(num(i.price)>0)||!ingPart(id,i)[part])return;(g[i.groupe]=g[i.groupe]||[]).push([id,i])});
+  return Object.entries(g).map(([nom,xs])=>{
+    const unit=Object.entries(xs.reduce((m,[,i])=>(m[i.unit]=(m[i.unit]||0)+1,m),{})).sort((a,b)=>b[1]-a[1])[0][0];
+    const items=xs.filter(([,i])=>i.unit===unit).map(([id,i])=>({id,i,prix:prixHabituel(i),conso:conso[id]||0})).sort((a,b)=>a.prix-b.prix);
+    const min=items[0]?.prix||0,eco=items.reduce((s,x)=>s+x.conso*(x.prix-min),0);
+    return {nom,unit,items,min,eco,fours:new Set(items.map(x=>x.i.supplier||"?")).size};
+  }).filter(x=>x.items.length>1&&x.fours>1).sort((a,b)=>b.eco-a.eco||a.nom.localeCompare(b.nom,"fr"));
+}
+function renderComparaison(part){
+  const gs=groupesFournisseurs(part),tot=gs.reduce((s,x)=>s+x.eco,0),aConso=!!ventesJours().length;
+  let h=`<section class="card"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.1rem">Comparer les fournisseurs</h2><span class="hint" style="margin:2px 0 0;display:block">Le même produit chez plusieurs fournisseurs, au prix ramené au kg, au litre ou à la pièce.${aConso?" L'économie est estimée sur ta consommation des 30 derniers jours (ventes × fiches techniques).":""}</span></div>${CM.options.ia&&!CM.lecture?(state.grpProg?`<button class="btn" disabled>${esc(state.grpProg)}</button>`:`<button class="btn" data-grp="ia">${gs.length?"Relancer le regroupement":"Trouver les produits équivalents"}</button>`):""}</div></section>`;
+  if(!gs.length)return h+`<div class="list"><div class="empty">Aucun produit comparé pour l'instant. Clique sur « Trouver les produits équivalents » : l'IA repère les mêmes produits chez des fournisseurs différents (ex. crème 30 % chez Romaf et chez VLG).</div></div>`;
+  if(tot>0.5)h+=`<section class="bilan"><div class="hl"><span class="lbl">Économie possible</span><span class="big">${eur.format(tot)} <small>HT / mois</small></span><span class="sub">en prenant chaque produit chez le moins cher</span></div><div><span class="lbl">Produits comparés</span><span class="big">${gs.length}</span><span class="sub">chez au moins deux fournisseurs</span></div></section>`;
+  h+=`<div class="list">`;
+  gs.forEach(g=>{const ul=UNITS[g.unit]?.label||g.unit;
+    h+=`<div class="group" style="display:flex;justify-content:space-between;gap:10px"><span class="lbl">${esc(g.nom)}</span>${g.eco>0.5?`<span class="lbl" style="color:var(--ok)">économie ≈ ${eur.format(g.eco)} / mois</span>`:""}</div>`;
+    g.items.forEach((x,k)=>{const d=g.min>0?x.prix/g.min-1:0;
+      h+=`<div class="row cmp"><span class="name">${esc(x.i.name||"")}<span class="sub">${esc(x.i.supplier||"Sans fournisseur")}${promoEnCours(x.i)?` · <b style="color:var(--ok)">promo ${eur4.format(x.i.promo.prix)} le ${esc(new Date(x.i.promo.date).toLocaleDateString("fr-FR"))}</b>`:""}${x.conso>0?` · ≈ ${n2.format(+x.conso.toFixed(1))} ${esc(ul)} / mois`:""}</span></span><span class="num">${eur4.format(x.prix)}<span class="sub">/ ${esc(ul)}</span></span><span>${k===0?`<span class="chip ok plain">Le moins cher</span>`:`<span class="chip ${d>0.15?"alert":"watch"} plain">+${(d*100).toFixed(0)} %</span>`}</span>${CM.lecture?"":`<button class="x" title="Ce n'est pas le même produit" aria-label="Retirer de la comparaison" data-grp="retirer" data-id="${esc(x.id)}">✕</button>`}</div>`})});
+  return h+`</div>`;
+}
+async function regrouperIA(t){
+  const parUnite={};Object.entries(state.ingredients).forEach(([id,i])=>{if(num(i.price)>0&&i.name)(parUnite[i.unit]=parUnite[i.unit]||[]).push([id,i])});
+  const touched=[];let ng=0;
+  try{for(const [u,xs] of Object.entries(parUnite)){if(xs.length<2)continue;
+      state.grpProg=`L'IA compare les produits au ${UNITS[u]?.label||u}…`;render();
+      const prompt=`Voici les produits achetés par un restaurant, tous vendus au ${UNITS[u]?.label||u} (numéro | nom | fournisseur) :
+${xs.map(([,i],k)=>`${k} | ${i.name} | ${i.supplier||"?"}`).join("\n")}
+
+Regroupe les produits ÉQUIVALENTS, c'est-à-dire qu'on peut acheter l'un à la place de l'autre pour la même recette : même aliment, même type (ex. crème liquide 30 % ≈ crème UHT 35 % ; champignons de Paris frais ≈ champignons de Paris frais ; mais PAS crème liquide ≠ crème épaisse, PAS beurre doux ≠ beurre demi-sel, PAS frites surgelées ≠ pommes de terre). Le conditionnement peut différer.
+Ne garde que les groupes d'au moins deux produits dont au moins deux fournisseurs différents. Donne à chaque groupe un nom court et générique en français.
+Réponds uniquement en JSON : {"groupes":[{"nom":"Crème liquide 30-35 %","n":[3,17]}]}`;
+      const d=await CM.post("ia",{prompt});(d.resultat&&d.resultat.groupes||[]).forEach(g=>{const ids=(g.n||[]).map(k=>xs[+k]&&xs[+k][0]).filter(Boolean);if(ids.length<2||!g.nom)return;ng++;
+        ids.forEach(id=>{if(state.ingredients[id].groupe!==g.nom){state.ingredients[id].groupe=String(g.nom).slice(0,60);touched.push(["ing",id])}})})}
+    state.grpProg=null;if(touched.length)commitMany(touched);render();setStatus(`${ng} produit${ng>1?"s":""} trouvé${ng>1?"s":""} chez plusieurs fournisseurs`)}
+  catch(e){state.grpProg=null;if(touched.length)commitMany(touched);render();setStatus(e.message,true)}
+}
+main.addEventListener("click",async e=>{
+  if(e.target.closest("[data-cmp]")){state.cmp=!state.cmp;render();return}
+  const g=e.target.closest("[data-grp]");if(g){if(g.dataset.grp==="ia")regrouperIA(g);else{const i=state.ingredients[g.dataset.id];if(i){delete i.groupe;commitMany([["ing",g.dataset.id]]);render()}}return}
+  const c=e.target.closest("[data-ctl]");if(!c)return;const a=(CM.docs.alertes||{})[c.dataset.id];if(!a)return;
+  if(c.dataset.ctl==="classer"){const d=Object.assign({},a,{statut:"classee"});CM.docs.alertes[c.dataset.id]=d;CM.ecrire("alertes",c.dataset.id,d).catch(x=>setStatus(x.message,true));render()}
+  else{const txt=mailReclamation(a);try{await navigator.clipboard.writeText(txt);setStatus("Mail de réclamation copié : colle-le dans un mail au fournisseur")}catch(x){prompt("Copie ce texte :",txt)}}
+});
+
+/* ---------- Choix du restaurant ---------- */
+const nomResto=()=>((CM.restos||[]).find(r=>r.id===CM.resto)||{nom:"Le 76"}).nom;
+function changerResto(id){try{localStorage.setItem("cm_r",id)}catch(e){}location.href=location.pathname+(id==="le76"?"":"?r="+encodeURIComponent(id))}
+function renderResto(){
+  const w=document.getElementById("cm-resto-w");if(!w)return;const rs=CM.restos||[];
+  if(rs.length<2){w.innerHTML="";return}
+  w.innerHTML=`<details class="menu-exp resto-pick"><summary class="resto-pill">${esc(nomResto())} ▾</summary><div class="menu-pop" style="left:0;right:auto;min-width:220px">${rs.map(r=>`<button data-resto="${esc(r.id)}">${r.id===CM.resto?"✓ ":""}${esc(r.nom)}</button>`).join("")}${CM.lecture?"":`<hr><button data-tab-go="reglages">+ Ajouter un restaurant…</button>`}</div></details>`;
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-resto]");if(b){e.preventDefault();if(b.dataset.resto!==CM.resto)changerResto(b.dataset.resto);return}
+  const g=e.target.closest("#cm-resto-w [data-tab-go]");if(g){state.view="reglages";state.open=null;render()}});
 
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
@@ -1361,7 +2252,7 @@ render();
     }
   }catch(e){}}
   {const t=relinkAll();if(t.length){t.forEach(([k,id])=>persist(k,id));render()}}
-  setStatus(mode==="db"?(state.demo?"Exemples, rien n'est encore enregistré":"Synchronisé"):"Démo · enregistré dans ce navigateur",false);render();
+  setStatus(mode==="db"?(CM.lecture?CM.moi.nom+" · lecture":CM.moi.nom+" · synchronisé"):"Hors connexion",mode!=="db");if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view)){state.view="fiches";}render();
   /* Suivi en direct : si les données changent ailleurs (autre appareil, Claude), la page se met à jour au lieu de les écraser */
   if(mode==="db"&&refs){
     let needRender=false;
@@ -1381,5 +2272,5 @@ render();
 })();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
