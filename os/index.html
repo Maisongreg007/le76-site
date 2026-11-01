@@ -1037,7 +1037,7 @@ const REAL={
 function realHTML(id){
   const r=REAL[id]; if(!r) return '';
   return '<h2 class="tp-h">Le vrai module, en action</h2><p class="sub">Captures de l’application telle qu’elle tourne, avec des données fictives.</p>'
-   +'<div class="shots">'+r.s.map(x=>'<figure class="shot '+(x[1]==='d'?'d':'p')+'"><img src="/os/img/'+x[0]+'.jpg" alt="'+x[2]+'" loading="lazy"><figcaption>'+x[2]+'</figcaption></figure>').join('')+'</div>'
+   +'<div class="shots">'+r.s.map(x=>'<figure class="shot '+(x[1]==='d'?'d':'p')+'"><img src="/os/img/'+x[0]+'.jpg" alt="'+x[2]+'"><figcaption>'+x[2]+'</figcaption></figure>').join('')+'</div>'
    +'<a class="btn" href="'+r.u+'" target="_blank" rel="noopener">Essayer le vrai module ↗</a>';
 }
 function toolPage(id){
