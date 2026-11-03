@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Reconstruit la carte et les soirées de index.html à partir des fichiers
-contenu/carte.json et contenu/soirees.json.
+"""Reconstruit les plats du jour, la carte et les soirées de index.html à partir des fichiers
+contenu/plats-du-jour.json, contenu/carte.json et contenu/soirees.json.
 
 Ne pas modifier à la main les zones entre les balises <!-- ...:DEBUT --> et
 <!-- ...:FIN --> de index.html : elles sont réécrites par ce script.
@@ -240,6 +240,30 @@ def bloc_soirees(s):
     return "\n".join(out)
 
 
+def bloc_plats(c):
+    """Plats du jour de la semaine (contenu/plats-du-jour.json). Vide si désactivé."""
+    jours = [j for j in c.get("jours", []) if (j.get("plat") or "").strip()]
+    if not c.get("actif") or not jours:
+        return ""
+    out = ['    <div class="center">',
+           f'      <span class="kicker">{e(tr(c.get("petit_titre")))}</span>',
+           f'      <h2 class="title">{titre_en_valeur(tr(c.get("titre")), tr(c.get("mot_en_valeur")))}</h2>']
+    if (c.get("semaine") or "").strip():
+        out.append(f'      <p class="lead">{e(tr(c["semaine"]))}</p>')
+    out += ['    </div>', '    <div class="pdj">']
+    for j in jours:
+        det = f'<p>{e(tr(j.get("details")))}</p>' if (j.get("details") or "").strip() else ""
+        out.append(f'      <div class="pdj-j"><span>{e(tr(j.get("jour")))}</span><h3>{e(tr(j.get("plat")))}</h3>{det}</div>')
+    out.append('    </div>')
+    if (c.get("formule_prix") or "").strip():
+        out.append('    <div class="pdj-f"><div><b>' + e(tr(c.get("formule_titre"))) + '</b>'
+                   + f'<span>{e(tr(c.get("formule_texte")))}</span></div><strong>{e(c["formule_prix"])}</strong></div>')
+    if (c.get("image") or "").strip():
+        lien = ("../" if LANGUE == "de" else "") + c["image"].strip()
+        out.append(f'    <p class="pdj-fiche"><a href="{e(lien)}" target="_blank" rel="noopener">{e(tr("Voir la fiche en grand"))}</a></p>')
+    return "\n".join(out)
+
+
 def remplacer(texte, nom, contenu):
     motif = re.compile(rf"(<!-- {nom}:DEBUT[^>]*-->\n).*?(\n\s*<!-- {nom}:FIN -->)", re.S)
     if not motif.search(texte):
@@ -251,7 +275,8 @@ def construire(page, langue):
     global LANGUE
     LANGUE = langue
     texte = page.read_text(encoding="utf-8")
-    nouveau = remplacer(texte, "CARTE", bloc_carte(lire("carte.json")))
+    nouveau = remplacer(texte, "PLATS", bloc_plats(lire("plats-du-jour.json")))
+    nouveau = remplacer(nouveau, "CARTE", bloc_carte(lire("carte.json")))
     nouveau = remplacer(nouveau, "SOIREES", bloc_soirees(lire("soirees.json")))
     if nouveau != texte:
         page.write_text(nouveau, encoding="utf-8")

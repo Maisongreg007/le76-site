@@ -359,6 +359,22 @@
     .call-mobile.show { transform: none; }
     footer { padding-bottom: 100px; }
   }
+  /* Plats du jour (généré depuis contenu/plats-du-jour.json) */
+  #plats[data-vide] { display: none; }
+  #plats { background: var(--paper); padding: 70px 0 10px; }
+  .pdj { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 34px; }
+  .pdj-j { background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px; text-align: center; }
+  .pdj-j span { font: 600 .74rem/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+  .pdj-j h3 { font-size: 1.3rem; margin: 12px 0 6px; color: var(--rust); line-height: 1.2; }
+  .pdj-j p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .pdj-f { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 18px auto 0; padding: 20px 28px; border-radius: 18px; background: var(--rust); color: #fff; }
+  .pdj-f b { display: block; font: 700 1.2rem var(--serif); }
+  .pdj-f span { font-size: .95rem; opacity: .9; }
+  .pdj-f strong { font: 800 2.2rem var(--serif); color: var(--gold-light); white-space: nowrap; }
+  .pdj-fiche { text-align: center; margin: 14px 0 0; font-size: .9rem; }
+  .pdj-fiche a { color: var(--gold); }
+  @media (max-width: 900px) { .pdj { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .pdj { grid-template-columns: 1fr; } .pdj-f { flex-direction: column; text-align: center; } }
 </style>
 </head>
 <body>
@@ -378,6 +394,7 @@
   <div class="wrap">
     <a class="brand" href="#"><b>Le</b><span>76</span></a>
     <nav class="links">
+      <a href="#plats">Tagesgerichte</a>
       <a href="#carte">Speisekarte</a>
       <a href="#soirees">Abende</a>
       <a href="#cadeaux">Gutscheine</a>
@@ -468,6 +485,26 @@
       <figure><img src="/images/salle-2.jpg" alt="Gedeckter Tisch am Fenster" loading="lazy"></figure>
       <figure><img src="/images/salle-3.jpg" alt="Großer Familientisch" loading="lazy"></figure>
     </div>
+  </div>
+</section>
+
+<section id="plats">
+  <div class="wrap">
+    <!-- PLATS:DEBUT (généré automatiquement : modifier contenu/plats-du-jour.json et pas ici) -->
+    <div class="center">
+      <span class="kicker">Dienstag bis Freitag · mittags</span>
+      <h2 class="title">Die <em>Tagesgerichte</em></h2>
+      <p class="lead">Woche vom 3. bis 6. November 2026</p>
+    </div>
+    <div class="pdj">
+      <div class="pdj-j"><span>Dienstag, 3. November</span><h3>Geschnetzeltes vom Hähnchen</h3><p>Sahne und Senf nach alter Art · Reis</p></div>
+      <div class="pdj-j"><span>Mittwoch, 4. November</span><h3>Hähnchen-Cordon-bleu</h3><p>Sahne · Pommes frites</p></div>
+      <div class="pdj-j"><span>Donnerstag, 5. November</span><h3>Königinpastetchen</h3><p>Nudeln</p></div>
+      <div class="pdj-j"><span>Freitag, 6. November</span><h3>Wolfsbarschfilet</h3><p>Aïoli · Kartoffelstampf</p></div>
+    </div>
+    <div class="pdj-f"><div><b>Das 76-Menü</b><span>Vorspeise, Hauptgericht und Dessert, dazu eine Limonade, ein Wasser, ein Sirup mit Wasser oder ein Viertel Rot- oder Roséwein</span></div><strong>16 €</strong></div>
+    <p class="pdj-fiche"><a href="../images/plats-du-jour.jpg" target="_blank" rel="noopener">Aushang groß ansehen</a></p>
+    <!-- PLATS:FIN -->
   </div>
 </section>
 

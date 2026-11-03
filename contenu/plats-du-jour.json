@@ -1,0 +1,33 @@
+{
+  "actif": true,
+  "petit_titre": "Du mardi au vendredi · midi",
+  "titre": "Les plats du jour",
+  "mot_en_valeur": "plats du jour",
+  "semaine": "Semaine du 3 au 6 novembre 2026",
+  "jours": [
+    {
+      "jour": "Mardi 3 novembre",
+      "plat": "Émincé de poulet",
+      "details": "crème et moutarde à l'ancienne · riz"
+    },
+    {
+      "jour": "Mercredi 4 novembre",
+      "plat": "Cordons-bleus de poulet",
+      "details": "crème · frites"
+    },
+    {
+      "jour": "Jeudi 5 novembre",
+      "plat": "Bouchée à la reine",
+      "details": "pâtes"
+    },
+    {
+      "jour": "Vendredi 6 novembre",
+      "plat": "Filet de loup",
+      "details": "aïoli · écrasé de pommes de terre"
+    }
+  ],
+  "formule_titre": "La formule du 76",
+  "formule_prix": "16 €",
+  "formule_texte": "Entrée, plat et dessert, avec une limonade, une eau, un sirop à l'eau ou 1/4 de rouge ou rosé",
+  "image": "images/plats-du-jour.jpg"
+}

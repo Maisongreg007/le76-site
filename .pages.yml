@@ -218,3 +218,39 @@ content:
                   - name: prix
                     label: Prix
                     type: string
+
+  - name: plats-du-jour
+    label: Plats du jour
+    type: file
+    path: contenu/plats-du-jour.json
+    format: json
+    fields:
+      - name: actif
+        label: Afficher les plats du jour sur le site
+        type: boolean
+      - name: semaine
+        label: Semaine (ex. « Semaine du 10 au 13 novembre 2026 »)
+        type: string
+      - name: jours
+        label: Les plats de la semaine
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.jour} : {fields.plat}"
+        fields:
+          - name: jour
+            label: Jour (ex. « Mardi 10 novembre »)
+            type: string
+          - name: plat
+            label: Plat
+            type: string
+          - name: details
+            label: Sauce, accompagnement (ex. « crème · frites »)
+            type: string
+      - name: formule_prix
+        label: Prix de la formule (ex. « 16 € »)
+        type: string
+      - name: formule_texte
+        label: Détail de la formule
+        type: text
