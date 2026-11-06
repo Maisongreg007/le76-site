@@ -285,6 +285,12 @@ details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;curs
 .cm-resto-w{display:inline-block;font-family:var(--f-text,inherit);font-size:1rem;letter-spacing:0}
 .promo-l{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);margin-top:4px;justify-content:flex-end;cursor:pointer}.promo-l input{width:auto;margin:0}
 .ok-btn{background:var(--ok,#34c759);color:#fff}.verif-q{cursor:pointer}.verif-q:hover{filter:brightness(.95);box-shadow:0 0 0 2px var(--ok-bg,#d6f5dd)}
+.chip-btn{border:0;cursor:pointer;font:inherit}.chip-btn:hover{filter:brightness(.95)}
+.pq{background:var(--fill);border-radius:14px;padding:12px 14px;margin:10px 0 4px;font-size:.88rem}
+.pq-l{padding:7px 0;border-bottom:.5px solid var(--line)}.pq-l:last-of-type{border-bottom:0}
+.pq-t{display:flex;justify-content:space-between;gap:10px}.pq-t .sub{display:block;color:var(--muted);font-size:.78rem}.pq-t small{color:var(--muted);font-weight:500}.pq-t b{white-space:nowrap}
+.pq-bar{height:5px;background:var(--line);border-radius:3px;margin-top:5px;overflow:hidden}.pq-bar i{display:block;height:100%;background:var(--bad);border-radius:3px}
+.pq-n{color:var(--warn);font-size:.78rem;margin-top:4px}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -743,7 +749,8 @@ function renderItem(id){
 }
 function renderItemCalc(it){
   const c=calcItem(it);const good=c.st==="ok"||c.st==="watch"||c.st==="alert";
-  return `<div class="hero"><div><span class="lbl">Food cost</span><br><span class="big">${pct(good?c.fc:null)}</span></div><span class="chip ${c.st}">${ST[c.st]}</span></div>
+  return `<div class="hero"><div><span class="lbl">Food cost</span><br><span class="big">${pct(good?c.fc:null)}</span></div>${good&&state.carte[state.open?.id]===it?`<button class="chip ${c.st} chip-btn" data-act="pourquoi" title="Voir ce qui coûte cher dans ce plat">${ST[c.st]} ${state.pourquoi?"▴":"▾"}</button>`:`<span class="chip ${c.st}">${ST[c.st]}</span>`}</div>
+  ${state.pourquoi&&good?pourquoiCher(it,c):""}
   <dl><dt>Coût matière</dt><dd>${eur.format(c.cp)}</dd><dt>Prix de vente HT</dt><dd>${eur.format(c.ht)}</dd><dt>Coefficient</dt><dd>${coefTxt(c.coef)}</dd><dt>Marge brute</dt><dd>${eur.format(c.marge)}</dd></dl>
   ${c.st==="missing"?`<p class="hint">Certains ingrédients n'ont pas encore de prix. Importez une facture ou complétez la mercuriale.</p>`:""}
   ${c.conseil&&good?`<p class="hint">Pour atteindre ${n2.format(num(state.settings.target))} % de food cost, vendez cet article <strong>${eur.format(c.conseil)} TTC</strong>.</p>`:""}`;
@@ -1371,6 +1378,7 @@ main.addEventListener("click",e=>{
     if(!(price>0)){if(pe){pe.focus();pe.style.borderColor="var(--bad)";pe.placeholder="Prix ?"}return}
     i.price=price;i.unit=document.getElementById("q-unit-"+k).value;const sup=document.getElementById("q-sup-"+k).value.trim();if(sup)i.supplier=sup;delete i.auto;
     const touched=[["ing",l.ref]];fixLinesForIngredient(l.ref,touched);commitMany(touched);render()}
+  else if(act==="pourquoi"){state.pourquoi=!state.pourquoi;const el=document.getElementById("calc");const it=o&&state.carte[o.id];if(el&&it)el.innerHTML=renderItemCalc(it);else render()}
   else if(act==="markChecked"){delete state.fiches[o.id].toCheck;queueSave("fic",o.id);setStatus("Fiche vérifiée");render()}
   else if(act==="delFiche")arm(t,()=>{const id=o.id;const f=state.fiches[id];delete state.fiches[id];state.open=null;state.edit=false;queueSave("fic",id);render();if(f&&f.photo&&f.photo.id){window.claude?.use?.("assets").then(a=>a&&a.delete(f.photo.id)).catch(()=>{})}});
   else if(act==="pickPhoto")pick("photo-file");
@@ -2122,6 +2130,25 @@ main.addEventListener("click",e=>{const v=e.target.closest("[data-verif],[data-b
   if(v.dataset.verif&&state.fiches[v.dataset.verif]){delete state.fiches[v.dataset.verif].toCheck;queueSave("fic",v.dataset.verif);setStatus((state.fiches[v.dataset.verif].name||"Fiche")+" : vérifiée")}
   else if(v.dataset.bverif&&state.boissons[v.dataset.bverif]){delete state.boissons[v.dataset.bverif].toCheck;queueSave("boi",v.dataset.bverif);setStatus((state.boissons[v.dataset.bverif].name||"Boisson")+" : vérifiée")}
   render()},true);
+/* ---------- Pourquoi ce plat coûte cher : détail des ingrédients ---------- */
+function pourquoiCher(it,c){
+  const f=state.fiches[it.fiche];if(!f||!(c.cp>0))return `<p class="hint">Relie une fiche technique à cet article pour voir le détail de son coût.</p>`;
+  const mult=multFiche(f,it.qty,it.unit),tgt=num(state.settings.target)/100||0.28,cible=c.ht*tgt;
+  const ls=(f.lines||[]).map(l=>{const cout=lineCost(l)*mult;let nom,notes=[];
+    if(l.type==="f"){const sf=state.fiches[l.ref];nom=sf?sf.name+" (sous-fiche)":"Sous-fiche supprimée"}
+    else{const i=state.ingredients[l.ref];nom=i?i.name:"Ingrédient supprimé";
+      if(i){const hab=prixHabituel(i),h=(i.hist||[]).slice(-1)[0];
+        if(num(i.price)>hab*1.05)notes.push(`prix actuel ${eur4.format(num(i.price))} contre ${eur4.format(hab)} d'habitude`);
+        else if(h&&num(h.a)>num(h.de)*1.03&&(Date.now()-new Date(h.d))<60*864e5)notes.push(`a augmenté de ${((num(h.a)/num(h.de)-1)*100).toFixed(0)} % le ${new Date(h.d).toLocaleDateString("fr-FR")}${h.f?" ("+esc(h.f)+")":""}`);
+        const ail=moinsCherAilleurs(l.ref,num(i.price),i.supplier);if(ail)notes.push(ail);
+        if(num(i.loss)>=15)notes.push(`${n2.format(num(i.loss))} % de perte comptée`);
+        if(hasFixed(l))notes.push("coût saisi à la main")}}
+    return {nom,cout,part:cout/c.cp,qte:`${n2.format(num(l.qty)*mult)} ${l.unit||""}`,notes}}).sort((a,b)=>b.cout-a.cout);
+  const top=ls.slice(0,3),partTop=top.reduce((s,x)=>s+x.part,0);
+  return `<div class="pq"><p style="margin:0 0 8px"><b>${top.length>1?`Les ${top.length} ingrédients les plus chers font ${pct(partTop)} du coût.`:"Détail du coût"}</b> ${c.cp>cible?`Pour revenir à ${n2.format(tgt*100)} % de food cost, il faut soit vendre ${eur.format(c.conseil||0)} TTC, soit faire baisser le coût de <b>${eur.format(c.cp-cible)}</b> (de ${eur.format(c.cp)} à ${eur.format(cible)}).`:`Ce plat est déjà sous ton objectif de ${n2.format(tgt*100)} %.`}</p>
+    ${ls.map((x,k)=>`<div class="pq-l"><div class="pq-t"><span>${esc(x.nom)}<span class="sub">${esc(x.qte)}</span></span><b>${eur.format(x.cout)} <small>${pct(x.part)}</small></b></div><div class="pq-bar"><i style="width:${Math.max(2,Math.min(100,x.part*100)).toFixed(1)}%;${k<3?"":"opacity:.45"}"></i></div>${x.notes.length?`<div class="pq-n">⚠️ ${x.notes.join(" · ")}</div>`:""}</div>`).join("")}
+    <p class="hint" style="margin:8px 0 0">Pistes : vérifier le grammage des premières lignes, comparer le prix chez un autre fournisseur, ou ajuster le prix de vente.</p></div>`;
+}
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
 render();
