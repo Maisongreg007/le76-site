@@ -29,6 +29,7 @@ ol li{margin-bottom:6px}
 
 <div class="apps">
   <a class="app" href="admin/"><img src="/admin/icone-192.png" alt=""><span><b>Portail du restaurant</b>Tous les outils au même endroit : résumé du jour, applis de gestion selon les droits, pages clients avec leur QR code.</span></a>
+  <a class="app" href="pilotage/"><img src="/pilotage/icone-192.png" alt=""><span><b>Pilotage du camping</b>Est-ce que je gagne de l'argent aujourd'hui ? CA, pain, personnel, loyer : le résultat du jour et le cumul de la saison.</span></a>
   <a class="app" href="personnel/admin.php"><img src="../personnel/assets/icons/admin-192.png?v=2" alt=""><span><b>Personnel · admin</b>Planning, heures (convenu / prévu / effectué), coûts jour·semaine·mois, équipe, congés, réglages.</span></a>
   <a class="app" href="personnel/pointeuse.php?site=le76"><img src="../personnel/assets/icons/pointeuse-le76-192.png?v=2" alt=""><span><b>Pointeuse · Le 76</b>Écran iPad : code à 4 chiffres pour l'arrivée et le départ. Les codes sont affichés à droite.</span></a>
   <a class="app" href="personnel/pointeuse.php?site=camping"><img src="../personnel/assets/icons/pointeuse-camping-192.png?v=2" alt=""><span><b>Pointeuse · Camping</b>Même chose pour le second établissement.</span></a>

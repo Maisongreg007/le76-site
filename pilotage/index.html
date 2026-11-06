@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pilotage">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/pilotage/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/pilotage/icone-180.png?v=1">
+<link rel="icon" type="image/png" href="/pilotage/icone-192.png?v=1">
+<title>Pilotage · Camping</title>
+<style>
+:root{
+  --bg:#f2f2f7; --card:#fff; --fg:#1c1c1e; --muted:#6e6e73; --line:rgba(60,60,67,.14); --fill:rgba(118,118,128,.12);
+  --accent:#1f6b45; --accent-soft:rgba(31,107,69,.1);
+  --green:#248a3d; --green-bg:#e3f5e8; --orange:#c76a00; --orange-bg:#fdf0dc; --red:#d70015; --red-bg:#fde4e6; --blue:#0a6bd6; --blue-bg:#e5f0fc;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#000; --card:#1c1c1e; --fg:#f2f2f7; --muted:#98989d; --line:rgba(84,84,88,.6); --fill:rgba(118,118,128,.24);
+  --accent:#5ccf8b; --accent-soft:rgba(92,207,139,.14);
+  --green:#30d158; --green-bg:#0f2e19; --orange:#ff9f0a; --orange-bg:#332205; --red:#ff453a; --red-bg:#3a1311; --blue:#409cff; --blue-bg:#0c2340;
+  color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 var(--font);
+  padding:env(safe-area-inset-top,0) max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:22px;padding-top:14px}
+a{color:var(--blue)}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+h1{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:-.02em;margin:2px 0 0;text-wrap:balance}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px;width:100%}
+.seg button{font:600 14px var(--font);border:0;border-radius:8px;padding:8px 6px;background:transparent;color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.datenav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.datenav b{font-size:17px;text-align:center;flex:1}
+.round{width:40px;height:40px;border-radius:50%;border:0;background:var(--card);color:var(--accent);font-size:22px;line-height:1;cursor:pointer;flex:none}
+.round:disabled{opacity:.35}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.verdict{border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--card)}
+.verdict.vert{background:var(--green-bg)} .verdict.orange{background:var(--orange-bg)} .verdict.rouge{background:var(--red-bg)} .verdict.en_cours{background:var(--blue-bg)}
+.pill{align-self:flex-start;font-size:13px;font-weight:700;padding:5px 11px;border-radius:99px;background:var(--card)}
+.vert .pill{color:var(--green)} .orange .pill{color:var(--orange)} .rouge .pill{color:var(--red)} .en_cours .pill{color:var(--blue)}
+.big{font-family:var(--display);font-size:46px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.big small{display:block;font:600 15px var(--font);color:var(--muted);letter-spacing:0;margin-top:6px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--card);border-radius:14px;padding:11px 12px}
+.kpi .l{font-size:12px;color:var(--muted);font-weight:600}
+.kpi .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px}
+.kpi .s{font-size:12px;color:var(--muted)}
+.v.vert{color:var(--green)} .v.orange{color:var(--orange)} .v.rouge{color:var(--red)}
+.alertes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.alertes li{font-size:14.5px;font-weight:500;display:flex;gap:9px;align-items:flex-start}
+.alertes li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:7px;background:var(--muted)}
+.alertes li.vert::before{background:var(--green)} .alertes li.orange::before{background:var(--orange)} .alertes li.rouge::before{background:var(--red)}
+.gt{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 4px 7px}
+.group{background:var(--card);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:11px 16px;min-height:48px;border-top:.5px solid var(--line)}
+.row:first-child{border-top:0}
+.row .lab{flex:1;min-width:0}
+.row .hint{display:block;font-size:12.5px;color:var(--muted)}
+.row .val{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.row.tot{font-weight:700;background:var(--accent-soft)}
+.row.minus .lab{color:var(--muted)}
+.src{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;background:var(--fill);color:var(--muted);vertical-align:1px}
+.src.ok{background:var(--green-bg);color:var(--green)}
+input[type=number],input[type=text],input[type=date],input[type=password],input[type=email],select{font:inherit;font-weight:600;font-variant-numeric:tabular-nums;border:0;background:var(--fill);color:var(--fg);border-radius:9px;padding:9px 10px;width:120px;text-align:right;min-width:0}
+input[type=text],input[type=password],input[type=email]{text-align:left;width:100%}
+select{text-align:left;width:140px}
+.unit{color:var(--muted);font-size:14px;width:24px;flex:none}
+.btn{font:600 16px var(--font);border:0;border-radius:12px;padding:14px;background:var(--accent);color:#fff;cursor:pointer;width:100%}
+.btn.light{background:var(--card);color:var(--accent)}
+.btn:disabled{opacity:.5}
+.note{font-size:13px;color:var(--muted);margin:8px 4px 0;max-width:65ch}
+.jours .row{cursor:pointer}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--muted)}
+.dot.vert{background:var(--green)} .dot.orange{background:var(--orange)} .dot.rouge{background:var(--red)} .dot.en_cours{background:var(--blue)}
+.bar{height:10px;border-radius:99px;background:var(--fill);overflow:hidden;position:relative}
+.bar span{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--green)}
+.bar i{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg);opacity:.6}
+.msg{background:var(--card);border-radius:14px;padding:16px;text-align:center}
+.demo{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;background:#5a4fcf;color:#fff;border-radius:12px;padding:9px 14px;font-size:13.5px;font-weight:600}
+.demo a{color:#fff;background:rgba(255,255,255,.2);border-radius:99px;padding:3px 11px;text-decoration:none}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:rgba(28,28,30,.92);color:#fff;border-radius:99px;padding:10px 18px;font-weight:600;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
+#toast.on{opacity:1}
+@media (max-width:480px){.big{font-size:40px}.kpis{grid-template-columns:1fr 1fr}.kpis .kpi:last-child{grid-column:span 2}input[type=number]{width:100px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="toast" role="status" aria-live="polite"></div>
+<div class="wrap">
+  <div id="demo"></div>
+  <div class="top">
+    <div><div class="eyebrow">Restaurant du camping</div><h1>Pilotage</h1></div>
+  </div>
+  <div class="seg" role="tablist">
+    <button type="button" data-v="jour" aria-pressed="true">Jour</button>
+    <button type="button" data-v="saison" aria-pressed="false">Saison</button>
+    <button type="button" data-v="reglages" aria-pressed="false">Réglages</button>
+  </div>
+  <main id="root" style="display:flex;flex-direction:column;gap:22px"><div class="msg">Chargement…</div></main>
+</div>
+<script>
+'use strict';
+const API = 'api.php';
+const root = document.getElementById('root');
+const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur = v => (Math.round(v) || 0).toLocaleString('fr-FR') + ' €';
+const pct = v => v == null ? '–' : Math.round(v) + ' %';
+const hh = v => (Math.round(v * 10) / 10).toLocaleString('fr-FR') + ' h';
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const dateFr = s => { const d = parse(s); return JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()]; };
+const add = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+const ETAT = {vert: 'Journée rentable', orange: 'Rentable, sous l\'objectif', rouge: 'Journée déficitaire', en_cours: 'Journée en cours', vide: 'Pas encore de données'};
+let vue = 'jour', jour = null, aujourdhui = ymd(new Date()), demoAffiche = false;
+
+function toast(t) { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2200); }
+
+async function api(a, data = {}) {
+  const r = await fetch(API, {method: 'POST', headers: {'Content-Type': 'application/json'}, credentials: 'same-origin', body: JSON.stringify({a, ...data})});
+  let j = null;
+  try { j = await r.json(); } catch (e) {}
+  if (!j) throw new Error('Le serveur ne répond pas correctement.');
+  if (j.connexion) { root.innerHTML = `<div class="msg"><p><b>Connecte-toi au portail du 76</b><br>Le pilotage utilise le même compte que /admin.</p><a class="btn" style="display:block;text-decoration:none" href="/admin/">Ouvrir le portail</a></div>`; throw null; }
+  if (!j.ok) throw new Error(j.erreur || 'Erreur.');
+  if (j.demo && !demoAffiche) { demoAffiche = true; document.getElementById('demo').innerHTML = `<div class="demo"><span>Démo · saison fictive, chiffres d'exemple</span><a href="/demo/">Accueil démo</a></div>`; }
+  return j;
+}
+function erreur(e) { if (e) root.innerHTML = `<div class="msg">${esc(e.message)}</div>`; }
+
+/* ---------- Jour ---------- */
+async function voirJour(j) {
+  try {
+    const d = await api('jour', j ? {jour: j} : {});
+    aujourdhui = d.aujourdhui; jour = d.jour.jour;
+    rendreJour(d);
+  } catch (e) { erreur(e); }
+}
+
+function ligne(lab, val, cls = '', hint = '') {
+  return `<div class="row ${cls}"><span class="lab">${lab}${hint ? `<span class="hint">${hint}</span>` : ''}</span><span class="val">${val}</span></div>`;
+}
+const src = (ok, t) => `<span class="src ${ok ? 'ok' : ''}">${esc(t)}</span>`;
+
+function rendreJour(d) {
+  const x = d.jour, s = x.saisie || {}, dem = d.demain;
+  const persV = x.ratio_personnel == null ? '' : x.ratio_personnel > 40 ? 'rouge' : x.ratio_personnel > 35 ? 'orange' : 'vert';
+  const h = x.personnel_min / 60, hb = x.heures_budget;
+  const caSrc = x.ca_source === 'z' ? src(true, "Z L'Addition") : x.ca_source === 'saisie' ? src(false, 'saisi') : src(false, 'en attente');
+  const meteo = Object.entries(d.meteo).map(([k, v]) => `<option value="${k}" ${s.meteo === k ? 'selected' : ''}>${esc(v)}</option>`).join('');
+  root.innerHTML = `
+  <div class="datenav">
+    <button class="round" id="prev" aria-label="Jour précédent">‹</button>
+    <b>${esc(dateFr(x.jour))}${x.jour === aujourdhui ? ' · aujourd\'hui' : ''}</b>
+    <button class="round" id="next" aria-label="Jour suivant" ${x.jour >= aujourdhui ? 'disabled' : ''}>›</button>
+  </div>
+  <section class="verdict ${x.etat}" aria-live="polite">
+    <span class="pill">${ETAT[x.etat]}</span>
+    <div class="big">${x.vide ? '–' : eur(x.resultat)}<small>${x.etat === 'en_cours' ? 'résultat provisoire, sans le CA du restaurant' : 'reste pour Vanessa et toi · objectif ' + eur(x.objectif)}</small></div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">CA HT</div><div class="v">${eur(x.ca_ht)}</div><div class="s">resto ${eur(x.ca_resto_ht)}</div></div>
+      <div class="kpi"><div class="l">Personnel / CA</div><div class="v ${persV}">${pct(x.ratio_personnel)}</div><div class="s">${eur(x.personnel)}</div></div>
+      <div class="kpi"><div class="l">Heures payées</div><div class="v ${hb != null && h > hb + 1 ? 'orange' : ''}">${hh(h)}</div><div class="s">${hb != null ? 'budget ' + hh(hb) : 'budget : CA manquant'}</div></div>
+    </div>
+    ${x.alertes.length ? `<ul class="alertes">${x.alertes.map(([c, t]) => `<li class="${c}">${esc(t)}</li>`).join('')}</ul>` : ''}
+  </section>
+
+  <section>
+    <h2 class="gt">Le calcul</h2>
+    <div class="group">
+      ${ligne('Restaurant ' + caSrc, eur(x.ca_resto_ht), '', x.ca_resto_ttc ? eur(x.ca_resto_ttc) + ' TTC' + (x.z && x.z.couverts ? ' · ' + x.z.couverts + ' couverts' : '') : 'saisis le CA ci-dessous si le Z n\'arrive pas')}
+      ${ligne('Pain ' + src(x.sources.pain, x.sources.pain ? 'précommandes' : 'outil absent'), eur(x.pain_ht), '', x.pain_pieces ? x.pain_pieces + ' pièces · ' + x.pain_commandes + ' commandes' : '')}
+      ${ligne('Petit-déj', eur(x.pdj_ht))}
+      ${ligne('Chiffre d\'affaires HT', eur(x.ca_ht), 'tot')}
+      ${ligne('− Matière restaurant et petit-déj', '−' + eur(x.matiere), 'minus')}
+      ${ligne('− Achats pain', '−' + eur(x.pain_achat), 'minus')}
+      ${ligne('− Personnel ' + src(x.sources.personnel && x.personnel_min > 0, x.personnel_source === 'reel' ? 'pointé' : x.personnel_source === 'prevu' ? 'planning' : 'aucune heure'), '−' + eur(x.personnel), 'minus', hh(h) + ' payées')}
+      ${ligne('− Loyer Capfun', '−' + eur(x.loyer), 'minus')}
+      ${ligne('− Frais de carte', '−' + eur(x.carte), 'minus')}
+      ${ligne('− Charges fixes du jour', '−' + eur(x.fixes), 'minus')}
+      ${ligne('Résultat', eur(x.resultat), 'tot')}
+    </div>
+    ${x.golfette_commandes ? `<p class="note">Livraison en golfette : ${x.golfette_commandes} commandes payées (${eur(x.golfette_ttc)} TTC), déjà comprises dans le Z de L'Addition.</p>` : ''}
+  </section>
+
+  <section>
+    <h2 class="gt">À saisir</h2>
+    <form class="group" id="saisie">
+      ${!x.z ? `<div class="row"><label class="lab" for="f-ca">CA restaurant TTC<span class="hint">seulement si le Z n'est pas arrivé</span></label><input type="number" id="f-ca" inputmode="decimal" step="0.01" min="0" value="${s.ca_ttc ?? ''}"><span class="unit">€</span></div>` : ''}
+      <div class="row"><label class="lab" for="f-pc">Petits-déj classiques</label><input type="number" id="f-pc" inputmode="numeric" min="0" value="${s.pdj_classique ?? ''}"><span class="unit"></span></div>
+      <div class="row"><label class="lab" for="f-pf">Petits-déj familiaux</label><input type="number" id="f-pf" inputmode="numeric" min="0" value="${s.pdj_familial ?? ''}"><span class="unit"></span></div>
+      <div class="row"><label class="lab" for="f-me">Météo</label><select id="f-me"><option value="">—</option>${meteo}</select></div>
+      <div class="row"><label class="lab" for="f-oc">Remplissage du camping<span class="hint">chiffre donné par l'accueil</span></label><input type="number" id="f-oc" inputmode="numeric" min="0" max="100" value="${s.occupation ?? ''}"><span class="unit">%</span></div>
+      <div class="row"><label class="lab" for="f-an" style="flex:none">Animation</label><input type="text" id="f-an" maxlength="80" placeholder="ex. soirée moules-frites" value="${esc(s.animation ?? '')}"></div>
+      <div class="row"><label class="lab" for="f-no" style="flex:none">Note</label><input type="text" id="f-no" maxlength="300" placeholder="ce qui explique la journée" value="${esc(s.note ?? '')}"></div>
+    </form>
+    <div style="margin-top:10px"><button class="btn" id="enreg" type="button">Enregistrer</button></div>
+  </section>
+
+  <section>
+    <h2 class="gt">Demain · ${esc(dateFr(dem.jour))}</h2>
+    <div class="group">
+      ${ligne('Heures au planning', hh(dem.heures), '', eur(dem.cout) + ' de personnel')}
+      ${ligne('Heures conseillées', dem.heures_conseillees != null ? hh(dem.heures_conseillees) : '–', '', dem.ca_reference != null ? 'd\'après ' + eur(dem.ca_reference) + ' HT, la moyenne des 4 derniers ' + JOURS[parse(dem.jour).getDay()] + 's' : 'pas encore d\'historique pour ce jour')}
+    </div>
+    ${dem.heures_conseillees != null && dem.heures > dem.heures_conseillees + 1 ? `<p class="note" style="color:var(--orange)">Le planning de demain dépasse de ${hh(dem.heures - dem.heures_conseillees)} le budget. Ajuste-le dans <a href="/personnel/admin.php?p=planning">Personnel</a>.</p>` : ''}
+  </section>
+  ${d.z_msg ? `<p class="note">Z de L'Addition : ${esc(d.z_msg)}</p>` : ''}`;
+  document.getElementById('prev').onclick = () => voirJour(add(x.jour, -1));
+  document.getElementById('next').onclick = () => voirJour(add(x.jour, 1));
+  document.getElementById('enreg').onclick = async (ev) => {
+    const b = ev.currentTarget; b.disabled = true;
+    const v = id => document.getElementById(id)?.value;
+    const valeurs = {pdj_classique: v('f-pc'), pdj_familial: v('f-pf'), meteo: v('f-me'), occupation: v('f-oc'), animation: v('f-an'), note: v('f-no')};
+    if (document.getElementById('f-ca')) valeurs.ca_ttc = v('f-ca');
+    try { await api('saisir', {jour: x.jour, valeurs}); toast('Enregistré'); voirJour(x.jour); }
+    catch (e) { if (e) toast(e.message); b.disabled = false; }
+  };
+}
+
+/* ---------- Saison ---------- */
+async function voirSaison() {
+  try {
+    const d = await api('saison'), t = d.totaux;
+    const avance = t.resultat - t.objectif_a_date;
+    const part = d.objectif > 0 ? Math.max(0, Math.min(100, t.resultat / d.objectif * 100)) : 0;
+    const repere = d.objectif > 0 ? Math.min(100, t.objectif_a_date / d.objectif * 100) : 0;
+    root.innerHTML = `
+    <section class="verdict ${t.jours === 0 ? '' : avance >= 0 ? 'vert' : t.resultat >= 0 ? 'orange' : 'rouge'}">
+      <span class="pill">${t.jours === 0 ? 'La saison n\'a pas commencé' : avance >= 0 ? 'En avance sur le prévisionnel' : 'En retard sur le prévisionnel'}</span>
+      <div class="big">${eur(t.resultat)}<small>cumulé sur ${t.jours} jour${t.jours > 1 ? 's' : ''} · objectif à date ${eur(t.objectif_a_date)}</small></div>
+      <div class="bar" aria-label="Avancement vers l'objectif de la saison"><span style="width:${part}%"></span><i style="left:${repere}%"></i></div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Projection fin de saison</div><div class="v">${t.projection != null ? eur(t.projection) : '–'}</div><div class="s">objectif ${eur(d.objectif)}</div></div>
+        <div class="kpi"><div class="l">Personnel / CA</div><div class="v ${t.ratio_personnel > 40 ? 'rouge' : t.ratio_personnel > 35 ? 'orange' : 'vert'}">${pct(t.ratio_personnel)}</div><div class="s">${eur(t.personnel)}</div></div>
+        <div class="kpi"><div class="l">Jours</div><div class="v">${t.verts} · ${t.orange} · ${t.rouges}</div><div class="s">verts · orange · rouges</div></div>
+      </div>
+    </section>
+    <section>
+      <h2 class="gt">Chiffre d'affaires HT</h2>
+      <div class="group">
+        ${ligne('Restaurant', eur(t.ca_resto_ht))}
+        ${ligne('Pain', eur(t.pain_ht))}
+        ${ligne('Total (avec petit-déj)', eur(t.ca_ht), 'tot')}
+      </div>
+      <p class="note">Saison du ${esc(dateFr(d.debut))} au ${esc(dateFr(d.fin))} (${d.jours_saison} jours). Le loyer compte le minimum garanti réparti sur la saison, plus 10 % au-delà du seuil.</p>
+    </section>
+    <section>
+      <h2 class="gt">Jour par jour</h2>
+      <div class="group jours">${d.jours.filter(j => !j.vide).map(j => `<div class="row" data-j="${j.jour}" role="button" tabindex="0"><span class="dot ${j.etat}"></span><span class="lab">${esc(dateFr(j.jour))}<span class="hint">${j.etat === 'en_cours' ? 'journée en cours' : 'CA ' + eur(j.ca_ht) + ' · personnel ' + pct(j.ratio_personnel) + (j.ca_source ? '' : ' · CA manquant')}</span></span><span class="val">${eur(j.resultat)}</span></div>`).join('') || '<div class="row"><span class="lab">Aucun jour pour l\'instant.</span></div>'}</div>
+    </section>`;
+    root.querySelectorAll('[data-j]').forEach(el => {
+      const go = () => { choisir('jour'); voirJour(el.dataset.j); };
+      el.onclick = go; el.onkeydown = e => { if (e.key === 'Enter') go(); };
+    });
+  } catch (e) { erreur(e); }
+}
+
+/* ---------- Réglages ---------- */
+const CHAMPS = [
+  ['Saison', [['saison_debut', 'Ouverture', 'date', ''], ['saison_fin', 'Fermeture', 'date', ''], ['objectif_saison', 'Objectif de la saison', 'number', '€', 'ce qui doit rester pour Vanessa et toi (prévisionnel réaliste)']]],
+  ['Personnel', [['coef_employeur', 'Coût réel d\'1 € net', 'number', '×', '12 € net ≈ 20 € de coût : 1,67'], ['budget_perso', 'Budget personnel', 'number', '%', 'en % du CA HT du restaurant']]],
+  ['Restaurant', [['food_cost', 'Food cost', 'number', '%', 'matière + emballages, en % du HT'], ['part_alcool', 'Part d\'alcool', 'number', '%', 'pour calculer le HT d\'un CA saisi à la main']]],
+  ['Charges', [['loyer_pct', 'Loyer Capfun', 'number', '%', 'du CA HT du restaurant'], ['loyer_min', 'Loyer minimum', 'number', '€', 'sur la saison, HT'], ['frais_carte', 'Frais de carte', 'number', '%', 'cartes et chèques vacances'], ['fixes_jour', 'Charges fixes par jour', 'number', '€', 'assurances, comptable, entretien, obligations du bail']]],
+  ['Petit-déj', [['pdj_classique', 'Formule classique', 'number', '€'], ['pdj_familial', 'Formule familiale', 'number', '€'], ['pdj_food', 'Matière', 'number', '%']]],
+];
+async function voirReglages() {
+  try {
+    const d = await api('reglages'), r = d.reglages;
+    const champ = ([k, lab, type, unit, hint]) => `<div class="row"><label class="lab" for="r-${k}">${esc(lab)}${hint ? `<span class="hint">${esc(hint)}</span>` : ''}</label><input type="${type}" id="r-${k}" ${type === 'number' ? 'inputmode="decimal" step="any"' : ''} value="${esc(r[k])}" ${d.demo ? 'disabled' : ''}><span class="unit">${esc(unit)}</span></div>`;
+    root.innerHTML = CHAMPS.map(([t, l]) => `<section><h2 class="gt">${esc(t)}</h2><div class="group">${l.map(champ).join('')}</div></section>`).join('') + `
+    <section><h2 class="gt">Z de L'Addition du camping</h2><div class="group">
+      <div class="row"><label class="lab" for="r-z_user" style="flex:none">Boîte</label><input type="email" id="r-z_user" value="${esc(r.z_user)}" ${d.demo ? 'disabled' : ''}></div>
+      <div class="row"><label class="lab" for="r-z_mdp" style="flex:none">Mot de passe</label><input type="password" id="r-z_mdp" autocomplete="new-password" placeholder="${r.z_mdp ? 'enregistré · laisser vide pour garder' : 'mot de passe de la boîte'}" ${d.demo ? 'disabled' : ''}></div>
+      <div class="row"><label class="lab" for="r-golfette_dans_caisse">Commandes golfette encaissées dans L'Addition<span class="hint">si non, elles s'ajoutent au CA du restaurant</span></label><select id="r-golfette_dans_caisse" ${d.demo ? 'disabled' : ''}><option value="1" ${r.golfette_dans_caisse ? 'selected' : ''}>Oui</option><option value="0" ${!r.golfette_dans_caisse ? 'selected' : ''}>Non</option></select></div>
+    </div>
+    <p class="note">Dans L'Addition du camping, fais envoyer le « Z quotidien » à cette boîte. Le pilotage le relève tout seul, au plus toutes les 30 minutes.${r.z_msg ? ' Dernier relevé : ' + esc(r.z_msg) : ''}</p></section>
+    ${d.demo ? '<p class="note">Démo : réglages en lecture seule.</p>' : `<div style="display:grid;gap:10px"><button class="btn" id="save" type="button">Enregistrer les réglages</button><button class="btn light" id="z" type="button">Relever les Z maintenant</button></div>`}`;
+    if (d.demo) return;
+    document.getElementById('save').onclick = async (ev) => {
+      const b = ev.currentTarget; b.disabled = true;
+      const reglages = {};
+      CHAMPS.flatMap(([, l]) => l).forEach(([k]) => reglages[k] = document.getElementById('r-' + k).value);
+      ['z_user', 'z_mdp', 'golfette_dans_caisse'].forEach(k => reglages[k] = document.getElementById('r-' + k).value);
+      try { await api('reglages_ecrire', {reglages}); toast('Réglages enregistrés'); voirReglages(); }
+      catch (e) { if (e) toast(e.message); b.disabled = false; }
+    };
+    document.getElementById('z').onclick = async (ev) => {
+      const b = ev.currentTarget; b.disabled = true; b.textContent = 'Relevé en cours…';
+      try { const x = await api('relever_z'); toast(x.message); } catch (e) { if (e) toast(e.message); }
+      b.disabled = false; b.textContent = 'Relever les Z maintenant';
+    };
+  } catch (e) { erreur(e); }
+}
+
+/* ---------- Navigation ---------- */
+function choisir(v) {
+  vue = v;
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v));
+}
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  choisir(b.dataset.v);
+  root.innerHTML = '<div class="msg">Chargement…</div>';
+  if (vue === 'jour') voirJour(jour); else if (vue === 'saison') voirSaison(); else voirReglages();
+});
+voirJour();
+</script>
+</body>
+</html>
