@@ -366,6 +366,8 @@
       st.mois = new Date(st.mois.getFullYear(), st.mois.getMonth() + Number(b.dataset.mois), 1);
       rerender();
     } else if (b.dataset.d) {
+      // Le Réveillon (31 décembre) a sa propre page : choix du lieu, adultes / enfants
+      if (b.dataset.d === '2026-12-31') { location.href = '/reveillon/' + (DE ? '?lang=de' : ''); return; }
       st.date = b.dataset.d; st.heure = null; st.service = null;
       rerender('#etape-heure');
     } else if (b.dataset.h) {
@@ -437,6 +439,7 @@
   }
 
   function choisirDate(dt) {
+    if (dt === '2026-12-31') { location.href = '/reveillon/' + (DE ? '?lang=de' : ''); return; }
     const x = parse(dt);
     st.mois = new Date(x.getFullYear(), x.getMonth(), 1);
     if (etatJour(parJour[dt]) === 'dispo') { st.date = dt; st.heure = null; st.service = null; }
