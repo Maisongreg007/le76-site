@@ -474,19 +474,23 @@
 <style>
   /* Réveillon du Nouvel An : encart sous les infos pratiques, disparaît tout seul après le 31 décembre */
   .rv { padding: 34px 0 0; }
-  .rv a { display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; text-decoration: none; color: var(--ink);
+  .rv .rvc { display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; text-decoration: none; color: var(--ink);
     background: #fffdf8; border-radius: 18px; padding: 22px 26px; position: relative; box-shadow: 0 16px 40px rgba(74,44,29,.08); }
-  .rv a::before { content: ""; position: absolute; inset: 7px; border: 1.5px solid #b07a1f; border-radius: 13px; pointer-events: none; opacity: .7; }
+  .rv .rvc::before { content: ""; position: absolute; inset: 7px; border: 1.5px solid #b07a1f; border-radius: 13px; pointer-events: none; opacity: .7; }
   .rv .ic { font-size: 2.2rem; line-height: 1; }
   .rv .k { font: 600 .74rem/1 var(--sans); letter-spacing: .24em; text-transform: uppercase; color: #8a5d12; }
   .rv h3 { font: 800 clamp(1.35rem, 3vw, 1.75rem)/1.15 var(--serif); margin: 6px 0 4px;
     background: linear-gradient(180deg, #d9a646 0%, #b07a1f 45%, #7c5310 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .rv p { margin: 0; color: var(--muted); font-size: .96rem; }
-  .rv .go { background: #b07a1f; color: #fff; font-weight: 600; padding: 12px 20px; border-radius: 999px; white-space: nowrap; position: relative; z-index: 1; }
-  .rv a:hover .go { background: #8a5d12; }
-  @media (max-width: 760px) { .rv a { grid-template-columns: 1fr; text-align: center; gap: 12px; } .rv .go { justify-self: center; } }
+  .rv .btns { display: flex; flex-direction: column; gap: 8px; align-items: stretch; position: relative; z-index: 1; }
+  .rv .go, .rv .dl { text-align: center; text-decoration: none; font-weight: 600; padding: 11px 20px; border-radius: 999px; white-space: nowrap; }
+  .rv .go { background: #b07a1f; color: #fff; }
+  .rv .go:hover { background: #8a5d12; }
+  .rv .dl { border: 1.5px solid #b07a1f; color: #8a5d12; font-size: .9rem; padding: 9px 18px; }
+  .rv .dl:hover { background: #f7ecd2; }
+  @media (max-width: 760px) { .rv .rvc { grid-template-columns: 1fr; text-align: center; gap: 12px; } .rv .btns { align-items: center; } .rv .dl { white-space: normal; } }
 </style>
-<section class="rv" id="reveillon"><div class="wrap"><a href="/reveillon/?lang=de"><span class="ic">🥂</span><span><span class="k">Donnerstag, 31. Dezember · ab 19 Uhr</span><h3>Silvester im Le 76</h3><p>85 € pro Erwachsenem · 42,50 € pro Kind · Orchester Santa Lucia im Saal oder DJ Jean Marc im Chalet</p></span><span class="go">Silvester reservieren</span></a></div></section>
+<section class="rv" id="reveillon"><div class="wrap"><div class="rvc"><span class="ic">🥂</span><span><span class="k">Donnerstag, 31. Dezember · ab 19 Uhr</span><h3>Silvester im Le 76</h3><p>85 € pro Erwachsenem · 42,50 € pro Kind · Orchester Santa Lucia im Saal oder DJ Jean Marc im Chalet</p></span><span class="btns"><a class="go" href="/reveillon/?lang=de">Silvester reservieren</a><a class="dl" href="/reveillon/bulletin.jpg" download="Reveillon-Le76-bulletin.jpg">Reservierungsformular herunterladen</a></span></div></div></section>
 <script>if (Date.now() >= Date.parse("2027-01-01T00:00:00+01:00")) { var rv = document.getElementById("reveillon"); if (rv) rv.remove(); }</script>
 
 <section id="salle" class="salle">
