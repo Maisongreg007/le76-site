@@ -1873,7 +1873,7 @@
   },
   "pz_marg": {
    "name": "Pizza Margherita",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -1912,7 +1912,7 @@
   },
   "pz_jambon": {
    "name": "Pizza Jambon",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -1957,7 +1957,7 @@
   },
   "pz_alsa": {
    "name": "Pizza Alsacienne",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2008,7 +2008,7 @@
   },
   "pz_reine": {
    "name": "Pizza Reine",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2065,7 +2065,7 @@
   },
   "pz_paysanne": {
    "name": "Pizza Paysanne",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2128,7 +2128,7 @@
   },
   "pz_thon": {
    "name": "Pizza Thon",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2185,7 +2185,7 @@
   },
   "pz_chorizo": {
    "name": "Pizza Chorizo",
-   "category": "Pizza",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2236,7 +2236,7 @@
   },
   "tf_nature": {
    "name": "Tarte flambée nature",
-   "category": "Tarte flambée",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2275,7 +2275,7 @@
   },
   "tf_grat": {
    "name": "Tarte flambée gratinée",
-   "category": "Tarte flambée",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2320,7 +2320,7 @@
   },
   "tf_forest": {
    "name": "Tarte flambée forestière",
-   "category": "Tarte flambée",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2365,7 +2365,7 @@
   },
   "tf_ail": {
    "name": "Tarte flambée ail & persil",
-   "category": "Tarte flambée",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2416,7 +2416,7 @@
   },
   "tf_munster": {
    "name": "Tarte flambée munster",
-   "category": "Tarte flambée",
+   "category": "Plat",
    "yield": 1,
    "yieldUnit": "portion",
    "lines": [
@@ -2712,7 +2712,7 @@
  "carte": {
   "c_formule": {
    "name": "Formule du jour (entrée, plat, dessert, boisson)",
-   "section": "Midi",
+   "section": "Plats",
    "ttc": 16,
    "tva": 10,
    "fiche": "formule",
@@ -2721,7 +2721,7 @@
   },
   "c_sal_alsa": {
    "name": "Salade alsacienne",
-   "section": "Salades",
+   "section": "Entrées",
    "ttc": 15,
    "tva": 10,
    "fiche": "sal_alsa",
@@ -2730,7 +2730,7 @@
   },
   "c_sal_cesar": {
    "name": "Salade César",
-   "section": "Salades",
+   "section": "Entrées",
    "ttc": 15,
    "tva": 10,
    "fiche": "sal_cesar",
@@ -2739,7 +2739,7 @@
   },
   "c_sal_oceane": {
    "name": "Salade océane",
-   "section": "Salades",
+   "section": "Entrées",
    "ttc": 15,
    "tva": 10,
    "fiche": "sal_oceane",
@@ -2748,7 +2748,7 @@
   },
   "c_burger": {
    "name": "Cheeseburger traditionnel + frites",
-   "section": "Snacking",
+   "section": "Plats",
    "ttc": 16.5,
    "tva": 10,
    "fiche": "burger",
@@ -2757,7 +2757,7 @@
   },
   "c_tenders": {
    "name": "Tenders de poulet + frites + sauce BBQ",
-   "section": "Snacking",
+   "section": "Plats",
    "ttc": 15,
    "tva": 10,
    "fiche": "tenders_f",
@@ -2766,7 +2766,7 @@
   },
   "c_croque": {
    "name": "Croque-monsieur maison + frites",
-   "section": "Snacking",
+   "section": "Plats",
    "ttc": 12,
    "tva": 10,
    "fiche": "croque",
@@ -2775,7 +2775,7 @@
   },
   "c_curry": {
    "name": "Currywurst + frites",
-   "section": "Snacking",
+   "section": "Plats",
    "ttc": 15,
    "tva": 10,
    "fiche": "currywurst",
@@ -2784,7 +2784,7 @@
   },
   "c_frites": {
    "name": "Frites",
-   "section": "Snacking",
+   "section": "Accompagnements",
    "ttc": 5,
    "tva": 10,
    "fiche": "frites_seules",
@@ -2829,7 +2829,7 @@
   },
   "c_bolo": {
    "name": "Pâtes bolognaise",
-   "section": "Pâtes",
+   "section": "Plats",
    "ttc": 12.5,
    "tva": 10,
    "fiche": "bolo",
@@ -2838,7 +2838,7 @@
   },
   "c_carbo": {
    "name": "Pâtes carbonara",
-   "section": "Pâtes",
+   "section": "Plats",
    "ttc": 13.5,
    "tva": 10,
    "fiche": "carbo",
@@ -2847,7 +2847,7 @@
   },
   "c_4f": {
    "name": "Pâtes 4 fromages",
-   "section": "Pâtes",
+   "section": "Plats",
    "ttc": 13,
    "tva": 10,
    "fiche": "quatre_f",
@@ -2856,7 +2856,7 @@
   },
   "c_enfant": {
    "name": "Menu enfant",
-   "section": "Menu enfant",
+   "section": "Plats",
    "ttc": 12.5,
    "tva": 10,
    "fiche": "enfant",
@@ -2865,7 +2865,7 @@
   },
   "c_pz_marg": {
    "name": "Pizza Margherita",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 11,
    "tva": 10,
    "fiche": "pz_marg",
@@ -2874,7 +2874,7 @@
   },
   "c_pz_jambon": {
    "name": "Pizza Jambon",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 12,
    "tva": 10,
    "fiche": "pz_jambon",
@@ -2883,7 +2883,7 @@
   },
   "c_pz_alsa": {
    "name": "Pizza Alsacienne",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 12,
    "tva": 10,
    "fiche": "pz_alsa",
@@ -2892,7 +2892,7 @@
   },
   "c_pz_reine": {
    "name": "Pizza Reine",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 13,
    "tva": 10,
    "fiche": "pz_reine",
@@ -2901,7 +2901,7 @@
   },
   "c_pz_pays": {
    "name": "Pizza Paysanne",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 13,
    "tva": 10,
    "fiche": "pz_paysanne",
@@ -2910,7 +2910,7 @@
   },
   "c_pz_thon": {
    "name": "Pizza Thon",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 13,
    "tva": 10,
    "fiche": "pz_thon",
@@ -2919,7 +2919,7 @@
   },
   "c_pz_chorizo": {
    "name": "Pizza Chorizo",
-   "section": "Pizzas (soir)",
+   "section": "Plats",
    "ttc": 13,
    "tva": 10,
    "fiche": "pz_chorizo",
@@ -2928,7 +2928,7 @@
   },
   "c_tf_nat": {
    "name": "Tarte flambée nature",
-   "section": "Tartes flambées (soir)",
+   "section": "Plats",
    "ttc": 10,
    "tva": 10,
    "fiche": "tf_nature",
@@ -2937,7 +2937,7 @@
   },
   "c_tf_grat": {
    "name": "Tarte flambée gratinée",
-   "section": "Tartes flambées (soir)",
+   "section": "Plats",
    "ttc": 11,
    "tva": 10,
    "fiche": "tf_grat",
@@ -2946,7 +2946,7 @@
   },
   "c_tf_for": {
    "name": "Tarte flambée forestière",
-   "section": "Tartes flambées (soir)",
+   "section": "Plats",
    "ttc": 11,
    "tva": 10,
    "fiche": "tf_forest",
@@ -2955,7 +2955,7 @@
   },
   "c_tf_ail": {
    "name": "Tarte flambée ail & persil",
-   "section": "Tartes flambées (soir)",
+   "section": "Plats",
    "ttc": 11,
    "tva": 10,
    "fiche": "tf_ail",
@@ -2964,7 +2964,7 @@
   },
   "c_tf_mun": {
    "name": "Tarte flambée munster",
-   "section": "Tartes flambées (soir)",
+   "section": "Plats",
    "ttc": 13,
    "tva": 10,
    "fiche": "tf_munster",
@@ -2991,7 +2991,7 @@
   },
   "c_g_gomini": {
    "name": "Go Minis",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 2.5,
    "tva": 10,
    "fiche": "f_g_gomini",
@@ -3000,7 +3000,7 @@
   },
   "c_g_pushup": {
    "name": "Haribo Push Up",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3,
    "tva": 10,
    "fiche": "f_g_pushup",
@@ -3009,7 +3009,7 @@
   },
   "c_g_minecraft": {
    "name": "Minecraft",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3,
    "tva": 10,
    "fiche": "f_g_minecraft",
@@ -3018,7 +3018,7 @@
   },
   "c_g_calcola": {
    "name": "Calippo Cola",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3,
    "tva": 10,
    "fiche": "f_g_calcola",
@@ -3027,7 +3027,7 @@
   },
   "c_g_calfraise": {
    "name": "Calippo Fraise",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3,
    "tva": 10,
    "fiche": "f_g_calfraise",
@@ -3036,7 +3036,7 @@
   },
   "c_g_twister": {
    "name": "Twister",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3,
    "tva": 10,
    "fiche": "f_g_twister",
@@ -3045,7 +3045,7 @@
   },
   "c_g_cornclassic": {
    "name": "Cornetto Classico",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3.5,
    "tva": 10,
    "fiche": "f_g_cornclassic",
@@ -3054,7 +3054,7 @@
   },
   "c_g_cornchoco": {
    "name": "Cornetto Chocolat",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 3.5,
    "tva": 10,
    "fiche": "f_g_cornchoco",
@@ -3063,7 +3063,7 @@
   },
   "c_g_magclassic": {
    "name": "Magnum Classic",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 4,
    "tva": 10,
    "fiche": "f_g_magclassic",
@@ -3072,7 +3072,7 @@
   },
   "c_g_magblanc": {
    "name": "Magnum Blanc",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 4,
    "tva": 10,
    "fiche": "f_g_magblanc",
@@ -3081,7 +3081,7 @@
   },
   "c_g_magamande": {
    "name": "Magnum Amande",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 4,
    "tva": 10,
    "fiche": "f_g_magamande",
@@ -3090,7 +3090,7 @@
   },
   "c_g_magdouble": {
    "name": "Magnum Double",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 4,
    "tva": 10,
    "fiche": "f_g_magdouble",
@@ -3099,7 +3099,7 @@
   },
   "c_g_magpistache": {
    "name": "Magnum Pistache",
-   "section": "Glaces",
+   "section": "Desserts",
    "ttc": 4,
    "tva": 10,
    "fiche": "f_g_magpistache",
