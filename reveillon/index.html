@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Réveillon du Nouvel An · Le 76 · Beinheim</title>
-<meta name="description" content="Réservez votre Réveillon du Nouvel An au 76 à Beinheim, jeudi 31 décembre : 85 € par adulte, 42,50 € par enfant. Dans la salle avec l'orchestre Santa Lucia ou au chalet avec DJ Jean Marc.">
+<meta name="description" content="Réveillon du Nouvel An au 76 à Beinheim, jeudi 31 décembre : 85 € par adulte, 42,50 € par enfant. Remplissez votre bulletin en ligne, imprimez-le et réglez au restaurant (espèces ou chèque).">
 <link rel="canonical" href="https://le76.fr/reveillon/">
 <link rel="alternate" hreflang="fr" href="https://le76.fr/reveillon/">
 <link rel="alternate" hreflang="de" href="https://le76.fr/reveillon/?lang=de">
 <meta property="og:title" content="Réveillon du Nouvel An au 76">
-<meta property="og:description" content="Jeudi 31 décembre · 85 € par adulte · orchestre Santa Lucia ou DJ Jean Marc. Réservation en ligne.">
+<meta property="og:description" content="Jeudi 31 décembre · 85 € par adulte · orchestre Santa Lucia ou DJ Jean Marc. Bulletin à imprimer, règlement au restaurant.">
 <meta property="og:url" content="https://le76.fr/reveillon/">
 <meta property="og:image" content="https://le76.fr/reveillon/bulletin.jpg">
 <meta name="theme-color" content="#fbf5ec">
@@ -124,6 +124,56 @@
   .papier p { margin: 0 0 8px; font-size: .94rem; color: var(--muted); }
   .papier a { font-weight: 600; }
   @media (max-width: 460px) { .papier img { width: 84px; } }
+  .comment { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 26px; }
+  .comment div { display: flex; gap: 10px; align-items: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: .92rem; color: var(--brown); }
+  .comment b { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; font: 600 .85rem/26px var(--sans); text-align: center; }
+  @media (max-width: 620px) { .comment { grid-template-columns: 1fr; } }
+
+  /* ---- Bulletin imprimé (A4 paysage), identique au bulletin papier ---- */
+  #bulletin { display: none; }
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    html, body { background: #fff !important; }
+    .wrap > *:not(#bulletin) { display: none !important; }
+    #bulletin { display: block; width: 100%; page-break-inside: avoid; break-inside: avoid; }
+    .wrap { max-width: none; padding: 0; }
+  }
+  .bl { box-sizing: border-box; width: 100%; max-height: 190mm; overflow: hidden; padding: 7mm 12mm 6mm; position: relative; color: #1d1410; font-family: var(--serif);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bl::before, .bl::after { content: ""; position: absolute; border: 2.4px solid #b07a1f; border-radius: 3mm; }
+  .bl::before { inset: 0; }
+  .bl::after { inset: 2.2mm; border-width: 1px; }
+  .bl .tete { text-align: center; }
+  .bl .logo { font: 800 26pt/1 var(--serif); letter-spacing: -.01em; }
+  .bl .bein { font: 700 8pt/1 var(--sans); letter-spacing: .5em; margin-top: 1mm; }
+  .bl .t1 { font: 800 30pt/1 var(--serif); letter-spacing: .02em; text-transform: uppercase; margin-top: 1.5mm; color: #a8761c; }
+  .bl .t2 { font: 800 19pt/1 var(--serif); text-transform: uppercase; margin-top: 1mm; color: #a8761c; }
+  .bl .jour { font: 700 13pt/1 var(--serif); letter-spacing: .32em; margin-top: 3mm; border-top: 1px solid #b07a1f; padding-top: 2.5mm; display: inline-block; }
+  .bl .portes { font: 600 8pt/1 var(--sans); letter-spacing: .3em; margin-top: 1.5mm; }
+  .bl .lignes { margin-top: 3mm; display: grid; gap: 1.2mm; font: 700 11pt/1.2 var(--serif); }
+  .bl .l { display: flex; align-items: baseline; gap: 2mm; }
+  .bl .l .v { flex: 1; min-width: 0; border-bottom: 1px dotted #6e5a48; font: 500 11pt/1.2 var(--sans); padding-left: 2mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bl .l2 { display: grid; grid-template-columns: 1fr 1.3fr; gap: 6mm; }
+  .bl .menus { margin-top: 3mm; display: grid; gap: 2mm; font: 700 11pt/1 var(--serif); }
+  .bl .m { display: grid; grid-template-columns: 82mm 22mm 8mm 26mm 8mm 30mm 6mm; align-items: center; gap: 1mm; white-space: nowrap; }
+  .bl .m small { font: 400 9pt var(--serif); }
+  .bl .case { border: 1.4px solid #b07a1f; height: 8mm; display: grid; place-items: center; font: 600 13pt var(--sans); }
+  .bl .x { text-align: center; }
+  .bl .pu { font: 800 14pt var(--serif); white-space: nowrap; }
+  .bl .tot { margin-top: 1.5mm; text-align: right; font: 800 14pt var(--serif); }
+  .bl .choix { margin-top: 2mm; border: 2px solid #b07a1f; }
+  .bl .choix .ti { background: #b07a1f; color: #fff; text-align: center; font: 700 10pt/1 var(--sans); letter-spacing: .5em; padding: 1.6mm 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bl .choix .opts { display: grid; grid-template-columns: 1fr 1fr; padding: 2.5mm 6mm; gap: 6mm; }
+  .bl .opt { display: flex; align-items: center; gap: 4mm; }
+  .bl .opt .cb { width: 10mm; height: 10mm; flex: none; border: 1.6px solid #b07a1f; display: grid; place-items: center; font: 800 18pt/1 var(--sans); color: #1d1410; }
+  .bl .opt small { display: block; font: 600 8pt/1 var(--sans); letter-spacing: .3em; }
+  .bl .opt b { font: 800 13pt/1.1 var(--serif); color: #a06d16; text-transform: uppercase; }
+  .bl .pied { margin-top: 3mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; align-items: end; font: 700 11pt var(--serif); }
+  .bl .sig { display: flex; align-items: center; gap: 3mm; }
+  .bl .sig div { flex: 1; height: 12mm; border: 1.4px solid #b07a1f; }
+  .bl .reg { margin-top: 2.5mm; font: 500 8.5pt/1.3 var(--sans); color: #4a3a2e; text-align: center; }
+  .bl .rem { font: 500 9pt/1.3 var(--sans); margin-top: 1.5mm; color: #4a3a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 6px 0 40px; }
   footer a { color: var(--muted); }
   [hidden] { display: none !important; }
@@ -148,6 +198,12 @@
     </div>
     <span class="places" id="places" hidden></span>
   </section>
+
+  <div class="comment">
+    <div><b>1</b><span data-t="c1">Remplissez votre bulletin ci-dessous</span></div>
+    <div><b>2</b><span data-t="c2">Imprimez-le</span></div>
+    <div><b>3</b><span data-t="c3">Apportez-le au restaurant avec votre règlement, en espèces ou par chèque</span></div>
+  </div>
 
   <form class="card" id="form" novalidate>
     <div class="step">
@@ -187,21 +243,17 @@
           <label class="f"><span data-t="ville">Ville</span> *<input id="ville" autocomplete="address-level2" required></label>
         </div>
         <div class="two">
-          <label class="f"><span data-t="tel">Téléphone mobile</span> *<input id="tel" type="tel" autocomplete="tel" required></label>
+          <label class="f"><span data-t="tel">Téléphone</span> *<input id="tel" type="tel" autocomplete="tel" required></label>
           <label class="f"><span data-t="email">E-mail</span> *<input id="email" type="email" autocomplete="email" required></label>
         </div>
         <label class="f"><span data-t="remarque">Une remarque ?</span> <small data-t="remarque_ex">(allergies, chaise haute, à côté de qui vous voulez être…)</small><textarea id="remarque" maxlength="250"></textarea></label>
-        <label class="check imp"><input type="checkbox" id="tarif"><span data-t="tarif">J'ai bien noté le tarif du Réveillon : 85 € par adulte et 42,50 € par enfant jusqu'à 16 ans. *</span></label>
-        <label class="check"><input type="checkbox" id="accord"><span><span data-t="accord">J'accepte que mes coordonnées soient utilisées par Le 76 pour gérer ma réservation. Elles ne sont jamais transmises à des tiers.</span> <a href="/mentions-legales.html" target="_blank" data-t="savoir">En savoir plus</a> *</span></label>
-        <label class="check"><input type="checkbox" id="infos"><span><span data-t="infos">Je souhaite recevoir les infos des soirées du 76 par e-mail (2 à 3 par mois maximum).</span> <i style="color:var(--muted)" data-t="facultatif">Facultatif</i></span></label>
-        <div class="pot" aria-hidden="true"><label>Site web<input id="site_web" tabindex="-1" autocomplete="off"></label></div>
       </div>
     </div>
 
     <div class="step">
       <div class="err" id="err" hidden></div>
-      <button class="btn" id="envoyer" type="submit" data-t="envoyer">Envoyer ma réservation</button>
-      <p class="small" data-t="confirm">Votre réservation est confirmée par le restaurant, vous recevez un e-mail de confirmation.</p>
+      <button class="btn" id="envoyer" type="submit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg><span data-t="envoyer">Imprimer mon bulletin</span></button>
+      <p class="small" data-t="confirm">Rien n'est envoyé par Internet. Votre réservation est validée quand vous déposez le bulletin et votre règlement au restaurant (espèces ou chèque).</p>
     </div>
   </form>
 
@@ -210,10 +262,12 @@
   <div class="papier">
     <a href="bulletin.jpg" target="_blank"><img src="bulletin.jpg" alt="Bulletin de réservation papier du Réveillon" loading="lazy"></a>
     <div>
-      <p data-t="papier">Vous préférez le papier ? Imprimez le bulletin, remplissez-le et déposez-le au restaurant.</p>
-      <a href="bulletin.jpg" download="Reveillon-Le76-bulletin.jpg" data-t="telecharger">Télécharger le bulletin</a>
+      <p data-t="papier">Vous préférez le remplir à la main ? Téléchargez le bulletin vierge, imprimez-le et apportez-le au restaurant.</p>
+      <a href="bulletin.jpg" download="Reveillon-Le76-bulletin.jpg" data-t="telecharger">Télécharger le bulletin vierge</a>
     </div>
   </div>
+
+  <section id="bulletin" aria-hidden="true"></section>
 
   <footer>Le 76 · 76 rue Principale, 67930 Beinheim · <a href="tel:+33388863187">03 88 86 31 87</a> · <a href="/mentions-legales.html" data-t="mentions">Mentions légales</a></footer>
 </div>
@@ -233,13 +287,14 @@
     adulte: 'pro Erwachsenem', enfant: 'pro Kind bis 16 Jahre', s1: 'Wo möchten Sie feiern?', salle_k: 'Im Saal', chalet_k: 'Im Chalet',
     s2: 'Anzahl der Menüs', adultes: 'Erwachsene', pp: 'pro Person', enfants: 'Kinder', jusqua: 'bis 16 Jahre',
     groupe: 'Für Gruppen über 12 Personen rufen Sie uns bitte an: +33 3 88 86 31 87.', s3: 'Ihre Kontaktdaten',
-    nom: 'Nachname', prenom: 'Vorname', adresse: 'Adresse', cp: 'Postleitzahl', ville: 'Ort', tel: 'Handynummer', email: 'E-Mail',
+    nom: 'Nachname', prenom: 'Vorname', adresse: 'Adresse', cp: 'Postleitzahl', ville: 'Ort', tel: 'Telefon', email: 'E-Mail',
     remarque: 'Eine Anmerkung?', remarque_ex: '(Allergien, Kinderstuhl, Tischwunsch …)',
     tarif: 'Ich habe den Preis zur Kenntnis genommen: 85 € pro Erwachsenem und 42,50 € pro Kind bis 16 Jahre. *',
     accord: 'Ich bin einverstanden, dass Le 76 meine Kontaktdaten zur Verwaltung meiner Reservierung verwendet. Sie werden niemals an Dritte weitergegeben.',
     savoir: 'Mehr erfahren', infos: 'Ich möchte per E-Mail über die Abende im Le 76 informiert werden (höchstens 2–3 pro Monat).', facultatif: 'Optional',
-    envoyer: 'Reservierung senden', confirm: 'Ihre Reservierung wird vom Restaurant bestätigt, Sie erhalten eine Bestätigung per E-Mail.',
-    papier: 'Lieber auf Papier? Drucken Sie das Formular aus, füllen Sie es aus und geben Sie es im Restaurant ab.', telecharger: 'Formular herunterladen',
+    envoyer: 'Mein Formular drucken', confirm: 'Es wird nichts über das Internet gesendet. Ihre Reservierung gilt, sobald Sie das Formular und Ihre Zahlung im Restaurant abgeben (bar oder per Scheck).',
+    c1: 'Füllen Sie unten Ihr Formular aus', c2: 'Drucken Sie es aus', c3: 'Bringen Sie es mit Ihrer Zahlung ins Restaurant, bar oder per Scheck',
+    papier: 'Lieber von Hand ausfüllen? Laden Sie das leere Formular herunter, drucken Sie es aus und bringen Sie es ins Restaurant.', telecharger: 'Leeres Formular herunterladen',
     mentions: 'Impressum'
   };
   var L = function (fr, de) { return DE ? de : fr; };
@@ -286,10 +341,11 @@
     else if (p.restant) { el.textContent = L('Plus que ' + p.restant + ' place' + (p.restant > 1 ? 's' : ''), 'Nur noch ' + p.restant + (p.restant > 1 ? ' Plätze' : ' Platz')); el.hidden = false; }
   }).catch(function () {});
 
-  // Envoi : la réservation arrive dans le carnet de l'équipe avec tout le détail dans la remarque
+  // Impression : le bulletin papier du Réveillon, rempli avec les informations saisies. Rien n'est envoyé.
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  $('form').addEventListener('submit', async function (ev) {
+  var prix = function (x) { return x.toFixed(2).replace('.', ',').replace(',00', ''); };
+  $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var err = $('err'); err.hidden = true;
     var lieu = (document.querySelector('input[name="lieu"]:checked') || {}).value;
@@ -299,40 +355,33 @@
     else if (v('nom').length < 2) msg = L('Indiquez votre nom.', 'Bitte geben Sie Ihren Nachnamen an.');
     else if (v('prenom').length < 2) msg = L('Indiquez votre prénom.', 'Bitte geben Sie Ihren Vornamen an.');
     else if (v('adresse').length < 4 || v('cp').length < 4 || v('ville').length < 2) msg = L('Indiquez votre adresse complète (adresse, code postal, ville).', 'Bitte geben Sie Ihre vollständige Adresse an.');
-    else if (!/^\S+@\S+\.\S+$/.test(v('email'))) msg = L('L’adresse e-mail ne semble pas correcte.', 'Die E-Mail-Adresse scheint nicht korrekt zu sein.');
-    else if (!$('tarif').checked) msg = L('Merci de cocher la case du tarif du Réveillon.', 'Bitte bestätigen Sie den Preis.');
-    else if (!$('accord').checked) msg = L('Merci de cocher la case d’accord pour l’utilisation de vos coordonnées.', 'Bitte bestätigen Sie die Verwendung Ihrer Kontaktdaten.');
+    else if (v('tel').replace(/\D/g, '').length < 9) msg = L('Indiquez votre numéro de téléphone.', 'Bitte geben Sie Ihre Telefonnummer an.');
     if (msg) { err.textContent = msg; err.hidden = false; err.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
 
-    var total = n.a * PRIX_A + n.e * PRIX_E;
-    var lieuTxt = lieu === 'salle' ? 'SALLE (orchestre Santa Lucia)' : 'CHALET (DJ Jean Marc)';
-    var detail = 'RÉVEILLON · ' + lieuTxt + ' · ' + n.a + ' adulte' + (n.a > 1 ? 's' : '') + ' × 85 €' +
-      (n.e ? ' + ' + n.e + ' enfant' + (n.e > 1 ? 's' : '') + ' × 42,50 €' : '') + ' = ' + total.toFixed(2).replace('.', ',') + ' € · ' +
-      'Adresse : ' + v('adresse') + ', ' + v('cp') + ' ' + v('ville');
-    var rem = v('remarque');
-    var remarque = (detail + (rem ? ' · Remarque : ' + rem : '')).slice(0, 500);
-
-    var bouton = $('envoyer'); bouton.disabled = true; bouton.textContent = L('Envoi en cours…', 'Wird gesendet …');
-    try {
-      var r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        action: 'demande', date: DATE, heure: HEURE, couverts: n.a + n.e, prenom: v('prenom'), nom: v('nom'),
-        telephone: v('tel'), email: v('email'), remarque: remarque, menu_accepte: true, accord: true, infos: $('infos').checked,
-        site_web: $('site_web').value, lang: LANG }) }).then(function (x) { return x.json(); });
-      if (!r.ok) throw new Error(r.erreur || L('La réservation n’a pas pu être envoyée.', 'Die Reservierung konnte nicht gesendet werden.'));
-      $('form').hidden = true;
-      var f = $('fini'); f.hidden = false;
-      f.innerHTML = '<div class="done"><div class="ok">✓</div><h2>' + L('Demande bien reçue !', 'Anfrage erhalten!') + '</h2>' +
-        '<p>' + L('Merci ' + esc(v('prenom')) + ' ! Nous vous envoyons un e-mail dès que votre réservation est confirmée.', 'Danke ' + esc(v('prenom')) + '! Wir schicken Ihnen eine E-Mail, sobald Ihre Reservierung bestätigt ist.') + '</p>' +
-        '<div class="recap"><b>' + L('Réveillon du Nouvel An', 'Silvester') + '</b> · ' + L('jeudi 31 décembre, dès 19h', 'Donnerstag, 31. Dezember, ab 19 Uhr') + '<br>' +
-        (lieu === 'salle' ? L('Dans la salle', 'Im Saal') + ' · Orchestre Santa Lucia' : L('Au chalet', 'Im Chalet') + ' · DJ Jean Marc') + '<br>' +
-        esc($('detail').textContent) + ' = <b>' + esc(euros(total)) + '</b></div>' +
-        '<a class="btn ghost" href="' + (DE ? '/de/' : '/') + '">' + L('Retour au site', 'Zurück zur Website') + '</a></div>';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-      err.textContent = e.message || L('Un problème est survenu. Appelez-nous au 03 88 86 31 87.', 'Ein Problem ist aufgetreten. Bitte rufen Sie uns an: +33 3 88 86 31 87.');
-      err.hidden = false;
-      bouton.disabled = false; bouton.textContent = DE ? TX.envoyer : 'Envoyer ma réservation';
-    }
+    var tA = n.a * PRIX_A, tE = n.e * PRIX_E;
+    var ligne = function (lbl, val) { return '<div class="l"><span>' + lbl + ' :</span><span class="v">' + esc(val) + '</span></div>'; };
+    $('bulletin').innerHTML =
+      '<div class="bl">' +
+        '<div class="tete"><div class="logo">Le 76</div><div class="bein">BEINHEIM</div>' +
+        '<div class="t1">Réservation</div><div class="t2">Réveillon du Nouvel An</div>' +
+        '<div class="jour">JEUDI 31 DÉCEMBRE</div><div class="portes">OUVERTURE DES PORTES À PARTIR DE 19H00</div></div>' +
+        '<div class="lignes">' + ligne('Nom', v('nom')) + ligne('Prénom', v('prenom')) + ligne('Adresse', v('adresse')) +
+          '<div class="l2">' + ligne('Code postal', v('cp')) + ligne('Ville', v('ville')) + '</div>' +
+          ligne('Téléphone', v('tel')) + ligne('E-mail', v('email')) + '</div>' +
+        '<div class="menus">' +
+          '<div class="m"><span>Nombre de menus adultes :</span><span class="case">' + n.a + '</span><span class="x">×</span><span class="pu">85 €</span><span class="x">=</span><span class="case">' + prix(tA) + '</span><span>€</span></div>' +
+          '<div class="m"><span>Nombre de menus enfants <small>(jusqu’à 16 ans)</small> :</span><span class="case">' + (n.e || '') + '</span><span class="x">×</span><span class="pu">42,50 €</span><span class="x">=</span><span class="case">' + (n.e ? prix(tE) : '') + '</span><span>€</span></div>' +
+        '</div>' +
+        '<div class="tot">Total à régler : ' + prix(tA + tE) + ' €</div>' +
+        '<div class="choix"><div class="ti">VOTRE CHOIX DE LIEU</div><div class="opts">' +
+          '<div class="opt"><span class="cb">' + (lieu === 'salle' ? '✕' : '') + '</span><span><small>DANS LA SALLE</small><b>Orchestre Santa Lucia</b></span></div>' +
+          '<div class="opt"><span class="cb">' + (lieu === 'chalet' ? '✕' : '') + '</span><span><small>AU CHALET</small><b>DJ Jean Marc</b></span></div>' +
+        '</div></div>' +
+        (v('remarque') ? '<div class="rem">Remarque : ' + esc(v('remarque')) + '</div>' : '') +
+        '<div class="pied"><div class="l"><span>Date de réservation :</span><span class="v"></span></div><div class="sig"><span>Signature :</span><div></div></div></div>' +
+        '<div class="reg">À déposer au restaurant Le 76 avec votre règlement (espèces ou chèque) · 76 rue Principale, 67930 Beinheim · 03 88 86 31 87</div>' +
+      '</div>';
+    window.print();
   });
 })();
 </script>
