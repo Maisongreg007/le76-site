@@ -1,0 +1,3651 @@
+{
+ "ingredients": {
+  "frites": {
+   "name": "Frites McCain SureCrisp",
+   "supplier": "McCain (bail)",
+   "price": 2.1,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "huile": {
+   "name": "Huile de friture",
+   "supplier": "À vérifier",
+   "price": 2.3,
+   "unit": "L",
+   "loss": 0,
+   "allergens": []
+  },
+  "pain_burger": {
+   "name": "Pain burger brioché",
+   "supplier": "À vérifier",
+   "price": 0.45,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten",
+    "oeufs",
+    "lait"
+   ]
+  },
+  "steak": {
+   "name": "Steak haché façon bouchère 150 g",
+   "supplier": "À vérifier",
+   "price": 11.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "cheddar": {
+   "name": "Cheddar tranches",
+   "supplier": "À vérifier",
+   "price": 9.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "iceberg": {
+   "name": "Salade iceberg",
+   "supplier": "À vérifier",
+   "price": 1.2,
+   "unit": "piece",
+   "loss": 25,
+   "allergens": []
+  },
+  "batavia": {
+   "name": "Salade batavia",
+   "supplier": "À vérifier",
+   "price": 1.1,
+   "unit": "piece",
+   "loss": 25,
+   "allergens": []
+  },
+  "tomate": {
+   "name": "Tomates",
+   "supplier": "À vérifier",
+   "price": 2.8,
+   "unit": "kg",
+   "loss": 5,
+   "allergens": []
+  },
+  "oignon_rouge": {
+   "name": "Oignons rouges",
+   "supplier": "À vérifier",
+   "price": 2.0,
+   "unit": "kg",
+   "loss": 12,
+   "allergens": []
+  },
+  "oignon": {
+   "name": "Oignons jaunes",
+   "supplier": "À vérifier",
+   "price": 1.3,
+   "unit": "kg",
+   "loss": 12,
+   "allergens": []
+  },
+  "sauce_burger": {
+   "name": "Sauce burger",
+   "supplier": "À vérifier",
+   "price": 4.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "oeufs",
+    "moutarde"
+   ]
+  },
+  "ketchup": {
+   "name": "Ketchup / mayonnaise (portions)",
+   "supplier": "À vérifier",
+   "price": 3.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "oeufs",
+    "moutarde"
+   ]
+  },
+  "tenders": {
+   "name": "Tenders de poulet panés",
+   "supplier": "À vérifier",
+   "price": 9.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "bbq": {
+   "name": "Sauce barbecue",
+   "supplier": "À vérifier",
+   "price": 4.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "moutarde"
+   ]
+  },
+  "pain_mie": {
+   "name": "Pain de mie",
+   "supplier": "À vérifier",
+   "price": 2.8,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "jambon": {
+   "name": "Jambon blanc",
+   "supplier": "À vérifier",
+   "price": 9.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "emmental": {
+   "name": "Emmental râpé",
+   "supplier": "À vérifier",
+   "price": 7.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "saucisse_curry": {
+   "name": "Saucisse pour currywurst",
+   "supplier": "À vérifier",
+   "price": 0.9,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "sauce_curry": {
+   "name": "Sauce curry-ketchup",
+   "supplier": "À vérifier",
+   "price": 3.8,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "moutarde"
+   ]
+  },
+  "curry": {
+   "name": "Curry en poudre",
+   "supplier": "À vérifier",
+   "price": 15.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "onglet": {
+   "name": "Onglet de bœuf",
+   "supplier": "À vérifier",
+   "price": 19.0,
+   "unit": "kg",
+   "loss": 10,
+   "allergens": []
+  },
+  "echalote": {
+   "name": "Échalotes",
+   "supplier": "À vérifier",
+   "price": 4.2,
+   "unit": "kg",
+   "loss": 15,
+   "allergens": []
+  },
+  "beurre": {
+   "name": "Beurre doux",
+   "supplier": "À vérifier",
+   "price": 8.9,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "vin_cuisine": {
+   "name": "Vin rouge de cuisine",
+   "supplier": "À vérifier",
+   "price": 3.2,
+   "unit": "L",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ]
+  },
+  "cordon_bleu": {
+   "name": "Cordon bleu de volaille (160 g)",
+   "supplier": "À vérifier",
+   "price": 1.5,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten",
+    "lait",
+    "oeufs"
+   ]
+  },
+  "cordon_munster": {
+   "name": "Cordon bleu au munster (180 g)",
+   "supplier": "À vérifier",
+   "price": 2.2,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten",
+    "lait",
+    "oeufs"
+   ]
+  },
+  "creme": {
+   "name": "Crème 30 %",
+   "supplier": "À vérifier",
+   "price": 5.2,
+   "unit": "L",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "champignons": {
+   "name": "Champignons de Paris",
+   "supplier": "À vérifier",
+   "price": 4.0,
+   "unit": "kg",
+   "loss": 10,
+   "allergens": []
+  },
+  "saumon": {
+   "name": "Pavé de saumon",
+   "supplier": "À vérifier",
+   "price": 15.5,
+   "unit": "kg",
+   "loss": 3,
+   "allergens": [
+    "poisson"
+   ]
+  },
+  "riz": {
+   "name": "Riz",
+   "supplier": "À vérifier",
+   "price": 1.6,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "citron": {
+   "name": "Citron",
+   "supplier": "À vérifier",
+   "price": 0.3,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "pates": {
+   "name": "Pâtes sèches",
+   "supplier": "À vérifier",
+   "price": 1.4,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "boeuf_hache": {
+   "name": "Bœuf haché (bolognaise)",
+   "supplier": "À vérifier",
+   "price": 9.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "tomate_conc": {
+   "name": "Tomates concassées",
+   "supplier": "À vérifier",
+   "price": 1.8,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "lardons": {
+   "name": "Lardons fumés",
+   "supplier": "À vérifier",
+   "price": 7.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "parmesan": {
+   "name": "Parmesan râpé",
+   "supplier": "À vérifier",
+   "price": 18.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "oeuf": {
+   "name": "Œuf",
+   "supplier": "À vérifier",
+   "price": 0.25,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "oeufs"
+   ]
+  },
+  "bleu": {
+   "name": "Bleu d'Auvergne",
+   "supplier": "À vérifier",
+   "price": 10.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "chevre": {
+   "name": "Bûche de chèvre",
+   "supplier": "À vérifier",
+   "price": 12.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "mozza": {
+   "name": "Mozzarella râpée",
+   "supplier": "À vérifier",
+   "price": 7.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "cervelas": {
+   "name": "Cervelas",
+   "supplier": "À vérifier",
+   "price": 7.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "cornichon": {
+   "name": "Cornichons",
+   "supplier": "À vérifier",
+   "price": 5.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ]
+  },
+  "croutons": {
+   "name": "Croûtons",
+   "supplier": "À vérifier",
+   "price": 6.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "sauce_cesar": {
+   "name": "Sauce César",
+   "supplier": "À vérifier",
+   "price": 6.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "oeufs",
+    "lait",
+    "poisson",
+    "moutarde"
+   ]
+  },
+  "thon": {
+   "name": "Thon au naturel",
+   "supplier": "À vérifier",
+   "price": 10.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "poisson"
+   ]
+  },
+  "mais": {
+   "name": "Maïs doux",
+   "supplier": "À vérifier",
+   "price": 2.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "concombre": {
+   "name": "Concombre",
+   "supplier": "À vérifier",
+   "price": 0.8,
+   "unit": "piece",
+   "loss": 10,
+   "allergens": []
+  },
+  "vinaigrette": {
+   "name": "Vinaigrette maison",
+   "supplier": "À vérifier",
+   "price": 3.0,
+   "unit": "L",
+   "loss": 0,
+   "allergens": [
+    "moutarde"
+   ]
+  },
+  "serviette": {
+   "name": "Serviette papier",
+   "supplier": "À vérifier",
+   "price": 0.03,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "pate_pizza": {
+   "name": "Pâton Patapizz 250 g",
+   "supplier": "Patapizz (bail)",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "sauce_pizza": {
+   "name": "Sauce tomate pizza",
+   "supplier": "À vérifier",
+   "price": 2.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "olives": {
+   "name": "Olives noires",
+   "supplier": "À vérifier",
+   "price": 6.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "chorizo": {
+   "name": "Chorizo",
+   "supplier": "À vérifier",
+   "price": 12.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "pdt": {
+   "name": "Pommes de terre",
+   "supplier": "À vérifier",
+   "price": 0.9,
+   "unit": "kg",
+   "loss": 20,
+   "allergens": []
+  },
+  "origan": {
+   "name": "Origan / basilic",
+   "supplier": "À vérifier",
+   "price": 20.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "pate_flamm": {
+   "name": "Pâte à tarte flambée fine",
+   "supplier": "À vérifier",
+   "price": 0.4,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "fromblanc": {
+   "name": "Fromage blanc 20 %",
+   "supplier": "À vérifier",
+   "price": 3.4,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "munster": {
+   "name": "Munster AOP",
+   "supplier": "À vérifier",
+   "price": 14.5,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "ail": {
+   "name": "Ail",
+   "supplier": "À vérifier",
+   "price": 6.0,
+   "unit": "kg",
+   "loss": 10,
+   "allergens": []
+  },
+  "persil": {
+   "name": "Persil (botte)",
+   "supplier": "À vérifier",
+   "price": 0.8,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "crepe": {
+   "name": "Crêpe prête à garnir",
+   "supplier": "À vérifier",
+   "price": 0.6,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten",
+    "oeufs",
+    "lait"
+   ]
+  },
+  "gaufre": {
+   "name": "Gaufre prête à garnir",
+   "supplier": "À vérifier",
+   "price": 0.6,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "gluten",
+    "oeufs",
+    "lait"
+   ]
+  },
+  "sucre": {
+   "name": "Sucre",
+   "supplier": "À vérifier",
+   "price": 1.1,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "confiture": {
+   "name": "Confiture",
+   "supplier": "À vérifier",
+   "price": 3.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": []
+  },
+  "tartiner": {
+   "name": "Pâte à tartiner",
+   "supplier": "À vérifier",
+   "price": 6.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "fruits à coque",
+    "lait",
+    "soja"
+   ]
+  },
+  "nuggets": {
+   "name": "Nuggets de poulet (≈ 20 g)",
+   "supplier": "À vérifier",
+   "price": 8.0,
+   "unit": "kg",
+   "loss": 0,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  "entree_jour": {
+   "name": "Petite entrée du jour (coût moyen)",
+   "supplier": "À vérifier",
+   "price": 0.6,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "plat_jour": {
+   "name": "Plat du jour (coût moyen)",
+   "supplier": "À vérifier",
+   "price": 2.4,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "boite_pizza": {
+   "name": "Boîte à pizza carton",
+   "supplier": "À vérifier",
+   "price": 0.22,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "barquette": {
+   "name": "Barquette carton + couvercle",
+   "supplier": "À vérifier",
+   "price": 0.18,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "sac": {
+   "name": "Sac kraft",
+   "supplier": "À vérifier",
+   "price": 0.08,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": []
+  },
+  "g_gomini": {
+   "name": "Glace Go Minis",
+   "supplier": "Miko · À vérifier",
+   "price": 0.45,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_pushup": {
+   "name": "Glace Haribo Push Up",
+   "supplier": "Miko · À vérifier",
+   "price": 0.75,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_minecraft": {
+   "name": "Glace Minecraft",
+   "supplier": "Miko · À vérifier",
+   "price": 0.7,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_calcola": {
+   "name": "Glace Calippo Cola",
+   "supplier": "Miko · À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_calfraise": {
+   "name": "Glace Calippo Fraise",
+   "supplier": "Miko · À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_twister": {
+   "name": "Glace Twister",
+   "supplier": "Miko · À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_cornclassic": {
+   "name": "Glace Cornetto Classico",
+   "supplier": "Miko · À vérifier",
+   "price": 0.85,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_cornchoco": {
+   "name": "Glace Cornetto Chocolat",
+   "supplier": "Miko · À vérifier",
+   "price": 0.85,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_magclassic": {
+   "name": "Glace Magnum Classic",
+   "supplier": "Miko · À vérifier",
+   "price": 1.1,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_magblanc": {
+   "name": "Glace Magnum Blanc",
+   "supplier": "Miko · À vérifier",
+   "price": 1.1,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_magamande": {
+   "name": "Glace Magnum Amande",
+   "supplier": "Miko · À vérifier",
+   "price": 1.15,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_magdouble": {
+   "name": "Glace Magnum Double",
+   "supplier": "Miko · À vérifier",
+   "price": 1.25,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "g_magpistache": {
+   "name": "Glace Magnum Pistache",
+   "supplier": "Miko · À vérifier",
+   "price": 1.2,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "lait"
+   ]
+  },
+  "kro": {
+   "name": "Kronenbourg pression (fût 30 L)",
+   "supplier": "À vérifier",
+   "price": 3.7,
+   "unit": "L",
+   "loss": 6,
+   "allergens": [
+    "gluten"
+   ],
+   "dept": "bar"
+  },
+  "grim_blanche": {
+   "name": "Grimbergen Blanche pression (fût 20 L)",
+   "supplier": "À vérifier",
+   "price": 4.8,
+   "unit": "L",
+   "loss": 6,
+   "allergens": [
+    "gluten"
+   ],
+   "dept": "bar"
+  },
+  "coca": {
+   "name": "Coca-Cola 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "coca_zero": {
+   "name": "Coca-Cola Zéro 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "coca_cherry": {
+   "name": "Coca-Cola Cherry 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.6,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "fanta": {
+   "name": "Fanta 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.52,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "sprite": {
+   "name": "Sprite 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.52,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "monster": {
+   "name": "Monster 50 cl",
+   "supplier": "À vérifier",
+   "price": 1.3,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "vittel": {
+   "name": "Vittel 50 cl",
+   "supplier": "À vérifier",
+   "price": 0.35,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "sanpel": {
+   "name": "San Pellegrino 50 cl",
+   "supplier": "À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "perrier": {
+   "name": "Perrier 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.55,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "mm_orange": {
+   "name": "Minute Maid orange 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.7,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "mm_pomme": {
+   "name": "Minute Maid pomme 33 cl",
+   "supplier": "À vérifier",
+   "price": 0.7,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "andros_ananas": {
+   "name": "Andros ananas 25 cl",
+   "supplier": "À vérifier",
+   "price": 0.8,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "andros_multi": {
+   "name": "Andros multifruits 25 cl",
+   "supplier": "À vérifier",
+   "price": 0.8,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "caprisun": {
+   "name": "Capri-Sun 20 cl",
+   "supplier": "À vérifier",
+   "price": 0.4,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "sirop": {
+   "name": "Sirop (bouteille 1 L)",
+   "supplier": "À vérifier",
+   "price": 4.5,
+   "unit": "L",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "riesling": {
+   "name": "Riesling Cave de Cleebourg 75 cl",
+   "supplier": "Cave de Cleebourg · À vérifier",
+   "price": 5.5,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  },
+  "auxerrois": {
+   "name": "Auxerrois Cave de Cleebourg 75 cl",
+   "supplier": "Cave de Cleebourg · À vérifier",
+   "price": 5.0,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  },
+  "pinotgris": {
+   "name": "Pinot Gris Cave de Cleebourg 75 cl",
+   "supplier": "Cave de Cleebourg · À vérifier",
+   "price": 6.5,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  },
+  "gewurz": {
+   "name": "Gewurztraminer Cave de Cleebourg 75 cl",
+   "supplier": "Cave de Cleebourg · À vérifier",
+   "price": 7.0,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  },
+  "muscat": {
+   "name": "Muscat Cave de Cleebourg 75 cl",
+   "supplier": "Cave de Cleebourg · À vérifier",
+   "price": 6.5,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  },
+  "cremant": {
+   "name": "Crémant d'Alsace Cave de Cleebourg 75 cl",
+   "supplier": "Cave de Cleebourg · À vérifier",
+   "price": 7.5,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  },
+  "ricard": {
+   "name": "Ricard 1 L",
+   "supplier": "Pernod Ricard (bail)",
+   "price": 21.0,
+   "unit": "L",
+   "loss": 0,
+   "allergens": [],
+   "dept": "bar"
+  },
+  "lillet": {
+   "name": "Lillet Blanc 75 cl",
+   "supplier": "Pernod Ricard (bail)",
+   "price": 12.5,
+   "unit": "piece",
+   "loss": 0,
+   "allergens": [
+    "sulfites"
+   ],
+   "dept": "bar"
+  }
+ },
+ "fiches": {
+  "p_frites": {
+   "name": "Portion de frites",
+   "category": "Base / sous-recette",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "frites",
+     "qty": 180,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 3,
+     "unit": "cl"
+    }
+   ],
+   "steps": "Cuisson 175 °C, 3 à 4 minutes. Saler à la sortie."
+  },
+  "p_salade": {
+   "name": "Petite salade d'accompagnement",
+   "category": "Base / sous-recette",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "batavia",
+     "qty": 0.12,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "vinaigrette",
+     "qty": 2,
+     "unit": "cl"
+    }
+   ],
+   "steps": ""
+  },
+  "sal_alsa": {
+   "name": "Salade alsacienne",
+   "category": "Entrée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "batavia",
+     "qty": 0.3,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "tomate",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "cervelas",
+     "qty": 100,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "emmental",
+     "qty": 40,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oeuf",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "oignon_rouge",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "cornichon",
+     "qty": 25,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "vinaigrette",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "sal_cesar": {
+   "name": "Salade César",
+   "category": "Entrée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "batavia",
+     "qty": 0.3,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "tenders",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "tomate",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "parmesan",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "croutons",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_cesar",
+     "qty": 40,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 2,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "sal_oceane": {
+   "name": "Salade océane",
+   "category": "Entrée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "batavia",
+     "qty": 0.3,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "tomate",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "thon",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oeuf",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "mais",
+     "qty": 40,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "concombre",
+     "qty": 0.25,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "oignon_rouge",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "vinaigrette",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "burger": {
+   "name": "Cheeseburger traditionnel + frites",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pain_burger",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "steak",
+     "qty": 150,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "cheddar",
+     "qty": 40,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "iceberg",
+     "qty": 0.08,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "tomate",
+     "qty": 30,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon_rouge",
+     "qty": 15,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_burger",
+     "qty": 25,
+     "unit": "g"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "ketchup",
+     "qty": 20,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "tenders_f": {
+   "name": "Tenders de poulet + frites + sauce BBQ",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "tenders",
+     "qty": 180,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "bbq",
+     "qty": 40,
+     "unit": "g"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "croque": {
+   "name": "Croque-monsieur maison + frites",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pain_mie",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "jambon",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "emmental",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "beurre",
+     "qty": 10,
+     "unit": "g"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "ketchup",
+     "qty": 20,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "currywurst": {
+   "name": "Currywurst + frites",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "saucisse_curry",
+     "qty": 2,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_curry",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "curry",
+     "qty": 2,
+     "unit": "g"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "frites_seules": {
+   "name": "Frites",
+   "category": "Accompagnement",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "ketchup",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "onglet": {
+   "name": "Onglet de bœuf à l'échalote, frites, salade",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "onglet",
+     "qty": 200,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "echalote",
+     "qty": 40,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "beurre",
+     "qty": 15,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "vin_cuisine",
+     "qty": 5,
+     "unit": "cl"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "f",
+     "ref": "p_salade",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": "Saisir l'onglet, repos 3 minutes.\nSuer les échalotes au beurre, déglacer au vin rouge, réduire.\nServir avec frites et salade."
+  },
+  "cb_creme": {
+   "name": "Cordon bleu de volaille, sauce crème, frites",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "cordon_bleu",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 8,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "champignons",
+     "qty": 30,
+     "unit": "g"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "cb_munster": {
+   "name": "Cordon bleu au munster, frites",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "cordon_munster",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "f",
+     "ref": "p_salade",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "saumon": {
+   "name": "Pavé de saumon, frites ou riz",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "saumon",
+     "qty": 160,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "citron",
+     "qty": 0.25,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "beurre",
+     "qty": 10,
+     "unit": "g"
+    },
+    {
+     "type": "f",
+     "ref": "p_frites",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "bolo": {
+   "name": "Pâtes bolognaise",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pates",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "boeuf_hache",
+     "qty": 90,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "tomate_conc",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 25,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "parmesan",
+     "qty": 10,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "carbo": {
+   "name": "Pâtes carbonara",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pates",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 10,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "oeuf",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "parmesan",
+     "qty": 15,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "quatre_f": {
+   "name": "Pâtes 4 fromages (végétarien)",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pates",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 10,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "emmental",
+     "qty": 25,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "bleu",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "chevre",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "enfant": {
+   "name": "Menu enfant (6 nuggets, frites, boisson ou Push Up)",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "nuggets",
+     "qty": 120,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "frites",
+     "qty": 130,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 2,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "ketchup",
+     "qty": 20,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "caprisun",
+     "qty": 0.5,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "g_pushup",
+     "qty": 0.5,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": "Boisson ou Push Up : compté moitié-moitié."
+  },
+  "formule": {
+   "name": "Formule du jour (coût moyen)",
+   "category": "Plat",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "entree_jour",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "plat_jour",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "f",
+     "ref": "crepe_s",
+     "qty": 1,
+     "unit": "portion"
+    },
+    {
+     "type": "i",
+     "ref": "coca",
+     "qty": 0.6,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "kro",
+     "qty": 10,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": "Volontairement attractive : peut dépasser l'objectif de food cost.\nRemplace les deux lignes « coût moyen » par les vraies fiches du plat du jour."
+  },
+  "pz_marg": {
+   "name": "Pizza Margherita",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_pizza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 100,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "pz_jambon": {
+   "name": "Pizza Jambon",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_pizza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 100,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "jambon",
+     "qty": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "pz_alsa": {
+   "name": "Pizza Alsacienne",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 6,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 50,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "pz_reine": {
+   "name": "Pizza Reine",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_pizza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 100,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "jambon",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "champignons",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "olives",
+     "qty": 10,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "pz_paysanne": {
+   "name": "Pizza Paysanne",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_pizza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 100,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "pdt",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 30,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oeuf",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "pz_thon": {
+   "name": "Pizza Thon",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_pizza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 100,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "thon",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon_rouge",
+     "qty": 25,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "olives",
+     "qty": 10,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "pz_chorizo": {
+   "name": "Pizza Chorizo",
+   "category": "Pizza",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_pizza",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "huile",
+     "qty": 1,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "origan",
+     "qty": 1,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "sauce_pizza",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "mozza",
+     "qty": 100,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "chorizo",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 25,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "tf_nature": {
+   "name": "Tarte flambée nature",
+   "category": "Tarte flambée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_flamm",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "fromblanc",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": "Pâte très fine, crème et fromage blanc, lardons, oignons.\nFour très chaud, 3 à 4 minutes."
+  },
+  "tf_grat": {
+   "name": "Tarte flambée gratinée",
+   "category": "Tarte flambée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_flamm",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "fromblanc",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 60,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "emmental",
+     "qty": 40,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "tf_forest": {
+   "name": "Tarte flambée forestière",
+   "category": "Tarte flambée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_flamm",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "fromblanc",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "champignons",
+     "qty": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "tf_ail": {
+   "name": "Tarte flambée ail & persil",
+   "category": "Tarte flambée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_flamm",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "fromblanc",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "ail",
+     "qty": 8,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "persil",
+     "qty": 0.15,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "tf_munster": {
+   "name": "Tarte flambée munster",
+   "category": "Tarte flambée",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "pate_flamm",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "fromblanc",
+     "qty": 80,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "creme",
+     "qty": 4,
+     "unit": "cl"
+    },
+    {
+     "type": "i",
+     "ref": "lardons",
+     "qty": 70,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "oignon",
+     "qty": 50,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "munster",
+     "qty": 60,
+     "unit": "g"
+    }
+   ],
+   "steps": ""
+  },
+  "crepe_s": {
+   "name": "Crêpe (sucre, confiture ou pâte à tartiner)",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "crepe",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "tartiner",
+     "qty": 15,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": "Coût calculé avec la garniture la plus chère (pâte à tartiner)."
+  },
+  "gaufre_s": {
+   "name": "Gaufre (sucre, confiture ou pâte à tartiner)",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "gaufre",
+     "qty": 1,
+     "unit": "pièce"
+    },
+    {
+     "type": "i",
+     "ref": "tartiner",
+     "qty": 15,
+     "unit": "g"
+    },
+    {
+     "type": "i",
+     "ref": "serviette",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": "Coût calculé avec la garniture la plus chère (pâte à tartiner)."
+  },
+  "f_g_gomini": {
+   "name": "Glace Go Minis",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_gomini",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_pushup": {
+   "name": "Glace Haribo Push Up",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_pushup",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_minecraft": {
+   "name": "Glace Minecraft",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_minecraft",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_calcola": {
+   "name": "Glace Calippo Cola",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_calcola",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_calfraise": {
+   "name": "Glace Calippo Fraise",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_calfraise",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_twister": {
+   "name": "Glace Twister",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_twister",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_cornclassic": {
+   "name": "Glace Cornetto Classico",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_cornclassic",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_cornchoco": {
+   "name": "Glace Cornetto Chocolat",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_cornchoco",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_magclassic": {
+   "name": "Glace Magnum Classic",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_magclassic",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_magblanc": {
+   "name": "Glace Magnum Blanc",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_magblanc",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_magamande": {
+   "name": "Glace Magnum Amande",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_magamande",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_magdouble": {
+   "name": "Glace Magnum Double",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_magdouble",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  },
+  "f_g_magpistache": {
+   "name": "Glace Magnum Pistache",
+   "category": "Dessert",
+   "yield": 1,
+   "yieldUnit": "portion",
+   "lines": [
+    {
+     "type": "i",
+     "ref": "g_magpistache",
+     "qty": 1,
+     "unit": "pièce"
+    }
+   ],
+   "steps": ""
+  }
+ },
+ "carte": {
+  "c_formule": {
+   "name": "Formule du jour (entrée, plat, dessert, boisson)",
+   "section": "Midi",
+   "ttc": 16,
+   "tva": 10,
+   "fiche": "formule",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_sal_alsa": {
+   "name": "Salade alsacienne",
+   "section": "Salades",
+   "ttc": 15,
+   "tva": 10,
+   "fiche": "sal_alsa",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_sal_cesar": {
+   "name": "Salade César",
+   "section": "Salades",
+   "ttc": 15,
+   "tva": 10,
+   "fiche": "sal_cesar",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_sal_oceane": {
+   "name": "Salade océane",
+   "section": "Salades",
+   "ttc": 15,
+   "tva": 10,
+   "fiche": "sal_oceane",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_burger": {
+   "name": "Cheeseburger traditionnel + frites",
+   "section": "Snacking",
+   "ttc": 16.5,
+   "tva": 10,
+   "fiche": "burger",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_tenders": {
+   "name": "Tenders de poulet + frites + sauce BBQ",
+   "section": "Snacking",
+   "ttc": 15,
+   "tva": 10,
+   "fiche": "tenders_f",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_croque": {
+   "name": "Croque-monsieur maison + frites",
+   "section": "Snacking",
+   "ttc": 12,
+   "tva": 10,
+   "fiche": "croque",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_curry": {
+   "name": "Currywurst + frites",
+   "section": "Snacking",
+   "ttc": 15,
+   "tva": 10,
+   "fiche": "currywurst",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_frites": {
+   "name": "Frites",
+   "section": "Snacking",
+   "ttc": 5,
+   "tva": 10,
+   "fiche": "frites_seules",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_onglet": {
+   "name": "Onglet de bœuf à l'échalote",
+   "section": "Plats",
+   "ttc": 19.9,
+   "tva": 10,
+   "fiche": "onglet",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_cb": {
+   "name": "Cordon bleu de volaille, sauce crème",
+   "section": "Plats",
+   "ttc": 18,
+   "tva": 10,
+   "fiche": "cb_creme",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_cbm": {
+   "name": "Cordon bleu au munster",
+   "section": "Plats",
+   "ttc": 20,
+   "tva": 10,
+   "fiche": "cb_munster",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_saumon": {
+   "name": "Pavé de saumon",
+   "section": "Plats",
+   "ttc": 18.9,
+   "tva": 10,
+   "fiche": "saumon",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_bolo": {
+   "name": "Pâtes bolognaise",
+   "section": "Pâtes",
+   "ttc": 12.5,
+   "tva": 10,
+   "fiche": "bolo",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_carbo": {
+   "name": "Pâtes carbonara",
+   "section": "Pâtes",
+   "ttc": 13.5,
+   "tva": 10,
+   "fiche": "carbo",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_4f": {
+   "name": "Pâtes 4 fromages",
+   "section": "Pâtes",
+   "ttc": 13,
+   "tva": 10,
+   "fiche": "quatre_f",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_enfant": {
+   "name": "Menu enfant",
+   "section": "Menu enfant",
+   "ttc": 12.5,
+   "tva": 10,
+   "fiche": "enfant",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_marg": {
+   "name": "Pizza Margherita",
+   "section": "Pizzas (soir)",
+   "ttc": 11,
+   "tva": 10,
+   "fiche": "pz_marg",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_jambon": {
+   "name": "Pizza Jambon",
+   "section": "Pizzas (soir)",
+   "ttc": 12,
+   "tva": 10,
+   "fiche": "pz_jambon",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_alsa": {
+   "name": "Pizza Alsacienne",
+   "section": "Pizzas (soir)",
+   "ttc": 12,
+   "tva": 10,
+   "fiche": "pz_alsa",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_reine": {
+   "name": "Pizza Reine",
+   "section": "Pizzas (soir)",
+   "ttc": 13,
+   "tva": 10,
+   "fiche": "pz_reine",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_pays": {
+   "name": "Pizza Paysanne",
+   "section": "Pizzas (soir)",
+   "ttc": 13,
+   "tva": 10,
+   "fiche": "pz_paysanne",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_thon": {
+   "name": "Pizza Thon",
+   "section": "Pizzas (soir)",
+   "ttc": 13,
+   "tva": 10,
+   "fiche": "pz_thon",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_pz_chorizo": {
+   "name": "Pizza Chorizo",
+   "section": "Pizzas (soir)",
+   "ttc": 13,
+   "tva": 10,
+   "fiche": "pz_chorizo",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_tf_nat": {
+   "name": "Tarte flambée nature",
+   "section": "Tartes flambées (soir)",
+   "ttc": 10,
+   "tva": 10,
+   "fiche": "tf_nature",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_tf_grat": {
+   "name": "Tarte flambée gratinée",
+   "section": "Tartes flambées (soir)",
+   "ttc": 11,
+   "tva": 10,
+   "fiche": "tf_grat",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_tf_for": {
+   "name": "Tarte flambée forestière",
+   "section": "Tartes flambées (soir)",
+   "ttc": 11,
+   "tva": 10,
+   "fiche": "tf_forest",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_tf_ail": {
+   "name": "Tarte flambée ail & persil",
+   "section": "Tartes flambées (soir)",
+   "ttc": 11,
+   "tva": 10,
+   "fiche": "tf_ail",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_tf_mun": {
+   "name": "Tarte flambée munster",
+   "section": "Tartes flambées (soir)",
+   "ttc": 13,
+   "tva": 10,
+   "fiche": "tf_munster",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_crepe": {
+   "name": "Crêpe",
+   "section": "Desserts",
+   "ttc": 4.5,
+   "tva": 10,
+   "fiche": "crepe_s",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_gaufre": {
+   "name": "Gaufre",
+   "section": "Desserts",
+   "ttc": 4.5,
+   "tva": 10,
+   "fiche": "gaufre_s",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_gomini": {
+   "name": "Go Minis",
+   "section": "Glaces",
+   "ttc": 2.5,
+   "tva": 10,
+   "fiche": "f_g_gomini",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_pushup": {
+   "name": "Haribo Push Up",
+   "section": "Glaces",
+   "ttc": 3,
+   "tva": 10,
+   "fiche": "f_g_pushup",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_minecraft": {
+   "name": "Minecraft",
+   "section": "Glaces",
+   "ttc": 3,
+   "tva": 10,
+   "fiche": "f_g_minecraft",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_calcola": {
+   "name": "Calippo Cola",
+   "section": "Glaces",
+   "ttc": 3,
+   "tva": 10,
+   "fiche": "f_g_calcola",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_calfraise": {
+   "name": "Calippo Fraise",
+   "section": "Glaces",
+   "ttc": 3,
+   "tva": 10,
+   "fiche": "f_g_calfraise",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_twister": {
+   "name": "Twister",
+   "section": "Glaces",
+   "ttc": 3,
+   "tva": 10,
+   "fiche": "f_g_twister",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_cornclassic": {
+   "name": "Cornetto Classico",
+   "section": "Glaces",
+   "ttc": 3.5,
+   "tva": 10,
+   "fiche": "f_g_cornclassic",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_cornchoco": {
+   "name": "Cornetto Chocolat",
+   "section": "Glaces",
+   "ttc": 3.5,
+   "tva": 10,
+   "fiche": "f_g_cornchoco",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_magclassic": {
+   "name": "Magnum Classic",
+   "section": "Glaces",
+   "ttc": 4,
+   "tva": 10,
+   "fiche": "f_g_magclassic",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_magblanc": {
+   "name": "Magnum Blanc",
+   "section": "Glaces",
+   "ttc": 4,
+   "tva": 10,
+   "fiche": "f_g_magblanc",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_magamande": {
+   "name": "Magnum Amande",
+   "section": "Glaces",
+   "ttc": 4,
+   "tva": 10,
+   "fiche": "f_g_magamande",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_magdouble": {
+   "name": "Magnum Double",
+   "section": "Glaces",
+   "ttc": 4,
+   "tva": 10,
+   "fiche": "f_g_magdouble",
+   "qty": 1,
+   "unit": "portion"
+  },
+  "c_g_magpistache": {
+   "name": "Magnum Pistache",
+   "section": "Glaces",
+   "ttc": 4,
+   "tva": 10,
+   "fiche": "f_g_magpistache",
+   "qty": 1,
+   "unit": "portion"
+  }
+ },
+ "boissons": {
+  "b_kro": {
+   "name": "Kronenbourg",
+   "category": "Bières pression",
+   "alcohol": true,
+   "desc": "Remplace la Hatz Pils (annexe 1 du bail)",
+   "formats": [
+    {
+     "label": "25 cl",
+     "type": "i",
+     "ref": "kro",
+     "qty": 25,
+     "unit": "cl",
+     "ttc": 3.5
+    },
+    {
+     "label": "50 cl",
+     "type": "i",
+     "ref": "kro",
+     "qty": 50,
+     "unit": "cl",
+     "ttc": 6.8
+    }
+   ]
+  },
+  "b_grim": {
+   "name": "Grimbergen Blanche",
+   "category": "Bières pression",
+   "alcohol": true,
+   "desc": "Remplace la Blanche de Bruxelles",
+   "formats": [
+    {
+     "label": "25 cl",
+     "type": "i",
+     "ref": "grim_blanche",
+     "qty": 25,
+     "unit": "cl",
+     "ttc": 4.5
+    },
+    {
+     "label": "50 cl",
+     "type": "i",
+     "ref": "grim_blanche",
+     "qty": 50,
+     "unit": "cl",
+     "ttc": 8.9
+    }
+   ]
+  },
+  "b_coca": {
+   "name": "Coca-Cola",
+   "category": "Sodas",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "coca",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_cocaz": {
+   "name": "Coca-Cola Zéro",
+   "category": "Sodas",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "coca_zero",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_cocac": {
+   "name": "Coca-Cola Cherry",
+   "category": "Sodas",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "coca_cherry",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_fanta": {
+   "name": "Fanta",
+   "category": "Sodas",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "fanta",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_sprite": {
+   "name": "Sprite",
+   "category": "Sodas",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "sprite",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_monster": {
+   "name": "Monster",
+   "category": "Sodas",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "50 cl",
+     "type": "i",
+     "ref": "monster",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 4.5
+    }
+   ]
+  },
+  "b_vittel": {
+   "name": "Vittel",
+   "category": "Eaux",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "50 cl",
+     "type": "i",
+     "ref": "vittel",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3
+    }
+   ]
+  },
+  "b_sanpel": {
+   "name": "San Pellegrino",
+   "category": "Eaux",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "50 cl",
+     "type": "i",
+     "ref": "sanpel",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3
+    }
+   ]
+  },
+  "b_perrier": {
+   "name": "Perrier",
+   "category": "Eaux",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "perrier",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_mmo": {
+   "name": "Minute Maid orange",
+   "category": "Jus de fruits",
+   "alcohol": false,
+   "desc": "Remplace Granini",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "mm_orange",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_mmp": {
+   "name": "Minute Maid pomme",
+   "category": "Jus de fruits",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "33 cl",
+     "type": "i",
+     "ref": "mm_pomme",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_andra": {
+   "name": "Andros ananas",
+   "category": "Jus de fruits",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "25 cl",
+     "type": "i",
+     "ref": "andros_ananas",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_andrm": {
+   "name": "Andros multifruits",
+   "category": "Jus de fruits",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "25 cl",
+     "type": "i",
+     "ref": "andros_multi",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 3.5
+    }
+   ]
+  },
+  "b_capri": {
+   "name": "Capri-Sun",
+   "category": "Jus de fruits",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "20 cl",
+     "type": "i",
+     "ref": "caprisun",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 2.5
+    }
+   ]
+  },
+  "b_sirop": {
+   "name": "Sirop à l'eau",
+   "category": "Sirops",
+   "alcohol": false,
+   "desc": "",
+   "formats": [
+    {
+     "label": "Verre",
+     "type": "i",
+     "ref": "sirop",
+     "qty": 3,
+     "unit": "cl",
+     "ttc": 2.5
+    }
+   ]
+  },
+  "b_ries": {
+   "name": "Riesling",
+   "category": "Vins d'Alsace",
+   "alcohol": true,
+   "desc": "Cave de Cleebourg",
+   "formats": [
+    {
+     "label": "Verre 12,5 cl",
+     "type": "i",
+     "ref": "riesling",
+     "qty": 0.167,
+     "unit": "pièce",
+     "ttc": 4
+    },
+    {
+     "label": "Pichet 25 cl",
+     "type": "i",
+     "ref": "riesling",
+     "qty": 0.333,
+     "unit": "pièce",
+     "ttc": 7
+    },
+    {
+     "label": "Pichet 50 cl",
+     "type": "i",
+     "ref": "riesling",
+     "qty": 0.667,
+     "unit": "pièce",
+     "ttc": 13
+    },
+    {
+     "label": "Bouteille 75 cl",
+     "type": "i",
+     "ref": "riesling",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 22
+    }
+   ]
+  },
+  "b_aux": {
+   "name": "Auxerrois",
+   "category": "Vins d'Alsace",
+   "alcohol": true,
+   "desc": "Cave de Cleebourg",
+   "formats": [
+    {
+     "label": "Verre 12,5 cl",
+     "type": "i",
+     "ref": "auxerrois",
+     "qty": 0.167,
+     "unit": "pièce",
+     "ttc": 4
+    },
+    {
+     "label": "Pichet 25 cl",
+     "type": "i",
+     "ref": "auxerrois",
+     "qty": 0.333,
+     "unit": "pièce",
+     "ttc": 7
+    },
+    {
+     "label": "Pichet 50 cl",
+     "type": "i",
+     "ref": "auxerrois",
+     "qty": 0.667,
+     "unit": "pièce",
+     "ttc": 13
+    },
+    {
+     "label": "Bouteille 75 cl",
+     "type": "i",
+     "ref": "auxerrois",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 22
+    }
+   ]
+  },
+  "b_pg": {
+   "name": "Pinot Gris",
+   "category": "Vins d'Alsace",
+   "alcohol": true,
+   "desc": "Cave de Cleebourg",
+   "formats": [
+    {
+     "label": "Verre 12,5 cl",
+     "type": "i",
+     "ref": "pinotgris",
+     "qty": 0.167,
+     "unit": "pièce",
+     "ttc": 4
+    },
+    {
+     "label": "Pichet 25 cl",
+     "type": "i",
+     "ref": "pinotgris",
+     "qty": 0.333,
+     "unit": "pièce",
+     "ttc": 7
+    },
+    {
+     "label": "Pichet 50 cl",
+     "type": "i",
+     "ref": "pinotgris",
+     "qty": 0.667,
+     "unit": "pièce",
+     "ttc": 13
+    },
+    {
+     "label": "Bouteille 75 cl",
+     "type": "i",
+     "ref": "pinotgris",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 22
+    }
+   ]
+  },
+  "b_gew": {
+   "name": "Gewurztraminer",
+   "category": "Vins d'Alsace",
+   "alcohol": true,
+   "desc": "Cave de Cleebourg",
+   "formats": [
+    {
+     "label": "Verre 12,5 cl",
+     "type": "i",
+     "ref": "gewurz",
+     "qty": 0.167,
+     "unit": "pièce",
+     "ttc": 4
+    },
+    {
+     "label": "Pichet 25 cl",
+     "type": "i",
+     "ref": "gewurz",
+     "qty": 0.333,
+     "unit": "pièce",
+     "ttc": 7
+    },
+    {
+     "label": "Pichet 50 cl",
+     "type": "i",
+     "ref": "gewurz",
+     "qty": 0.667,
+     "unit": "pièce",
+     "ttc": 13
+    },
+    {
+     "label": "Bouteille 75 cl",
+     "type": "i",
+     "ref": "gewurz",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 22
+    }
+   ]
+  },
+  "b_mus": {
+   "name": "Muscat",
+   "category": "Vins d'Alsace",
+   "alcohol": true,
+   "desc": "Cave de Cleebourg",
+   "formats": [
+    {
+     "label": "Verre 12,5 cl",
+     "type": "i",
+     "ref": "muscat",
+     "qty": 0.167,
+     "unit": "pièce",
+     "ttc": 4
+    },
+    {
+     "label": "Pichet 25 cl",
+     "type": "i",
+     "ref": "muscat",
+     "qty": 0.333,
+     "unit": "pièce",
+     "ttc": 7
+    },
+    {
+     "label": "Pichet 50 cl",
+     "type": "i",
+     "ref": "muscat",
+     "qty": 0.667,
+     "unit": "pièce",
+     "ttc": 13
+    },
+    {
+     "label": "Bouteille 75 cl",
+     "type": "i",
+     "ref": "muscat",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 22
+    }
+   ]
+  },
+  "b_cremant": {
+   "name": "Crémant d'Alsace",
+   "category": "Vins d'Alsace",
+   "alcohol": true,
+   "desc": "Cave de Cleebourg",
+   "formats": [
+    {
+     "label": "Bouteille 75 cl",
+     "type": "i",
+     "ref": "cremant",
+     "qty": 1,
+     "unit": "pièce",
+     "ttc": 26
+    }
+   ]
+  },
+  "b_ricard": {
+   "name": "Ricard",
+   "category": "Apéritifs",
+   "alcohol": true,
+   "desc": "",
+   "formats": [
+    {
+     "label": "2 cl",
+     "type": "i",
+     "ref": "ricard",
+     "qty": 2,
+     "unit": "cl",
+     "ttc": 3
+    }
+   ]
+  },
+  "b_lillet": {
+   "name": "Lillet Blanc",
+   "category": "Apéritifs",
+   "alcohol": true,
+   "desc": "",
+   "formats": [
+    {
+     "label": "6 cl",
+     "type": "i",
+     "ref": "lillet",
+     "qty": 0.08,
+     "unit": "pièce",
+     "ttc": 5
+    }
+   ]
+  }
+ },
+ "settings": {
+  "target": 28
+ }
+}

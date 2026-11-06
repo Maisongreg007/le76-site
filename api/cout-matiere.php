@@ -104,6 +104,24 @@ try {
             repondre(['ok' => true, 'importes' => cm_ventes_importer(is_array($q['ventes'] ?? null) ? $q['ventes'] : [])]);
         case 'copier_depuis':
             repondre(['ok' => true, 'copies' => cm_copier_depuis((string) ($q['source'] ?? ''), is_array($q['colls'] ?? null) ? $q['colls'] : [])]);
+        case 'modele_camping':
+            // Carte et fiches techniques du restaurant du camping 2027 (prix d'achat estimés, à vérifier)
+            $id = '';
+            foreach (cm_restaurants() as $r) {
+                if ($r['id'] === 'camping-2027') {
+                    $id = $r['id'];
+                }
+            }
+            $restos = cm_restaurants();
+            if ($id === '') {
+                ['id' => $id, 'restos' => $restos] = cm_resto_creer('Camping 2027');
+            }
+            cm_resto($id);
+            [$docs] = cm_tout();
+            !count((array) ($docs['fiches'] ?? [])) || erreur('« Camping 2027 » a déjà des fiches : rien n\'a été remplacé.');
+            $s = json_decode((string) file_get_contents(__DIR__ . '/lib/cout-matiere-camping-2027.json'), true);
+            is_array($s) || erreur('Modèle du camping introuvable.');
+            repondre(['ok' => true, 'id' => $id, 'restos' => $restos, 'importes' => cm_importer($s)]);
         case 'resto_creer':
             repondre(['ok' => true] + cm_resto_creer((string) ($q['nom'] ?? '')));
         case 'facture_relire':

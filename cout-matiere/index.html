@@ -1537,7 +1537,7 @@ function renderReglages(){
     <div class="list" style="box-shadow:none">${(CM.restos||[]).map(r=>`<div class="row" style="cursor:default;background-image:none"><span class="name">${esc(r.nom)}${r.id===CM.resto?` <span class="chip ok plain" style="font-size:.7rem;padding:2px 8px">ouvert</span>`:""}</span>${r.id===CM.resto?"":`<button class="btn ghost sm" data-resto="${esc(r.id)}">Ouvrir</button>`}</div>`).join("")}</div>
     <div class="fields2"><label class="f"><span class="lbl">Nouveau restaurant</span><input type="text" id="rg-resto" placeholder="ex. Restaurant du camping" autocomplete="off"></label>
     <label class="switch" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="rg-copie" checked> Reprendre la mercuriale et les fiches de ${esc(nomResto())}</label></div>
-    <div class="acts"><button class="btn" data-cm="restoCreer">Créer ce restaurant</button></div>
+    <div class="acts"><button class="btn" data-cm="restoCreer">Créer ce restaurant</button>${(CM.restos||[]).some(r=>r.id==="camping-2027")?"":`<button class="btn ghost" data-cm="modeleCamping">Créer « Camping 2027 » avec sa carte</button>`}</div>
   </section>
   <section class="card reg"><h2>Ventes de la caisse (Z de L'Addition)</h2>
     <p class="hint" style="margin:0">L'Addition envoie chaque jour le « Z quotidien » à cette boîte. L'app le lit tout seul (sans toucher aux mails) pour calculer ta marge réelle et classer ta carte.</p>
@@ -1562,6 +1562,7 @@ async function cmAction(a,t){
     if(a==="saveOpts"){t.disabled=true;const d=await CM.post("options_ecrire",{options:{ia_cle:document.getElementById("rg-cle").value,ia_modele:document.getElementById("rg-modele").value,imap_hote:document.getElementById("rg-hote").value,imap_user:document.getElementById("rg-user").value,imap_mdp:document.getElementById("rg-mdp").value,mail_actif:document.getElementById("rg-actif").checked}});CM.options=d.options;setStatus("Réglages enregistrés");render()}
     else if(a==="relever"){t.disabled=true;t.textContent="Relève en cours…";const d=await CM.post("factures_relever",{forcer:true});const o=await CM.post("options");CM.options=o.options;setStatus(d.message||"Relève terminée",!d.releve);render()}
     else if(a==="importer"){document.getElementById("rg-file").click()}
+    else if(a==="modeleCamping"){t.disabled=true;t.textContent="Création en cours…";const d=await CM.post("modele_camping");setStatus(d.importes+" éléments importés : carte, fiches et boissons du camping");CM.restos=d.restos;changerResto(d.id)}
     else if(a==="restoCreer"){const nom=document.getElementById("rg-resto").value.trim();if(!nom){setStatus("Donne un nom au restaurant",true);return}t.disabled=true;const copie=document.getElementById("rg-copie").checked,src=CM.resto;const d=await CM.post("resto_creer",{nom});
       if(copie){setStatus("Copie de la mercuriale et des fiches…");const r=await fetch("/api/cout-matiere.php",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"copier_depuis",r:d.id,source:src,colls:["ingredients","fiches"]})});const j=await r.json().catch(()=>({}));if(!j.ok)setStatus(j.erreur||"Copie impossible",true)}
       CM.restos=d.restos;changerResto(d.id)}

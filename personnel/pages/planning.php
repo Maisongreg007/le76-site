@@ -151,6 +151,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         db()->prepare('INSERT INTO modeles (nom, etab, data, created_at) VALUES (?,?,?,?)')->execute([mb_substr($nom, 0, 60), $etab, json_encode($data), date('Y-m-d H:i:s')]);
         back($retour, 'Modèle « ' . $nom . ' » enregistré (' . count($data) . ' horaires).');
     }
+    if ($act === 'model_import_camping' && $etab === 'camping') {
+        // Semaines types du prévisionnel Camping 2027, rattachées à l'équipe par prénom
+        $norm = static fn(string $x) => strtolower(trim((string)iconv('UTF-8', 'ASCII//TRANSLIT', $x)));
+        $equipe = employes(true, 'camping');
+        $trouver = static function (string $prenom, ?string $type) use ($equipe, $norm): ?array {
+            $l = array_values(array_filter($equipe, fn($e) => $norm(explode(' ', (string)$e['prenom'])[0]) === $norm($prenom)));
+            if (count($l) > 1 && $type) {
+                $t = array_values(array_filter($l, fn($e) => $e['type'] === $type));
+                $l = $t ?: $l;
+            }
+            return count($l) >= 1 ? $l[0] : null;
+        };
+        $crees = [];
+        $manquants = [];
+        foreach (CAMPING_2027_MODELES as $nom => $lignes) {
+            $data = [];
+            foreach ($lignes as [$prenom, $type, $off, $d, $f]) {
+                $e = $trouver($prenom, $type);
+                if (!$e) {
+                    $manquants[$prenom] = true;
+                    continue;
+                }
+                $data[] = [$off, (int)$e['id'], $d, $f];
+            }
+            if ($data) {
+                db()->prepare('DELETE FROM modeles WHERE etab = ? AND nom = ?')->execute(['camping', $nom]);
+                db()->prepare('INSERT INTO modeles (nom, etab, data, created_at) VALUES (?,?,?,?)')->execute([$nom, 'camping', json_encode($data), date('Y-m-d H:i:s')]);
+                $crees[] = $nom . ' (' . count($data) . ' horaires)';
+            }
+        }
+        $miss = $manquants ? ' Pas encore dans l\'équipe du camping : ' . implode(', ', array_keys($manquants)) . ' (ajoute-les puis réimporte).' : '';
+        if (!$crees) back($retour, '', 'Aucun membre de l\'équipe du camping ne correspond aux prénoms du planning type.' . $miss);
+        back($retour, 'Modèles importés : ' . implode(' · ', $crees) . '.' . $miss);
+    }
     if ($act === 'model_apply' || $act === 'model_delete') {
         $st = db()->prepare('SELECT * FROM modeles WHERE id = ?');
         $st->execute([(int)($_POST['mid'] ?? 0)]);
@@ -500,6 +534,11 @@ if ($modeles) {
     echo '</ul>';
 } else {
     echo '<p class="muted" style="text-align:center">Aucun modèle pour l\'instant.</p>';
+}
+if ($etab === 'camping') {
+    echo '<form method="post" style="margin-top:12px">' . $hid . '<input type="hidden" name="action" value="model_import_camping">'
+        . '<button class="small" style="width:100%">Importer les semaines types Camping 2027</button>'
+        . '<p class="muted small" style="text-align:center;margin:6px 0 0">Haute et basse saison du prévisionnel, rattachées à l\'équipe par prénom.</p></form>';
 }
 echo '<form method="post" class="row" style="margin-top:12px">' . $hid . '<input type="hidden" name="action" value="model_save">'
     . '<input name="nom" placeholder="Nom (ex. Semaine été)" maxlength="60" required style="flex:1;min-width:160px"><button class="small">Enregistrer cette semaine</button></form>'
