@@ -284,6 +284,7 @@ details.menu-exp{position:relative}details.menu-exp>summary{list-style:none;curs
 .resto-pill{display:inline-block;font-size:.8rem;font-weight:600;background:var(--fill);color:var(--fg);border-radius:999px;padding:3px 10px;cursor:pointer;vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cm-resto-w{display:inline-block;font-family:var(--f-text,inherit);font-size:1rem;letter-spacing:0}
 .promo-l{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);margin-top:4px;justify-content:flex-end;cursor:pointer}.promo-l input{width:auto;margin:0}
+.ok-btn{background:var(--ok,#34c759);color:#fff}.verif-q{cursor:pointer}.verif-q:hover{filter:brightness(.95);box-shadow:0 0 0 2px var(--ok-bg,#d6f5dd)}
 .alerte-prix{box-shadow:0 0 0 2px var(--warn-bg),var(--shadow)}
 @media print{.alerte-prix,.fac-banner{display:none!important}#mn-add{display:none}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
@@ -761,7 +762,7 @@ function renderFicheList(){
     if(!g.length)return;
     h+=`<div class="group"><span class="lbl">${esc(cat)}</span></div>`;
     g.forEach(([id,f])=>{const u=ficheUsers(id), miss=missingPrices(f);
-      h+=`<button class="row f" data-open-fiche="${esc(id)}"><span class="name">${esc(f.name||"Sans nom")}<span class="sub">${yieldTxt(f)} · ${(f.lines||[]).length} ingrédient${(f.lines||[]).length>1?"s":""}${u.items?` · ${u.items} article${u.items>1?"s":""} à la carte`:""}${u.fiches?` · utilisée dans ${u.fiches} fiche${u.fiches>1?"s":""}`:""}</span></span><span class="num hide-s">${eur.format(ficheUnitCost(f))}<span class="sub">/ ${f.yieldUnit==="portion"||!f.yieldUnit?"portion":YIELD[f.yieldUnit].label}</span></span><span class="num hide-s">${eur.format(ficheTotal(f))}<span class="sub">total</span></span><span style="justify-self:end">${f.toCheck?`<span class="chip check">À vérifier</span>`:miss?`<span class="chip missing">Prix manquants</span>`:`<span class="chip ok plain">Prête</span>`}</span></button>`});
+      h+=`<button class="row f" data-open-fiche="${esc(id)}"><span class="name">${esc(f.name||"Sans nom")}<span class="sub">${yieldTxt(f)} · ${(f.lines||[]).length} ingrédient${(f.lines||[]).length>1?"s":""}${u.items?` · ${u.items} article${u.items>1?"s":""} à la carte`:""}${u.fiches?` · utilisée dans ${u.fiches} fiche${u.fiches>1?"s":""}`:""}</span></span><span class="num hide-s">${eur.format(ficheUnitCost(f))}<span class="sub">/ ${f.yieldUnit==="portion"||!f.yieldUnit?"portion":YIELD[f.yieldUnit].label}</span></span><span class="num hide-s">${eur.format(ficheTotal(f))}<span class="sub">total</span></span><span style="justify-self:end">${f.toCheck?(CM.lecture?`<span class="chip check">À vérifier</span>`:`<span class="chip check verif-q" data-verif="${esc(id)}" role="button" title="Cliquer pour marquer la fiche comme vérifiée">À vérifier <b>✓</b></span>`):miss?`<span class="chip missing">Prix manquants</span>`:`<span class="chip ok plain">Prête</span>`}</span></button>`});
   });
   return h+`</div>`;
 }
@@ -772,7 +773,7 @@ function renderFicheRead(id){
   const uName=f.yieldUnit==="portion"||!f.yieldUnit?"portion(s)":YIELD[f.yieldUnit].label;
   let h=`<button class="back" data-act="back">‹ ${f.category==="Boisson"?"Recettes boissons":"Fiches techniques"}</button>
   <section class="card sheet">
-    <div class="toolbar"><div><span class="lbl">${esc(f.category||"")}</span><h2 class="big-title">${esc(f.name||"Sans nom")}</h2></div><div class="acts">${f.toCheck?`<span class="tag">Proposée par Claude, à vérifier</span>`:""}<button class="btn ghost" data-act="imprimer">Imprimer</button><button class="btn" data-act="editFiche">Modifier</button></div></div>
+    <div class="toolbar"><div><span class="lbl">${esc(f.category||"")}</span><h2 class="big-title">${esc(f.name||"Sans nom")}</h2></div><div class="acts">${f.toCheck?`<span class="tag">Proposée par Claude, à vérifier</span>${CM.lecture?"":`<button class="btn ok-btn" data-act="markChecked">✓ Vérifiée</button>`}`:""}<button class="btn ghost" data-act="imprimer">Imprimer</button><button class="btn" data-act="editFiche">Modifier</button></div></div>
     ${f.photo&&f.photo.url?`<img class="photo" src="${esc(f.photo.url)}" alt="Dressage : ${esc(f.name)}">`:""}
     <div class="scaler"><label for="scale">Quantités pour</label><input type="text" inputmode="decimal" class="n" id="scale" data-scale="${esc(id)}" value="${n2.format(want)}"><span>${uName}</span><span class="hint" style="margin:0">(recette de base : ${yieldTxt(f)})</span></div>
     <div class="cols"><div><span class="lbl">Ingrédients</span><table class="qtytbl" id="qtytbl"><tbody>${qtyRows(f,k)}</tbody></table></div>
@@ -1217,7 +1218,7 @@ function renderBoissons(){
     h+=`<div class="group"><span class="lbl">${esc(cat)}</span></div>`;
     g.forEach(([id,b])=>{const fm=(b.formats||[]);
       const worst=fm.map(f=>calcFormat(b,f).st).sort((a,c)=>["alert","missing","nd","watch","ok"].indexOf(a)-["alert","missing","nd","watch","ok"].indexOf(c))[0]||"nd";
-      h+=`<button class="row f" data-bopen="${esc(id)}"><span class="name">${esc(b.name||"Sans nom")}${b.toCheck?` <span class="tag">À vérifier</span>`:""}<span class="sub">${fm.map(f=>esc(f.label||"")+" "+(num(f.ttc)>0?eur.format(num(f.ttc)):"—")).join(" · ")||"Aucun format"}</span></span><span class="num hide-s">${b.alcohol?"TVA 20 %":"TVA 10 %"}</span><span class="num hide-s">${fm.length} format${fm.length>1?"s":""}</span><span class="chip ${worst==="missing"?"missing":worst}" style="justify-self:end">${BST[worst]}</span></button>`});
+      h+=`<button class="row f" data-bopen="${esc(id)}"><span class="name">${esc(b.name||"Sans nom")}${b.toCheck?(CM.lecture?` <span class="tag">À vérifier</span>`:` <span class="tag verif-q" data-bverif="${esc(id)}" role="button" title="Cliquer pour marquer comme vérifiée">À vérifier ✓</span>`):""}<span class="sub">${fm.map(f=>esc(f.label||"")+" "+(num(f.ttc)>0?eur.format(num(f.ttc)):"—")).join(" · ")||"Aucun format"}</span></span><span class="num hide-s">${b.alcohol?"TVA 20 %":"TVA 10 %"}</span><span class="num hide-s">${fm.length} format${fm.length>1?"s":""}</span><span class="chip ${worst==="missing"?"missing":worst}" style="justify-self:end">${BST[worst]}</span></button>`});
   });
   return h+`</div>`;
 }
@@ -1370,7 +1371,7 @@ main.addEventListener("click",e=>{
     if(!(price>0)){if(pe){pe.focus();pe.style.borderColor="var(--bad)";pe.placeholder="Prix ?"}return}
     i.price=price;i.unit=document.getElementById("q-unit-"+k).value;const sup=document.getElementById("q-sup-"+k).value.trim();if(sup)i.supplier=sup;delete i.auto;
     const touched=[["ing",l.ref]];fixLinesForIngredient(l.ref,touched);commitMany(touched);render()}
-  else if(act==="markChecked"){delete state.fiches[o.id].toCheck;queueSave("fic",o.id);render()}
+  else if(act==="markChecked"){delete state.fiches[o.id].toCheck;queueSave("fic",o.id);setStatus("Fiche vérifiée");render()}
   else if(act==="delFiche")arm(t,()=>{const id=o.id;const f=state.fiches[id];delete state.fiches[id];state.open=null;state.edit=false;queueSave("fic",id);render();if(f&&f.photo&&f.photo.id){window.claude?.use?.("assets").then(a=>a&&a.delete(f.photo.id)).catch(()=>{})}});
   else if(act==="pickPhoto")pick("photo-file");
   else if(act==="removePhoto")removePhoto();
@@ -2116,6 +2117,11 @@ function renderResto(){
 document.addEventListener("click",e=>{const b=e.target.closest("[data-resto]");if(b){e.preventDefault();if(b.dataset.resto!==CM.resto)changerResto(b.dataset.resto);return}
   const g=e.target.closest("#cm-resto-w [data-tab-go]");if(g){state.view="reglages";state.open=null;render()}});
 
+/* Marquer une fiche ou une boisson comme vérifiée directement depuis la liste */
+main.addEventListener("click",e=>{const v=e.target.closest("[data-verif],[data-bverif]");if(!v)return;e.preventDefault();e.stopPropagation();
+  if(v.dataset.verif&&state.fiches[v.dataset.verif]){delete state.fiches[v.dataset.verif].toCheck;queueSave("fic",v.dataset.verif);setStatus((state.fiches[v.dataset.verif].name||"Fiche")+" : vérifiée")}
+  else if(v.dataset.bverif&&state.boissons[v.dataset.bverif]){delete state.boissons[v.dataset.bverif].toCheck;queueSave("boi",v.dataset.bverif);setStatus((state.boissons[v.dataset.bverif].name||"Boisson")+" : vérifiée")}
+  render()},true);
 /* ---------- Démarrage ---------- */
 try{if(location.hash==="#service")state.view="service";else if(location.hash==="#bar")state.view="boissons"}catch(e){}
 render();
