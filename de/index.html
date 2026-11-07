@@ -375,6 +375,17 @@
   .pdj-fiche a { color: var(--gold); }
   @media (max-width: 900px) { .pdj { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 520px) { .pdj { grid-template-columns: 1fr; } .pdj-f { flex-direction: column; text-align: center; } }
+
+  /* --- Post-it d'annonce (disparaît tout seul après la date data-jusqu) --- */
+  .postit-zone { padding: 112px 0 4px; text-align: center; position: relative; z-index: 3; }
+  .postit-zone:has(.postit) + .dix { padding-top: 34px; }
+  @media (max-width: 860px) { .postit-zone { padding-top: 96px; } .postit-zone:has(.postit) + .dix { padding-top: 28px; } }
+  .postit-zone:not(:has(.postit)) { display: none; }
+  .postit { position: relative; display: inline-block; max-width: 420px; margin: 0; text-align: left; padding: 22px 22px 18px; background: #ffe680; color: #3a2a12; transform: rotate(-2.5deg); box-shadow: 0 1px 1px rgba(0,0,0,.08), 0 14px 26px -10px rgba(74,44,29,.35); border-radius: 2px 2px 18px 2px; z-index: 2; }
+  .postit::before { content: ""; position: absolute; top: -12px; left: 50%; width: 92px; height: 26px; transform: translateX(-50%) rotate(3deg); background: rgba(255,255,255,.55); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .postit b { display: block; font: 700 1.55rem/1.1 var(--script); color: var(--rust); margin-bottom: 6px; }
+  .postit p { margin: 0; font: 600 1.15rem/1.35 var(--script); }
+  .postit a { color: inherit; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -405,6 +416,11 @@
     </nav>
   </div>
 </header>
+<div class="postit-zone"><div class="wrap">
+        <!-- POST-IT : annonce temporaire, masquée automatiquement après la date data-jusqu -->
+        <div class="postit" role="note" data-jusqu="2026-11-07"><b>Heute Abend, Samstag 7. November</b><p>Der Tanzabend ist abgesagt. Das Restaurant ist geöffnet, <strong>à la carte</strong>, ohne Orchester.<br><a href="tel:+33388863187">📞 +33 3 88 86 31 87</a></p></div>
+        <script>(function(){var p=document.currentScript.previousElementSibling,d=p&&p.dataset.jusqu;if(d&&new Date()>new Date(d+"T23:59:59"))p.remove();})();</script>
+</div></div>
 
 <section class="dix" id="dix-ans" hidden>
   <div class="wrap">
