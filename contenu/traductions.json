@@ -702,5 +702,9 @@
   {
     "fr": "Le restaurant est ouvert ce soir, sans orchestre",
     "de": "Das Restaurant ist heute Abend geöffnet, ohne Orchester"
+  },
+  {
+    "fr": "Le restaurant est ouvert ce soir, à la carte, sans orchestre",
+    "de": "Das Restaurant ist heute Abend geöffnet, à la carte, ohne Orchester"
   }
 ]
