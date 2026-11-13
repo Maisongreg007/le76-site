@@ -101,6 +101,46 @@ function cm_copier_depuis(string $source, array $colls): int
     return count($e) - 1;
 }
 
+/* ------------------------------------------------------------------ */
+/* Rôles dans le coût matière : responsable (admin du portail), cuisine, lecture */
+/* ------------------------------------------------------------------ */
+
+const CM_COLLS_CUISINE = ['ingredients', 'fiches', 'menus'];
+
+function cm_role(array $moi): string
+{
+    if (!empty($moi['admin'])) {
+        return 'responsable';
+    }
+    $r = cm_options()['roles'] ?? [];
+    $x = is_array($r) ? ($r[(string) $moi['id']] ?? 'lecture') : 'lecture';
+    return in_array($x, ['cuisine', 'lecture'], true) ? $x : 'lecture';
+}
+
+function cm_equipe(): array
+{
+    $r = cm_options()['roles'] ?? [];
+    $r = is_array($r) ? $r : [];
+    $o = [];
+    foreach (db()->query('SELECT id, nom, identifiant, admin FROM utilisateurs WHERE actif = 1 ORDER BY admin DESC, nom') as $u) {
+        $o[] = ['id' => (int) $u['id'], 'nom' => $u['nom'], 'identifiant' => $u['identifiant'],
+            'role' => $u['admin'] ? 'responsable' : (in_array($r[(string) $u['id']] ?? '', ['cuisine', 'lecture'], true) ? $r[(string) $u['id']] : 'lecture')];
+    }
+    return $o;
+}
+
+function cm_roles_ecrire(array $roles): array
+{
+    $r = [];
+    foreach ($roles as $id => $role) {
+        if (ctype_digit((string) $id) && in_array($role, ['cuisine', 'lecture'], true)) {
+            $r[(string) $id] = $role;
+        }
+    }
+    cm_option('roles', $r);
+    return cm_equipe();
+}
+
 function cm_dossier(string $sous = ''): string
 {
     $r = cm_resto();
@@ -250,7 +290,7 @@ function cm_options(): array
 {
     $o = ['ia_cle' => '', 'ia_modele' => '', 'imap_hote' => 'imap.hostinger.com', 'imap_user' => '', 'imap_mdp' => '',
         'mail_actif' => false, 'derniere_releve' => '', 'derniere_releve_msg' => '',
-        'z_hote' => 'imap.hostinger.com', 'z_user' => 'le76@le76.fr', 'z_mdp' => '', 'z_derniere' => '', 'z_msg' => ''];
+        'z_hote' => 'imap.hostinger.com', 'z_user' => 'le76@le76.fr', 'z_mdp' => '', 'z_derniere' => '', 'z_msg' => '', 'roles' => []];
     foreach (cm_db()->query('SELECT cle, valeur FROM options') as $l) {
         $o[$l['cle']] = json_decode($l['valeur'], true);
     }
@@ -276,6 +316,7 @@ function cm_options_publiques(bool $admin): array
             'derniere_releve' => $o['derniere_releve'], 'derniere_releve_msg' => $o['derniere_releve_msg'],
             'z_user' => $o['z_user'], 'z_mdp' => $o['z_mdp'] !== '', 'z_msg' => $o['z_msg'],
             'imap_dispo' => function_exists('imap_open'), 'curl_dispo' => function_exists('curl_init'),
+            'equipe' => cm_equipe(),
         ];
     }
     return $p;

@@ -300,7 +300,7 @@ h1 .cm-t{color:var(--fg)}
 .status-wrap{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
 .cm-gear{border:0;background:var(--fill);color:var(--muted2);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none}
 .cm-gear svg{width:18px;height:18px}
-.lecture .cm-gear{display:none}
+.restreint .cm-gear{display:none}
 .cm-login{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px));background:var(--bg)}
 .cm-box{width:100%;max-width:380px;background:var(--surface);border-radius:22px;padding:28px 22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
 .cm-box label{display:flex;flex-direction:column;gap:6px;font-size:.82rem;color:var(--muted2);font-weight:500}
@@ -311,6 +311,7 @@ h1 .cm-t{color:var(--fg)}
 .cm-err{color:var(--bad);background:var(--bad-bg);border-radius:10px;padding:10px 12px;margin:0;font-size:.9rem}
 .cm-small{text-align:center;color:var(--muted);font-size:.8rem;margin:4px 0 0}
 /* Lecture seule (équipe) */
+.restreint [data-act="pickInvoice"],.restreint [data-act="pickMenu"],.restreint [data-act="newItem"]{display:none!important}
 .lecture [data-act="editFiche"],.lecture [data-act="newFiche"],.lecture [data-act="pickInvoice"],.lecture [data-act="pickMenu"],.lecture [data-act="newItem"],.lecture [data-act="newIng"],.lecture [data-bact="newB"]{display:none!important}
 /* Factures reçues */
 .fac{display:flex;flex-direction:column;gap:0}
@@ -444,8 +445,8 @@ function ecranConnexion(msg){
     catch(e){b.disabled=false;let p=v.querySelector('.cm-err');if(!p){p=document.createElement('p');p.className='cm-err';f.insertBefore(p,f.querySelector('label'))}p.textContent=e.message}};
 }
 async function demarrer(){
-  try{const d=await post('charger').catch(e=>{if(e.status===404&&RESTO!=='le76'){try{localStorage.removeItem('cm_r')}catch(x){}location.href=location.pathname}throw e});CM.resto=d.resto||'le76';CM.restos=d.restos||[];CM.moi=d.moi;CM.options=d.options||{};CM.docs=d.docs||{};CM.rev=d.rev||0;CM.lecture=!d.moi.admin;
-    document.documentElement.classList.toggle('lecture',CM.lecture);finPret();suivre();
+  try{const d=await post('charger').catch(e=>{if(e.status===404&&RESTO!=='le76'){try{localStorage.removeItem('cm_r')}catch(x){}location.href=location.pathname}throw e});CM.resto=d.resto||'le76';CM.restos=d.restos||[];CM.moi=d.moi;CM.options=d.options||{};CM.docs=d.docs||{};CM.rev=d.rev||0;CM.cuisine=d.moi.role==='cuisine';CM.lecture=!d.moi.admin&&!CM.cuisine;CM.restreint=!d.moi.admin;
+    document.documentElement.classList.toggle('lecture',CM.lecture);document.documentElement.classList.toggle('restreint',CM.restreint);finPret();suivre();
     if(d.moi.admin&&CM.options.mail)setTimeout(()=>post('factures_relever').catch(()=>{}),1500);}
   catch(e){if(e.code==='auth')ecranConnexion();else{document.getElementById('status')&&(document.getElementById('status').textContent=e.message);setTimeout(demarrer,5000)}}
 }
@@ -683,7 +684,7 @@ function renderNav(){
   const part=partOf(state.view);if(state.view!=="service"&&state.view!=="allergenes")state.lastPart=part;
   document.querySelectorAll("[data-part]").forEach(b=>b.setAttribute("aria-pressed",String(state.view!=="service"&&state.view!=="allergenes"&&b.dataset.part===part)));
   const nav=document.getElementById("nav");if(!nav)return;
-  nav.innerHTML=PARTS[part].filter(([k])=>!CM.lecture||k==="fiches"||k==="bfiches"||k==="menus").map(([k,l,sh])=>`<button role="tab" aria-selected="${k===state.view}" data-tab="${k}">${ico(k)}<span class="tl">${l}</span><span class="ts">${sh}</span>${(k==="ingredients"||k==="bingredients")&&!CM.lecture&&facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length?`<span class="nav-badge">${facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length}</span>`:""}</button>`).join("")+`<button role="tab" aria-selected="${state.view==="allergenes"}" data-tab="allergenes">${ico("allergenes")}<span class="tl">Allergènes</span><span class="ts">Allergènes</span></button>`+`<button role="tab" aria-selected="${state.view==="service"}" data-tab="service">${ico("service")}<span class="tl">Service</span><span class="ts">Service</span></button>`;
+  nav.innerHTML=PARTS[part].filter(([k])=>!CM.restreint||k==="fiches"||k==="bfiches"||k==="menus").map(([k,l,sh])=>`<button role="tab" aria-selected="${k===state.view}" data-tab="${k}">${ico(k)}<span class="tl">${l}</span><span class="ts">${sh}</span>${(k==="ingredients"||k==="bingredients")&&!CM.restreint&&facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length?`<span class="nav-badge">${facturesDe(k==="bingredients"?"bar":"cuisine").filter(([,f])=>f.statut==="a_valider").length}</span>`:""}</button>`).join("")+`<button role="tab" aria-selected="${state.view==="allergenes"}" data-tab="allergenes">${ico("allergenes")}<span class="tl">Allergènes</span><span class="ts">Allergènes</span></button>`+`<button role="tab" aria-selected="${state.view==="service"}" data-tab="service">${ico("service")}<span class="tl">Service</span><span class="ts">Service</span></button>`;
   const hd=document.querySelector("header");if(hd)document.documentElement.style.setProperty("--hdr",hd.offsetHeight+"px");
 }
 function render(){
@@ -691,10 +692,10 @@ function render(){
   let h="";
   if(state.noDb)h+=`<div class="banner"><p><strong>Le serveur ne répond pas.</strong> Vérifie la connexion internet puis recharge la page.</p></div>`;
   else if(state.view!=="service"&&!state.demo&&!Object.keys(state.ingredients).length&&!Object.keys(state.fiches).length&&!Object.keys(state.carte).length&&!state.imp&&!state.menuImp)
-    h+=`<div class="banner"><p><strong>Bienvenue.</strong> Commencez par importer vos factures fournisseurs : la mercuriale se remplit toute seule. Écrivez ensuite vos fiches techniques et importez votre carte.</p><div class="acts">${CM.lecture?"":`<button class="btn" data-cm="importer">Remettre ma sauvegarde</button>`}<button class="btn ghost" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="pickMenu">Importer ma carte</button></div></div>`;
+    h+=`<div class="banner"><p><strong>Bienvenue.</strong> Commencez par importer vos factures fournisseurs : la mercuriale se remplit toute seule. Écrivez ensuite vos fiches techniques et importez votre carte.</p><div class="acts">${CM.restreint?"":`<button class="btn" data-cm="importer">Remettre ma sauvegarde</button>`}<button class="btn ghost" data-act="pickInvoice">Importer une facture</button><button class="btn ghost" data-act="pickMenu">Importer ma carte</button></div></div>`;
   if(state.demo) h+=`<div class="banner"><p><strong>Ce sont des exemples.</strong> Modifiez-les pour commencer avec, ou repartez d'une page blanche et importez votre carte et vos factures.</p><div class="acts"><button class="btn" data-act="adopt">Garder les exemples</button><button class="btn ghost" data-act="empty">Partir de zéro</button></div></div>`;
   const o=state.open;
-  if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view))state.view=state.view==="boissons"||state.view==="bingredients"?"bfiches":"fiches";
+  if(CM.restreint&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view))state.view=state.view==="boissons"||state.view==="bingredients"?"bfiches":"fiches";
   if(state.view==="reglages"){main.innerHTML=renderReglages();return}
   if(state.view==="menus"){main.innerHTML=renderMenus();return}
   if(state.view==="ventes"||state.view==="bventes"){main.innerHTML=renderVentes(state.view==="bventes"?"bar":"cuisine");return}
@@ -708,7 +709,7 @@ function render(){
   if(state.view==="ingredients"||state.view==="bingredients")filterIngredients();
   filtrerCarte();
 }
-function bandeauFactures(part){if(CM.lecture)return "";const n=facturesDe(part).filter(([,f])=>f.statut==="a_valider").length;if(!n)return "";
+function bandeauFactures(part){if(CM.restreint)return "";const n=facturesDe(part).filter(([,f])=>f.statut==="a_valider").length;if(!n)return "";
   return `<div class="banner fac-banner"><p><strong>📬 ${n} nouvelle${n>1?"s":""} facture${n>1?"s":""} à vérifier.</strong> Les prix seront mis à jour dès que tu l${n>1?"es":"a"} valides.</p><button class="btn" data-tab-go="${part==="bar"?"bingredients":"ingredients"}">Voir ${n>1?"les factures":"la facture"}</button></div>`}
 function summaryHtml(){return bandeauFactures("cuisine")+renderAlertes("cuisine")+bilanHtml()}
 function renderCarte(){
@@ -759,7 +760,7 @@ function yieldTxt(f){const y=num(f.yield);return n2.format(y)+" "+(f.yieldUnit==
 function renderFicheList(){
   const bar=state.view==="bfiches";
   const fs=Object.entries(state.fiches).filter(([,f])=>(f.category==="Boisson")===bar);
-  const exp=fs.length?boutonsExport(bar?"bfiches":"fiches",CM.lecture?"":`<hr><button data-modif="1">⬆️ Importer les nouveaux prix…<small>le fichier rempli, enregistré en CSV</small></button>`):"";
+  const exp=fs.length?boutonsExport(bar?"bfiches":"fiches",CM.restreint?"":`<hr><button data-modif="1">⬆️ Importer les nouveaux prix…<small>le fichier rempli, enregistré en CSV</small></button>`):"";
   let h=bar?`<div class="toolbar"><h2>Recettes boissons</h2><div class="acts"><button class="btn" data-act="newFiche">+ Nouvelle recette</button>${exp}</div></div>
   <p class="hint" style="margin:0">Cocktails, kirs, cafés, bières panachées… Chaque recette se relie à une boisson de la carte des boissons, qui calcule son coût.</p><div class="list">`:`<div class="toolbar"><h2>Fiches techniques</h2><div class="acts"><button class="btn" data-act="newFiche">+ Nouvelle fiche</button>${exp}</div></div>
   <p class="hint" style="margin:0">Une fiche par recette, avec grammages, étapes et photo. Les bases (frites, sauces, pâtes) se réutilisent dans d'autres fiches.</p><div class="list">`;
@@ -1451,7 +1452,7 @@ function facturesDe(part){
     .sort((a,b)=>(b[1].recu_le||"").localeCompare(a[1].recu_le||""));
 }
 function renderFactures(part){
-  if(CM.lecture)return "";
+  if(CM.restreint)return "";
   const fs=facturesDe(part);const dp=state.depot;
   const prog=dp?`<section class="card imp"><p class="msg">${dp.fini?"":'<span class="spin" aria-hidden="true"></span>'}${esc(dp.msg)}</p>${dp.fini?`<div class="acts"><button class="btn ghost sm" data-cm="depotOk">Fermer</button></div>`:""}</section>`:"";
   if(!fs.length)return prog+`<p class="hint" style="margin:0">Touchez « Ajouter des factures » et sélectionnez tous les PDF ou photos de votre dossier de factures : celles déjà reçues sont reconnues et ignorées, les nouvelles sont lues et arrivent ici, prêtes à vérifier.</p>`;
@@ -1496,7 +1497,7 @@ function bilanHtml(){
     <p class="hint" style="margin:-8px 0 0">Moyennes par plat, calculées sur ${ok.length} plat${ok.length>1?"s":""} complet${ok.length>1?"s":""}, sans tenir compte des quantités vendues.</p>`;
   }
   const hs=hausses();
-  if(hs.length&&!CM.lecture)h+=`<section class="list fac hausses"><div class="fac-head"><h2 style="font-size:1.05rem">Hausses de prix récentes</h2></div>${hs.map(x=>`<div class="fac-row"><div style="min-width:0"><b>${esc(x.i.name)}</b><span class="sub">${eur.format(num(x.x.de))} → ${eur.format(num(x.x.a))} / ${UNITS[x.i.unit]?.label||""} · ${esc(new Date(x.x.d).toLocaleDateString("fr-FR"))}${x.u?` · dans ${x.u} fiche${x.u>1?"s":""}`:""}</span></div><span class="delta up">+${(x.d*100).toFixed(1).replace(".",",")} %</span></div>`).join("")}</section>`;
+  if(hs.length&&!CM.restreint)h+=`<section class="list fac hausses"><div class="fac-head"><h2 style="font-size:1.05rem">Hausses de prix récentes</h2></div>${hs.map(x=>`<div class="fac-row"><div style="min-width:0"><b>${esc(x.i.name)}</b><span class="sub">${eur.format(num(x.x.de))} → ${eur.format(num(x.x.a))} / ${UNITS[x.i.unit]?.label||""} · ${esc(new Date(x.x.d).toLocaleDateString("fr-FR"))}${x.u?` · dans ${x.u} fiche${x.u>1?"s":""}`:""}</span></div><span class="delta up">+${(x.d*100).toFixed(1).replace(".",",")} %</span></div>`).join("")}</section>`;
   return h;
 }
 function bilanBar(){
@@ -1517,6 +1518,10 @@ function renderReglages(){
   const o=CM.options||{};
   return `<button class="back" data-act="back" data-reg-back="1">‹ Retour</button>
   <div class="toolbar"><h2>Réglages</h2></div>
+  ${(o.equipe||[]).length?`<section class="card reg"><h2>Équipe</h2>
+    <p class="hint" style="margin:0">Les comptes se créent dans le portail (le76.fr/admin → Équipe). Ici tu choisis ce que chacun peut faire. <b>Cuisine</b> : modifie les fiches techniques, les marque « Vérifiée », gère les menus, sans voir les prix de vente, marges, ventes ni factures. <b>Lecture</b> : consulte seulement.</p>
+    ${o.equipe.map(u=>`<div class="fields2" style="align-items:center"><span><b>${esc(u.nom)}</b> <span class="hint">(${esc(u.identifiant)})</span></span>${u.role==="responsable"?`<span class="hint">Responsable</span>`:`<select data-role-user="${u.id}"><option value="lecture"${u.role==="lecture"?" selected":""}>Lecture seule</option><option value="cuisine"${u.role==="cuisine"?" selected":""}>Cuisine (modifie les fiches)</option></select>`}</div>`).join("")}
+  </section>`:""}
   <section class="card reg"><h2>Lecture automatique des factures (IA)</h2>
     <p class="hint" style="margin:0">L'IA lit vos factures PDF ou photos et calcule les prix au kg, au litre ou à la pièce. Elle a besoin d'une clé d'accès Anthropic (console.anthropic.com → API Keys). Comptez quelques centimes par facture.</p>
     <div class="fields2"><label class="f"><span class="lbl">Clé d'accès</span><input type="text" id="rg-cle" autocomplete="off" placeholder="sk-ant-…" value="${esc(o.ia_cle||"")}"></label>
@@ -1596,7 +1601,7 @@ document.addEventListener("change",async e=>{if(e.target.id!=="dep-file")return;
   state.depot={fini:true,msg:`${nouv} nouvelle${nouv>1?"s":""} facture${nouv>1?"s":""}${dbl?` · ${dbl} déjà reçue${dbl>1?"s":""}, ignorée${dbl>1?"s":""}`:""}${err?` · ${err} à relire (voir ci-dessous)`:""}.`};render();
 });
 document.getElementById("cm-gear").addEventListener("click",async()=>{try{const o=await CM.post("options");CM.options=o.options}catch(e){}state.view="reglages";state.open=null;render();window.scrollTo(0,0)});
-function majTitre(){if(CM.lecture)return;const n=Object.values(CM.docs.factures||{}).filter(f=>f.statut==="a_valider").length;document.title=(n?`(${n}) `:"")+nomResto()+" · Coût matière";try{if(navigator.setAppBadge)n?navigator.setAppBadge(n):navigator.clearAppBadge()}catch(e){}}
+function majTitre(){if(CM.restreint)return;const n=Object.values(CM.docs.factures||{}).filter(f=>f.statut==="a_valider").length;document.title=(n?`(${n}) `:"")+nomResto()+" · Coût matière";try{if(navigator.setAppBadge)n?navigator.setAppBadge(n):navigator.clearAppBadge()}catch(e){}}
 setInterval(majTitre,5000);
 document.addEventListener("cm-factures",()=>{majTitre();const a=document.activeElement;if(a&&main.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;if(state.imp&&state.imp.status==="review")return;render()});
 
@@ -1623,7 +1628,7 @@ function alertesOuvertes(part){
   return Object.entries(CM.docs.alertes||{}).filter(([,a])=>a.statut==="ouverte").map(([id,a])=>[id,a,(a.plats||[]).filter(p=>(part==="bar")===p.cle.startsWith("boi:")&&!p.fait)]).filter(([,,ps])=>ps.length).sort((x,y)=>(y[1].date||"").localeCompare(x[1].date||""));
 }
 function renderAlertes(part){
-  if(CM.lecture)return "";
+  if(CM.restreint)return "";
   const al=alertesOuvertes(part);if(!al.length)return "";
   const tgt=num(state.settings.target)/100;
   return al.map(([id,a,ps])=>`<section class="list fac alerte-prix"><div class="fac-head"><div><h2 style="font-size:1.05rem">⚠️ Hausse de prix${a.fournisseur?" · "+esc(a.fournisseur):""}</h2><span class="hint" style="margin:2px 0 0;display:block">${ps.length} ${part==="bar"?"boisson":"plat"}${ps.length>1?"s":""} touché${part==="bar"?"e":""}${ps.length>1?"s":""} par la facture du ${esc(new Date(a.date).toLocaleDateString("fr-FR"))}. Le prix conseillé garde ta marge en % d'avant la hausse.</span></div><button class="btn ghost sm" data-alerte="fermer" data-id="${esc(id)}">Tout ignorer</button></div>
@@ -2037,7 +2042,7 @@ function enregistrerControle(im){
 }
 function controlesOuverts(part){return Object.entries(CM.docs.alertes||{}).filter(([,a])=>a&&a.type==="facture"&&a.statut==="ouverte"&&(a.lignes||[]).some(l=>{const i=state.ingredients[l.id];return !i||ingPart(l.id,i)[part]})).sort((a,b)=>(b[1].date||"").localeCompare(a[1].date||""))}
 function renderControles(part){
-  if(CM.lecture)return "";const cs=controlesOuverts(part);if(!cs.length)return "";
+  if(CM.restreint)return "";const cs=controlesOuverts(part);if(!cs.length)return "";
   return cs.map(([id,a])=>`<section class="list fac alerte-prix"><div class="fac-head"><div><h2 style="font-size:1.05rem">🧾 Contrôle facture ${esc(a.fournisseur||"")}${a.date_facture?" du "+esc(new Date(a.date_facture).toLocaleDateString("fr-FR")):""}</h2><span class="hint" style="margin:2px 0 0;display:block">${a.lignes.length} produit${a.lignes.length>1?"s":""} plus cher${a.lignes.length>1?"s":""} que d'habitude${a.total>0?` · <b>${eur.format(a.total)} HT</b> de plus`:""}</span></div>
     <div class="acts"><button class="btn sm" data-ctl="mail" data-id="${esc(id)}">Copier la réclamation</button><button class="btn ghost sm" data-ctl="classer" data-id="${esc(id)}">Classer</button></div></div>
     ${a.lignes.map(l=>`<div class="fac-row"><div style="min-width:0"><b>${esc(l.name)}</b><span class="sub">${eur4.format(l.prix)} au lieu de ${eur4.format(l.hab)} / ${esc(UNITS[l.unit]?.label||l.unit)} <span class="delta up">+${((l.prix/l.hab-1)*100).toFixed(1).replace(".",",")} %</span>${l.qty?` · ${n2.format(l.qty)} ${esc(UNITS[l.unit]?.label||"")} achetés`:""}</span></div><div class="num"><b>${l.surcout!=null?"+"+eur.format(l.surcout):""}</b></div></div>`).join("")}</section>`).join("");
@@ -2081,14 +2086,14 @@ function groupesFournisseurs(part){
 }
 function renderComparaison(part){
   const gs=groupesFournisseurs(part),tot=gs.reduce((s,x)=>s+x.eco,0),aConso=!!ventesJours().length;
-  let h=`<section class="card"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.1rem">Comparer les fournisseurs</h2><span class="hint" style="margin:2px 0 0;display:block">Le même produit chez plusieurs fournisseurs, au prix ramené au kg, au litre ou à la pièce.${aConso?" L'économie est estimée sur ta consommation des 30 derniers jours (ventes × fiches techniques).":""}</span></div>${CM.options.ia&&!CM.lecture?(state.grpProg?`<button class="btn" disabled>${esc(state.grpProg)}</button>`:`<button class="btn" data-grp="ia">${gs.length?"Relancer le regroupement":"Trouver les produits équivalents"}</button>`):""}</div></section>`;
+  let h=`<section class="card"><div class="toolbar" style="margin:0"><div><h2 style="font-size:1.1rem">Comparer les fournisseurs</h2><span class="hint" style="margin:2px 0 0;display:block">Le même produit chez plusieurs fournisseurs, au prix ramené au kg, au litre ou à la pièce.${aConso?" L'économie est estimée sur ta consommation des 30 derniers jours (ventes × fiches techniques).":""}</span></div>${CM.options.ia&&!CM.restreint?(state.grpProg?`<button class="btn" disabled>${esc(state.grpProg)}</button>`:`<button class="btn" data-grp="ia">${gs.length?"Relancer le regroupement":"Trouver les produits équivalents"}</button>`):""}</div></section>`;
   if(!gs.length)return h+`<div class="list"><div class="empty">Aucun produit comparé pour l'instant. Clique sur « Trouver les produits équivalents » : l'IA repère les mêmes produits chez des fournisseurs différents (ex. crème 30 % chez Romaf et chez VLG).</div></div>`;
   if(tot>0.5)h+=`<section class="bilan"><div class="hl"><span class="lbl">Économie possible</span><span class="big">${eur.format(tot)} <small>HT / mois</small></span><span class="sub">en prenant chaque produit chez le moins cher</span></div><div><span class="lbl">Produits comparés</span><span class="big">${gs.length}</span><span class="sub">chez au moins deux fournisseurs</span></div></section>`;
   h+=`<div class="list">`;
   gs.forEach(g=>{const ul=UNITS[g.unit]?.label||g.unit;
     h+=`<div class="group" style="display:flex;justify-content:space-between;gap:10px"><span class="lbl">${esc(g.nom)}</span>${g.eco>0.5?`<span class="lbl" style="color:var(--ok)">économie ≈ ${eur.format(g.eco)} / mois</span>`:""}</div>`;
     g.items.forEach((x,k)=>{const d=g.min>0?x.prix/g.min-1:0;
-      h+=`<div class="row cmp"><span class="name">${esc(x.i.name||"")}<span class="sub">${esc(x.i.supplier||"Sans fournisseur")}${promoEnCours(x.i)?` · <b style="color:var(--ok)">promo ${eur4.format(x.i.promo.prix)} le ${esc(new Date(x.i.promo.date).toLocaleDateString("fr-FR"))}</b>`:""}${x.conso>0?` · ≈ ${n2.format(+x.conso.toFixed(1))} ${esc(ul)} / mois`:""}</span></span><span class="num">${eur4.format(x.prix)}<span class="sub">/ ${esc(ul)}</span></span><span>${k===0?`<span class="chip ok plain">Le moins cher</span>`:`<span class="chip ${d>0.15?"alert":"watch"} plain">+${(d*100).toFixed(0)} %</span>`}</span>${CM.lecture?"":`<button class="x" title="Ce n'est pas le même produit" aria-label="Retirer de la comparaison" data-grp="retirer" data-id="${esc(x.id)}">✕</button>`}</div>`})});
+      h+=`<div class="row cmp"><span class="name">${esc(x.i.name||"")}<span class="sub">${esc(x.i.supplier||"Sans fournisseur")}${promoEnCours(x.i)?` · <b style="color:var(--ok)">promo ${eur4.format(x.i.promo.prix)} le ${esc(new Date(x.i.promo.date).toLocaleDateString("fr-FR"))}</b>`:""}${x.conso>0?` · ≈ ${n2.format(+x.conso.toFixed(1))} ${esc(ul)} / mois`:""}</span></span><span class="num">${eur4.format(x.prix)}<span class="sub">/ ${esc(ul)}</span></span><span>${k===0?`<span class="chip ok plain">Le moins cher</span>`:`<span class="chip ${d>0.15?"alert":"watch"} plain">+${(d*100).toFixed(0)} %</span>`}</span>${CM.restreint?"":`<button class="x" title="Ce n'est pas le même produit" aria-label="Retirer de la comparaison" data-grp="retirer" data-id="${esc(x.id)}">✕</button>`}</div>`})});
   return h+`</div>`;
 }
 async function regrouperIA(t){
@@ -2121,12 +2126,15 @@ function changerResto(id){try{localStorage.setItem("cm_r",id)}catch(e){}location
 function renderResto(){
   const w=document.getElementById("cm-resto-w");if(!w)return;const rs=CM.restos||[];
   if(rs.length<2){w.innerHTML="";return}
-  w.innerHTML=`<details class="menu-exp resto-pick"><summary class="resto-pill">${esc(nomResto())} ▾</summary><div class="menu-pop" style="left:0;right:auto;min-width:220px">${rs.map(r=>`<button data-resto="${esc(r.id)}">${r.id===CM.resto?"✓ ":""}${esc(r.nom)}</button>`).join("")}${CM.lecture?"":`<hr><button data-tab-go="reglages">+ Ajouter un restaurant…</button>`}</div></details>`;
+  w.innerHTML=`<details class="menu-exp resto-pick"><summary class="resto-pill">${esc(nomResto())} ▾</summary><div class="menu-pop" style="left:0;right:auto;min-width:220px">${rs.map(r=>`<button data-resto="${esc(r.id)}">${r.id===CM.resto?"✓ ":""}${esc(r.nom)}</button>`).join("")}${CM.restreint?"":`<hr><button data-tab-go="reglages">+ Ajouter un restaurant…</button>`}</div></details>`;
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-resto]");if(b){e.preventDefault();if(b.dataset.resto!==CM.resto)changerResto(b.dataset.resto);return}
   const g=e.target.closest("#cm-resto-w [data-tab-go]");if(g){state.view="reglages";state.open=null;render()}});
 
 /* Marquer une fiche ou une boisson comme vérifiée directement depuis la liste */
+main.addEventListener("change",async e=>{const sel=e.target.closest("[data-role-user]");if(!sel)return;
+  const roles={};(CM.options.equipe||[]).forEach(u=>{if(u.role!=="responsable")roles[u.id]=u.role});roles[sel.dataset.roleUser]=sel.value;
+  try{const r=await post("roles_ecrire",{roles});CM.options.equipe=r.equipe;setStatus("Rôle enregistré")}catch(x){setStatus("Échec : "+(x.message||"erreur"),true)}});
 main.addEventListener("click",e=>{const v=e.target.closest("[data-verif],[data-bverif]");if(!v)return;e.preventDefault();e.stopPropagation();
   if(v.dataset.verif&&state.fiches[v.dataset.verif]){delete state.fiches[v.dataset.verif].toCheck;queueSave("fic",v.dataset.verif);setStatus((state.fiches[v.dataset.verif].name||"Fiche")+" : vérifiée")}
   else if(v.dataset.bverif&&state.boissons[v.dataset.bverif]){delete state.boissons[v.dataset.bverif].toCheck;queueSave("boi",v.dataset.bverif);setStatus((state.boissons[v.dataset.bverif].name||"Boisson")+" : vérifiée")}
@@ -2200,7 +2208,7 @@ render();
     }
   }catch(e){}}
   {const t=relinkAll();if(t.length){t.forEach(([k,id])=>persist(k,id));render()}}
-  setStatus(mode==="db"?(CM.lecture?CM.moi.nom+" · lecture":CM.moi.nom+" · synchronisé"):"Hors connexion",mode!=="db");if(CM.lecture&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view)){state.view="fiches";}render();
+  setStatus(mode==="db"?(CM.lecture?CM.moi.nom+" · lecture":CM.moi.nom+(CM.cuisine?" · cuisine":" · synchronisé")):"Hors connexion",mode!=="db");if(CM.restreint&&!["service","allergenes","fiches","bfiches","menus"].includes(state.view)){state.view="fiches";}render();
   /* Suivi en direct : si les données changent ailleurs (autre appareil, Claude), la page se met à jour au lieu de les écraser */
   if(mode==="db"&&refs){
     let needRender=false;

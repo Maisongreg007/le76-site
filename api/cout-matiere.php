@@ -42,7 +42,8 @@ try {
     }
     $moi = cm_utilisateur() ?? erreur('Connecte-toi pour continuer.', 401);
     $admin = (bool) $moi['admin'];
-    $public = ['id' => (int) $moi['id'], 'nom' => $moi['nom'], 'admin' => $admin];
+    $role = cm_role($moi);
+    $public = ['id' => (int) $moi['id'], 'nom' => $moi['nom'], 'admin' => $admin, 'role' => $role];
 
     // Fichiers (GET) : photos des fiches et factures reçues
     if ($action === 'photo') {
@@ -65,12 +66,32 @@ try {
     switch ($action) {
         case 'charger':
             [$docs, $rev] = cm_tout();
+            if (!$admin) {
+                foreach (['ventes', 'factures', 'alertes', 'liens', 'carte', 'boissons'] as $k) {
+                    $docs[$k] = new stdClass();
+                }
+            }
             repondre(['ok' => true, 'moi' => $public, 'docs' => $docs, 'rev' => $rev, 'options' => cm_options_publiques($admin),
                 'resto' => cm_resto(), 'restos' => cm_restaurants()]);
         case 'changements':
             repondre(['ok' => true] + cm_changements((int) ($q['depuis'] ?? 0)));
     }
 
+    // Cuisine : peut modifier ingrédients, fiches et menus, ajouter des photos et utiliser l'IA pour les fiches
+    if (!$admin && $role === 'cuisine') {
+        switch ($action) {
+            case 'ecrire':
+                $e = array_values(array_filter(is_array($q['ecritures'] ?? null) ? $q['ecritures'] : [], fn($x) => in_array($x['coll'] ?? '', CM_COLLS_CUISINE, true)));
+                repondre(['ok' => true, 'rev' => $e ? cm_ecrire($e) : cm_rev()]);
+            case 'ia':
+                repondre(['ok' => true, 'resultat' => cm_ia_requete($q)]);
+            case 'photo_envoyer':
+                repondre(['ok' => true] + cm_photo_enregistrer((string) ($q['donnees'] ?? '')));
+            case 'photo_supprimer':
+                cm_fichier_supprimer('photos', (string) ($q['id'] ?? ''));
+                repondre(['ok' => true]);
+        }
+    }
     $admin || erreur('Réservé au responsable : demande-lui de faire la modification.', 403);
 
     switch ($action) {
@@ -122,6 +143,8 @@ try {
             $s = json_decode((string) file_get_contents(__DIR__ . '/lib/cout-matiere-camping-2027.json'), true);
             is_array($s) || erreur('Modèle du camping introuvable.');
             repondre(['ok' => true, 'id' => $id, 'restos' => $restos, 'importes' => cm_importer($s)]);
+        case 'roles_ecrire':
+            repondre(['ok' => true, 'equipe' => cm_roles_ecrire(is_array($q['roles'] ?? null) ? $q['roles'] : [])]);
         case 'resto_creer':
             repondre(['ok' => true] + cm_resto_creer((string) ($q['nom'] ?? '')));
         case 'facture_relire':
