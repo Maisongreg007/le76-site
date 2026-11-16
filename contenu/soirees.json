@@ -26,11 +26,6 @@
   "agenda_titre": "Les prochaines dates",
   "agenda": [
     {
-      "date": "2026-11-14",
-      "titre": "Soirée cordon bleu XXL",
-      "details": "29,90 €"
-    },
-    {
       "date": "2026-11-21",
       "heure": "20h",
       "titre": "Soirée blind test avec KJ Patric",
