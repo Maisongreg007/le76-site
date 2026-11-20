@@ -1,0 +1,211 @@
+/*
+ * Habillage de Noël et de l'Avent (le76.fr et le76.fr/de/) : vert sapin, rouge et or, couronne de l'Avent.
+ * Ne s'applique que si <html> a la classe « noel », posée par le petit script de l'en-tête
+ * du dimanche 29 novembre au 31 décembre minuit. Ensuite, le site reprend tout seul son apparence habituelle.
+ * Aperçu à tout moment : le76.fr/?noel  (et ?noel&bougies=3 pour voir un autre dimanche de l'Avent)
+ */
+html.noel {
+  --cream: #0a1611;
+  --paper: #12231a;
+  --sand: #193026;
+  --ink: #050d09;          /* fonds très sombres (soirées, pied de page) */
+  --brown: #f1e2bc;        /* titres : or pâle */
+  --muted: #bcae95;
+  --rust: #d6b062;
+  --rouge: #c8322f;         /* boutons et accents : or */
+  --rust-dark: #b8923f;
+  --orange: #d9b46a;
+  --gold: #d6b062;
+  --gold-light: #efd592;
+  --line: rgba(214,176,98,.26);
+  --or-degrade: linear-gradient(180deg, #f6e2a8 0%, #d6b062 48%, #a67c2e 100%);
+  color-scheme: dark;
+}
+html.noel body { background: var(--cream); color: #efe4cc; }
+html.noel ::selection { background: #d6b062; color: #120d07; }
+html.noel a { color: var(--gold-light); }
+
+/* ----- Titres : or satiné ----- */
+html.noel .title, html.noel .sheet-head h3 {
+  background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html.noel .title em { color: inherit; font-style: italic; }
+html.noel .kicker, html.noel .sheet-head .de, html.noel .pdj-j span { color: var(--gold); letter-spacing: .34em; }
+html.noel .note { color: var(--gold-light); }
+html.noel .divider { color: var(--gold); }
+
+/* ----- Boutons : or massif, texte sombre ----- */
+html.noel .btn { background: var(--or-degrade); color: #17110a; border-color: #b8923f; font-weight: 600; letter-spacing: .06em;
+  box-shadow: 0 8px 26px rgba(214,176,98,.22), inset 0 1px 0 rgba(255,255,255,.45); }
+html.noel .btn:hover { background: linear-gradient(180deg, #fbeab9 0%, #e3c27a 50%, #b8923f 100%); border-color: #e3c27a; color: #17110a; }
+html.noel .btn.ghost { background: transparent; color: var(--gold-light); border-color: rgba(214,176,98,.7); box-shadow: none; }
+html.noel .btn.ghost:hover { background: var(--gold); color: #17110a; }
+html.noel nav.links .btn { color: #17110a; }
+html.noel nav.links .tel-mobile { color: var(--gold-light); background: var(--paper); }
+html.noel nav.links .tel-mobile:hover { color: #17110a; }
+
+/* ----- En-tête ----- */
+html.noel header.top.scrolled { background: rgba(10,22,17,.94); box-shadow: 0 1px 0 rgba(214,176,98,.3); }
+html.noel .brand { color: #f4ead4; }
+html.noel .brand span { color: var(--gold-light); }
+html.noel nav.links a { color: #eadfc6; }
+html.noel nav.links a:hover { color: var(--gold-light); }
+html.noel nav.links a.lang { background: transparent; color: var(--gold-light); }
+html.noel nav.links .btn:hover { color: #17110a; }
+
+/* ----- Haut de page : écrin noir, halo doré ----- */
+html.noel .hero {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(214,176,98,.20), transparent 60%),
+    radial-gradient(ellipse at 90% 95%, rgba(166,124,46,.14), transparent 55%),
+    radial-gradient(ellipse at 8% 80%, rgba(166,124,46,.10), transparent 50%),
+    #08130e;
+}
+html.noel .hero::after { content: ""; position: absolute; inset: 18px; border: 1px solid rgba(214,176,98,.35); pointer-events: none; z-index: 1; }
+html.noel .hero::before { content: ""; position: absolute; inset: 26px; border: 1px solid rgba(214,176,98,.14); pointer-events: none; z-index: 1; }
+html.noel .hero .leaves { display: none; }
+html.noel .hero::before { border-color: rgba(200,50,47,.25); }
+html.noel .status { background: rgba(214,176,98,.08); border-color: var(--line); color: #efe4cc; }
+html.noel .logo-xl b { color: #fbf3df; text-shadow: 0 6px 30px rgba(214,176,98,.25); }
+html.noel .logo-xl span { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.noel .logo-xl .note { color: var(--gold-light); }
+html.noel .tagline { color: var(--gold-light); letter-spacing: .42em; }
+html.noel .hero .lead { color: #d3c6ac; }
+html.noel .hero .lead strong { color: var(--gold-light); }
+html.noel .hero-photo img { border-radius: 200px 200px 6px 6px; box-shadow: 0 40px 90px rgba(0,0,0,.65), 0 0 0 1px rgba(214,176,98,.75), 0 0 0 9px #08130e, 0 0 0 10px rgba(214,176,98,.4); }
+html.noel .hero-photo .note { background: #12231a; border: 1px solid var(--line); color: var(--gold-light); box-shadow: 0 12px 34px rgba(0,0,0,.5); }
+
+/* ----- Paillettes dorées ----- */
+.nl-paillettes { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.nl-paillettes i { position: absolute; top: -12px; display: block; border-radius: 50%;
+  background: radial-gradient(circle, #fff6dc 0, #e2bd6e 45%, rgba(184,137,47,0) 72%);
+  animation: nl-tombe linear infinite; opacity: 0; }
+.nl-paillettes i.losange { border-radius: 2px; transform: rotate(45deg);
+  background: linear-gradient(135deg, #f3dc9f, #b8892f); }
+@keyframes nl-tombe {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: .95; }
+  85% { opacity: .75; }
+  100% { transform: translate(var(--dx, 20px), 92vh) rotate(220deg); opacity: 0; }
+}
+
+/* ----- Bandeau « 10 ans » : coffret noir et or ----- */
+html.noel .dix { background: #08130e; }
+html.noel .dix .box { background: linear-gradient(135deg, #12231a 0%, #0a1611 60%, #12231a 100%); color: #f1e6d6;
+  box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(214,176,98,.55); }
+html.noel .dix .box::after { border-color: rgba(214,176,98,.4); }
+html.noel .dix .box::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(239,213,146,.16) 50%, transparent 65%);
+  background-size: 250% 100%; animation: nl-reflet 6s ease-in-out infinite; }
+@keyframes nl-reflet { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+html.noel .dix .box > * { position: relative; z-index: 1; }
+html.noel .dix .big10 { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.noel .dix .big10 small { color: var(--gold-light); -webkit-text-fill-color: var(--gold-light); }
+html.noel .dix h2 { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.noel .dix .places { background: var(--or-degrade); color: #17110a; }
+html.noel .dix .compte div { background: rgba(214,176,98,.07); border-color: rgba(214,176,98,.4); }
+html.noel .dix .compte b { color: var(--gold-light); }
+
+/* ----- Bandeau infos, carte, plats du jour ----- */
+html.noel .infobar .grid, html.noel .sheet, html.noel .hours, html.noel .addr {
+  background: var(--paper); border-color: var(--line); box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+html.noel .infobar .ico { background: rgba(214,176,98,.12); color: var(--gold-light); }
+html.noel .infobar h3 { color: var(--gold-light); }
+html.noel .tabs button { background: var(--paper); border-color: var(--line); color: #eadfc6; }
+html.noel .tabs button:hover { border-color: var(--gold); }
+html.noel .tabs button[aria-selected="true"] { background: var(--or-degrade); border-color: #b8923f; color: #17110a; font-weight: 600; }
+html.noel .sub { color: var(--gold-light); }
+html.noel .item h4 { color: #f6ecd6; }
+html.noel .item .dots { border-bottom-color: rgba(214,176,98,.35); }
+html.noel .item .price { color: var(--gold-light); }
+html.noel .item .de { color: var(--gold); }
+html.noel .item.tag h4::after { background: var(--or-degrade); color: #17110a; }
+html.noel .callout, html.noel .glaces { background: var(--sand); border: 1px solid var(--line); }
+html.noel .callout .big { color: var(--gold-light); }
+html.noel .glaces strong { color: var(--gold-light); }
+html.noel .chips span { background: var(--paper); }
+html.noel .chips b { color: var(--gold-light); }
+html.noel .ribbon { background: var(--or-degrade); color: #17110a; }
+html.noel .ribbon span { color: #5a3d0c; }
+html.noel #plats { background: #0d1b14; }
+html.noel .pdj-j { background: var(--paper); border-color: var(--line); }
+html.noel .pdj-j h3 { color: var(--gold-light); }
+html.noel .pdj-f { background: linear-gradient(135deg, #5e1722, #260a10); border: 1px solid rgba(214,176,98,.5); color: #f1e6d6; }
+html.noel .pdj-f strong { color: var(--gold-light); }
+
+/* ----- Soirées, pied de page : noir absolu ----- */
+html.noel .evenings { background: #040a07; }
+html.noel .ev { border-color: rgba(214,176,98,.4); background: linear-gradient(160deg, rgba(214,176,98,.08), rgba(0,0,0,0)); }
+html.noel .ev .next { background: rgba(214,176,98,.16); }
+html.noel footer { background: #040a07; border-top: 1px solid rgba(214,176,98,.3); }
+html.noel footer .social a:hover { background: var(--gold); border-color: var(--gold); color: #17110a; }
+
+/* ----- Bon cadeau : carte noire et or ----- */
+html.noel .giftcard { background: linear-gradient(135deg, #5e1722 0%, #260a10 55%, #4a1119 100%); color: #f6ecd6;
+  box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(214,176,98,.6); }
+html.noel .giftcard::before { border-color: rgba(214,176,98,.5); }
+html.noel ul.check li { border-bottom-color: var(--line); }
+html.noel ul.check li::before { background-color: rgba(214,176,98,.14);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23efd592' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+
+/* ----- Horaires & accès ----- */
+html.noel .visit { background: #0d1b14; }
+html.noel .hours .h-head { background: #193026; color: var(--gold); }
+html.noel .hours .day { color: var(--gold-light); }
+html.noel .hours .on { color: #efe4cc; }
+html.noel .hours .off { color: #6f6454; }
+html.noel .hours .closedrow { color: #d9a07c; }
+html.noel .hours .today { background: rgba(214,176,98,.12); }
+html.noel .hours .today .day::after { color: var(--gold-light); }
+html.noel .map { filter: invert(.92) hue-rotate(180deg) saturate(.45) sepia(.35) brightness(.95); }
+
+/* ----- Encart Réveillon, feuilles décoratives ----- */
+html.noel .rv .rvc { background: var(--paper); box-shadow: 0 20px 50px rgba(0,0,0,.5); color: #efe4cc; }
+html.noel .rv .rvc::before { border-color: rgba(214,176,98,.55); }
+html.noel .rv .k { color: var(--gold); }
+html.noel .rv h3 { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.noel .rv .go { background: var(--or-degrade); color: #17110a; }
+html.noel .rv .go:hover { background: var(--gold-light); }
+html.noel .rv .dl { border-color: rgba(214,176,98,.7); color: var(--gold-light); }
+html.noel .rv .dl:hover { background: rgba(214,176,98,.14); }
+html.noel .evenings .leaves, html.noel .giftcard .leafc { display: none; }
+html.noel .tagline { letter-spacing: .3em; }
+@media (max-width: 860px) { html.noel .tagline { letter-spacing: .16em; } }
+
+/* ----- Noël : touches rouges, guirlande, neige, couronne de l'Avent ----- */
+html.noel .ribbon { background: linear-gradient(180deg, #d9423d, #9d1f24); color: #fff; }
+html.noel .ribbon span { color: var(--gold-light); }
+html.noel .hero { background:
+    radial-gradient(ellipse at 50% 0%, rgba(214,176,98,.16), transparent 58%),
+    radial-gradient(ellipse at 92% 95%, rgba(200,50,47,.16), transparent 55%),
+    radial-gradient(ellipse at 6% 85%, rgba(31,110,70,.28), transparent 50%), #08130e; }
+html.noel .pdj-f { border-color: rgba(214,176,98,.55); }
+html.noel .rv .rvc { box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(200,50,47,.35); }
+
+.nl-guirlande { position: absolute; top: 0; left: 0; right: 0; height: 46px; z-index: 2; pointer-events: none; }
+.nl-guirlande svg { width: 100%; height: 46px; display: block; }
+.nl-guirlande .fil { fill: none; stroke: rgba(214,176,98,.55); stroke-width: 1.5; }
+.nl-guirlande .amp { animation: nl-brille 2.6s ease-in-out infinite; }
+@keyframes nl-brille { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+
+.nl-neige { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.nl-neige i { position: absolute; top: -12px; display: block; border-radius: 50%; background: #fff; opacity: 0; filter: blur(.4px);
+  animation: nl-neige linear infinite; }
+@keyframes nl-neige { 0% { transform: translate(0,0); opacity: 0; } 10% { opacity: .85; } 90% { opacity: .6; } 100% { transform: translate(var(--dx,20px), 96vh); opacity: 0; } }
+
+.nl-avent { margin: 30px 0 0; display: flex; align-items: center; gap: 20px; }
+.hero.no-photo .nl-avent { justify-content: center; }
+.nl-avent svg { width: 300px; height: auto; flex: none; overflow: visible; }
+.nl-avent p { margin: 0; color: #d3c6ac; font-size: .98rem; line-height: 1.45; max-width: 15em; }
+.nl-avent b { display: block; font: 700 1.25rem/1.15 var(--serif); color: var(--gold-light); margin-bottom: 4px; }
+.nl-flamme { transform-box: fill-box; transform-origin: 50% 100%; animation: nl-danse 1.8s ease-in-out infinite alternate; }
+.nl-halo { animation: nl-pulse 2.4s ease-in-out infinite alternate; }
+@keyframes nl-danse { from { transform: scale(1,1) rotate(-3deg); } to { transform: scale(.92,1.08) rotate(3deg); } }
+@keyframes nl-pulse { from { opacity: .55; } to { opacity: 1; } }
+@media (max-width: 860px) { .nl-avent { flex-direction: column; text-align: center; gap: 10px; } .nl-avent p { max-width: none; } }
+@media (prefers-reduced-motion: reduce) { .nl-neige { display: none; } .nl-flamme, .nl-halo, .nl-guirlande .amp { animation: none !important; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nl-paillettes { display: none; }
+  .nl-sceau .tourne, html.noel .dix .box::before { animation: none !important; }
+}
