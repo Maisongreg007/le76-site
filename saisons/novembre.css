@@ -1,44 +1,89 @@
 /*
- * Habillage de novembre « Le 76 fête ses 10 ans » (le76.fr et le76.fr/de/).
+ * Habillage « Le 76 fête ses 10 ans » : noir profond et or, ambiance soirée de gala (le76.fr et le76.fr/de/).
  * Ne s'applique que si <html> a la classe « novembre », posée par le petit script de l'en-tête
- * du dimanche 1er novembre à midi (fin d'Halloween) au samedi 28 novembre à minuit.
- * Ensuite, le site reprend son apparence habituelle tout seul.
+ * du dimanche 1er novembre à midi au samedi 28 novembre à minuit.
+ * Ensuite, le site reprend tout seul son apparence habituelle.
  * Aperçu à tout moment : le76.fr/?novembre
  */
 html.novembre {
-  --rust: #8c6420;        /* boutons et titres : doré foncé */
-  --rust-dark: #6c4c16;
-  --orange: #a8782a;
-  --gold: #b8892f;
-  --gold-light: #e2bd6e;
+  --cream: #0c0a08;
+  --paper: #15110d;
+  --sand: #1b1610;
+  --ink: #060504;          /* fonds très sombres (soirées, pied de page) */
+  --brown: #f1e2bc;        /* titres : or pâle */
+  --muted: #bcae95;
+  --rust: #d6b062;         /* boutons et accents : or */
+  --rust-dark: #b8923f;
+  --orange: #d9b46a;
+  --gold: #d6b062;
+  --gold-light: #efd592;
+  --line: rgba(214,176,98,.26);
+  --or-degrade: linear-gradient(180deg, #f6e2a8 0%, #d6b062 48%, #a67c2e 100%);
+  color-scheme: dark;
 }
+html.novembre body { background: var(--cream); color: #efe4cc; }
+html.novembre ::selection { background: #d6b062; color: #120d07; }
+html.novembre a { color: var(--gold-light); }
 
-/* ----- Haut de page : crème plus chaud, lumière dorée ----- */
+/* ----- Titres : or satiné ----- */
+html.novembre .title, html.novembre .sheet-head h3 {
+  background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html.novembre .title em { color: inherit; font-style: italic; }
+html.novembre .kicker, html.novembre .sheet-head .de, html.novembre .pdj-j span { color: var(--gold); letter-spacing: .34em; }
+html.novembre .note { color: var(--gold-light); }
+html.novembre .divider { color: var(--gold); }
+
+/* ----- Boutons : or massif, texte sombre ----- */
+html.novembre .btn { background: var(--or-degrade); color: #17110a; border-color: #b8923f; font-weight: 600; letter-spacing: .06em;
+  box-shadow: 0 8px 26px rgba(214,176,98,.22), inset 0 1px 0 rgba(255,255,255,.45); }
+html.novembre .btn:hover { background: linear-gradient(180deg, #fbeab9 0%, #e3c27a 50%, #b8923f 100%); border-color: #e3c27a; color: #17110a; }
+html.novembre .btn.ghost { background: transparent; color: var(--gold-light); border-color: rgba(214,176,98,.7); box-shadow: none; }
+html.novembre .btn.ghost:hover { background: var(--gold); color: #17110a; }
+html.novembre nav.links .btn { color: #17110a; }
+html.novembre nav.links .tel-mobile { color: var(--gold-light); background: var(--paper); }
+html.novembre nav.links .tel-mobile:hover { color: #17110a; }
+
+/* ----- En-tête ----- */
+html.novembre header.top.scrolled { background: rgba(12,10,8,.94); box-shadow: 0 1px 0 rgba(214,176,98,.3); }
+html.novembre .brand { color: #f4ead4; }
+html.novembre .brand span { color: var(--gold-light); }
+html.novembre nav.links a { color: #eadfc6; }
+html.novembre nav.links a:hover { color: var(--gold-light); }
+html.novembre nav.links a.lang { background: transparent; color: var(--gold-light); }
+html.novembre nav.links .btn:hover { color: #17110a; }
+
+/* ----- Haut de page : écrin noir, halo doré ----- */
 html.novembre .hero {
   background:
-    radial-gradient(ellipse at 18% 8%, rgba(226,189,110,.22), transparent 55%),
-    radial-gradient(ellipse at 88% 92%, rgba(140,100,32,.12), transparent 50%),
-    #fbf4e6;
+    radial-gradient(ellipse at 50% 0%, rgba(214,176,98,.20), transparent 60%),
+    radial-gradient(ellipse at 90% 95%, rgba(166,124,46,.14), transparent 55%),
+    radial-gradient(ellipse at 8% 80%, rgba(166,124,46,.10), transparent 50%),
+    #0a0806;
 }
-html.novembre .logo-xl .note { color: var(--rust); }
-html.novembre .logo-xl span {
-  background: linear-gradient(180deg, #e9c87e 0%, #b8892f 55%, #8c6420 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-
-/* Les feuilles d'automne deviennent dorées et plus discrètes */
-html.novembre .hero .leaves svg { opacity: .55; }
+html.novembre .hero::after { content: ""; position: absolute; inset: 18px; border: 1px solid rgba(214,176,98,.35); pointer-events: none; z-index: 1; }
+html.novembre .hero::before { content: ""; position: absolute; inset: 26px; border: 1px solid rgba(214,176,98,.14); pointer-events: none; z-index: 1; }
+html.novembre .hero .leaves { display: none; }
+html.novembre .status { background: rgba(214,176,98,.08); border-color: var(--line); color: #efe4cc; }
+html.novembre .logo-xl b { color: #fbf3df; text-shadow: 0 6px 30px rgba(214,176,98,.25); }
+html.novembre .logo-xl span { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.novembre .logo-xl .note { color: var(--gold-light); }
+html.novembre .tagline { color: var(--gold-light); letter-spacing: .42em; }
+html.novembre .hero .lead { color: #d3c6ac; }
+html.novembre .hero .lead strong { color: var(--gold-light); }
+html.novembre .hero-photo img { border-radius: 200px 200px 6px 6px; box-shadow: 0 40px 90px rgba(0,0,0,.65), 0 0 0 1px rgba(214,176,98,.75), 0 0 0 9px #0a0806, 0 0 0 10px rgba(214,176,98,.4); }
+html.novembre .hero-photo .note { background: #15110d; border: 1px solid var(--line); color: var(--gold-light); box-shadow: 0 12px 34px rgba(0,0,0,.5); }
 
 /* ----- Le tampon « Depuis 2016 · 10 ans » ----- */
 .nv-sceau { position: absolute; z-index: 3; width: 132px; height: 132px; top: -34px; right: -30px; pointer-events: none;
-  filter: drop-shadow(0 10px 22px rgba(74,44,29,.28)); }
+  filter: drop-shadow(0 10px 22px rgba(0,0,0,.55)); }
 .nv-sceau .tourne { transform-origin: 50% 50%; animation: nv-tourne 40s linear infinite; }
 .nv-sceau.seul { position: relative; top: auto; right: auto; display: block; margin: 18px 0 0; width: 112px; height: 112px; }
 .hero.no-photo .nv-sceau.seul { margin-left: auto; margin-right: auto; }
 @keyframes nv-tourne { to { transform: rotate(360deg); } }
 @media (max-width: 860px) { .nv-sceau { width: 104px; height: 104px; top: -26px; right: -14px; } }
 
-/* ----- Paillettes dorées qui tombent doucement dans le haut de page ----- */
+/* ----- Paillettes dorées ----- */
 .nv-paillettes { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
 .nv-paillettes i { position: absolute; top: -12px; display: block; border-radius: 50%;
   background: radial-gradient(circle, #fff6dc 0, #e2bd6e 45%, rgba(184,137,47,0) 72%);
@@ -47,18 +92,93 @@ html.novembre .hero .leaves svg { opacity: .55; }
   background: linear-gradient(135deg, #f3dc9f, #b8892f); }
 @keyframes nv-tombe {
   0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-  10% { opacity: .9; }
+  10% { opacity: .95; }
   85% { opacity: .75; }
   100% { transform: translate(var(--dx, 20px), 92vh) rotate(220deg); opacity: 0; }
 }
 
-/* ----- Le bandeau des 10 ans : un liseré doré qui brille ----- */
-html.novembre .dix .box { box-shadow: 0 24px 60px rgba(74,44,29,.22); }
+/* ----- Bandeau « 10 ans » : coffret noir et or ----- */
+html.novembre .dix { background: #0a0806; }
+html.novembre .dix .box { background: linear-gradient(135deg, #17120b 0%, #0b0907 60%, #19130a 100%); color: #f1e6d6;
+  box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(214,176,98,.55); }
+html.novembre .dix .box::after { border-color: rgba(214,176,98,.4); }
 html.novembre .dix .box::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background: linear-gradient(110deg, transparent 35%, rgba(226,189,110,.16) 50%, transparent 65%);
+  background: linear-gradient(110deg, transparent 35%, rgba(239,213,146,.16) 50%, transparent 65%);
   background-size: 250% 100%; animation: nv-reflet 6s ease-in-out infinite; }
 @keyframes nv-reflet { from { background-position: 120% 0; } to { background-position: -120% 0; } }
 html.novembre .dix .box > * { position: relative; z-index: 1; }
+html.novembre .dix .big10 { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.novembre .dix .big10 small { color: var(--gold-light); -webkit-text-fill-color: var(--gold-light); }
+html.novembre .dix h2 { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.novembre .dix .places { background: var(--or-degrade); color: #17110a; }
+html.novembre .dix .compte div { background: rgba(214,176,98,.07); border-color: rgba(214,176,98,.4); }
+html.novembre .dix .compte b { color: var(--gold-light); }
+
+/* ----- Bandeau infos, carte, plats du jour ----- */
+html.novembre .infobar .grid, html.novembre .sheet, html.novembre .hours, html.novembre .addr {
+  background: var(--paper); border-color: var(--line); box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+html.novembre .infobar .ico { background: rgba(214,176,98,.12); color: var(--gold-light); }
+html.novembre .infobar h3 { color: var(--gold-light); }
+html.novembre .tabs button { background: var(--paper); border-color: var(--line); color: #eadfc6; }
+html.novembre .tabs button:hover { border-color: var(--gold); }
+html.novembre .tabs button[aria-selected="true"] { background: var(--or-degrade); border-color: #b8923f; color: #17110a; font-weight: 600; }
+html.novembre .sub { color: var(--gold-light); }
+html.novembre .item h4 { color: #f6ecd6; }
+html.novembre .item .dots { border-bottom-color: rgba(214,176,98,.35); }
+html.novembre .item .price { color: var(--gold-light); }
+html.novembre .item .de { color: var(--gold); }
+html.novembre .item.tag h4::after { background: var(--or-degrade); color: #17110a; }
+html.novembre .callout, html.novembre .glaces { background: var(--sand); border: 1px solid var(--line); }
+html.novembre .callout .big { color: var(--gold-light); }
+html.novembre .glaces strong { color: var(--gold-light); }
+html.novembre .chips span { background: var(--paper); }
+html.novembre .chips b { color: var(--gold-light); }
+html.novembre .ribbon { background: var(--or-degrade); color: #17110a; }
+html.novembre .ribbon span { color: #5a3d0c; }
+html.novembre #plats { background: #0f0c09; }
+html.novembre .pdj-j { background: var(--paper); border-color: var(--line); }
+html.novembre .pdj-j h3 { color: var(--gold-light); }
+html.novembre .pdj-f { background: linear-gradient(135deg, #1d1609, #0d0a06); border: 1px solid rgba(214,176,98,.5); color: #f1e6d6; }
+html.novembre .pdj-f strong { color: var(--gold-light); }
+
+/* ----- Soirées, pied de page : noir absolu ----- */
+html.novembre .evenings { background: #050403; }
+html.novembre .ev { border-color: rgba(214,176,98,.4); background: linear-gradient(160deg, rgba(214,176,98,.08), rgba(0,0,0,0)); }
+html.novembre .ev .next { background: rgba(214,176,98,.16); }
+html.novembre footer { background: #050403; border-top: 1px solid rgba(214,176,98,.3); }
+html.novembre footer .social a:hover { background: var(--gold); border-color: var(--gold); color: #17110a; }
+
+/* ----- Bon cadeau : carte noire et or ----- */
+html.novembre .giftcard { background: linear-gradient(135deg, #2a2112 0%, #0f0b06 55%, #251c0d 100%); color: #f6ecd6;
+  box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(214,176,98,.6); }
+html.novembre .giftcard::before { border-color: rgba(214,176,98,.5); }
+html.novembre ul.check li { border-bottom-color: var(--line); }
+html.novembre ul.check li::before { background-color: rgba(214,176,98,.14);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23efd592' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+
+/* ----- Horaires & accès ----- */
+html.novembre .visit { background: #0f0c09; }
+html.novembre .hours .h-head { background: #1b1610; color: var(--gold); }
+html.novembre .hours .day { color: var(--gold-light); }
+html.novembre .hours .on { color: #efe4cc; }
+html.novembre .hours .off { color: #6f6454; }
+html.novembre .hours .closedrow { color: #d9a07c; }
+html.novembre .hours .today { background: rgba(214,176,98,.12); }
+html.novembre .hours .today .day::after { color: var(--gold-light); }
+html.novembre .map { filter: invert(.92) hue-rotate(180deg) saturate(.45) sepia(.35) brightness(.95); }
+
+/* ----- Encart Réveillon, feuilles décoratives ----- */
+html.novembre .rv .rvc { background: var(--paper); box-shadow: 0 20px 50px rgba(0,0,0,.5); color: #efe4cc; }
+html.novembre .rv .rvc::before { border-color: rgba(214,176,98,.55); }
+html.novembre .rv .k { color: var(--gold); }
+html.novembre .rv h3 { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.novembre .rv .go { background: var(--or-degrade); color: #17110a; }
+html.novembre .rv .go:hover { background: var(--gold-light); }
+html.novembre .rv .dl { border-color: rgba(214,176,98,.7); color: var(--gold-light); }
+html.novembre .rv .dl:hover { background: rgba(214,176,98,.14); }
+html.novembre .evenings .leaves, html.novembre .giftcard .leafc { display: none; }
+html.novembre .tagline { letter-spacing: .3em; }
+@media (max-width: 860px) { html.novembre .tagline { letter-spacing: .16em; } }
 
 @media (prefers-reduced-motion: reduce) {
   .nv-paillettes { display: none; }

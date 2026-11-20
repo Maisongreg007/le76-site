@@ -14,6 +14,14 @@
   var dores = ["#c9a14a", "#b8892f", "#e2bd6e", "#a87b2c", "#d6b066", "#9c7128", "#e9cf8f", "#b8892f"];
   document.querySelectorAll(".hero .leaves svg").forEach(function (svg, i) { svg.style.fill = dores[i % dores.length]; });
 
+  // Textes de gala
+  var G = de
+    ? { tag: "Zehn Jahre · Ein Abend der Extraklasse · 28. November", lead: "<strong>Le 76 feiert seinen 10. Geburtstag.</strong> Samstag, 28. November, 20 Uhr: Jubiläumsmenü für 29 €, Jubiläumstorte, ein Glas Crémant und Tanz mit dem Orchester Santa Lucia.", note: "Seit 2016" }
+    : { tag: "Dix ans · Une soirée d'exception · 28 novembre", lead: "<strong>Le 76 fête ses 10 ans.</strong> Samedi 28 novembre à 20h : menu anniversaire à 29 €, gâteau des 10 ans, coupe de crémant et bal avec l'orchestre Santa Lucia.", note: "Depuis 2016" };
+  var tg = document.querySelector(".hero .tagline"); if (tg) tg.textContent = G.tag;
+  var ld = document.querySelector(".hero .lead"); if (ld) ld.innerHTML = G.lead;
+  var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute("content", "#0c0a08");
+
   // Petits mots
   var note = document.querySelector(".logo-xl .note"); if (note) note.textContent = T.note;
   var bien = document.querySelector(".hero-photo .note"); if (bien) bien.textContent = T.bienvenue;
