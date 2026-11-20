@@ -209,3 +209,18 @@ html.noel .rv .rvc { box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(200,
   .nl-paillettes { display: none; }
   .nl-sceau .tourne, html.noel .dix .box::before { animation: none !important; }
 }
+
+/* ----- Décor : village enneigé et traîneau volant ----- */
+.nl-scene { position: relative; height: clamp(200px, 27vw, 330px); overflow: hidden; background: #08130e; border-top: 1px solid rgba(214,176,98,.3); }
+.nl-scene svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.nl-scene .nl-bras { transform-box: fill-box; transform-origin: 0% 100%; animation: nl-salue 1.4s ease-in-out infinite alternate; }
+.nl-scene .nl-bonhomme { animation: nl-balance 3.2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes nl-salue { from { transform: rotate(-14deg); } to { transform: rotate(16deg); } }
+@keyframes nl-balance { from { transform: translate(300px,252px) rotate(-1.4deg); } to { transform: translate(300px,252px) rotate(1.4deg); } }
+.nl-traineau { position: absolute; top: 44px; left: 0; width: min(330px, 46vw); z-index: 2; pointer-events: none;
+  animation: nl-traverse 34s linear infinite; filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)); }
+.nl-traineau svg { width: 100%; height: auto; display: block; overflow: visible; }
+.nl-traineau .nl-vol { animation: nl-bob 2.4s ease-in-out infinite alternate; transform-box: fill-box; }
+@keyframes nl-traverse { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(calc(100vw + 20%)); } }
+@keyframes nl-bob { from { transform: translateY(-5px) rotate(-1.5deg); } to { transform: translateY(6px) rotate(1.5deg); } }
+@media (prefers-reduced-motion: reduce) { .nl-traineau { display: none; } .nl-scene .nl-bras, .nl-scene .nl-bonhomme { animation: none; } }
