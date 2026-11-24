@@ -1,33 +1,33 @@
 {
-  "actif": false,
+  "actif": true,
   "petit_titre": "Du mardi au vendredi · midi",
   "titre": "Les plats du jour",
   "mot_en_valeur": "plats du jour",
-  "semaine": "Semaine du 10 au 13 novembre 2026",
+  "semaine": "Semaine du 24 au 27 novembre 2026",
   "jours": [
     {
-      "jour": "Mardi 10 novembre",
-      "plat": "Palette fumée",
-      "details": "sauce raifort · frites"
+      "jour": "Mardi 24 novembre",
+      "plat": "Sauté de lapin à l'ancienne",
+      "details": "pâtes"
     },
     {
-      "jour": "Mercredi 11 novembre",
-      "plat": "Jour férié",
-      "details": "ouvert à la carte"
-    },
-    {
-      "jour": "Jeudi 12 novembre",
-      "plat": "Émincé de volaille au curry",
+      "jour": "Mercredi 25 novembre",
+      "plat": "Cuisses de poulet au vin blanc",
       "details": "riz"
     },
     {
-      "jour": "Vendredi 13 novembre",
-      "plat": "Noix de joue de porc",
-      "details": "à la moutarde à l'ancienne · pâtes"
+      "jour": "Jeudi 26 novembre",
+      "plat": "Civet de biche",
+      "details": "spätzle"
+    },
+    {
+      "jour": "Vendredi 27 novembre",
+      "plat": "Bouchée aux fruits de mer",
+      "details": "riz"
     }
   ],
   "formule_titre": "La formule du 76",
   "formule_prix": "16 €",
   "formule_texte": "Entrée, plat et dessert, avec une limonade, une eau, un sirop à l'eau ou 1/4 de rouge ou rosé",
-  "image": "images/plats-du-jour.jpg?v=2"
+  "image": ""
 }
