@@ -49,7 +49,15 @@ try {
             $prompt = trim((string) ($q['prompt'] ?? ''));
             ($prompt !== '' && strlen($prompt) < 200000) || erreur('Demande vide.');
             try {
-                repondre(['ok' => true, 'resultat' => cm_ia([['type' => 'text', 'text' => $prompt]], 8000)]);
+                // Images (pages d'une carte déposée) : jusqu'à 4 par demande
+                $contenu = [];
+                foreach (array_slice(is_array($q['images'] ?? null) ? $q['images'] : [], 0, 4) as $img) {
+                    if (is_string($img) && preg_match('/^data:(image\/(?:png|jpeg|webp))/', $img, $m)) {
+                        $contenu[] = ['type' => 'image', 'source' => ['type' => 'base64', 'media_type' => $m[1], 'data' => preg_replace('/^data:[^,]+,/', '', $img)]];
+                    }
+                }
+                $contenu[] = ['type' => 'text', 'text' => $prompt];
+                repondre(['ok' => true, 'resultat' => cm_ia($contenu, $contenu[0]['type'] === 'image' ? 16000 : 8000)]);
             } catch (RuntimeException $e) {
                 erreur($e->getMessage(), 502);
             }

@@ -232,7 +232,8 @@ function collRef(coll){return {...query(coll,{}),path:coll,doc:id=>docRef(coll,i
 const db={doc:p=>{const [c,i]=p.split('/');return docRef(c,i)},collection:c=>collRef(c)};
 const user={isOwner:async()=>!!(S.moi&&S.moi.admin),canEdit:async()=>!!(S.moi&&S.moi.admin),can:async()=>!S.anon,id:async()=>S.moi?String(S.moi.id):null,nom:async()=>S.moi?S.moi.nom:''};
 const downloads={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]);const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return {status:'saved'}}};
-const sample={json:async prompt=>(await post('ia',{prompt})).resultat};
+async function reduire(b){try{const bmp=await createImageBitmap(b);const k=Math.min(1,1800/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.85)}catch(e){return enB64(b)}}
+const sample={limits:async()=>({images:{maxCount:4}}),json:async(prompt,o={})=>{const images=[];for(const b of (o.images||[]))images.push(await reduire(b));return (await post('ia',{prompt,images})).resultat}};
 const enB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)});
 const assets={upload:async blob=>{const d=await post('image_envoyer',{donnees:await enB64(blob)});return {id:d.id,url:d.url}}};
 window.claude={use:async nom=>{await pret;
@@ -308,6 +309,8 @@ document.addEventListener('DOMContentLoaded',demarrer);
     </div>
   </form>
 </div>
+<div class="ov" id="imp" hidden><div class="sheetui"><h2>Déposer une carte</h2><div id="impBody"></div><div class="sh-acts" id="impActs"></div></div></div>
+<input type="file" id="fileCarte" accept="application/pdf,image/jpeg,image/png,image/webp" multiple hidden>
 <input type="file" id="fileDec" accept="image/png,image/webp,image/jpeg,image/svg+xml" hidden>
 <div class="toast" id="toast" hidden></div>
 <div id="measure"></div>
@@ -338,7 +341,7 @@ const DEF={saison:'automne',tagline:'Cuisine • Partage • Convivialité',slog
 const NOTEPOS=[['hg','Haut gauche'],['hd','Haut droite'],['bg','Bas gauche'],['bd','Bas droite']];
 
 let meta=clone(DEF),secs=[],publie=null,archives=[],db=null,dl=null,sample=null,assets=null,owner=true,canWrite=true,needEd=false,editing=null,loaded=false,decSlot=null;
-let me='Greg',cur='',fixe=false;try{me=localStorage.getItem('c76-moi')||'Greg';cur=localStorage.getItem('c76-page')||''}catch(e){}
+let me='Greg',cur='',fixe=false,imgOk=false;try{me=localStorage.getItem('c76-moi')||'Greg';cur=localStorage.getItem('c76-page')||''}catch(e){}
 const pend=new Set();let metaPend=false;
 
 const fmtPrix=v=>{const t=String(v??'').trim();if(!t)return'';if(/[a-zA-Z+]/.test(t.replace(/€/g,'')))return t;const n=Number(t.replace(/\s|€/g,'').replace(',','.'));return isFinite(n)&&/\d/.test(t)?(Number.isInteger(n)?n:n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}))+' €':t};
@@ -419,7 +422,7 @@ function renderEditor(){
    <label class="field"><span>Mention en bas</span><input type="text" data-k="pied" value="${esc(meta.pied)}"></label>
    <label class="field"><span>Signature en bas</span><input type="text" data-k="slogan" value="${esc(meta.slogan)}"></label>
   </details></div>
- <div class="card"><h2>Pages</h2><div class="pills">${meta.pages.map(p=>`<button data-pg="${esc(p.id)}" aria-pressed="${p.id===cur}">${esc(p.nom||'Page')}</button>`).join('')}<button data-act="addpage">+ Page</button></div>
+ <div class="card"><h2>Pages</h2>${imgOk?'<button class="btn sm pri" data-act="deposer" style="margin-bottom:12px">Déposer une carte (PDF ou photos)</button>':''}<div class="pills">${meta.pages.map(p=>`<button data-pg="${esc(p.id)}" aria-pressed="${p.id===cur}">${esc(p.nom||'Page')}</button>`).join('')}<button data-act="addpage">+ Page</button></div>
   ${pg?`<label class="field"><span>Nom de la page</span><input type="text" data-pf="nom" value="${esc(pg.nom)}"></label>
   <details class="more"><summary>Petites phrases manuscrites</summary>${notes}</details>
   <div class="acts"><button class="btn sm" data-act="pgup" ${pi>0?'':'disabled'}>Avancer</button><button class="btn sm" data-act="pgdown" ${pi<meta.pages.length-1?'':'disabled'}>Reculer</button>${sample?'<button class="btn sm" data-act="trpage">Traduire en allemand ce qui manque</button>':''}<button class="btn sm dng" data-act="delpage">Supprimer la page</button></div>`:''}</div>
@@ -497,6 +500,56 @@ $('#fUp').onclick=()=>move(-1);$('#fDown').onclick=()=>move(1);
 $('#fTr').onclick=async()=>{const b=$('#fTr'),map={};const n=$('#fNom').value.trim(),nt=$('#fNote').value.trim(),d=$('#fDesc').value.trim();if(n)map.nom=n+(nt?' '+nt:'');if(d)map.desc=d;if(!n&&!d)return;
  b.disabled=true;b.textContent='Traduction…';try{const r=await traduire(map);if(typeof r.nom==='string')$('#fNomDe').value=r.nom.trim();if(typeof r.desc==='string')$('#fDescDe').value=r.desc.trim()}catch(e){toast('Traduction impossible pour le moment.')}b.disabled=false;b.textContent='Traduire en allemand'};
 
+/* ---------- Déposer une carte (PDF ou photos) ---------- */
+const PROMPT_CARTE=`Voici une page de la carte du restaurant Le 76 (restaurant alsacien, carte bilingue français / allemand).
+Recopie fidèlement tout son contenu, sans rien inventer. Si l'allemand figure sur la page, recopie-le dans les champs « De » ; sinon laisse-les vides.
+Ignore le logo, les décorations et le pied de page fixe (adresse, « Bonne table • Bons moments », « Prix nets »).
+Réponds uniquement par un objet JSON de cette forme :
+{"nom_page":"Entrées & plats","notes":{"hg":"","hd":"","bg":"","bd":""},"sections":[{"titre":"Nos entrées","titreDe":"Unsere Vorspeisen","accroche":"","accrocheDe":"","bandeau":"","style":"liste","colonnes":1,"items":[{"nom":"Velouté de potimarron","note":"","nomDe":"Kürbiscremesuppe","desc":"Crème de châtaigne","descDe":"Maronencreme","prix":"8","vol":"","prix2":"","vol2":"","surligne":false}]}]}
+Règles : une rubrique par grand titre de la page. style "texte" pour des listes de parfums ou de phrases sans prix (nom = intitulé en gras, desc = le texte) ; style "encadre" pour un cadre de suppléments ou de prix ; colonnes 2 si la rubrique est présentée sur deux colonnes. Prix tels qu'écrits, sans le symbole € (ex. "9,90" ou "+ 4"). Boisson avec contenance : vol (ex. "25 cl.") et prix, puis vol2 et prix2 s'il y a un 2e format. note = précision entre parenthèses après le nom. surligne = true si la ligne est mise en valeur. notes = petites phrases manuscrites décoratives (hg haut gauche, hd haut droite, bg bas gauche, bd bas droite). bandeau = bandeau sous une rubrique (ex. "Seulement le soir - Nur abends"). Écris en minuscules normales (pas tout en majuscules), sauf les noms propres.`;
+function chargerScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)})}
+async function pagesPdf(f){
+ if(!window.pdfjsLib){await chargerScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');await chargerScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js')}
+ const pdf=await window.pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,out=[];
+ for(let i=1;i<=Math.min(pdf.numPages,16);i++){const pg=await pdf.getPage(i),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:Math.min(2.5,1600/v0.width)});
+  const c=document.createElement('canvas');c.width=v.width;c.height=v.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+  await pg.render({canvasContext:x,viewport:v}).promise;out.push(await new Promise(r=>c.toBlob(r,'image/jpeg',.86)))}
+ return out}
+const txt=(v,n=400)=>typeof v==='string'?v.trim().slice(0,n):(typeof v==='number'?String(v):'');
+function nettoyerPage(r){
+ if(!r||typeof r!=='object')return null;const n=r.notes&&typeof r.notes==='object'?r.notes:{};
+ const sections=(Array.isArray(r.sections)?r.sections:[]).slice(0,12).map(s=>({titre:txt(s.titre,120),titreDe:txt(s.titreDe,120),accroche:txt(s.accroche,200),accrocheDe:txt(s.accrocheDe,200),bandeau:txt(s.bandeau,120),
+  style:['liste','texte','encadre'].includes(s.style)?s.style:'liste',colonnes:Number(s.colonnes)===2?2:1,
+  items:(Array.isArray(s.items)?s.items:[]).slice(0,60).map(p=>({id:uid(),nom:txt(p.nom,160),note:txt(p.note,80),nomDe:txt(p.nomDe,160),desc:txt(p.desc,400),descDe:txt(p.descDe,400),prix:txt(p.prix,20),vol:txt(p.vol,20),prix2:txt(p.prix2,20),vol2:txt(p.vol2,20),surligne:p.surligne===true,tags:[],auteur:me})).filter(p=>p.nom||p.desc)}))
+  .filter(s=>s.titre||s.items.length);
+ return sections.length?{nom:txt(r.nom_page,60)||'Page',notes:{hg:txt(n.hg,90),hd:txt(n.hd,90),bg:txt(n.bg,90),bd:txt(n.bd,90)},sections}:null}
+let impRes=[],impStop=false;
+function impShow(body,acts){$('#impBody').innerHTML=body;$('#impActs').innerHTML=acts;$('#imp').hidden=false}
+$('#fileCarte').addEventListener('change',async e=>{const files=[...e.target.files];e.target.value='';if(!files.length||!sample)return;
+ impRes=[];impStop=false;impShow('<p class="hint">Préparation des pages…</p>','<div class="r"><button class="btn" data-imp="stop">Arrêter</button></div>');
+ try{let imgs=[];for(const f of files){if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name))imgs=imgs.concat(await pagesPdf(f));else imgs.push(f)}
+  imgs=imgs.slice(0,16);
+  for(let i=0;i<imgs.length&&!impStop;i++){
+   impShow(`<p>Lecture de la page ${i+1} sur ${imgs.length}…</p><p class="hint">Compte environ une demi-minute par page. Tu peux continuer à utiliser l’appli.</p>`,'<div class="r"><button class="btn" data-imp="stop">Arrêter</button></div>');
+   try{const r=nettoyerPage(await sample.json(PROMPT_CARTE,{images:[imgs[i]],modelTier:'default'}));if(r)impRes.push(r)}
+   catch(x){if(x&&(x.code==='not_granted'||x.code==='images_unavailable'||x.code==='sampling_disabled'))throw x}}
+  if(!impRes.length){impShow('<p>Je n’ai rien pu lire sur ce document. Essaie avec un PDF plus net ou des photos bien droites.</p>','<div class="r"><button class="btn" data-imp="fermer">Fermer</button></div>');return}
+  const nb=impRes.reduce((a,p)=>a+p.sections.reduce((b,s)=>b+s.items.length,0),0);
+  impShow(`<p><b>${impRes.length} page${impRes.length>1?'s':''} lue${impRes.length>1?'s':''}, ${nb} lignes trouvées :</b></p><ul style="margin:6px 0 10px;padding-inline-start:20px">${impRes.map(p=>`<li>${esc(p.nom)} : ${p.sections.map(s=>esc(s.titre||'encadré')).join(', ')}</li>`).join('')}</ul><p class="hint">Relis bien les prix ensuite : la lecture automatique peut se tromper.</p>`,
+   '<button class="btn" data-imp="fermer">Annuler</button><div class="r"><button class="btn" data-imp="ajouter">Ajouter à la suite</button><button class="btn pri" data-imp="remplacer">Remplacer la carte actuelle</button></div>')}
+ catch(x){impShow(`<p>Lecture impossible : ${esc(x&&x.code==='not_granted'?'l’accès à Claude a été refusé.':(x&&x.message)||'erreur')}</p>`,'<div class="r"><button class="btn" data-imp="fermer">Fermer</button></div>')}});
+$('#imp').addEventListener('click',async e=>{const b=e.target.closest('[data-imp]');if(!b)return;const k=b.dataset.imp;
+ if(k==='stop'){impStop=true;b.disabled=true;b.textContent='Arrêt après cette page…';return}
+ if(k==='fermer'){$('#imp').hidden=true;return}
+ if(k==='remplacer'&&!b.dataset.c){b.dataset.c=1;b.textContent='Confirmer : tout remplacer';return}
+ $('#imp').hidden=true;
+ if(k==='remplacer'){for(const s of secs.slice())await delSec(s.id);meta.pages=[]}
+ let first='',ord=Date.now();
+ for(const pg of impRes){const pid=uid();first=first||pid;meta.pages.push({id:pid,nom:pg.nom,notes:pg.notes});
+  for(const s of pg.sections){const n={id:uid(),page:pid,ordre:ord++,...s};secs.push(n);saveSec(n,true)}}
+ cur=first;try{localStorage.setItem('c76-page',cur)}catch(x){}
+ metaChanged(true);render();toast(k==='remplacer'?'Carte remplacée : relis chaque page avant de valider.':'Pages ajoutées à la suite.')});
+
 /* ---------- Décor ---------- */
 $('#fileDec').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f||!assets||!decSlot)return;
  try{toast('Envoi de l’image…');const r=await assets.upload(f);const url=okUrl(r.url)?r.url:'/_blob/'+r.id;meta.decor=meta.decor||{};meta.decor[meta.saison]={...(meta.decor[meta.saison]||{}),[decSlot]:url};metaChanged(true);renderEditor();toast('Décor mis à jour.')}catch(x){toast('Image refusée ou trop lourde.')}});
@@ -522,6 +575,7 @@ document.addEventListener('click',async e=>{
  else if(a==='delpage'){if(meta.pages.length<2){toast('Il faut garder au moins une page.');return}if(!t.dataset.c){t.dataset.c=1;t.textContent='Confirmer : supprimer la page et ses rubriques';return}
   for(const x of secsOf(secs,cur))await delSec(x.id);meta.pages.splice(pi,1);cur=meta.pages[0].id;metaChanged(true);renderEditor()}
  else if(a==='trpage')trPage(t);
+ else if(a==='deposer')$('#fileCarte').click();
  else if(a==='send')setStatut('a_valider');
  else if(a==='valid')setStatut('validee');
  else if(a==='back')setStatut('brouillon');
@@ -555,7 +609,7 @@ renderMe();render();route();
 document.fonts&&document.fonts.ready.then(()=>{renderPreview();if(!$('#pub').hidden)renderPub()});
 (async()=>{
  const [d,u,w,sp,as]=await Promise.all([claude.use('db'),claude.use('user'),claude.use('downloads'),claude.use('sample'),claude.use('assets')]);
- db=d;dl=w;sample=sp;assets=as;if(!dl){$('#bPdf').hidden=$('#bPng').hidden=true}
+ db=d;dl=w;sample=sp;assets=as;if(sample&&sample.limits){try{const L=await sample.limits();imgOk=!!(L&&L.images)}catch(e){imgOk=false}}if(!dl){$('#bPdf').hidden=$('#bPng').hidden=true}
  if(u){owner=(await u.isOwner())??false;if(await u.can('data.write')===false)canWrite=false;if(typeof u.nom==='function'){const n=await u.nom();if(n){me=n;fixe=true;renderMe()}}}
  if(!db){$('#sync').textContent='Hors ligne : rien n’est enregistré';render();return}
  const tm=setTimeout(()=>{if(!loaded)$('#sync').textContent='Connexion lente… les données arrivent.'},10000);
