@@ -230,6 +230,7 @@
 
   function etatJour(j) {
     if (!j) return 'hors';
+    if (j.date === '2026-11-28') return 'complet'; // 10 ans du 76 : complet
     const s = Object.values(j.services);
     if (s.some(v => v.creneaux.some(c => c.max >= st.n))) return 'dispo';
     if (s.some(v => v.ouvert)) return 'complet';
@@ -458,11 +459,8 @@
       document.getElementById('dixJ').textContent = ms <= 0 ? L("C'est ce soir !", 'Heute Abend!') : j <= 1 ? L('Demain soir !', 'Morgen Abend!') : DE ? `Noch ${j} Tage` : `J-${j}`;
     };
     majJ(); setInterval(majJ, 60000);
-    fetch('/api/reservation.php?action=places&date=' + D + '&service=soir&lang=' + LANG).then(r => r.json()).then(p => {
-      if (p.complet) document.getElementById('dixPl').textContent = L(' · complet en ligne', ' · online ausgebucht');
-      else if (p.restant) document.getElementById('dixPl').textContent = DE ? ` · nur noch ${p.restant} ${p.restant > 1 ? 'Plätze' : 'Platz'}` : ` · plus que ${p.restant} place${p.restant > 1 ? 's' : ''}`;
-    }).catch(() => {});
-    document.getElementById('dixChoisir').onclick = () => choisirDate(D);
+    document.getElementById('dixPl').innerHTML = ' · <b style="color:var(--rust)">' + L('COMPLET, merci à tous !', 'AUSGEBUCHT, danke an alle!') + '</b>';
+    document.getElementById('dixChoisir').hidden = true;
   }
 
   async function demarrer() {

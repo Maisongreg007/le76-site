@@ -432,10 +432,10 @@
       <div>
         <h2>Das 76 feiert 10 Jahre 🎉</h2>
         <p>Samstag, 28. November, 20 Uhr · mit dem Orchester Santa Lucia · Jubiläumsmenü 29 €</p>
-        <span class="places" id="dixPlaces" hidden></span>
+        <span class="places" id="dixPlaces">AUSGEBUCHT · danke an alle!</span>
         <div class="compte" id="dixCompte" aria-live="polite"></div>
       </div>
-      <a class="btn" id="dixBtn" href="/reserver/?lang=de&date=2026-11-28">Für den 28. November reservieren</a>
+      <a class="btn" id="dixBtn" href="/reserver/?lang=de">Einen anderen Abend reservieren</a>
     </div>
   </div>
 </section>
@@ -756,11 +756,6 @@
       compte.innerHTML = cel(j, j > 1 ? "Tage" : "Tag") + cel(h, "Std") + cel(m, "Min") + cel(s, "Sek");
     }
     maj(); var t = setInterval(maj, 1000);
-    fetch("/api/reservation.php?action=places&date=2026-11-28&service=soir").then(function (r) { return r.json(); }).then(function (d) {
-      var p = document.getElementById("dixPlaces");
-      if (d.complet) { p.textContent = "Ausgebucht: rufen Sie uns für die Warteliste an"; p.hidden = false; document.getElementById("dixBtn").href = "tel:+33388863187"; document.getElementById("dixBtn").textContent = "Rufen Sie uns an"; }
-      else if (d.restant) { p.textContent = "Nur noch " + d.restant + (d.restant > 1 ? " Plätze" : " Platz"); p.hidden = false; }
-    }).catch(function () {});
   })();
 </script>
 <script src="/saisons/halloween.js?v=1" defer></script>
