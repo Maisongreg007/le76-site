@@ -139,6 +139,9 @@ details.more summary{cursor:pointer;color:var(--blue);font-size:14px;padding:6px
 .c-pied{font-size:13px;color:#4a3a30;margin-bottom:6px}
 .c-slo{display:flex;align-items:center;gap:12px;font-family:"Playfair Display",Georgia,serif;font-size:10.5px;letter-spacing:.3em;color:#2a1d16;justify-content:center}
 .c-slo i{width:60px;height:1px;background:var(--gold);flex:none}
+.c-fond{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.sheet.fd .c-hd{display:none}.c-sp{height:290px;flex:none}
+.sheet.fd .c-main{padding:0 110px 60px}.sheet.fd .c-ft{padding:6px 250px 92px}.sheet.fd .c-slo{font-size:9.5px;letter-spacing:.2em;flex-wrap:wrap}.sheet.fd .c-slo i{display:none}.sheet.fd .c-slo span{white-space:normal}
 .c-empty{text-align:center;font-style:italic;font-size:22px;color:#7a6a5e;margin-top:80px}
 </style>
 <link rel="manifest" href="/carte/manifest.webmanifest">
@@ -328,12 +331,13 @@ const BRUSH='<svg class="c-brush" viewBox="0 0 600 70" preserveAspectRatio="none
 const RIB='<svg viewBox="0 0 600 60" preserveAspectRatio="none"><path fill="var(--title)" d="M8 12 590 4 598 30 586 56 14 58 2 32z"/><path fill="var(--title)" opacity=".5" d="M0 20 600 14 600 18 0 26z"/></svg>';
 const TH={
  automne:{nom:'Automne',pbg:'#ffffff',title:'#b3141c',gold:'#bd7420',frame:'#e0a25a',brush:'#fbe3d1'},
- hiver:{nom:'Hiver',pbg:'#ffffff',title:'#1d4b78',gold:'#6f86a3',frame:'#9db5d0',brush:'#e1ebf6'},
+ hiver:{nom:'Hiver',pbg:'#ffffff',title:'#24507e',gold:'#b5763e',frame:'#9db5d0',brush:'#e4edf6'},
  printemps:{nom:'Printemps',pbg:'#ffffff',title:'#a52c62',gold:'#5c8a37',frame:'#b5d295',brush:'#f7e0ea'},
  ete:{nom:'Été',pbg:'#ffffff',title:'#0d5d87',gold:'#c98510',frame:'#efc055',brush:'#fdefc6'},
  fetes:{nom:'Fêtes',pbg:'#ffffff',title:'#9e1520',gold:'#a8852c',frame:'#c9a94e',brush:'#f4e6c4'}};
+const FOND={hiver:'img/hiver-fond.jpg'};
 const DEC={};['automne','hiver','printemps','ete','fetes'].forEach(k=>DEC[k]={hg:`img/${k}-hg.png`,bd:`img/${k}-bd.png`});
-const okUrl=u=>typeof u==='string'&&(/^\/_blob\/[\w.-]+$/.test(u)||/^img\/[\w.-]+\.png$/.test(u)||/^\/api\/carte\.php\?action=image&id=[a-f0-9]{24}\.(png|jpg|webp)$/.test(u));
+const okUrl=u=>typeof u==='string'&&(/^\/_blob\/[\w.-]+$/.test(u)||/^img\/[\w.-]+\.(png|jpg)$/.test(u)||/^\/api\/carte\.php\?action=image&id=[a-f0-9]{24}\.(png|jpg|webp)$/.test(u));
 const TAG={vege:'VÉGÉ',nouveau:'NOUVEAU'};
 const ST={brouillon:'Brouillon',a_valider:'À valider',validee:'Validée',publiee:'Publiée'};
 const ORDER=['brouillon','a_valider','validee','publiee'];
@@ -353,6 +357,7 @@ const secsOf=(ss,pid)=>ss.filter(s=>s.page===pid).sort((a,b)=>(a.ordre||0)-(b.or
 const curPage=()=>meta.pages.find(p=>p.id===cur);
 
 /* ---------- Rendu d'une page de carte ---------- */
+function fondOf(m){const f=((m.fond||{})[m.saison])??FOND[m.saison];return okUrl(f)?f:''}
 function decorOf(m){const d={...(DEC[m.saison]||{}),...((m.decor||{})[m.saison]||{})};return{hg:okUrl(d.hg)?d.hg:'',bd:okUrl(d.bd)?d.bd:''}}
 function itemH(p){
  const hasP=p.prix||p.prix2||p.vol;
@@ -368,12 +373,12 @@ function secH(s){
  const [b1,b2]=String(s.bandeau||'').split(/\s+-\s+/);
  return `<section class="c-sec">${s.titre?`<div class="c-sh">${BRUSH}<h2>${esc(String(s.titre).toUpperCase())}</h2>${s.titreDe?`<div class="c-shde">${esc(String(s.titreDe).toUpperCase())}</div>`:''}</div>`:''}${s.accroche?`<div class="c-acc">${esc(s.accroche)}</div>`:''}${s.accrocheDe?`<div class="c-acc de">${esc(s.accrocheDe)}</div>`:''}${body}${s.bandeau?`<div class="c-rib">${RIB}<span>${esc(b1)}${b2?` - <em>${esc(b2)}</em>`:''}</span></div>`:''}</section>`}
 function pageH(m,pg,ss){
- const t=TH[m.saison]||TH.automne,d=decorOf(m),list=secsOf(ss,pg.id),n=pg.notes||{};
+ const t=TH[m.saison]||TH.automne,fd=fondOf(m),d=fd?{hg:'',bd:''}:decorOf(m),list=secsOf(ss,pg.id),n=fd?{}:(pg.notes||{});
  const notes=NOTEPOS.filter(([k])=>n[k]).map(([k])=>`<div class="c-note n-${k}">${esc(n[k])}${SW}</div>`).join('');
  const bn=n.bg||n.bd;
- return `<div class="sheet${bn?' bn':''}" style="--pbg:${t.pbg};--title:${t.title};--gold:${t.gold};--frame:${t.frame};--brush:${t.brush}"><div class="c-frame"></div>
+ return `<div class="sheet${bn?' bn':''}${fd?' fd':''}" style="--pbg:${t.pbg};--title:${t.title};--gold:${t.gold};--frame:${t.frame};--brush:${t.brush}">${fd?`<img class="c-fond" src="${esc(fd)}" alt="">`:'<div class="c-frame"></div>'}
  ${d.hg?`<img class="c-dhg" src="${esc(d.hg)}" alt="">`:''}${d.bd?`<img class="c-dbd" src="${esc(d.bd)}" alt="">`:''}${notes}
- <header class="c-hd"><img class="c-logo" src="img/logo-76.png" alt="Le 76 Restaurant"><div class="c-tag">${esc(m.tagline).toUpperCase()}</div><div class="c-orn"><i></i>${LEAF}<i></i></div></header>
+ ${fd?'<div class="c-sp"></div>':''}<header class="c-hd"><img class="c-logo" src="img/logo-76.png" alt="Le 76 Restaurant"><div class="c-tag">${esc(m.tagline).toUpperCase()}</div><div class="c-orn"><i></i>${LEAF}<i></i></div></header>
  <div class="c-main">${list.length?list.map(secH).join(''):'<p class="c-empty">Ajoute une rubrique pour remplir cette page.</p>'}</div>
  <footer class="c-ft">${m.pied?`<div class="c-pied">${esc(m.pied)}</div>`:''}<div class="c-slo"><i></i><span>${esc(String(m.slogan).toUpperCase())}</span><i></i></div></footer></div>`}
 function fit(sh){const b=sh.querySelector('.c-main');let k=1;sh.style.setProperty('--k',1);while(k>.6&&b.scrollHeight>b.clientHeight+1){k-=.025;sh.style.setProperty('--k',k.toFixed(3))}return{k,over:b.scrollHeight>b.clientHeight+1||k<.66}}
@@ -397,7 +402,8 @@ function renderEditor(){
  needEd=false;pageOk();const pg=curPage(),d=decorOf(meta);
  const seg=Object.keys(TH).map(k=>`<button data-season="${k}" aria-pressed="${k===meta.saison}">${TH[k].nom}</button>`).join('');
  const slot=(k,l)=>`<div class="slot">${d[k]?`<img src="${esc(d[k])}" alt="">`:''}<span>${l}</span><button class="btn sm" data-dec="${k}">${d[k]?'Changer':'Ajouter'}</button>${d[k]?`<button class="btn sm dng" data-decx="${k}">Retirer</button>`:''}</div>`;
- const decor=assets?`<span class="lbl">Décor de la saison ${esc(TH[meta.saison].nom.toLowerCase())}</span><div class="dec">${slot('hg','Haut gauche')}${slot('bd','Bas droite')}</div>`:'';
+ const fd=fondOf(meta);
+ const decor=assets?`<span class="lbl">Décor de la saison ${esc(TH[meta.saison].nom.toLowerCase())}</span><div class="dec"><div class="slot">${fd?`<img src="${esc(fd)}" alt="">`:''}<span>Fond page entière</span><button class="btn sm" data-dec="fond">${fd?'Changer':'Ajouter'}</button>${fd?'<button class="btn sm dng" data-decx="fond">Retirer</button>':''}</div>${fd?'':slot('hg','Haut gauche')+slot('bd','Bas droite')}</div>${fd?'<p class="hint">Avec un fond page entière, le logo, le cadre et les petites phrases viennent du fond.</p>':''}`:'';
  const list=pg?secsOf(secs,pg.id):[];
  const secCards=list.map((s,i)=>{const it=s.items||[];return `<div class="card" data-sid="${esc(s.id)}">
   <div class="sec-h"><input type="text" data-sf="titre" value="${esc(s.titre)}" placeholder="${s.style==='encadre'?'Encadré (sans titre)':'Titre de la rubrique'}" aria-label="Titre de la rubrique">
@@ -567,7 +573,7 @@ $('#imp').addEventListener('click',async e=>{const b=e.target.closest('[data-imp
 
 /* ---------- Décor ---------- */
 $('#fileDec').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f||!assets||!decSlot)return;
- try{toast('Envoi de l’image…');const r=await assets.upload(f);const url=okUrl(r.url)?r.url:'/_blob/'+r.id;meta.decor=meta.decor||{};meta.decor[meta.saison]={...(meta.decor[meta.saison]||{}),[decSlot]:url};metaChanged(true);renderEditor();toast('Décor mis à jour.')}catch(x){toast('Image refusée ou trop lourde.')}});
+ try{toast('Envoi de l’image…');const r=await assets.upload(f);const url=okUrl(r.url)?r.url:'/_blob/'+r.id;if(decSlot==='fond'){meta.fond={...(meta.fond||{}),[meta.saison]:url}}else{meta.decor=meta.decor||{};meta.decor[meta.saison]={...(meta.decor[meta.saison]||{}),[decSlot]:url}}metaChanged(true);renderEditor();toast('Décor mis à jour.')}catch(x){toast('Image refusée ou trop lourde.')}});
 
 /* ---------- Clics et saisies ---------- */
 document.addEventListener('click',async e=>{
@@ -577,6 +583,7 @@ document.addEventListener('click',async e=>{
  if(t.dataset.pg){cur=t.dataset.pg;try{localStorage.setItem('c76-page',cur)}catch(x){}renderPreview();renderEditor();return}
  if(t.dataset.season){meta.saison=t.dataset.season;metaChanged(true);renderEditor();return}
  if(t.dataset.dec){decSlot=t.dataset.dec;$('#fileDec').click();return}
+ if(t.dataset.decx==='fond'){meta.fond={...(meta.fond||{}),[meta.saison]:'none'};metaChanged(true);renderEditor();return}
  if(t.dataset.decx){meta.decor=meta.decor||{};meta.decor[meta.saison]={...(meta.decor[meta.saison]||{}),[t.dataset.decx]:'none'};metaChanged(true);renderEditor();return}
  if(t.dataset.pid){openSheet(t.closest('[data-sid]').dataset.sid,t.dataset.pid);return}
  const a=t.dataset.act;if(!a)return;const box=t.closest('[data-sid]'),sid=box&&box.dataset.sid,s=secs.find(x=>x.id===sid);
