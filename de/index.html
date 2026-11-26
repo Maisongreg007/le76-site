@@ -173,6 +173,9 @@
   .dix .compte span { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: #c9b8a4; }
   .dix .jourj { font: 700 2rem var(--serif); color: var(--gold-light); margin-top: 14px; }
   .dix .btn { position: relative; z-index: 1; white-space: nowrap; }
+  .dix .complet-band { grid-column: 1 / -1; margin: -40px -44px 0; padding: 18px 20px; background: #c0392b; color: #fff; text-align: center; font: 800 clamp(1.3rem, 3.4vw, 2rem)/1.15 var(--sans); letter-spacing: .12em; text-transform: uppercase; border-radius: 22px 22px 0 0; position: relative; z-index: 2; box-shadow: 0 6px 18px rgba(192,57,43,.35); }
+  .dix .complet-band small { display: block; margin-top: 6px; font: 600 .95rem/1.3 var(--sans); letter-spacing: .04em; text-transform: none; opacity: .95; }
+  @media (max-width: 900px) { .dix .complet-band { margin: -34px -22px 0; } }
   @media (max-width: 900px) {
     .dix .box { grid-template-columns: 1fr; text-align: center; gap: 18px; padding: 34px 22px; }
     .dix .big10 { font-size: 5rem; }
@@ -428,11 +431,11 @@
 <section class="dix" id="dix-ans" hidden>
   <div class="wrap">
     <div class="box">
+      <div class="complet-band">Ausgebucht! Danke an alle<small>Alle Plätze für das Jubiläum sind vergeben. Bis zu den nächsten Abenden!</small></div>
       <div class="big10">10<small>Jahre</small></div>
       <div>
         <h2>Das 76 feiert 10 Jahre 🎉</h2>
         <p>Samstag, 28. November, 20 Uhr · mit dem Orchester Santa Lucia · Jubiläumsmenü 29 €</p>
-        <span class="places" id="dixPlaces">AUSGEBUCHT · danke an alle!</span>
         <div class="compte" id="dixCompte" aria-live="polite"></div>
       </div>
       <a class="btn" id="dixBtn" href="/reserver/?lang=de">Einen anderen Abend reservieren</a>

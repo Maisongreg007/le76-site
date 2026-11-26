@@ -124,11 +124,11 @@
   .done p { color: var(--muted); max-width: 26em; margin: 10px auto 0; }
   .done .recap { text-align: left; margin: 20px 0; }
   .loading { text-align: center; padding: 50px 0; color: var(--muted); }
-  .dix { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--ink); color: #f1e6d6; border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; font-size: .95rem; }
+  .dix { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #c0392b; color: #fff; box-shadow: 0 6px 18px rgba(192,57,43,.3); border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; font-size: .95rem; }
   .dix[hidden] { display: none; }
   .dix b { color: #fff; }
-  .dix #dixJ { color: #e7b66a; font-weight: 600; }
-  .dix #dixPl { color: #f4b4aa; font-weight: 600; }
+  .dix #dixJ { display: none; }
+  .dix #dixPl { color: #fff; font-weight: 800; font-size: 1.15rem; letter-spacing: .06em; }
   .dixbtn { flex: none; border: 0; border-radius: 999px; background: #e7b66a; color: var(--ink); font-weight: 600; padding: 10px 16px; }
   @media (max-width: 520px) { .dix { flex-direction: column; align-items: stretch; text-align: center; } }
   footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 6px 0 40px; }
@@ -459,7 +459,7 @@
       document.getElementById('dixJ').textContent = ms <= 0 ? L("C'est ce soir !", 'Heute Abend!') : j <= 1 ? L('Demain soir !', 'Morgen Abend!') : DE ? `Noch ${j} Tage` : `J-${j}`;
     };
     majJ(); setInterval(majJ, 60000);
-    document.getElementById('dixPl').innerHTML = ' · <b style="color:var(--rust)">' + L('COMPLET, merci à tous !', 'AUSGEBUCHT, danke an alle!') + '</b>';
+    document.getElementById('dixPl').textContent = L('COMPLET, MERCI À TOUS !', 'AUSGEBUCHT, DANKE AN ALLE!');
     document.getElementById('dixChoisir').hidden = true;
   }
 
