@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded',demarrer);
     <label class="field de-lbl"><span>Nom en allemand</span><input type="text" id="fNomDe"></label>
     <label class="field"><span>Description</span><textarea id="fDesc" rows="2"></textarea></label>
     <label class="field de-lbl"><span>Description en allemand</span><textarea id="fDescDe" rows="2"></textarea></label>
-    <button type="button" class="btn sm" id="fTr" style="margin-bottom:12px">Traduire en allemand</button>
+    <button type="button" class="btn sm" id="fTr" style="margin-bottom:4px">Traduire en allemand</button><p class="hint" id="fTrH" style="margin:0 0 12px">Laisse l’allemand vide : il sera traduit tout seul à l’enregistrement.</p>
     <div class="two">
       <label class="field"><span>Prix</span><input type="text" id="fPrix" inputmode="decimal" placeholder="14,50"></label>
       <label class="field"><span>Contenance (boissons)</span><input type="text" id="fVol" placeholder="25 cl."></label>
@@ -435,7 +435,7 @@ function renderPub(){const L=$('#publist');
 function render(){renderPreview();renderStatus();if(edFocused())needEd=true;else renderEditor()}
 function route(){const p=location.hash==='#carte';$('#app').hidden=p;$('#pub').hidden=!p;if(p)renderPub();else renderPreview()}
 addEventListener('hashchange',route);
-$('#ed').addEventListener('focusout',()=>setTimeout(()=>{if(needEd&&!edFocused())renderEditor()},0));
+$('#ed').addEventListener('focusout',e=>{const f=e.target;if(f.dataset&&/^(titre|accroche)$/.test(f.dataset.sf||'')&&f.value.trim()){const b=f.closest('[data-sid]');if(b)setTimeout(()=>autoTr(b.dataset.sid),700)}setTimeout(()=>{if(needEd&&!edFocused())renderEditor()},0)});
 
 /* ---------- Enregistrement ---------- */
 let mq=Promise.resolve(),mt;const sq={},stm={};
@@ -471,6 +471,20 @@ async function trPage(btn){
  catch(e){toast(e&&e.code==='not_granted'?'Traduction refusée.':'Traduction impossible pour le moment.')}
  btn.disabled=false;btn.textContent='Traduire en allemand ce qui manque'}
 
+/* Traduction automatique : dès qu'un texte n'a pas son allemand */
+const enTr=new Set();
+async function autoTr(sid){
+ if(!sample||enTr.has(sid))return;const s=secs.find(x=>x.id===sid);if(!s)return;const map={};
+ if(s.titre&&!s.titreDe)map[`s|titreDe`]=s.titre;if(s.accroche&&!s.accrocheDe)map[`s|accrocheDe`]=s.accroche;
+ for(const p of s.items||[]){if(p.nom&&!p.nomDe)map[`i|${p.id}|nomDe`]=p.nom+(p.note?' '+p.note:'');if(p.desc&&!p.descDe)map[`i|${p.id}|descDe`]=p.desc}
+ if(!Object.keys(map).length)return;enTr.add(sid);
+ try{const r=await traduire(map),s2=secs.find(x=>x.id===sid);if(!s2)return;let n=0;
+  for(const [k,v] of Object.entries(r)){if(typeof v!=='string'||!map[k]||!v.trim())continue;const a=k.split('|');
+   if(a[0]==='s'&&/^(titreDe|accrocheDe)$/.test(a[1])&&!s2[a[1]]){s2[a[1]]=v.trim();n++}
+   else if(a[0]==='i'&&/^(nomDe|descDe)$/.test(a[2])){const p=(s2.items||[]).find(x=>x.id===a[1]);if(p&&!p[a[2]]){p[a[2]]=v.trim();n++}}}
+  if(n){saveSec(s2,true);render();toast('Allemand ajouté automatiquement : relis-le avant de valider.')}}
+ catch(e){}finally{enTr.delete(sid)}}
+
 /* ---------- Fiche plat ---------- */
 let edSec=null;
 function openSheet(sid,pid){
@@ -481,7 +495,7 @@ function openSheet(sid,pid){
  $('#fSec').innerHTML=secsOf(secs,s.page).map(x=>`<option value="${esc(x.id)}">${esc(x.titre||'Encadré')}</option>`).join('');$('#fSec').value=sid;
  $('#fHl').checked=!!editing.surligne;document.querySelectorAll('#sf .tg').forEach(c=>c.checked=(editing.tags||[]).includes(c.value));
  $('#fBy').textContent=p?`Proposé par ${p.auteur||'—'}${p.majPar?` · modifié par ${p.majPar}`:''}`:`Proposé par ${me}`;
- $('#fDel').hidden=$('#fUp').hidden=$('#fDown').hidden=!p;$('#fDel').textContent='Supprimer';delete $('#fDel').dataset.c;$('#fTr').hidden=!sample;
+ $('#fDel').hidden=$('#fUp').hidden=$('#fDown').hidden=!p;$('#fDel').textContent='Supprimer';delete $('#fDel').dataset.c;$('#fTr').hidden=$('#fTrH').hidden=!sample;
  $('#ov').hidden=false;setTimeout(()=>$('#fNom').focus(),30)}
 const closeSheet=()=>{$('#ov').hidden=true;editing=null};
 $('#fCancel').onclick=closeSheet;
@@ -493,7 +507,7 @@ $('#sf').addEventListener('submit',e=>{e.preventDefault();if(!editing)return;
  if(!p.nom&&!p.desc)return;const from=secs.find(x=>x.id===edSec),to=secs.find(x=>x.id===$('#fSec').value)||from;closeSheet();
  const i=(from.items||[]).findIndex(x=>x.id===p.id);
  if(to!==from){if(i>=0)from.items.splice(i,1);(to.items=to.items||[]).push(p);saveSec(from,true)}else if(i>=0)from.items[i]=p;else (from.items=from.items||[]).push(p);
- secChanged(to,true,true)});
+ secChanged(to,true,true);if(!p.nomDe||(p.desc&&!p.descDe))autoTr(to.id)});
 $('#fDel').onclick=()=>{const b=$('#fDel');if(!b.dataset.c){b.dataset.c=1;b.textContent='Confirmer la suppression';return}const s=secs.find(x=>x.id===edSec);s.items=(s.items||[]).filter(x=>x.id!==editing.id);closeSheet();secChanged(s,true,true)};
 function move(d){const s=secs.find(x=>x.id===edSec),i=(s.items||[]).findIndex(x=>x.id===editing.id),j=i+d;if(i<0||j<0||j>=s.items.length)return;[s.items[i],s.items[j]]=[s.items[j],s.items[i]];secChanged(s,true,true)}
 $('#fUp').onclick=()=>move(-1);$('#fDown').onclick=()=>move(1);
@@ -502,7 +516,7 @@ $('#fTr').onclick=async()=>{const b=$('#fTr'),map={};const n=$('#fNom').value.tr
 
 /* ---------- Déposer une carte (PDF ou photos) ---------- */
 const PROMPT_CARTE=`Voici une page de la carte du restaurant Le 76 (restaurant alsacien, carte bilingue français / allemand).
-Recopie fidèlement tout son contenu, sans rien inventer. Si l'allemand figure sur la page, recopie-le dans les champs « De » ; sinon laisse-les vides.
+Recopie fidèlement tout son contenu, sans rien inventer. Si l'allemand figure sur la page, recopie-le dans les champs « De » ; sinon traduis toi-même en allemand (style de carte de restaurant, concis, pour des clients allemands ; garde les spécialités alsaciennes et les marques telles quelles quand c'est l'usage).
 Ignore le logo, les décorations et le pied de page fixe (adresse, « Bonne table • Bons moments », « Prix nets »).
 Réponds uniquement par un objet JSON de cette forme :
 {"nom_page":"Entrées & plats","notes":{"hg":"","hd":"","bg":"","bd":""},"sections":[{"titre":"Nos entrées","titreDe":"Unsere Vorspeisen","accroche":"","accrocheDe":"","bandeau":"","style":"liste","colonnes":1,"items":[{"nom":"Velouté de potimarron","note":"","nomDe":"Kürbiscremesuppe","desc":"Crème de châtaigne","descDe":"Maronencreme","prix":"8","vol":"","prix2":"","vol2":"","surligne":false}]}]}
@@ -548,6 +562,7 @@ $('#imp').addEventListener('click',async e=>{const b=e.target.closest('[data-imp
  for(const pg of impRes){const pid=uid();first=first||pid;meta.pages.push({id:pid,nom:pg.nom,notes:pg.notes});
   for(const s of pg.sections){const n={id:uid(),page:pid,ordre:ord++,...s};secs.push(n);saveSec(n,true)}}
  cur=first;try{localStorage.setItem('c76-page',cur)}catch(x){}
+ secs.filter(s=>meta.pages.some(pg=>pg.id===s.page)).forEach(s=>{if(s.items&&s.items.some(p=>(p.nom&&!p.nomDe)||(p.desc&&!p.descDe)))autoTr(s.id)});
  metaChanged(true);render();toast(k==='remplacer'?'Carte remplacée : relis chaque page avant de valider.':'Pages ajoutées à la suite.')});
 
 /* ---------- Décor ---------- */
