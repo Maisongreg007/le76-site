@@ -82,6 +82,8 @@ details.more summary{cursor:pointer;color:var(--blue);font-size:14px;padding:6px
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;max-width:90vw}
 .toast[hidden]{display:none}
 #measure{position:fixed;left:-10000px;top:0;width:794px;pointer-events:none}
+#printZone{display:none}
+@media print{@page{size:A4;margin:0}html,body{background:#fff!important;margin:0}body>*:not(#printZone){display:none!important}#printZone{display:block}#printZone .sheet{width:210mm;height:296.5mm;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}#printZone .sheet:last-child{break-after:auto;page-break-after:auto}}
 #pub{max-width:860px;margin:0 auto;padding:16px}
 #pub .pv{margin-bottom:24px}
 .pubtop{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -267,6 +269,7 @@ document.addEventListener('DOMContentLoaded',demarrer);
       <div class="pvbar">
         <span class="sp" id="sync">Connexion…</span>
         <button class="btn sm" data-act="png" id="bPng">Image de la page</button>
+        <button class="btn sm pri" data-act="imprimer" id="bPrint" hidden>Imprimer la carte</button>
         <button class="btn sm pri" data-act="pdf" id="bPdf">PDF de toute la carte</button>
         <a class="btn sm" href="#carte" style="text-decoration:none;display:inline-flex;align-items:center">Carte publiée</a>
       </div>
@@ -317,6 +320,7 @@ document.addEventListener('DOMContentLoaded',demarrer);
 <input type="file" id="fileDec" accept="image/png,image/webp,image/jpeg,image/svg+xml" hidden>
 <div class="toast" id="toast" hidden></div>
 <div id="measure"></div>
+<div id="printZone"></div>
 
 <script>
 {
@@ -604,6 +608,7 @@ document.addEventListener('click',async e=>{
  else if(a==='publish')publier();
  else if(a==='reprendre'){if(!t.dataset.c){t.dataset.c=1;t.textContent='Confirmer';return}const ar=archives.find(x=>x.id===t.dataset.aid);if(ar)await reprendre(ar)}
  else if(a==='pdf'||a==='png')exporter(a);
+ else if(a==='imprimer')imprimer();
 });
 function onField(e){const t=e.target;
  if(t.dataset.k){meta[t.dataset.k]=t.value;metaChanged(false)}
@@ -612,6 +617,19 @@ function onField(e){const t=e.target;
  else if(t.dataset.sf){const s=secs.find(x=>x.id===t.closest('[data-sid]').dataset.sid);if(!s)return;s[t.dataset.sf]=t.dataset.sf==='colonnes'?Number(t.value):t.value;secChanged(s,t.tagName==='SELECT',false)}}
 $('#ed').addEventListener('input',e=>{if(e.target.tagName!=='SELECT')onField(e)});
 $('#ed').addEventListener('change',e=>{if(e.target.tagName==='SELECT'){onField(e);renderEditor()}});
+
+/* ---------- Impression directe ---------- */
+let peutImprimer=false;try{peutImprimer=window.self===window.top}catch(e){}
+if(peutImprimer){$('#bPrint').hidden=false;$('#bPdf').classList.remove('pri')}
+async function imprimer(){
+ if(imprimer.on)return;imprimer.on=1;setTimeout(()=>imprimer.on=0,3000);
+ const b=$('#bPrint'),lab=b.textContent;b.disabled=true;b.textContent='Préparation…';
+ try{await document.fonts.ready;
+  const z=$('#printZone');z.innerHTML=meta.pages.map(pg=>{const r=measured(meta,pg,secs);return pageH(meta,pg,secs).replace('<div class="sheet','<div data-k="'+r.k.toFixed(3)+'" class="sheet')}).join('');
+  z.querySelectorAll('.sheet').forEach(s=>s.style.setProperty('--k',s.dataset.k));
+  await Promise.all([...z.querySelectorAll('img')].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+  b.disabled=false;b.textContent=lab;window.print()}
+ catch(e){b.disabled=false;b.textContent=lab;toast('Impression impossible, utilise « PDF de toute la carte ».')}}
 
 /* ---------- Export PDF / PNG ---------- */
 async function snap(pg,sc){const {sh}=measured(meta,pg,secs);await Promise.all([...sh.querySelectorAll('img')].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return html2canvas(sh,{scale:sc,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,useCORS:true})}
