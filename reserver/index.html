@@ -134,6 +134,10 @@
   footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 6px 0 40px; }
   footer a { color: var(--muted); }
   [hidden] { display: none !important; }
+  .noelbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 14px; padding: 12px 16px; border-radius: 14px; background: linear-gradient(135deg, #8e2a20, #5e1612); color: #fff3dc; }
+  .noelbar b { font-family: var(--serif); }
+  .noelbar span { font-size: .93rem; color: #f3e3c6; }
+  .noelbar a { background: #e2bd6e; color: #3b1d0d; text-decoration: none; font-weight: 600; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -148,6 +152,9 @@
     <h1>Réserver une <em>table</em></h1>
     <p>Faites votre demande en quelques secondes, nous vous confirmons par e-mail.</p>
   </div>
+
+  <div class="noelbar" id="noelBar"><div><b id="nbT">🎄 Menus spéciaux Fêtes de Noël</b><br><span id="nbS">27 €, 30 € ou 36 € par personne · sur réservation, à partir de 8 personnes</span></div><a href="/menus-noel/" id="nbA">Voir les menus</a></div>
+  <script>if (Date.now() >= Date.parse("2027-01-01T00:00:00+01:00")) { var nb = document.getElementById("noelBar"); if (nb) nb.remove(); } if (/[?&]lang=de/.test(location.search)) { document.getElementById("nbT").textContent = "🎄 Weihnachtsmenüs"; document.getElementById("nbS").textContent = "27 €, 30 € oder 36 € pro Person · nur mit Reservierung, ab 8 Personen"; document.getElementById("nbA").textContent = "Menüs ansehen"; }</script>
 
   <div class="dix" id="dixResa" hidden>
     <div><b>🎉 Le 76 fête ses 10 ans</b> · samedi 28 novembre à 20h<br><span id="dixJ"></span><span id="dixPl"></span></div>

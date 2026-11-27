@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menus spéciaux Fêtes de Noël · Le 76 · Beinheim</title>
+<meta name="description" content="Menus spéciaux Fêtes de Noël au 76 à Beinheim : 27 €, 30 € ou 36 € par personne, dessert de Noël maison. Uniquement sur réservation, à partir de 8 personnes.">
+<link rel="canonical" href="https://le76.fr/menus-noel/">
+<meta name="theme-color" content="#7a1f1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232b1d16'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='32' font-weight='700' fill='%23d4953f' text-anchor='middle'%3E76%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="Menus spéciaux Fêtes de Noël · Le 76">
+<meta property="og:description" content="Trois menus à 27 €, 30 € ou 36 € par personne, sur réservation à partir de 8 personnes.">
+<meta property="og:image" content="https://le76.fr/menus-noel/ensemble.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&family=Jost:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fbf6ec; --paper: #fffdf8; --ink: #2b1d16; --brown: #4a2c1d; --muted: #7a6a5c;
+    --gold: #b07a1f; --gold-dark: #8a5d12; --gold-soft: #f7ecd2; --line: #eadcc3;
+    --red: #a8321f; --red-dark: #7a1f1a; --green: #2f6b45;
+    --serif: "Playfair Display", Georgia, serif; --sans: "Jost", system-ui, sans-serif; --script: "Caveat", cursive;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 400 17px/1.55 var(--sans); min-height: 100vh;
+    background-image: radial-gradient(ellipse at 15% 0%, rgba(168,50,31,.10), transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(176,122,31,.12), transparent 50%);
+    background-attachment: fixed; }
+  a { color: var(--gold-dark); }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.12; margin: 0; text-wrap: balance; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  header { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { text-decoration: none; display: flex; align-items: baseline; gap: 2px; color: var(--ink); }
+  .brand b { font: 800 1.55rem/1 var(--serif); }
+  .brand span { font: 700 1.95rem/1 var(--script); color: var(--gold); }
+  .back { color: var(--brown); text-decoration: none; font-weight: 500; font-size: .95rem; }
+
+  .hero { text-align: center; padding: 26px 22px 30px; margin: 8px 0 26px; border-radius: 18px; color: #fff3dc;
+    background: radial-gradient(ellipse at 50% 0%, #9b2a22, #5e1612 75%); box-shadow: 0 24px 60px rgba(94,22,18,.28); position: relative; }
+  .hero::before { content: ""; position: absolute; inset: 9px; border: 1.5px solid rgba(226,189,110,.6); border-radius: 12px; pointer-events: none; }
+  .hero .k { font: 600 .76rem/1 var(--sans); letter-spacing: .34em; text-transform: uppercase; color: #e2bd6e; }
+  .hero h1 { font-size: clamp(2rem, 7.5vw, 3.2rem); font-weight: 800; margin: 12px 0 8px;
+    background: linear-gradient(180deg, #f3d58b 0%, #d9a646 50%, #b07a1f 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { margin: 0 auto; max-width: 560px; color: #f3e3c6; }
+  .cond { display: inline-block; margin-top: 16px; background: rgba(0,0,0,.28); border: 1px solid rgba(226,189,110,.55); border-radius: 999px; padding: 8px 18px; font-weight: 600; font-size: .95rem; color: #f6dca0; }
+
+  .menus { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .menu { background: var(--paper); border-radius: 16px; padding: 22px 18px 20px; text-align: center; position: relative;
+    box-shadow: 0 14px 36px rgba(74,44,29,.10); display: flex; flex-direction: column; }
+  .menu::before { content: ""; position: absolute; inset: 6px; border: 1.5px solid var(--gold); border-radius: 11px; opacity: .55; pointer-events: none; }
+  .menu .no { font: 700 .74rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--red); }
+  .menu .plats { list-style: none; padding: 0; margin: 14px 0 16px; flex: 1; }
+  .menu .plats li { font: 700 1.12rem/1.25 var(--serif); color: var(--red-dark); padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .menu .plats li:last-child { border-bottom: 0; }
+  .menu .plats li small { display: block; font: 400 .88rem/1.3 var(--sans); color: var(--muted); margin-top: 2px; }
+  .menu .px { font: 800 2.2rem/1 var(--serif); background: linear-gradient(180deg, #d9a646 0%, #b07a1f 50%, #7c5310 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .menu .px small { display: block; font: 500 .8rem/1.2 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); -webkit-text-fill-color: var(--muted); margin-top: 4px; }
+  @media (max-width: 760px) { .menus { grid-template-columns: 1fr; } }
+
+  .resa { margin: 26px 0; background: var(--paper); border-radius: 16px; padding: 24px 22px; text-align: center; box-shadow: 0 14px 36px rgba(74,44,29,.08); }
+  .resa h2 { font-size: 1.5rem; }
+  .resa p { margin: 8px 0 0; color: var(--muted); }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; padding: 12px 22px; border-radius: 999px; }
+  .btn.p { background: var(--red); color: #fff; }
+  .btn.p:hover { background: var(--red-dark); }
+  .btn.s { border: 1.5px solid var(--gold); color: var(--gold-dark); background: #fff; }
+  .btn.s:hover { background: var(--gold-soft); }
+
+  .affiches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 8px 0 8px; }
+  .affiches a { display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 26px rgba(74,44,29,.18); }
+  .affiches img { display: block; width: 100%; height: auto; }
+  .titre-aff { text-align: center; font: 600 .78rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--brown); margin: 30px 0 12px; }
+  @media (max-width: 760px) { .affiches { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; } }
+  footer { text-align: center; color: var(--muted); font-size: .9rem; padding: 28px 0 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/" aria-label="Le 76"><b>Le</b><span>76</span></a>
+    <a class="back" href="/">← Retour au site</a>
+  </header>
+
+  <section class="hero">
+    <span class="k">Le 76 · Beinheim</span>
+    <h1>Menus spéciaux Fêtes de Noël</h1>
+    <p>Un repas de Noël entre amis, collègues ou en famille : choisissez parmi nos trois menus, dessert de Noël maison inclus.</p>
+    <span class="cond">Uniquement sur réservation · minimum 8 personnes</span>
+  </section>
+
+  <section class="menus">
+    <article class="menu">
+      <span class="no">Menu n°1</span>
+      <ul class="plats">
+        <li>½ tarte flambée<small>en entrée</small></li>
+        <li>Suprême de volaille<small>sauce aux épices de Noël</small></li>
+        <li>Dessert de Noël<small>maison</small></li>
+      </ul>
+      <div class="px">27 €<small>par personne</small></div>
+    </article>
+    <article class="menu">
+      <span class="no">Menu n°2</span>
+      <ul class="plats">
+        <li>Velouté de potimarron et châtaigne</li>
+        <li>Civet de biche</li>
+        <li>Dessert de Noël<small>maison</small></li>
+      </ul>
+      <div class="px">30 €<small>par personne</small></div>
+    </article>
+    <article class="menu">
+      <span class="no">Menu n°3</span>
+      <ul class="plats">
+        <li>Pâté en croûte</li>
+        <li>Mignon de porc<small>sauce foie gras</small></li>
+        <li>Dessert de Noël<small>maison</small></li>
+      </ul>
+      <div class="px">36 €<small>par personne</small></div>
+    </article>
+  </section>
+
+  <section class="resa">
+    <h2>Réserver votre repas de Noël</h2>
+    <p>Ces menus se réservent directement avec nous (groupes de 8 personnes minimum). Indiquez-nous la date, le nombre de personnes et le menu choisi.</p>
+    <div class="btns">
+      <a class="btn p" href="tel:+33388863187">📞 03 88 86 31 87</a>
+      <a class="btn s" href="mailto:le76@le76.fr?subject=Repas%20de%20No%C3%ABl%20au%2076">✉️ le76@le76.fr</a>
+      <a class="btn s" href="/reserver/">Réserver une table</a>
+    </div>
+  </section>
+
+  <div class="titre-aff">Les affiches</div>
+  <section class="affiches">
+    <a href="menu-27.jpg" target="_blank" rel="noopener"><img src="menu-27.jpg" alt="Menu spécial Fêtes de Noël à 27 € : demi tarte flambée, suprême de volaille sauce aux épices de Noël, dessert de Noël maison" loading="lazy"></a>
+    <a href="menu-30.jpg" target="_blank" rel="noopener"><img src="menu-30.jpg" alt="Menu spécial Fêtes de Noël à 30 € : velouté de potimarron et châtaigne, civet de biche, dessert de Noël maison" loading="lazy"></a>
+    <a href="menu-36.jpg" target="_blank" rel="noopener"><img src="menu-36.jpg" alt="Menu spécial Fêtes de Noël à 36 € : pâté en croûte, mignon de porc sauce foie gras, dessert de Noël maison" loading="lazy"></a>
+  </section>
+
+  <footer>Le 76 · 76 rue Principale, 67930 Beinheim · <a href="tel:+33388863187">03 88 86 31 87</a> · <a href="mailto:le76@le76.fr">le76@le76.fr</a></footer>
+</div>
+</body>
+</html>
