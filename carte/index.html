@@ -83,7 +83,7 @@ details.more summary{cursor:pointer;color:var(--blue);font-size:14px;padding:6px
 .toast[hidden]{display:none}
 #measure{position:fixed;left:-10000px;top:0;width:794px;pointer-events:none}
 #printZone{display:none}
-@media print{@page{size:A4;margin:0}html,body{background:#fff!important;margin:0}body>*:not(#printZone){display:none!important}#printZone{display:block}#printZone .sheet{width:210mm;height:296.5mm;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}#printZone .sheet:last-child{break-after:auto;page-break-after:auto}}
+@media print{#printZone .ptab{padding:12mm;font-family:Georgia,serif}#printZone .ptab h2{margin:0 0 4mm;font-size:18pt}#printZone .ptab .atab{font-size:8.5pt}#printZone .ptab .atab th,#printZone .ptab .atab td{border-bottom:.2mm solid #ccc;padding:1.2mm .8mm}@page{size:A4;margin:0}html,body{background:#fff!important;margin:0}body>*:not(#printZone){display:none!important}#printZone{display:block}#printZone .sheet{width:210mm;height:296.5mm;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}#printZone .sheet:last-child{break-after:auto;page-break-after:auto}}
 #pub{max-width:860px;margin:0 auto;padding:16px}
 #pub .pv{margin-bottom:24px}
 .pubtop{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -144,6 +144,17 @@ details.more summary{cursor:pointer;color:var(--blue);font-size:14px;padding:6px
 .c-fond{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .sheet.fd .c-hd{display:none}.c-sp{height:290px;flex:none}
 .sheet.fd .c-main{padding:0 110px 60px}.sheet.fd .c-ft{padding:6px 250px 92px}.sheet.fd .c-slo{font-size:9.5px;letter-spacing:.2em;flex-wrap:wrap}.sheet.fd .c-slo i{display:none}.sheet.fd .c-slo span{white-space:normal}
+.cm{font-size:12px;grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px}
+.cm b{font-weight:600}.cm .ok{color:var(--green)}.cm .watch{color:var(--orange)}.cm .alert{color:var(--red)}.cm .nd{color:var(--mut)}
+.alg{font-size:11px;background:var(--fill);border-radius:6px;padding:1px 6px;color:var(--mut)}
+.warnbox{background:color-mix(in srgb,var(--red) 9%,var(--card));border-radius:10px;padding:10px 12px;font-size:13px;margin-top:10px}
+.warnbox b{color:var(--red)}.warnbox ul{margin:4px 0 0;padding-inline-start:18px}
+.atab{width:100%;border-collapse:collapse;font-size:12px}.atab th,.atab td{border-bottom:1px solid var(--line);padding:5px 4px;text-align:center}
+.atab th:first-child,.atab td:first-child{text-align:left}.atab thead th{font-weight:600;font-size:11px;vertical-align:bottom}
+.atab .v{color:var(--red);font-weight:700}.atab .q{color:var(--orange)}
+.pubalg{background:#fff;color:#1b1410;border-radius:6px;padding:18px;margin:10px auto 30px;max-width:794px;box-shadow:0 10px 40px rgba(0,0,0,.14)}
+.pubalg h2{font-family:"Playfair Display",Georgia,serif;margin:0 0 4px;font-size:24px}.pubalg p{margin:0 0 12px;font-size:14px;color:#5a4a40}
+.pubalg .atab th,.pubalg .atab td{border-color:#e6ddd4}
 .c-empty{text-align:center;font-style:italic;font-size:22px;color:#7a6a5e;margin-top:80px}
 </style>
 <link rel="manifest" href="/carte/manifest.webmanifest">
@@ -243,7 +254,7 @@ const enB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res
 const assets={upload:async blob=>{const d=await post('image_envoyer',{donnees:await enB64(blob)});return {id:d.id,url:d.url}}};
 window.claude={use:async nom=>{await pret;
   if(nom==='db')return db;if(nom==='user')return S.anon?null:user;if(nom==='downloads')return downloads;
-  if(nom==='sample')return !S.anon&&S.ia?sample:null;if(nom==='assets')return S.anon?null:assets;return null}};
+  if(nom==='sample')return !S.anon&&S.ia?sample:null;if(nom==='coutmatiere')return S.anon?null:{get:async()=>await post('cm')};if(nom==='publication')return S.anon||!(S.moi&&S.moi.admin)?null:{images:async l=>post('images_publiees',{images:l})};if(nom==='assets')return S.anon?null:assets;return null}};
 document.addEventListener('DOMContentLoaded',demarrer);
 })();
 </script>
@@ -268,6 +279,7 @@ document.addEventListener('DOMContentLoaded',demarrer);
       <div class="pills" id="pgs"></div>
       <div class="pvbar">
         <span class="sp" id="sync">Connexion…</span>
+        <button class="btn sm" data-act="allergenes" id="bAlg" hidden>Allergènes</button>
         <button class="btn sm" data-act="png" id="bPng">Image de la page</button>
         <button class="btn sm pri" data-act="imprimer" id="bPrint" hidden>Imprimer la carte</button>
         <button class="btn sm pri" data-act="pdf" id="bPdf">PDF de toute la carte</button>
@@ -282,6 +294,7 @@ document.addEventListener('DOMContentLoaded',demarrer);
 <div id="pub" hidden>
   <div class="pubtop"><b>Le 76 · la carte du moment</b><a href="#">Retour à l'éditeur</a></div>
   <div id="publist"></div>
+  <div id="pubalg"></div>
   <p class="hint" id="pubmeta" style="text-align:center"></p>
 </div>
 
@@ -300,6 +313,8 @@ document.addEventListener('DOMContentLoaded',demarrer);
       <label class="field"><span>2ᵉ prix</span><input type="text" id="fPrix2" inputmode="decimal"></label>
       <label class="field"><span>2ᵉ contenance</span><input type="text" id="fVol2" placeholder="50 cl."></label>
     </div>
+    <label class="field" id="fCmL" hidden><span>Fiche recette du coût matière</span><select id="fCm"></select></label>
+    <p class="hint" id="fCmInfo" style="margin:-4px 0 12px" hidden></p>
     <label class="field"><span>Rubrique</span><select id="fSec"></select></label>
     <div class="tags">
       <label><input type="checkbox" id="fHl"> Surligné</label>
@@ -315,6 +330,7 @@ document.addEventListener('DOMContentLoaded',demarrer);
     </div>
   </form>
 </div>
+<div class="ov" id="algOv" hidden><div class="sheetui" style="width:min(1100px,100%)"><h2>Allergènes de la carte</h2><div id="algBody"></div><div class="sh-acts"><button class="btn" data-alg="fermer">Fermer</button><div class="r"><button class="btn pri" data-alg="imprimer" id="algPrint" hidden>Imprimer le tableau</button></div></div></div></div>
 <div class="ov" id="imp" hidden><div class="sheetui"><h2>Déposer une carte</h2><div id="impBody"></div><div class="sh-acts" id="impActs"></div></div></div>
 <input type="file" id="fileCarte" accept="application/pdf,image/jpeg,image/png,image/webp" multiple hidden>
 <input type="file" id="fileDec" accept="image/png,image/webp,image/jpeg,image/svg+xml" hidden>
@@ -360,6 +376,46 @@ const pageOk=()=>{if(!meta.pages.find(p=>p.id===cur))cur=(meta.pages[0]||{}).id|
 const secsOf=(ss,pid)=>ss.filter(s=>s.page===pid).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
 const curPage=()=>meta.pages.find(p=>p.id===cur);
 
+/* ---------- Coût matière (le76.fr) : coûts, marges, allergènes ---------- */
+let CMD=null;
+const ALG=[["gluten","Gluten","Gluten"],["crustaces","Crustacés","Krebstiere"],["oeufs","Œufs","Eier"],["poissons","Poissons","Fisch"],["arachides","Arachides","Erdnüsse"],["soja","Soja","Soja"],["lait","Lait","Milch"],["fruits_coque","Fruits à coque","Schalenfrüchte"],["celeri","Céleri","Sellerie"],["moutarde","Moutarde","Senf"],["sesame","Sésame","Sesam"],["sulfites","Sulfites","Sulfite"],["lupin","Lupin","Lupinen"],["mollusques","Mollusques","Weichtiere"]];
+const ALGN=Object.fromEntries(ALG.map(a=>[a[0],a[1]]));
+const cnum=v=>{const x=parseFloat(String(v??'').replace(/\s|€/g,'').replace(',','.'));return isFinite(x)?x:0};
+const CU={kg:{g:0.001,kg:1},L:{ml:0.001,cl:0.01,L:1},piece:{'pièce':1}},CY={portion:{portion:1},kg:{g:0.001,kg:1},L:{ml:0.001,cl:0.01,L:1}},MASS={g:1,kg:1000},VOL={ml:1,cl:10,L:1000};
+const cIng=id=>CMD&&CMD.ingredients[id],cFic=id=>CMD&&CMD.fiches[id];
+const netCost=i=>{if(!i)return 0;const l=Math.min(Math.max(cnum(i.loss),0),95);return cnum(i.price)/(1-l/100)};
+function pwOf(i){if(cnum(i.pieceWeight))return cnum(i.pieceWeight);if(i.unit!=='piece')return 0;const m=String(i.name).toLowerCase().replace(',','.').match(/(\d+(?:\.\d+)?)\s*(g|gr|ml)(?![a-z])/);const v=m?parseFloat(m[1]):0;return v>0&&v<3000?v:0}
+function baseQty(l,i){const q=cnum(l.qty),u=l.unit,g=MASS[u]!=null?q*MASS[u]:VOL[u]!=null?q*VOL[u]:null;
+ if(i.unit==='kg'||i.unit==='L'){if(g!=null)return g/1000;if(u==='pièce'&&pwOf(i)>0)return q*pwOf(i)/1000;return null}
+ if(u==='pièce')return q;if(g!=null&&pwOf(i)>0)return g/pwOf(i);return null}
+const hasFixed=l=>l.fixed!=null&&l.fixed!=='';
+function lineCost(l,d){if(hasFixed(l))return cnum(l.fixed);if(l.type!=='f'){const i=cIng(l.ref);if(!i)return 0;const b=baseQty(l,i);return b==null?0:netCost(i)*b}
+ const f=cFic(l.ref);const u=f?CY[f.yieldUnit||'portion']:null;if(!u||u[l.unit]==null)return 0;return ficheUnit(f,d+1)*cnum(l.qty)*u[l.unit]}
+function ficheTotal(f,d=0){if(!f||d>6)return 0;return (f.lines||[]).reduce((s,l)=>s+lineCost(l,d),0)}
+function ficheUnit(f,d=0){return f?ficheTotal(f,d)/Math.max(cnum(f.yield),0.0001):0}
+function ficheMissing(f,d=0){if(!f||d>6)return false;return (f.lines||[]).some(l=>l.type==='f'?ficheMissing(cFic(l.ref),d+1):(!hasFixed(l)&&cIng(l.ref)&&(!(cnum(cIng(l.ref).price)>0)||baseQty(l,cIng(l.ref))==null)))}
+function ficheAlg(f,set=new Set(),d=0){if(!f||d>6)return set;(f.lines||[]).forEach(l=>{if(l.type==='f')ficheAlg(cFic(l.ref),set,d+1);else ((cIng(l.ref)||{}).allergens||[]).forEach(a=>set.add(a))});return set}
+const normN=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/œ/g,'oe').replace(/[^a-z0-9]+/g,' ').split(' ').filter(w=>w.length>1&&!['le','la','les','de','du','des','au','aux','et','sa','ses','son','en','un','une','maison','facon','notre','nos'].includes(w));
+function simil(a,b){const A=new Set(normN(a)),B=new Set(normN(b));if(!A.size||!B.size)return 0;let n=0;A.forEach(w=>{if(B.has(w))n++});return n/Math.max(A.size,B.size)}
+function autoLien(p){if(!CMD)return null;let best=null,sc=0;
+ for(const [id,c] of Object.entries(CMD.carte)){if(!c.fiche||!cFic(c.fiche))continue;const s=simil(p.nom,c.name);if(s>sc){sc=s;best='c:'+id}}
+ for(const [id,f] of Object.entries(CMD.fiches)){if(/base|sous/i.test(f.category||''))continue;const s=simil(p.nom,f.name);if(s>sc+0.001){sc=s;best='f:'+id}}
+ return sc>=0.6?best:null}
+function lienOf(p){if(!CMD)return null;if(p.cm==='none')return null;if(p.cm&&/^[cf]:/.test(p.cm)){const [k,id]=[p.cm[0],p.cm.slice(2)];if(k==='c'?CMD.carte[id]:cFic(id))return {v:p.cm,auto:false}}const a=autoLien(p);return a?{v:a,auto:true}:null}
+function coutOf(p){const L=lienOf(p);if(!L)return null;let f,qty=1,unit='portion',nom;
+ if(L.v[0]==='c'){const c=CMD.carte[L.v.slice(2)];f=cFic(c.fiche);qty=cnum(c.qty)||1;unit=c.unit||'portion';nom=c.name}else{f=cFic(L.v.slice(2));nom=f&&f.name}
+ if(!f)return null;const u=CY[f.yieldUnit||'portion'];const fac=u[unit]??Object.values(u)[0];const cp=ficheUnit(f)*qty*fac;
+ const ttc=cnum(p.prix),ht=ttc/1.1,target=(cnum(CMD.objectif)||28)/100,fc=ht>0&&cp>0?cp/ht:null;
+ let st='nd';if(ficheMissing(f))st='missing';else if(fc!=null)st=fc<=target?'ok':fc<=target+0.07?'watch':'alert';
+ return {cp,ht,fc,marge:ht-cp,st,algs:[...ficheAlg(f)],nom,auto:L.auto,target}}
+const STC={ok:'Rentable',watch:'À surveiller',alert:'Marge trop basse',nd:'Prix à compléter',missing:'Prix d’ingrédients manquants'};
+const eur2=v=>v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+function cmLigne(p){const c=coutOf(p);if(!c)return CMD&&!p.vol&&cnum(p.prix)>0?'<span class="cm"><span class="nd">Pas de fiche recette</span></span>':'';
+ return `<span class="cm"><span class="${c.st==='missing'?'nd':c.st}"><b>${c.fc!=null?Math.round(c.fc*100)+' %':'—'}</b> ${STC[c.st]}</span><span>coût ${eur2(c.cp)}${c.ht>0?` · marge ${eur2(c.marge)} HT`:''}</span>${c.algs.map(a=>`<span class="alg">${esc(ALGN[a]||a)}</span>`).join('')}</span>`}
+const estBoisson=s=>/boisson|cocktail|ap[ée]ritif|soft|digestif|caf[ée]s?\b|getr[äa]nk|vins?\b|bi[èe]re/i.test((s.titre||'')+' '+(s.titreDe||''));
+function algRows(ss,pages){const rows=[];for(const pg of pages)for(const s of secsOf(ss,pg.id)){if(s.style==='texte'||estBoisson(s))continue;for(const p of s.items||[]){if(!p.nom||p.vol)continue;rows.push({p,pg,s})}}return rows}
+function algTable(rows,de,get){return `<table class="atab"><thead><tr><th>${de?'Gericht / Plat':'Plat'}</th>${ALG.map(a=>`<th>${esc(a[1])}${de?`<br><span style="font-weight:400">${esc(a[2])}</span>`:''}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>{const g=get(r.p);return `<tr><td>${esc(r.p.nom)}${de&&r.p.nomDe?`<br><span style="color:#a0601a;font-style:italic">${esc(r.p.nomDe)}</span>`:''}</td>${g?ALG.map(a=>`<td class="v">${g.includes(a[0])?'●':''}</td>`).join(''):`<td colspan="${ALG.length}" class="q">${de?'Bitte beim Personal nachfragen · ':''}À demander au personnel</td>`}</tr>`}).join('')}</tbody></table>`}
+
 /* ---------- Rendu d'une page de carte ---------- */
 function fondOf(m){const f=((m.fond||{})[m.saison])??FOND[m.saison];return okUrl(f)?f:''}
 function decorOf(m){const d={...(DEC[m.saison]||{}),...((m.decor||{})[m.saison]||{})};return{hg:okUrl(d.hg)?d.hg:'',bd:okUrl(d.bd)?d.bd:''}}
@@ -401,7 +457,10 @@ function renderStatus(){
  else if(meta.statut==='a_valider'){acts=owner?'<button class="btn ok" data-act="valid">Valider la carte</button><button class="btn" data-act="back">Renvoyer en brouillon</button>':'';hint=`Envoyée pour validation par ${esc(meta.statutPar||'l’équipe')}${owner?'. Relis chaque page puis valide.':' : en attente de Greg.'}`}
  else if(meta.statut==='validee'){acts=owner?'<button class="btn pri" data-act="publish">Publier la carte</button>':'';hint=`Validée par ${esc(meta.statutPar||'Greg')}. Toute modification la repasse en brouillon.`}
  else hint=`Publiée le ${fmtDate(meta.publieLe)}. Toute modification la repasse en brouillon ; la carte publiée reste en ligne jusqu’à la prochaine publication.`;
- $('#st').innerHTML=`<h2>Validation</h2><div class="steps">${steps}</div><div class="acts">${acts}</div><p class="hint">${hint}</p>`}
+ let wb='';if(CMD){const bad=[],sans=[];for(const pg of meta.pages)for(const s of secsOf(secs,pg.id)){if(s.style!=='liste'||estBoisson(s))continue;for(const p of s.items||[]){if(p.vol||!cnum(p.prix))continue;const c=coutOf(p);if(!c)sans.push(p.nom);else if(c.st==='alert')bad.push(`${esc(p.nom)} (${Math.round(c.fc*100)} %)`)}}
+  if(bad.length)wb+=`<div class="warnbox"><b>${bad.length} plat${bad.length>1?'s':''} sous ta marge</b> (objectif ${Math.round(cnum(CMD.objectif)||28)} % de coût matière) :<ul>${bad.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  if(sans.length)wb+=`<p class="hint">${sans.length} plat${sans.length>1?'s':''} sans fiche recette : pas de coût ni d’allergènes calculés.</p>`}
+ $('#st').innerHTML=`<h2>Validation</h2><div class="steps">${steps}</div><div class="acts">${acts}</div><p class="hint">${hint}</p>${wb}`}
 function renderEditor(){
  needEd=false;pageOk();const pg=curPage(),d=decorOf(meta);
  const seg=Object.keys(TH).map(k=>`<button data-season="${k}" aria-pressed="${k===meta.saison}">${TH[k].nom}</button>`).join('');
@@ -420,7 +479,7 @@ function renderEditor(){
    <div class="two"><label class="field"><span>Présentation</span><select data-sf="style"><option value="liste">Liste de plats</option><option value="texte"${s.style==='texte'?' selected':''}>Texte (parfums…)</option><option value="encadre"${s.style==='encadre'?' selected':''}>Encadré (suppléments…)</option></select></label>
    <label class="field"><span>Colonnes</span><select data-sf="colonnes"><option value="1">1 colonne</option><option value="2"${Number(s.colonnes)===2?' selected':''}>2 colonnes</option></select></label></div>
   </details>
-  <div>${it.map(p=>`<button class="row" data-pid="${esc(p.id)}"><span class="rn">${esc(p.nom)||'Sans nom'}${p.note?' '+esc(p.note):''}</span><span class="rp">${esc(fmtPrix(p.prix))}</span><span class="ra">${p.nomDe||p.descDe||(!p.desc&&s.style!=='liste')?esc(p.nomDe||p.descDe):'<span class="miss">Allemand manquant</span>'}${p.auteur?' · '+esc(p.auteur):''}</span></button>`).join('')}</div>
+  <div>${it.map(p=>`<button class="row" data-pid="${esc(p.id)}"><span class="rn">${esc(p.nom)||'Sans nom'}${p.note?' '+esc(p.note):''}</span><span class="rp">${esc(fmtPrix(p.prix))}</span><span class="ra">${p.nomDe||p.descDe||(!p.desc&&s.style!=='liste')?esc(p.nomDe||p.descDe):'<span class="miss">Allemand manquant</span>'}${p.auteur?' · '+esc(p.auteur):''}</span>${s.style==='liste'&&!estBoisson(s)?cmLigne(p):''}</button>`).join('')}</div>
   <button class="add" data-act="add">+ Ajouter ${s.style==='liste'?'un plat':'une ligne'}</button></div>`}).join('');
  const notes=pg?NOTEPOS.map(([k,l])=>`<label class="field"><span>${l}</span><input type="text" data-note="${k}" value="${esc((pg.notes||{})[k])}"></label>`).join(''):'';
  const pi=meta.pages.findIndex(p=>p.id===cur);
@@ -441,9 +500,10 @@ function edFocused(){const a=document.activeElement;return a&&$('#ed').contains(
 function renderPreview(){pageOk();renderPills();const pg=curPage();if(!pg){$('#pv').innerHTML='';return}const r=mount($('#pv'),meta,pg,secs);$('#warn').hidden=!r.over}
 function renderPub(){const L=$('#publist');
  if(publie&&publie.meta){L.innerHTML=(publie.meta.pages||[]).map((p,i)=>`<div class="pv" data-i="${i}"></div>`).join('');(publie.meta.pages||[]).forEach((p,i)=>{const b=L.querySelector(`[data-i="${i}"]`);ro.observe(b);mount(b,publie.meta,p,publie.sections||[])});$('#pubmeta').textContent=`Publiée le ${fmtDate(publie.publieLe)}`}
- else{L.innerHTML='<p class="hint" style="padding:40px;text-align:center">Aucune carte publiée pour l’instant.</p>';$('#pubmeta').textContent=''}}
+ else{L.innerHTML='<p class="hint" style="padding:40px;text-align:center">Aucune carte publiée pour l’instant.</p>';$('#pubmeta').textContent=''}
+ const A=$('#pubalg');if(publie&&publie.allergenes){const rows=algRows(publie.sections||[],publie.meta.pages||[]);A.innerHTML=`<div class="pubalg" id="allergenes"><h2>Allergènes · Allergene</h2><p>Les 14 allergènes réglementaires présents dans nos plats. En cas de doute, demandez-nous. · Bei Fragen wenden Sie sich bitte an unser Personal.</p><div class="scroll">${algTable(rows,true,p=>Array.isArray(p.algs)?p.algs:null)}</div></div>`;if(location.hash==='#allergenes')setTimeout(()=>{const x=$('#allergenes');x&&x.scrollIntoView()},300)}else A.innerHTML=''}
 function render(){renderPreview();renderStatus();if(edFocused())needEd=true;else renderEditor()}
-function route(){const p=location.hash==='#carte';$('#app').hidden=p;$('#pub').hidden=!p;if(p)renderPub();else renderPreview()}
+function route(){const p=location.hash==='#carte'||location.hash==='#allergenes';$('#app').hidden=p;$('#pub').hidden=!p;if(p)renderPub();else renderPreview()}
 addEventListener('hashchange',route);
 $('#ed').addEventListener('focusout',e=>{const f=e.target;if(f.dataset&&/^(titre|accroche)$/.test(f.dataset.sf||'')&&f.value.trim()){const b=f.closest('[data-sid]');if(b)setTimeout(()=>autoTr(b.dataset.sid),700)}setTimeout(()=>{if(needEd&&!edFocused())renderEditor()},0)});
 
@@ -458,8 +518,13 @@ function secChanged(s,now,ed){touch();renderPreview();renderStatus();saveSec(s,n
 function setStatut(s){meta.statut=s;meta.statutPar=me;meta.statutLe=Date.now();renderStatus();saveMeta(true)}
 async function publier(){
  const snap={meta:{...clone(meta),statut:'publiee'},sections:clone(secs),publieLe:Date.now(),par:me};
+ if(CMD)snap.sections.forEach(s=>(s.items||[]).forEach(p=>{const c=coutOf(p);if(c)p.algs=c.algs;else delete p.algs}));snap.allergenes=!!CMD;
  try{if(db){await db.doc('publie/actuelle').set(snap);await db.collection('archives').add(snap)}
-  publie=snap;meta.statut='publiee';meta.publieLe=snap.publieLe;meta.statutPar=me;saveMeta(true);render();toast('Carte publiée.')}catch(e){fail(e)}}
+  publie=snap;meta.statut='publiee';meta.publieLe=snap.publieLe;meta.statutPar=me;saveMeta(true);render();toast('Carte publiée.');imagesPubliees()}catch(e){fail(e)}}
+let pubA=null;
+async function imagesPubliees(){if(!pubA||!window.html2canvas)return;try{toast('Carte publiée. Préparation des images pour le site et les réseaux…');await document.fonts.ready;const imgs=[];
+ for(const pg of meta.pages){const c=await snap(pg,1.35);imgs.push(c.toDataURL('image/jpeg',.85))}
+ await pubA.images(imgs);toast('Carte publiée : site et réseaux mis à jour.')}catch(e){toast('Carte publiée (images non envoyées).')}}
 async function reprendre(a){for(const s of secs.slice())await delSec(s.id);secs=clone(a.sections||[]);for(const s of secs)saveSec(s,true);
  meta={...clone(DEF),...clone(a.meta),statut:'brouillon',statutPar:me,statutLe:Date.now()};saveMeta(true);render();toast('Ancienne carte reprise en brouillon.')}
 
@@ -503,6 +568,9 @@ function openSheet(sid,pid){
  $('#sfT').textContent=p?'Modifier':'Ajouter';
  for(const [f,k] of [['fNom','nom'],['fNote','note'],['fNomDe','nomDe'],['fDesc','desc'],['fDescDe','descDe'],['fPrix','prix'],['fVol','vol'],['fPrix2','prix2'],['fVol2','vol2']])$('#'+f).value=editing[k]||'';
  $('#fSec').innerHTML=secsOf(secs,s.page).map(x=>`<option value="${esc(x.id)}">${esc(x.titre||'Encadré')}</option>`).join('');$('#fSec').value=sid;
+ if(CMD){$('#fCmL').hidden=false;$('#fCmInfo').hidden=false;const sug=autoLien(editing),nomS=sug?(sug[0]==='c'?CMD.carte[sug.slice(2)].name:cFic(sug.slice(2)).name):'';
+  $('#fCm').innerHTML=`<option value="">Automatique${sug?' : '+esc(nomS):' (rien trouvé)'}</option><option value="none">Aucune fiche</option><optgroup label="Carte du coût matière">${Object.entries(CMD.carte).filter(([,c])=>c.fiche).sort((a,b)=>a[1].name.localeCompare(b[1].name,'fr')).map(([id,c])=>`<option value="c:${esc(id)}">${esc(c.name)}</option>`).join('')}</optgroup><optgroup label="Fiches recettes">${Object.entries(CMD.fiches).sort((a,b)=>a[1].name.localeCompare(b[1].name,'fr')).map(([id,f])=>`<option value="f:${esc(id)}">${esc(f.name)}</option>`).join('')}</optgroup>`;
+  $('#fCm').value=editing.cm||'';majCmInfo()}else{$('#fCmL').hidden=true;$('#fCmInfo').hidden=true}
  $('#fHl').checked=!!editing.surligne;document.querySelectorAll('#sf .tg').forEach(c=>c.checked=(editing.tags||[]).includes(c.value));
  $('#fBy').textContent=p?`Proposé par ${p.auteur||'—'}${p.majPar?` · modifié par ${p.majPar}`:''}`:`Proposé par ${me}`;
  $('#fDel').hidden=$('#fUp').hidden=$('#fDown').hidden=!p;$('#fDel').textContent='Supprimer';delete $('#fDel').dataset.c;$('#fTr').hidden=$('#fTrH').hidden=!sample;
@@ -513,7 +581,7 @@ $('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeSheet()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#ov').hidden)closeSheet()});
 $('#sf').addEventListener('submit',e=>{e.preventDefault();if(!editing)return;
  const v=id=>$('#'+id).value.trim();
- const p={...editing,nom:v('fNom'),note:v('fNote'),nomDe:v('fNomDe'),desc:v('fDesc'),descDe:v('fDescDe'),prix:v('fPrix'),vol:v('fVol'),prix2:v('fPrix2'),vol2:v('fVol2'),surligne:$('#fHl').checked,tags:[...document.querySelectorAll('#sf .tg:checked')].map(c=>c.value),majPar:me,maj:Date.now()};
+ const p={...editing,nom:v('fNom'),note:v('fNote'),nomDe:v('fNomDe'),desc:v('fDesc'),descDe:v('fDescDe'),prix:v('fPrix'),vol:v('fVol'),prix2:v('fPrix2'),vol2:v('fVol2'),surligne:$('#fHl').checked,cm:CMD?$('#fCm').value:(editing.cm||''),tags:[...document.querySelectorAll('#sf .tg:checked')].map(c=>c.value),majPar:me,maj:Date.now()};
  if(!p.nom&&!p.desc)return;const from=secs.find(x=>x.id===edSec),to=secs.find(x=>x.id===$('#fSec').value)||from;closeSheet();
  const i=(from.items||[]).findIndex(x=>x.id===p.id);
  if(to!==from){if(i>=0)from.items.splice(i,1);(to.items=to.items||[]).push(p);saveSec(from,true)}else if(i>=0)from.items[i]=p;else (from.items=from.items||[]).push(p);
@@ -575,6 +643,15 @@ $('#imp').addEventListener('click',async e=>{const b=e.target.closest('[data-imp
  secs.filter(s=>meta.pages.some(pg=>pg.id===s.page)).forEach(s=>{if(s.items&&s.items.some(p=>(p.nom&&!p.nomDe)||(p.desc&&!p.descDe)))autoTr(s.id)});
  metaChanged(true);render();toast(k==='remplacer'?'Carte remplacée : relis chaque page avant de valider.':'Pages ajoutées à la suite.')});
 
+function majCmInfo(){if(!CMD||!editing)return;const c=coutOf({...editing,nom:$('#fNom').value,prix:$('#fPrix').value,cm:$('#fCm').value});
+ $('#fCmInfo').textContent=c?`${c.auto?'Lié automatiquement à « '+c.nom+' ». ':''}Coût matière ${eur2(c.cp)} · ${c.fc!=null?Math.round(c.fc*100)+' % du prix HT · marge '+eur2(c.marge)+' HT · ':''}${STC[c.st]}. Allergènes : ${c.algs.map(a=>ALGN[a]).join(', ')||'aucun déclaré'}.`:'Pas de fiche recette liée : coût et allergènes inconnus.'}
+['fCm','fPrix','fNom'].forEach(id=>$('#'+id).addEventListener(id==='fCm'?'change':'input',majCmInfo));
+
+/* ---------- Tableau des allergènes ---------- */
+function ouvrirAlg(){const rows=algRows(secs,meta.pages);$('#algBody').innerHTML=`<p class="hint" style="margin-top:0">Calculé à partir des fiches recettes du coût matière. « À demander au personnel » : plat sans fiche liée.</p><div class="scroll">${algTable(rows,false,p=>{const c=coutOf(p);return c?c.algs:null})}</div>`;$('#algPrint').hidden=!peutImprimer;$('#algOv').hidden=false}
+$('#algOv').addEventListener('click',e=>{const b=e.target.closest('[data-alg]');if(e.target.id==='algOv'||(b&&b.dataset.alg==='fermer')){$('#algOv').hidden=true;return}
+ if(b&&b.dataset.alg==='imprimer'){const rows=algRows(secs,meta.pages);$('#printZone').innerHTML=`<div class="ptab"><h2>Le 76 · Allergènes / Allergene</h2>${algTable(rows,true,p=>{const c=coutOf(p);return c?c.algs:null})}</div>`;window.print()}});
+
 /* ---------- Décor ---------- */
 $('#fileDec').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f||!assets||!decSlot)return;
  try{toast('Envoi de l’image…');const r=await assets.upload(f);const url=okUrl(r.url)?r.url:'/_blob/'+r.id;if(decSlot==='fond'){meta.fond={...(meta.fond||{}),[meta.saison]:url}}else{meta.decor=meta.decor||{};meta.decor[meta.saison]={...(meta.decor[meta.saison]||{}),[decSlot]:url}}metaChanged(true);renderEditor();toast('Décor mis à jour.')}catch(x){toast('Image refusée ou trop lourde.')}});
@@ -609,6 +686,7 @@ document.addEventListener('click',async e=>{
  else if(a==='reprendre'){if(!t.dataset.c){t.dataset.c=1;t.textContent='Confirmer';return}const ar=archives.find(x=>x.id===t.dataset.aid);if(ar)await reprendre(ar)}
  else if(a==='pdf'||a==='png')exporter(a);
  else if(a==='imprimer')imprimer();
+ else if(a==='allergenes')ouvrirAlg();
 });
 function onField(e){const t=e.target;
  if(t.dataset.k){meta[t.dataset.k]=t.value;metaChanged(false)}
@@ -649,7 +727,10 @@ renderMe();render();route();
 document.fonts&&document.fonts.ready.then(()=>{renderPreview();if(!$('#pub').hidden)renderPub()});
 (async()=>{
  const [d,u,w,sp,as]=await Promise.all([claude.use('db'),claude.use('user'),claude.use('downloads'),claude.use('sample'),claude.use('assets')]);
- db=d;dl=w;sample=sp;assets=as;if(sample&&sample.limits){try{const L=await sample.limits();imgOk=!!(L&&L.images)}catch(e){imgOk=false}}if(!dl){$('#bPdf').hidden=$('#bPng').hidden=true}
+ db=d;dl=w;sample=sp;assets=as;
+ const cmA=await claude.use('coutmatiere');pubA=await claude.use('publication');
+ const chargerCm=async()=>{if(!cmA)return;try{const r=await cmA.get();CMD=r&&r.dispo?r:null}catch(e){CMD=null}$('#bAlg').hidden=!CMD;render()};
+ await chargerCm();document.addEventListener('visibilitychange',()=>{if(!document.hidden)chargerCm()});if(sample&&sample.limits){try{const L=await sample.limits();imgOk=!!(L&&L.images)}catch(e){imgOk=false}}if(!dl){$('#bPdf').hidden=$('#bPng').hidden=true}
  if(u){owner=(await u.isOwner())??false;if(await u.can('data.write')===false)canWrite=false;if(typeof u.nom==='function'){const n=await u.nom();if(n){me=n;fixe=true;renderMe()}}}
  if(!db){$('#sync').textContent='Hors ligne : rien n’est enregistré';render();return}
  const tm=setTimeout(()=>{if(!loaded)$('#sync').textContent='Connexion lente… les données arrivent.'},10000);

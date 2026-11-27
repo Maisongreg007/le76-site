@@ -43,6 +43,13 @@ try {
             repondre(['ok' => true, 'rev' => ca_ecrire(is_array($q['ecritures'] ?? null) ? $q['ecritures'] : [], $responsable)]);
         case 'image_envoyer':
             repondre(['ok' => true] + ca_image_enregistrer((string) ($q['donnees'] ?? '')));
+        case 'cm':
+            // Données du coût matière utiles à la carte : coûts des recettes et allergènes
+            repondre(['ok' => true] + ca_cout_matiere());
+        case 'images_publiees':
+            // Images des pages de la carte publiée (pour le site et les réseaux sociaux)
+            $responsable || erreur('Seul un responsable peut publier la carte.', 403);
+            repondre(['ok' => true, 'n' => ca_images_publiees(is_array($q['images'] ?? null) ? $q['images'] : [])]);
         case 'ia':
             // Traduction en allemand : même clé d'IA que le coût matière
             ca_ia_dispo() || erreur("La traduction automatique n'est pas activée : ajoute la clé de l'IA dans les Réglages du coût matière.", 503);
@@ -81,3 +88,32 @@ function ca_ia_dispo(): bool
         return $ok = false;
     }
 }
+
+function ca_cout_matiere(): array
+{
+    try {
+        require_once __DIR__ . '/lib/cout-matiere.php';
+        [$d] = cm_tout();
+    } catch (Throwable $e) {
+        return ['dispo' => false];
+    }
+    $ing = [];
+    foreach ((array) $d['ingredients'] as $id => $i) {
+        $ing[$id] = ['name' => $i['name'] ?? '', 'price' => $i['price'] ?? 0, 'unit' => $i['unit'] ?? 'kg', 'loss' => $i['loss'] ?? 0,
+            'allergens' => $i['allergens'] ?? [], 'pieceWeight' => $i['pieceWeight'] ?? null];
+    }
+    $fic = [];
+    foreach ((array) $d['fiches'] as $id => $f) {
+        $fic[$id] = ['name' => $f['name'] ?? '', 'category' => $f['category'] ?? '', 'yield' => $f['yield'] ?? 1,
+            'yieldUnit' => $f['yieldUnit'] ?? 'portion', 'lines' => $f['lines'] ?? []];
+    }
+    $car = [];
+    foreach ((array) $d['carte'] as $id => $c) {
+        $car[$id] = ['name' => $c['name'] ?? '', 'ttc' => $c['ttc'] ?? 0, 'tva' => $c['tva'] ?? 10, 'fiche' => $c['fiche'] ?? '',
+            'qty' => $c['qty'] ?? 1, 'unit' => $c['unit'] ?? 'portion'];
+    }
+    $set = (array) ($d['set']['kitchen'] ?? []);
+    return ['dispo' => true, 'ingredients' => (object) $ing, 'fiches' => (object) $fic, 'carte' => (object) $car,
+        'objectif' => (float) ($set['target'] ?? 28)];
+}
+

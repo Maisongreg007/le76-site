@@ -146,10 +146,9 @@ def bloc_carte(c):
     out += ['    </div>', '']
     out += [onglet(o, i) for i, o in enumerate(onglets, 1)]
     out += ['', f'    <p class="fineprint">{e(tr(c.get("mention_bas")))}</p>']
-    # Lien vers la carte complète de l'appli (pages imprimables), visible dès qu'une carte est publiée
-    lien = "Die ganze Speisekarte ansehen (alle Seiten)" if LANGUE == "de" else "Voir la carte complète (toutes les pages)"
-    out += [f'    <p class="center" id="carteComplete" hidden><a class="btn ghost" href="/carte/#carte">{e(lien)}</a></p>',
-            '    <script>fetch("/api/carte.php?action=publiee").then(r=>r.json()).then(d=>{if(d&&d.publie)document.getElementById("carteComplete").hidden=false}).catch(()=>{})</script>']
+    # La carte publiée dans l'appli /carte/ remplace automatiquement celle-ci dans le navigateur (carte/site.js)
+    langue = "de" if LANGUE == "de" else "fr"
+    out += [f'    <script src="/carte/site.js" data-langue="{langue}" defer></script>']
     return "\n".join(out)
 
 

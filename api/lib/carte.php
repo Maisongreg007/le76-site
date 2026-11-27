@@ -170,3 +170,22 @@ function ca_image_envoyer(string $id): never
     readfile($f);
     exit;
 }
+
+/* Images des pages publiées : servies par /carte/publiee.php (site, réseaux sociaux) */
+function ca_images_publiees(array $images): int
+{
+    $d = ca_dossier('publiee');
+    foreach (glob($d . '/page-*.jpg') ?: [] as $f) {
+        @unlink($f);
+    }
+    $n = 0;
+    foreach (array_slice($images, 0, 20) as $b64) {
+        $bin = is_string($b64) ? base64_decode(preg_replace('/^data:image\/jpeg;base64,/', '', $b64), true) : false;
+        if ($bin === false || strlen($bin) < 1000 || strlen($bin) > 6_000_000 || @getimagesizefromstring($bin) === false) {
+            continue;
+        }
+        file_put_contents($d . '/page-' . (++$n) . '.jpg', $bin);
+    }
+    return $n;
+}
+
